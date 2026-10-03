@@ -2267,110 +2267,151 @@
             }
         }
     </script>
-    <!-- === بداية كود بوت خدمة العملاء (Shift X) === -->
+<!-- === بداية كود بوت خدمة العملاء المطور (Shift X Theme) === -->
 <style>
+  /* زر الدردشة العائم بتصميم داكن وعصري */
   #chat-bubble {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    background-color: #2563eb;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #6366f1, #3b82f6);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
     cursor: pointer;
-    z-index: 9999;
-    transition: transform 0.2s ease;
+    z-index: 99999;
+    transition: all 0.25s ease;
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
-  #chat-bubble:hover { transform: scale(1.05); }
-  #chat-bubble svg { width: 30px; height: 30px; fill: #ffffff; }
+  #chat-bubble:hover {
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 12px 28px rgba(99, 102, 241, 0.45);
+  }
+  #chat-bubble svg { width: 26px; height: 26px; fill: #ffffff; }
 
+  /* نافذة المحادثة بنمط Dark Mode وتأثير Glassmorphism */
   #chat-modal {
     display: none;
     position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 360px;
-    max-width: calc(100vw - 40px);
-    height: 520px;
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    bottom: 92px;
+    right: 24px;
+    width: 370px;
+    max-width: calc(100vw - 32px);
+    height: 530px;
+    background: #0f172a; /* كحلي داكن متوافق مع الثيمات الليلية */
+    border: 1px solid #1e293b;
+    border-radius: 18px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(99, 102, 241, 0.15);
     flex-direction: column;
     overflow: hidden;
-    z-index: 9999;
-    font-family: system-ui, -apple-system, sans-serif;
+    z-index: 99999;
+    font-family: inherit;
     direction: rtl;
   }
 
+  /* ترويسة الشات */
   .chat-header {
-    background: #2563eb;
-    color: white;
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+    color: #f8fafc;
     padding: 14px 18px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-weight: bold;
+    font-weight: 600;
     font-size: 15px;
   }
-  .chat-header span { cursor: pointer; font-size: 18px; }
+  .chat-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chat-status-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #10b981;
+  }
+  .chat-header-close {
+    cursor: pointer;
+    font-size: 18px;
+    color: #94a3b8;
+    transition: color 0.2s;
+  }
+  .chat-header-close:hover { color: #ffffff; }
 
+  /* منطقة الرسائل */
   .chat-messages {
     flex: 1;
     padding: 16px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    background: #f8fafc;
+    gap: 12px;
+    background: #090d16;
   }
 
   .chat-bubble-msg {
-    max-width: 80%;
-    padding: 10px 14px;
-    border-radius: 12px;
-    font-size: 14px;
-    line-height: 1.5;
+    max-width: 82%;
+    padding: 11px 15px;
+    border-radius: 14px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    word-break: break-word;
   }
   .msg-bot {
-    background: #ffffff;
-    color: #1e293b;
+    background: #1e293b;
+    color: #e2e8f0;
     align-self: flex-start;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #334155;
+    border-bottom-right-radius: 4px;
   }
   .msg-user {
-    background: #2563eb;
-    color: white;
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    color: #ffffff;
     align-self: flex-end;
+    border-bottom-left-radius: 4px;
   }
 
+  /* منطقة الإدخال */
   .chat-input-area {
-    padding: 12px;
-    border-top: 1px solid #e2e8f0;
+    padding: 12px 14px;
+    border-top: 1px solid #1e293b;
     display: flex;
     gap: 8px;
-    background: #ffffff;
+    background: #0f172a;
   }
   .chat-input-area input {
     flex: 1;
     padding: 10px 14px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    color: #f8fafc;
     outline: none;
-    font-size: 14px;
+    font-size: 13.5px;
+    transition: border-color 0.2s;
   }
+  .chat-input-area input:focus { border-color: #6366f1; }
+  .chat-input-area input::placeholder { color: #64748b; }
+
   .chat-input-area button {
-    background: #2563eb;
+    background: #4f46e5;
     color: white;
     border: none;
     padding: 0 16px;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: background 0.2s;
   }
+  .chat-input-area button:hover { background: #4338ca; }
 </style>
 
 <!-- زر المحادثة العائم -->
@@ -2381,12 +2422,15 @@
 <!-- صندوق المحادثة -->
 <div id="chat-modal">
   <div class="chat-header">
-    <div>خدمة عملاء Shift X ⚡</div>
-    <span onclick="toggleChat()">✕</span>
+    <div class="chat-header-title">
+      <span class="chat-status-dot"></span>
+      <span>خدمة عملاء Shift X</span>
+    </div>
+    <span class="chat-header-close" onclick="toggleChat()">✕</span>
   </div>
   <div class="chat-messages" id="chat-messages">
     <div class="chat-bubble-msg msg-bot">
-      أهلاً بك في Shift X! 👋 كيف يمكنني مساعدتك اليوم بخصوص الأسعار، شحن الألعاب، أو تتبع طلبك؟
+      أهلاً بك في Shift X! 👋 كيف يمكنني مساعدتك اليوم؟ يمكنك الاستفسار عن الأسعار، أو تتبع طلبك، أو طرق الشحن المتوفرة.
     </div>
   </div>
   <div class="chat-input-area">
@@ -2412,7 +2456,7 @@
 
     const messagesArea = document.getElementById('chat-messages');
 
-    // رسالة العميل
+    // عرض رسالة العميل
     const userDiv = document.createElement('div');
     userDiv.className = 'chat-bubble-msg msg-user';
     userDiv.innerText = msg;
@@ -2421,6 +2465,22 @@
     input.value = '';
     messagesArea.scrollTop = messagesArea.scrollHeight;
   }
+
+  // ربط تلقائي مع تبويبة "خدمة العملاء" في القائمة الجانبية
+  document.addEventListener("DOMContentLoaded", () => {
+    // البحث عن أي عنصر رابط أو زر في الموقع يحتوي على نص "خدمة العملاء"
+    const links = document.querySelectorAll('a, button, li');
+    links.forEach(el => {
+      if (el.innerText && el.innerText.trim() === 'خدمة العملاء') {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', (e) => {
+          e.preventDefault(); // منع إعادة تحميل الصفحة أو الانتقال لرابط فارغ
+          const modal = document.getElementById('chat-modal');
+          modal.style.display = 'flex'; // فتح الشات فوراً
+        });
+      }
+    });
+  });
 </script>
 <!-- === نهاية كود بوت خدمة العملاء === -->
 </body>
