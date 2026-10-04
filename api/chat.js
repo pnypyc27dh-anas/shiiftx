@@ -118,7 +118,7 @@ module.exports = async function handler(req, res) {
     }
 
     const chat = ai.chats.create({
-      model: 'gemini-2.5-flash',
+      model: 'model: 'gemini-3.8-flash',
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
         tools: [{ functionDeclarations: botTools }],
