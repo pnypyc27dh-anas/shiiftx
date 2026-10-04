@@ -8,13 +8,13 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-<!-- كود تبديل الوضع الليلي والنهاري -->
+
+    <!-- كود تبديل الوضع الليلي والنهاري -->
     <script>
-       function toggleTheme() {
+        function toggleTheme() {
             const html = document.documentElement;
             const icon = document.getElementById('theme-toggle-icon');
             
-            // إضافة حركة دوران وانكماش سريعة
             if (icon) icon.classList.add('theme-rotating');
 
             setTimeout(() => {
@@ -22,7 +22,6 @@
                 localStorage.setItem('theme', isDark ? 'dark' : 'light');
                 updateThemeIcon(isDark);
                 
-                // إرجاع الأيقونة لحجمها الطبيعي بزاوية مكتملة
                 setTimeout(() => {
                     if (icon) icon.classList.remove('theme-rotating');
                 }, 200);
@@ -39,20 +38,17 @@
             }
         }
 
-        // مزامنة شكل الأيقونة فور تحميل الصفحة
         document.addEventListener('DOMContentLoaded', () => {
             const isDark = document.documentElement.classList.contains('dark');
             updateThemeIcon(isDark);
         });
     </script>
-</body>
-</html>
-<!-- تفعيل الوضع الليلي في Tailwind -->
+
+    <!-- تفعيل الوضع الليلي في Tailwind -->
     <script>
         tailwind.config = {
             darkMode: 'class'
         }
-        // تطبيق الوضع المخزن قبل رسم الصفحة لتجنب الوميض الأبيض
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
@@ -135,7 +131,6 @@
         @keyframes slideUpModal { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
         .hidden { display: none !important; }  
 
-        /* تأثير التمدد عند مرور الفأرة لشاشات الكمبيوتر */
         @media (min-width: 768px) {
             #floating-nav-bar nav {
                 width: 56px;
@@ -163,130 +158,75 @@
                 margin-right: 8px;
             }
         }   
-/* ==================== تخصيصات الوضع الليلي ==================== */
+
+        /* تخصيصات الوضع الليلي */
         html.dark body {
             background-color: #0b1120;
             background-image: radial-gradient(#1e293b 1px, transparent 1px);
             color: #f8fafc;
         }
-
-        /* تحويل الألواح الزجاجية للوضع الداكن */
         html.dark .glass-panel {
             background: rgba(15, 23, 42, 0.85) !important;
             border-color: rgba(255, 255, 255, 0.08) !important;
             box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4) !important;
         }
-
-        /* تحويل البطاقات البيضاء والنوافذ المنبثقة للوضع الداكن */
         html.dark .bg-white {
             background-color: #151e32 !important;
             border-color: #1e293b !important;
             color: #f1f5f9 !important;
         }
-
-        /* النصوص والعناوين الداكنة تتحول للفاتح */
         html.dark .text-slate-900,
         html.dark .text-slate-800,
-        html.dark .text-slate-700 {
-            color: #f8fafc !important;
-        }
-
+        html.dark .text-slate-700 { color: #f8fafc !important; }
         html.dark .text-slate-600,
-        html.dark .text-slate-500 {
-            color: #94a3b8 !important;
-        }
-
-        /* حقول الإدخال في الوضع الداكن */
+        html.dark .text-slate-500 { color: #94a3b8 !important; }
         html.dark .input-field {
             background: rgba(15, 23, 42, 0.8) !important;
             border-color: #334155 !important;
             color: #ffffff !important;
         }
-
-        /* الحدود والفواصل */
         html.dark .border-slate-100,
         html.dark .border-slate-200,
-        html.dark .border-slate-200\/60 {
-            border-color: rgba(255, 255, 255, 0.07) !important;
-        }
-
-        /* الشريط العائم في الوضع الداكن */
+        html.dark .border-slate-200\/60 { border-color: rgba(255, 255, 255, 0.07) !important; }
         html.dark #floating-nav-bar nav {
             background-color: rgba(15, 23, 42, 0.92) !important;
             border-color: rgba(255, 255, 255, 0.1) !important;
             box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.5) !important;
         }
-
-        html.dark .dock-inactive {
-            color: #94a3b8 !important;
-        }
-
+        html.dark .dock-inactive { color: #94a3b8 !important; }
         html.dark .dock-inactive:hover {
             color: #ffffff !important;
             background-color: rgba(255, 255, 255, 0.05) !important;
         }
-
-        /* الهيدر العلوي في الوضع الداكن */
         html.dark header {
             background-color: rgba(11, 17, 32, 0.85) !important;
             border-bottom-color: rgba(255, 255, 255, 0.08) !important;
         }    
-
-/* ==================== 1. انتقالات لونية فائقة النعومة ==================== */
         body, .glass-panel, .cyber-card, .bg-white, header, #floating-nav-bar nav, .input-field {
             transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease !important;
         }
-
-        /* ==================== 2. دوران وفيزيائية زر الثيم ==================== */
         #theme-toggle-icon {
             display: inline-block;
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
         }
-        .theme-rotating {
-            transform: rotate(360deg) scale(0.75);
-        }
-
-        /* ==================== 3. توهج البطاقة الرقمية وحاوية الرصيد ==================== */
+        .theme-rotating { transform: rotate(360deg) scale(0.75); }
         html.dark .cyber-card {
             box-shadow: 0 20px 50px -10px rgba(0, 91, 163, 0.35), 0 0 30px -5px rgba(124, 58, 237, 0.2) !important;
             border-color: rgba(255, 255, 255, 0.15) !important;
         }
-
-        html.dark #live-balance-container {
-            box-shadow: 0 0 30px -5px rgba(0, 91, 163, 0.25) !important;
-        }
-
-        /* حلقة انعكاس زجاجية فاخرة داخل البطاقة */
         .cyber-card {
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 20px 40px -15px var(--primary-glow);
         }
-
-        /* ==================== 4. تأثير وميض الكود الرقمي (Shimmer) ==================== */
-        .code-shimmer-box {
-            position: relative;
-            overflow: hidden;
-        }
+        .code-shimmer-box { position: relative; overflow: hidden; }
         .code-shimmer-box::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -150%;
-            width: 60%;
-            height: 100%;
+            content: ""; position: absolute; top: 0; left: -150%; width: 60%; height: 100%;
             background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.18), rgba(255, 255, 255, 0.15), transparent);
             transform: skewX(-20deg);
             animation: voucherShimmer 3s infinite;
             pointer-events: none;
         }
-        @keyframes voucherShimmer {
-            0% { left: -150%; }
-            50%, 100% { left: 200%; }
-        }
-
-        /* تأثير الارتفاع والانسيابية لبطاقات المتجر */
-        .card-lift {
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
-        }
+        @keyframes voucherShimmer { 0% { left: -150%; } 50%, 100% { left: 200%; } }
+        .card-lift { transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease; }
         .card-lift:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 30px -8px rgba(0, 91, 163, 0.15);
@@ -295,19 +235,11 @@
         html.dark .card-lift:hover {
             box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 91, 163, 0.25);
             border-color: rgba(255, 255, 255, 0.2) !important;
-        }   
-   
-    </style>
-
-<!-- تنسيقات التباين للنوافذ المنبثقة في الوضع الليلي -->
-    <style>
-        /* 1. تعتيم خلفية الشاشة لزيادة بروز النافذة */
+        }
         html.dark .fixed.inset-0[class*="bg-slate-900"] {
             background-color: rgba(3, 7, 18, 0.75) !important;
             backdrop-filter: blur(8px) !important;
         }
-
-        /* 2. جسم النوافذ المنبثقة وتحديد حوافها بنقاء */
         html.dark .slide-up-modal,
         html.dark #reactivate-modal > div,
         html.dark #custom-prompt > div {
@@ -315,32 +247,22 @@
             border: 1px solid rgba(255, 255, 255, 0.12) !important;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 91, 163, 0.15) !important;
         }
-
-        /* 3. الصناديق الرمادية الداخلية (مثل تفاصيل الفاتورة وقائمة المعاملات) */
         html.dark .bg-slate-50 {
             background-color: rgba(255, 255, 255, 0.04) !important;
             border-color: rgba(255, 255, 255, 0.08) !important;
         }
-
-        /* 4. أزرار الإغلاق والتصفية */
         html.dark .bg-slate-100 {
             background-color: rgba(255, 255, 255, 0.08) !important;
             border-color: rgba(255, 255, 255, 0.12) !important;
             color: #e2e8f0 !important;
         }
-
         html.dark button.bg-slate-50,
-        html.dark button.bg-slate-100 {
-            color: #94a3b8 !important;
-        }
-
+        html.dark button.bg-slate-100 { color: #94a3b8 !important; }
         html.dark button.bg-slate-50:hover,
         html.dark button.bg-slate-100:hover {
             background-color: rgba(255, 255, 255, 0.15) !important;
             color: #ffffff !important;
         }
-
-        /* 5. الصناديق الملونة وشارات التحذير والدعم */
         html.dark .bg-blue-50,
         html.dark .bg-blue-50\/50,
         html.dark .bg-blue-50\/60 {
@@ -348,68 +270,209 @@
             border-color: rgba(0, 91, 163, 0.35) !important;
             color: #93c5fd !important;
         }
-
         html.dark .bg-emerald-50 {
             background-color: rgba(16, 185, 129, 0.15) !important;
             border-color: rgba(16, 185, 129, 0.3) !important;
             color: #6ee7b7 !important;
         }
-
         html.dark .bg-amber-50 {
             background-color: rgba(245, 158, 11, 0.15) !important;
             border-color: rgba(245, 158, 11, 0.3) !important;
             color: #fcd34d !important;
         }
-
         html.dark .bg-indigo-50 {
             background-color: rgba(99, 102, 241, 0.15) !important;
             border-color: rgba(99, 102, 241, 0.3) !important;
             color: #a5b4fc !important;
         }
-
         html.dark .bg-red-50 {
             background-color: rgba(239, 68, 68, 0.15) !important;
             border-color: rgba(239, 68, 68, 0.3) !important;
             color: #fca5a5 !important;
         }
-
-        /* 6. نصوص العناوين والتفاصيل داخل النوافذ */
         html.dark .text-slate-800,
         html.dark .text-slate-900,
         html.dark h3,
         html.dark h4,
-        html.dark h5 {
-            color: #f8fafc !important;
-        }
-
+        html.dark h5 { color: #f8fafc !important; }
         html.dark .text-slate-500,
-        html.dark .text-slate-600 {
-            color: #cbd5e1 !important;
-        }
-
-        html.dark .text-slate-400 {
-            color: #94a3b8 !important;
-        }
-
-        /* 7. القوائم المنسدلة */
+        html.dark .text-slate-600 { color: #cbd5e1 !important; }
+        html.dark .text-slate-400 { color: #94a3b8 !important; }
         html.dark select.input-field {
             background-color: #1e293b !important;
             color: #ffffff !important;
         }
-        
         html.dark select.input-field option {
             background-color: #0f172a;
             color: #ffffff;
         }
-
-        /* 8. خطوط الفواصل الأفقية داخل النوافذ */
         html.dark .border-b,
         html.dark .border-t,
-        html.dark .divide-y > * {
-            border-color: rgba(255, 255, 255, 0.08) !important;
-        }
-    </style>
+        html.dark .divide-y > * { border-color: rgba(255, 255, 255, 0.08) !important; }
 
+        /* ==================== تنسيقات نافذة وبوت خدمة العملاء ==================== */
+        #chat-bubble {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #005ba3, #0284c7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px -5px rgba(0, 91, 163, 0.5);
+            cursor: pointer;
+            z-index: 9999;
+            transition: all 0.25s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        #chat-bubble:hover {
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(0, 91, 163, 0.6);
+        }
+        #chat-bubble svg { width: 28px; height: 28px; fill: #ffffff; }
+
+        #chat-modal {
+            display: none;
+            position: fixed;
+            bottom: 92px;
+            right: 24px;
+            width: 380px;
+            max-width: calc(100vw - 32px);
+            height: 540px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 9999;
+            direction: rtl;
+            transition: all 0.3s ease;
+        }
+        html.dark #chat-modal {
+            background: #0f172a;
+            border-color: #1e293b;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 91, 163, 0.2);
+        }
+
+        .chat-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        html.dark .chat-header {
+            background: #151e32;
+            border-bottom-color: #1e293b;
+        }
+        .chat-header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 14px;
+            color: #0f172a;
+        }
+        html.dark .chat-header-title { color: #f8fafc; }
+        .chat-status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+        }
+        .chat-header-close {
+            cursor: pointer;
+            font-size: 18px;
+            color: #94a3b8;
+            transition: color 0.2s;
+        }
+        .chat-header-close:hover { color: #0f172a; }
+        html.dark .chat-header-close:hover { color: #ffffff; }
+
+        .chat-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f8fafc;
+        }
+        html.dark .chat-messages { background: #0b1120; }
+
+        .chat-bubble-msg {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        .msg-bot {
+            background: #ffffff;
+            color: #1e293b;
+            align-self: flex-start;
+            border: 1px solid #e2e8f0;
+            border-bottom-right-radius: 4px;
+        }
+        html.dark .msg-bot {
+            background: #151e32;
+            color: #f1f5f9;
+            border-color: #1e293b;
+        }
+        .msg-user {
+            background: linear-gradient(135deg, #005ba3, #0284c7);
+            color: #ffffff;
+            align-self: flex-end;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-input-area {
+            padding: 12px 14px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 8px;
+            background: #ffffff;
+        }
+        html.dark .chat-input-area {
+            background: #0f172a;
+            border-top-color: #1e293b;
+        }
+        .chat-input-area input {
+            flex: 1;
+            padding: 10px 14px;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            color: #0f172a;
+            outline: none;
+            font-size: 13px;
+        }
+        html.dark .chat-input-area input {
+            background: #1e293b;
+            border-color: #334155;
+            color: #f8fafc;
+        }
+        .chat-input-area input:focus { border-color: #005ba3; }
+        .chat-input-area button {
+            background: #005ba3;
+            color: white;
+            border: none;
+            padding: 0 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .chat-input-area button:hover { background: #004a85; }
+    </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased selection:bg-blue-200 selection:text-blue-900">
 
@@ -488,12 +551,12 @@
                 <div class="flex items-center gap-2.5">
                     <span id="nav-user-name" class="hidden"></span>
 
-                    <!-- زر تبديل المظهر (يمين زر البرغر) -->
+                    <!-- زر تبديل المظهر -->
                     <button onclick="toggleTheme()" class="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-700 dark:text-amber-400 transition active:scale-90" title="تبديل المظهر">
                         <i id="theme-toggle-icon" class="ph-fill ph-moon text-xl"></i>
                     </button>
 
-                    <!-- زر القائمة الجانبية (أقصى اليسار) -->
+                    <!-- زر القائمة الجانبية -->
                     <button onclick="toggleSideMenu(true)" class="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-700 dark:text-slate-200 transition" title="القائمة">
                         <i class="ph ph-list text-xl"></i>
                     </button>
@@ -667,11 +730,10 @@
             </div>
         </main>
 
-        <!-- شريط التنقل العائم (أفقي للموبايل / يتمدد عند مرور الفأرة في الكمبيوتر) -->
+        <!-- شريط التنقل العائم -->
         <div id="floating-nav-bar" class="fixed z-40 bottom-4 left-1/2 -translate-x-1/2 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:left-auto md:right-6 md:translate-x-0 select-none">
             <nav class="bg-white/95 backdrop-blur-2xl border border-white/80 shadow-[0_15px_35px_-5px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)] p-1.5 rounded-full md:rounded-2xl flex flex-row md:flex-col items-center gap-1.5">
                 
-                <!-- الرئيسية -->
                 <button id="float-tab-home" onclick="switchTab('home')" class="min-h-[44px] h-[44px] w-auto md:w-full flex items-center justify-center md:justify-start px-3.5 md:px-2 rounded-full md:rounded-xl text-xs font-bold transition-all duration-200 active:scale-95 bg-[#005ba3] text-white shadow-md shadow-blue-500/25">
                     <span class="w-7 h-7 flex items-center justify-center shrink-0">
                         <i class="ph-fill ph-house text-xl"></i>
@@ -679,7 +741,6 @@
                     <span class="dock-label text-[11px] font-bold">الرئيسية</span>
                 </button>
 
-                <!-- المتجر -->
                 <button id="float-tab-store" onclick="switchTab('store')" class="min-h-[44px] h-[44px] w-auto md:w-full flex items-center justify-center md:justify-start px-3.5 md:px-2 rounded-full md:rounded-xl text-xs font-bold transition-all duration-200 active:scale-95 text-slate-600 hover:text-slate-900 hover:bg-slate-100/70">
                     <span class="w-7 h-7 flex items-center justify-center shrink-0">
                         <i class="ph-fill ph-storefront text-xl"></i>
@@ -687,7 +748,6 @@
                     <span class="dock-label text-[11px] font-bold">المتجر</span>
                 </button>
 
-                <!-- شحن الرصيد -->
                 <button id="float-tab-deposit" onclick="switchTab('deposit')" class="min-h-[44px] h-[44px] w-auto md:w-full flex items-center justify-center md:justify-start px-3.5 md:px-2 rounded-full md:rounded-xl text-xs font-bold transition-all duration-200 active:scale-95 text-slate-600 hover:text-slate-900 hover:bg-slate-100/70">
                     <span class="w-7 h-7 flex items-center justify-center shrink-0">
                         <i class="ph-fill ph-wallet text-xl"></i>
@@ -697,7 +757,6 @@
 
             </nav>
         </div>
-
     </div>
 
     <!-- خلفية التعتيم للقائمة الجانبية -->
@@ -745,15 +804,17 @@
                 </div>
 
                 <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 px-2">الشبكة والمساعدة</p>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 px-2">المساعدة</p>
                     <div class="space-y-1">
+                        <!-- التبويبة الموحدة لخدمة العملاء (تفتح البوت مباشرة) -->
+                        <button onclick="toggleChat(); toggleSideMenu(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-blue-50/70 text-blue-600 font-bold text-xs transition border border-blue-100/50">
+                            <i class="ph-fill ph-headset text-lg text-[#005ba3]"></i>
+                            <span>خدمة العملاء</span>
+                        </button>
+                        
                         <button onclick="openAgentsDirectoryModal()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-slate-50 font-bold text-xs transition">
                             <i class="ph ph-users-three text-lg text-blue-600"></i>
                             <span>دليل الوكلاء المعتمدين</span>
-                        </button>
-                        <button onclick="openSupportModal()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-slate-50 font-bold text-xs transition">
-                            <i class="ph ph-headset text-lg text-indigo-500"></i>
-                            <span>الدعم الفني المباشر</span>
                         </button>
                         <button onclick="sharePlatform()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-slate-50 font-bold text-xs transition">
                             <i class="ph ph-share-network text-lg text-teal-600"></i>
@@ -786,7 +847,7 @@
 
     <!-- ==================== النوافذ المنبثقة ==================== -->
 
-    <!-- نافذة إعادة تفعيل الحساب المؤتمتة (Self Reactivation) -->
+    <!-- نافذة إعادة تفعيل الحساب المؤتمتة -->
     <div id="reactivate-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[115]">
         <div class="bg-white w-full max-w-sm rounded-[28px] p-6 shadow-2xl text-center space-y-4">
             <div class="w-16 h-16 bg-blue-50 text-[#005ba3] rounded-2xl flex items-center justify-center mx-auto text-3xl shadow-inner">
@@ -844,24 +905,24 @@
         </div>
     </div>
 
-    <!-- نافذة الدعم الفني المباشر -->
+    <!-- نافذة الدعم الفني المباشر (تفتح تلقائياً عند التحويل أو الحاجة) -->
     <div id="support-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
         <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative slide-up-modal text-right space-y-4">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4">
                 <div class="flex items-center gap-2">
                     <div class="p-2 rounded-xl bg-indigo-50 text-indigo-600"><i class="ph-fill ph-headset text-xl"></i></div>
-                    <h4 class="text-base font-black text-slate-800">مركز الدعم والمساعدة</h4>
+                    <h4 class="text-base font-black text-slate-800">مركز الدعم والمساعدة المباشر</h4>
                 </div>
                 <button onclick="toggleView('support-modal', false)" class="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full"><i class="ph ph-x font-bold"></i></button>
             </div>
-            <p class="text-xs text-slate-500 font-medium leading-relaxed">فريق خدمة عملاء SHIIFTX متاح على مدار الساعة للإجابة على استفساراتكم وحل أي مشكلة في عمليات الشحن.</p>
+            <p class="text-xs text-slate-500 font-medium leading-relaxed">فريق خدمة عملاء SHIIFTX متاح على مدار الساعة للإجابة على استفساراتكم ومتابعة أي مشكلة أو طلب تعليق في عمليات الشحن.</p>
             <div class="space-y-2.5 pt-1">
-                <a href="https://wa.me/963900000000" target="_blank" class="flex items-center justify-between p-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-2xl transition border border-emerald-100">
+                <a href="https://wa.me/963900000000" id="official-whatsapp-link" target="_blank" class="flex items-center justify-between p-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-2xl transition border border-emerald-100">
                     <div class="flex items-center gap-3">
                         <i class="ph-fill ph-whatsapp-logo text-2xl text-emerald-600"></i>
                         <div>
-                            <p class="text-xs font-black">محادثة واتساب مباشرة</p>
-                            <p class="text-[10px] text-emerald-600">الرد فوري خلال دقائق</p>
+                            <p class="text-xs font-black">محادثة واتساب بزنس مباشرة</p>
+                            <p class="text-[10px] text-emerald-600">متابعة فورية مع الموظف المختص</p>
                         </div>
                     </div>
                     <i class="ph ph-caret-left text-sm"></i>
@@ -1014,7 +1075,6 @@
                 <button onclick="toggleView('register-modal', false)" class="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full"><i class="ph ph-x font-bold"></i></button>
             </div>
 
-            <!-- المرحلة 1: إدخال البيانات أو البريد -->
             <div id="register-step-form" class="space-y-4">
                 <div id="reg-extra-fields" class="space-y-4">
                     <div class="grid grid-cols-2 gap-3">
@@ -1041,7 +1101,6 @@
                 </button>
             </div>
 
-            <!-- المرحلة 2: إدخال رمز التحقق OTP وزر إعادة الإرسال -->
             <div id="register-step-otp" class="hidden space-y-5 text-center py-4">
                 <div class="inline-flex justify-center items-center w-16 h-16 bg-blue-50 text-blue-500 rounded-full mb-1">
                     <i class="ph-fill ph-envelope-open text-3xl"></i>
@@ -1053,7 +1112,6 @@
                     تأكيد الرمز
                 </button>
 
-                <!-- زر إعادة الإرسال المشترك لكلا العمليتين -->
                 <div class="pt-2 text-center border-t border-slate-100">
                     <span class="text-xs text-slate-500 font-medium">لم يصلك الرمز بعد؟</span>
                     <button id="resend-otp-btn" onclick="resendOtpCode()" class="text-xs text-[#005ba3] font-bold hover:underline mr-1 disabled:opacity-50 disabled:no-underline cursor-pointer">
@@ -1062,7 +1120,6 @@
                 </div>
             </div>
 
-            <!-- المرحلة 3: تعيين كلمة المرور -->
             <div id="register-step-password" class="hidden space-y-4">
                 <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100 text-[11px] text-amber-800 leading-relaxed font-bold flex gap-3 items-start">
                     <i class="ph-fill ph-warning-circle text-amber-500 text-lg shrink-0 mt-0.5"></i>
@@ -1107,6 +1164,31 @@
         </div>
     </div>
 
+    <!-- زر المحادثة العائم -->
+    <div id="chat-bubble" onclick="toggleChat()" title="خدمة العملاء">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+    </div>
+
+    <!-- نافذة بوت خدمة العملاء (المساعد الذكي) -->
+    <div id="chat-modal">
+        <div class="chat-header">
+            <div class="chat-header-title">
+                <span class="chat-status-dot"></span>
+                <span>خدمة عملاء SHIIFTX ⚡</span>
+            </div>
+            <span class="chat-header-close" onclick="toggleChat()">✕</span>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-bubble-msg msg-bot">
+                أهلاً بك في SHIIFTX! 👋 أنا مساعدك الذكي لخدمة العملاء. كيف يمكنني مساعدتك اليوم؟ (يمكنك السؤال عن الأسعار، الباقات، طرق الإيداع، أو فحص حالة طلبك برقم الطلب).
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="اكتب استفسارك هنا..." onkeypress="handleKeyPress(event)" />
+            <button onclick="sendChatMessage()">إرسال</button>
+        </div>
+    </div>
+
     <script>
         // ========================================================================
         // 1. إعدادات قاعدة البيانات Supabase
@@ -1121,7 +1203,7 @@
         let tempRegisterData = {}, globalProductsRaw = [], currentFlowType = "register", globalTransactionsRaw = [];
         let resendTimer = null;
 
-        // التحقق التلقائي من الجلسة والاستماع لتغييرات المصادقة
+        // استماع لحالات المصادقة
         supabase.auth.onAuthStateChange(async (event, session) => {
             if (event === 'PASSWORD_RECOVERY') {
                 currentFlowType = "reset";
@@ -1166,7 +1248,7 @@
             }
         });
 
-        // فحص الجلسة عند تحميل الصفحة لأول مرة
+        // فحص الجلسة عند البداية
         supabase.auth.getSession().then(async ({ data: { session } }) => {
             const isRecoveryHash = window.location.hash.includes('type=recovery');
             if (session && !isRecoveryHash) { 
@@ -1194,7 +1276,7 @@
         });
 
         // ========================================================================
-        // 2. دوال المصادقة (Auth) وإدارة الحساب
+        // 2. دوال المصادقة (Auth)
         // ========================================================================
         async function handleLogin() { 
             const email = document.getElementById('login-email').value.trim();
@@ -1294,7 +1376,7 @@
         }
 
         // ========================================================================
-        // 3. إدارة التسجيل واستعادة كلمة المرور وإعادة الإرسال
+        // 3. إدارة التسجيل واستعادة كلمة المرور
         // ========================================================================
         function resetResendButtonState() {
             if (resendTimer) clearInterval(resendTimer);
@@ -1473,7 +1555,7 @@
                 toggleView('register-step-otp', true); 
                 document.getElementById('register-modal-title').innerText = "تفعيل الحساب";
                 startResendCooldown();
-            } else {
+            } else { 
                 const { error } = await supabase.auth.updateUser({ password: password }); 
                 
                 btn.disabled = false; 
@@ -1822,7 +1904,7 @@
         }
 
         // ========================================================================
-        // 7. عرض المعاملات وتنسيق الحالات
+        // 7. عرض المعاملات
         // ========================================================================
         const TX_TYPE_LABELS = {
             'Deposit': 'شحن رصيد',
@@ -1927,7 +2009,7 @@
         }
 
         // ========================================================================
-        // 8. سجل المعاملات ودليل الوكلاء والدعم والمعلومات
+        // 8. سجل المعاملات ودليل الوكلاء والمعلومات
         // ========================================================================
         let currentOrderFilter = 'ALL';
         function openAllOrdersModal() {
@@ -2055,15 +2137,11 @@
                         <p class="font-medium">نحن في <strong>SHIIFTX</strong> نضع حماية بياناتك الشخصية والمالية على رأس أولوياتنا وفق البنود التالية:</p>
                         <div class="border-r-2 border-blue-500 pr-3 space-y-1">
                             <h5 class="font-bold text-slate-800">1. البيانات التي نطلبها:</h5>
-                            <p class="text-slate-500">نجمع فقط المعلومات الأساسية اللازمة لإنشاء الحساب (الاسم، البريد الإلكتروني، ورقم الهاتف)، ومعرف اللاعب (ID) الذي تدخله لشحن ألعابك مباشرة.</p>
+                            <p class="text-slate-500">نجمع فقط المعلومات الأساسية اللازمة لإنشاء الحساب ومعرف اللاعب (ID) لشحن ألعابك مباشرة.</p>
                         </div>
                         <div class="border-r-2 border-blue-500 pr-3 space-y-1">
-                            <h5 class="font-bold text-slate-800">2. أمان كلمات المرور وحسابك:</h5>
-                            <p class="text-slate-500">كلمات المرور مشفرة كلياً عبر خوادم Supabase الآمنة. لا نطلب منك أبداً كلمة مرور حسابك في لعبتك أو بريدك الإلكتروني.</p>
-                        </div>
-                        <div class="border-r-2 border-blue-500 pr-3 space-y-1">
-                            <h5 class="font-bold text-slate-800">3. عدم مشاركة البيانات:</h5>
-                            <p class="text-slate-500">نلتزم بعدم بيع أو مشاركة بيانات عملائنا مع أي أطراف تجارية أو إعلانية خارجية تحت أي ظرف.</p>
+                            <h5 class="font-bold text-slate-800">2. أمان كلمات المرور:</h5>
+                            <p class="text-slate-500">كلمات المرور مشفرة كلياً عبر خوادم Supabase الآمنة.</p>
                         </div>
                     </div>
                 `
@@ -2075,15 +2153,11 @@
                     <div class="space-y-3">
                         <div class="border-r-2 border-blue-500 pr-3 space-y-1">
                             <h5 class="font-bold text-slate-800">1. دقة معرف اللاعب (Player ID):</h5>
-                            <p class="text-slate-500">المستخدم مسؤول بالكامل عن صحة معرف الحساب المدخل عند الشحن المباشر، ولا يمكن استرجاع الرصيد في حال تم الشحن لمعرف خاطئ قدمه العميل.</p>
+                            <p class="text-slate-500">المستخدم مسؤول بالكامل عن صحة معرف الحساب المدخل عند الشحن المباشر.</p>
                         </div>
                         <div class="border-r-2 border-blue-500 pr-3 space-y-1">
                             <h5 class="font-bold text-slate-800">2. الأكواد الرقمية (Vouchers):</h5>
-                            <p class="text-slate-500">تعتبر البطاقة الرقمية مستلمة بمجرد ظهورها على الشاشة وتسجيلها في سجلك، ولا تقبل الاستبدال بعد الكشف عنها إلا في حال ثبوت عطل فني في الكود قبل الاستخدام.</p>
-                        </div>
-                        <div class="border-r-2 border-blue-500 pr-3 space-y-1">
-                            <h5 class="font-bold text-slate-800">3. شحن المحفظة:</h5>
-                            <p class="text-slate-500">تتم مطابقة طلبات الشحن مع إشعارات الوكلاء بدقة؛ إدخال أرقام إشعارات وهمية قد يعرض حسابك للإيقاف التلقائي.</p>
+                            <p class="text-slate-500">تعتبر البطاقة الرقمية مستلمة بمجرد ظهورها على الشاشة وتسجيلها في سجلك.</p>
                         </div>
                     </div>
                 `
@@ -2101,7 +2175,7 @@
         }
 
         // ========================================================================
-        // 9. متجر المنتجات وعرض الباقات
+        // 9. متجر المنتجات
         // ========================================================================
         function renderMainCategoriesView() {
             document.getElementById('store-title-text').innerHTML = `متجر المجموعات الرقمية`;
@@ -2149,7 +2223,7 @@
             });
         }
 
-       function openPlansModal(platformName, categoryName) { 
+        function openPlansModal(platformName, categoryName) { 
             document.getElementById('plans-modal-title').innerText = `باقات منصة ${platformName}`; 
             const container = document.getElementById('plans-container'); 
             container.innerHTML = ""; 
@@ -2161,7 +2235,6 @@
                 const card = document.createElement('div'); 
                 card.className = "card-lift bg-white border border-slate-100 p-4 rounded-[22px] flex justify-between items-center gap-3 text-right shadow-sm"; 
                 
-                // شارة التسليم النيون
                 const badgeHtml = isCode 
                     ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"><i class="ph-fill ph-lightning"></i> كود فوري</span>`
                     : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20"><i class="ph-fill ph-user-circle"></i> شحن بالمعرف</span>`;
@@ -2238,7 +2311,6 @@
             document.getElementById('delivered-code-text').innerText = code;
             document.getElementById('delivery-item-name').innerText = itemName || "البطاقة الرقمية";
             
-            // إضافة تأثير التمرير الضوئي لحاوية الكود
             const codeBox = document.getElementById('delivered-code-text').parentElement;
             if (codeBox) {
                 codeBox.classList.add('code-shimmer-box');
@@ -2266,222 +2338,122 @@
                 copyDeliveredCode();
             }
         }
+
+        // ========================================================================
+        // 11. تشغيل والتحكم ببوت خدمة العملاء ونظام التحويل التلقائي للدعم
+        // ========================================================================
+        function toggleChat() {
+            const modal = document.getElementById('chat-modal');
+            if (!modal) return;
+            const isOpen = modal.style.display === 'flex';
+            modal.style.display = isOpen ? 'none' : 'flex';
+            
+            if (!isOpen) {
+                setTimeout(() => {
+                    const input = document.getElementById('chat-input');
+                    if (input) input.focus();
+                }, 100);
+            }
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendChatMessage();
+        }
+
+        // دالة التحويل التلقائي لنافذة الدعم المباشر
+        function triggerSupportTransfer(reasonText) {
+            const messagesArea = document.getElementById('chat-messages');
+            if (!messagesArea) return;
+            
+            const botDiv = document.createElement('div');
+            botDiv.className = 'chat-bubble-msg msg-bot';
+            botDiv.innerHTML = `
+                <div class="space-y-2">
+                    <p class="leading-relaxed">${reasonText}</p>
+                    <div class="p-2.5 bg-blue-50 dark:bg-slate-800 rounded-xl border border-blue-100 dark:border-white/10 flex items-center justify-between mt-2">
+                        <span class="text-[11px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+                            <i class="ph ph-arrows-clockwise animate-spin text-sm"></i> جاري فتح نافذة الدعم المباشر...
+                        </span>
+                        <button onclick="toggleChat(); openSupportModal();" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-lg font-bold transition">
+                            فتح الآن
+                        </button>
+                    </div>
+                </div>
+            `;
+            messagesArea.appendChild(botDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+
+            // تحويل العميل تلقائياً بعد ثانيتين بإغلاق الشات وإظهار نافذة الدعم المباشر
+            setTimeout(() => {
+                const modal = document.getElementById('chat-modal');
+                if (modal && modal.style.display === 'flex') {
+                    toggleChat();
+                }
+                openSupportModal();
+            }, 2000);
+        }
+
+        // إرسال الرسالة ومعالجة الذكاء الاصطناعي
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const messagesArea = document.getElementById('chat-messages');
+
+            // 1. إظهار رسالة العميل
+            const userDiv = document.createElement('div');
+            userDiv.className = 'chat-bubble-msg msg-user';
+            userDiv.innerText = msg;
+            messagesArea.appendChild(userDiv);
+            input.value = '';
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+
+            // 2. الكشف المسبق عن الحالات الحرجة التي تستلزم تحويلاً بشرياً فورياً
+            const requiresHumanSupport = /مشكل|عطل|ما وصل|كود غلط|الكود لا يعمل|مستعمل|مسروق|تعليق|تأخير|استرجاع|إلغاء طلب|إيداع مرفوض|تعديل رقم|غلطت بالمعرف/i.test(msg);
+
+            if (requiresHumanSupport) {
+                triggerSupportTransfer("عذراً لمواجهتك هذه المشكلة! هذه الحالة تتطلب مراجعة وتدقيقاً من فريق الدعم الفني لحلها فوراً. جاري توجيهك لمركز الدعم المباشر...");
+                return;
+            }
+
+            // 3. مؤشر انتظار استجابة السيرفر
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'chat-bubble-msg msg-bot';
+            loadingDiv.id = 'chat-bot-loading';
+            loadingDiv.innerHTML = `<i class="ph ph-dots-three animate-pulse text-lg"></i> جاري التحقق...`;
+            messagesArea.appendChild(loadingDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+
+            try {
+                // الاتصال بنقطة نهاية الخادم الوسيط
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg })
+                });
+
+                const data = await response.json();
+                loadingDiv.remove();
+
+                if (data.escalate) {
+                    // إذا وجد الخادم أن المشكلة معقدة أو تتطلب بشراً
+                    triggerSupportTransfer(data.reply || "يتطلب هذا الاستفسار مراجعة خاصة من فريق الدعم الفني.");
+                } else {
+                    const botDiv = document.createElement('div');
+                    botDiv.className = 'chat-bubble-msg msg-bot';
+                    botDiv.innerText = data.reply || "شكراً لتواصلك، هل لديك أي استفسار آخر بخصوص باقاتنا وأسعارنا؟";
+                    messagesArea.appendChild(botDiv);
+                }
+
+            } catch (err) {
+                loadingDiv.remove();
+                // في حال انقطاع السيرفر يتم تحويل العميل تلقائياً لضمان عدم تركه معلقاً
+                triggerSupportTransfer("نظام المحادثة الآلي قيد المزامنة حالياً. سأقوم بنقلك لنافذة الدعم المباشر لتلبية استفسارك دون تأخير.");
+            }
+
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
     </script>
-<!-- === بداية كود بوت خدمة العملاء المطور (Shift X Theme) === -->
-<style>
-  /* زر الدردشة العائم بتصميم داكن وعصري */
-  #chat-bubble {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 56px;
-    height: 56px;
-    background: linear-gradient(135deg, #6366f1, #3b82f6);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
-    cursor: pointer;
-    z-index: 99999;
-    transition: all 0.25s ease;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-  }
-  #chat-bubble:hover {
-    transform: scale(1.08) translateY(-2px);
-    box-shadow: 0 12px 28px rgba(99, 102, 241, 0.45);
-  }
-  #chat-bubble svg { width: 26px; height: 26px; fill: #ffffff; }
-
-  /* نافذة المحادثة بنمط Dark Mode وتأثير Glassmorphism */
-  #chat-modal {
-    display: none;
-    position: fixed;
-    bottom: 92px;
-    right: 24px;
-    width: 370px;
-    max-width: calc(100vw - 32px);
-    height: 530px;
-    background: #0f172a; /* كحلي داكن متوافق مع الثيمات الليلية */
-    border: 1px solid #1e293b;
-    border-radius: 18px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(99, 102, 241, 0.15);
-    flex-direction: column;
-    overflow: hidden;
-    z-index: 99999;
-    font-family: inherit;
-    direction: rtl;
-  }
-
-  /* ترويسة الشات */
-  .chat-header {
-    background: #1e293b;
-    border-bottom: 1px solid #334155;
-    color: #f8fafc;
-    padding: 14px 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 600;
-    font-size: 15px;
-  }
-  .chat-header-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .chat-status-dot {
-    width: 8px;
-    height: 8px;
-    background: #10b981;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #10b981;
-  }
-  .chat-header-close {
-    cursor: pointer;
-    font-size: 18px;
-    color: #94a3b8;
-    transition: color 0.2s;
-  }
-  .chat-header-close:hover { color: #ffffff; }
-
-  /* منطقة الرسائل */
-  .chat-messages {
-    flex: 1;
-    padding: 16px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    background: #090d16;
-  }
-
-  .chat-bubble-msg {
-    max-width: 82%;
-    padding: 11px 15px;
-    border-radius: 14px;
-    font-size: 13.5px;
-    line-height: 1.6;
-    word-break: break-word;
-  }
-  .msg-bot {
-    background: #1e293b;
-    color: #e2e8f0;
-    align-self: flex-start;
-    border: 1px solid #334155;
-    border-bottom-right-radius: 4px;
-  }
-  .msg-user {
-    background: linear-gradient(135deg, #4f46e5, #3b82f6);
-    color: #ffffff;
-    align-self: flex-end;
-    border-bottom-left-radius: 4px;
-  }
-
-  /* منطقة الإدخال */
-  .chat-input-area {
-    padding: 12px 14px;
-    border-top: 1px solid #1e293b;
-    display: flex;
-    gap: 8px;
-    background: #0f172a;
-  }
-  .chat-input-area input {
-    flex: 1;
-    padding: 10px 14px;
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    color: #f8fafc;
-    outline: none;
-    font-size: 13.5px;
-    transition: border-color 0.2s;
-  }
-  .chat-input-area input:focus { border-color: #6366f1; }
-  .chat-input-area input::placeholder { color: #64748b; }
-
-  .chat-input-area button {
-    background: #4f46e5;
-    color: white;
-    border: none;
-    padding: 0 16px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 13.5px;
-    font-weight: 500;
-    transition: background 0.2s;
-  }
-  .chat-input-area button:hover { background: #4338ca; }
-</style>
-
-<!-- زر المحادثة العائم -->
-<div id="chat-bubble" onclick="toggleChat()">
-  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
-</div>
-
-<!-- صندوق المحادثة -->
-<div id="chat-modal">
-  <div class="chat-header">
-    <div class="chat-header-title">
-      <span class="chat-status-dot"></span>
-      <span>خدمة عملاء Shift X</span>
-    </div>
-    <span class="chat-header-close" onclick="toggleChat()">✕</span>
-  </div>
-  <div class="chat-messages" id="chat-messages">
-    <div class="chat-bubble-msg msg-bot">
-      أهلاً بك في Shift X! 👋 كيف يمكنني مساعدتك اليوم؟ يمكنك الاستفسار عن الأسعار، أو تتبع طلبك، أو طرق الشحن المتوفرة.
-    </div>
-  </div>
-  <div class="chat-input-area">
-    <input type="text" id="chat-input" placeholder="اكتب استفسارك هنا..." onkeypress="handleKeyPress(event)" />
-    <button onclick="sendChatMessage()">إرسال</button>
-  </div>
-</div>
-
-<script>
-  function toggleChat() {
-    const modal = document.getElementById('chat-modal');
-    modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
-  }
-
-  function handleKeyPress(e) {
-    if (e.key === 'Enter') sendChatMessage();
-  }
-
-  function sendChatMessage() {
-    const input = document.getElementById('chat-input');
-    const msg = input.value.trim();
-    if (!msg) return;
-
-    const messagesArea = document.getElementById('chat-messages');
-
-    // عرض رسالة العميل
-    const userDiv = document.createElement('div');
-    userDiv.className = 'chat-bubble-msg msg-user';
-    userDiv.innerText = msg;
-    messagesArea.appendChild(userDiv);
-
-    input.value = '';
-    messagesArea.scrollTop = messagesArea.scrollHeight;
-  }
-
-  // ربط تلقائي مع تبويبة "خدمة العملاء" في القائمة الجانبية
-  document.addEventListener("DOMContentLoaded", () => {
-    // البحث عن أي عنصر رابط أو زر في الموقع يحتوي على نص "خدمة العملاء"
-    const links = document.querySelectorAll('a, button, li');
-    links.forEach(el => {
-      if (el.innerText && el.innerText.trim() === 'خدمة العملاء') {
-        el.style.cursor = 'pointer';
-        el.addEventListener('click', (e) => {
-          e.preventDefault(); // منع إعادة تحميل الصفحة أو الانتقال لرابط فارغ
-          const modal = document.getElementById('chat-modal');
-          modal.style.display = 'flex'; // فتح الشات فوراً
-        });
-      }
-    });
-  });
-</script>
-<!-- === نهاية كود بوت خدمة العملاء === -->
 </body>
 </html>
