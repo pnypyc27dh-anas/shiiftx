@@ -1,0 +1,9 @@
+{
+  "name": "shiiftx-store",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@google/genai": "^0.1.2",
+    "@supabase/supabase-js": "^2.48.0"
+  }
+}
