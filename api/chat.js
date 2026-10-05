@@ -115,7 +115,7 @@ ${orderText}
     const ai = new GoogleGenAI({ apiKey });
 
     const chat = ai.chats.create({
-      model: 'gemini-3.8-flash',
+      model: 'gemini-2.0-flash',
       config: {
         systemInstruction: systemInstruction,
       },
