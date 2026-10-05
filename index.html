@@ -2340,10 +2340,10 @@
         }
 
         // ========================================================================
-        // 11. تشغيل والتحكم ببوت خدمة العملاء المطور مع ذاكرة الحوار
+        // 11. تشغيل والتحكم ببوت خدمة العملاء (تصفير ذكي وتلقائي للذاكرة)
         // ========================================================================
         let chatHistory = [];
-        const OFFICIAL_WHATSAPP_NUMBER = "963900000000"; // استبدله برقم واتساب بزنس الخاص بالمتجر
+        const OFFICIAL_WHATSAPP_NUMBER = "963900000000"; // رقم واتساب المتجر الرسمي
 
         function toggleChat() {
             const modal = document.getElementById('chat-modal');
@@ -2381,7 +2381,7 @@
                                 <span>محادثة واتساب</span>
                                 <i class="ph ph-arrow-square-out text-sm"></i>
                             </a>
-                            <button onclick="openSupportModal();" class="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition">
+                            <button onclick="if(typeof openSupportModal === 'function') openSupportModal();" class="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition">
                                 قنوات أخرى
                             </button>
                         </div>
@@ -2399,7 +2399,7 @@
 
             const messagesArea = document.getElementById('chat-messages');
 
-            // 1. عرض رسالة العميل
+            // 1. إضافة رسالة العميل
             const userDiv = document.createElement('div');
             userDiv.className = 'chat-bubble-msg msg-user';
             userDiv.innerText = msg;
@@ -2407,7 +2407,7 @@
             input.value = '';
             messagesArea.scrollTop = messagesArea.scrollHeight;
 
-            // 2. مؤشر التحميل
+            // 2. مؤشر الانتظار
             const loadingDiv = document.createElement('div');
             loadingDiv.className = 'chat-bubble-msg msg-bot';
             loadingDiv.id = 'chat-bot-loading';
@@ -2428,24 +2428,30 @@
                 const data = await response.json();
                 loadingDiv.remove();
 
-                // تحديث ذاكرة الحوار
-                chatHistory.push({ role: 'user', content: msg });
-                if (data.reply) {
-                    chatHistory.push({ role: 'model', content: data.reply });
-                }
-
                 if (data.escalate) {
                     renderEscalationCard(data.reply || "يتطلب هذا الاستفسار مراجعة مباشرة من فريق الدعم الفني.");
+                    // تصفير الذاكرة تلقائياً حتى لا يعلق البوت في المشكلة السابقة عند السؤال التالي
+                    chatHistory = [];
                 } else {
                     const botDiv = document.createElement('div');
                     botDiv.className = 'chat-bubble-msg msg-bot';
                     botDiv.innerText = data.reply || "كيف يمكنني مساعدتك أيضاً بخصوص خدمات المتجر؟";
                     messagesArea.appendChild(botDiv);
+
+                    // حفظ السياق في الذاكرة للأسئلة العادية فقط
+                    chatHistory.push({ role: 'user', content: msg });
+                    if (data.reply) {
+                        chatHistory.push({ role: 'model', content: data.reply });
+                    }
                 }
 
             } catch (err) {
                 loadingDiv.remove();
-                renderEscalationCard("أواجه صعوبة مؤقتة في الاتصال بالنظام. يمكنك إكمال استفسارك مباشرة عبر واتساب المتجر.");
+                const botDiv = document.createElement('div');
+                botDiv.className = 'chat-bubble-msg msg-bot';
+                botDiv.innerText = "أهلاً بك! يمكنك الاستفسار عن باقات المتجر أو إكمال محادثتك عبر واتساب الدعم الفني.";
+                messagesArea.appendChild(botDiv);
+                chatHistory = [];
             }
 
             messagesArea.scrollTop = messagesArea.scrollHeight;
