@@ -2340,8 +2340,11 @@
         }
 
         // ========================================================================
-        // 11. تشغيل والتحكم ببوت خدمة العملاء ونظام التحويل التلقائي للدعم
+        // 11. تشغيل والتحكم ببوت خدمة العملاء المطور مع ذاكرة الحوار
         // ========================================================================
+        let chatHistory = [];
+        const OFFICIAL_WHATSAPP_NUMBER = "963900000000"; // استبدله برقم واتساب بزنس الخاص بالمتجر
+
         function toggleChat() {
             const modal = document.getElementById('chat-modal');
             if (!modal) return;
@@ -2360,40 +2363,35 @@
             if (e.key === 'Enter') sendChatMessage();
         }
 
-        // دالة التحويل التلقائي لنافذة الدعم المباشر
-        function triggerSupportTransfer(reasonText) {
+        function renderEscalationCard(reasonText) {
             const messagesArea = document.getElementById('chat-messages');
             if (!messagesArea) return;
             
             const botDiv = document.createElement('div');
             botDiv.className = 'chat-bubble-msg msg-bot';
             botDiv.innerHTML = `
-                <div class="space-y-2">
+                <div class="space-y-2.5">
                     <p class="leading-relaxed">${reasonText}</p>
-                    <div class="p-2.5 bg-blue-50 dark:bg-slate-800 rounded-xl border border-blue-100 dark:border-white/10 flex items-center justify-between mt-2">
-                        <span class="text-[11px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
-                            <i class="ph ph-arrows-clockwise animate-spin text-sm"></i> جاري فتح نافذة الدعم المباشر...
+                    <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800/50 flex flex-col gap-2 mt-1">
+                        <span class="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                            <i class="ph-fill ph-whatsapp-logo text-base text-emerald-600"></i> فريق الدعم المباشر جاهز لمساعدتك:
                         </span>
-                        <button onclick="toggleChat(); openSupportModal();" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-lg font-bold transition">
-                            فتح الآن
-                        </button>
+                        <div class="flex gap-2">
+                            <a href="https://wa.me/${OFFICIAL_WHATSAPP_NUMBER}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-center py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
+                                <span>محادثة واتساب</span>
+                                <i class="ph ph-arrow-square-out text-sm"></i>
+                            </a>
+                            <button onclick="openSupportModal();" class="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition">
+                                قنوات أخرى
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
             messagesArea.appendChild(botDiv);
             messagesArea.scrollTop = messagesArea.scrollHeight;
-
-            // تحويل العميل تلقائياً بعد ثانيتين بإغلاق الشات وإظهار نافذة الدعم المباشر
-            setTimeout(() => {
-                const modal = document.getElementById('chat-modal');
-                if (modal && modal.style.display === 'flex') {
-                    toggleChat();
-                }
-                openSupportModal();
-            }, 2000);
         }
 
-        // إرسال الرسالة ومعالجة الذكاء الاصطناعي
         async function sendChatMessage() {
             const input = document.getElementById('chat-input');
             const msg = input.value.trim();
@@ -2401,7 +2399,7 @@
 
             const messagesArea = document.getElementById('chat-messages');
 
-            // 1. إظهار رسالة العميل
+            // 1. عرض رسالة العميل
             const userDiv = document.createElement('div');
             userDiv.className = 'chat-bubble-msg msg-user';
             userDiv.innerText = msg;
@@ -2409,47 +2407,45 @@
             input.value = '';
             messagesArea.scrollTop = messagesArea.scrollHeight;
 
-            // 2. الكشف المسبق عن الحالات الحرجة التي تستلزم تحويلاً بشرياً فورياً
-            const requiresHumanSupport = /مشكل|عطل|ما وصل|كود غلط|الكود لا يعمل|مستعمل|مسروق|تعليق|تأخير|استرجاع|إلغاء طلب|إيداع مرفوض|تعديل رقم|غلطت بالمعرف/i.test(msg);
-
-            if (requiresHumanSupport) {
-                triggerSupportTransfer("عذراً لمواجهتك هذه المشكلة! هذه الحالة تتطلب مراجعة وتدقيقاً من فريق الدعم الفني لحلها فوراً. جاري توجيهك لمركز الدعم المباشر...");
-                return;
-            }
-
-            // 3. مؤشر انتظار استجابة السيرفر
+            // 2. مؤشر التحميل
             const loadingDiv = document.createElement('div');
             loadingDiv.className = 'chat-bubble-msg msg-bot';
             loadingDiv.id = 'chat-bot-loading';
-            loadingDiv.innerHTML = `<i class="ph ph-dots-three animate-pulse text-lg"></i> جاري التحقق...`;
+            loadingDiv.innerHTML = `<i class="ph ph-dots-three animate-pulse text-lg"></i> جاري المتابعة...`;
             messagesArea.appendChild(loadingDiv);
             messagesArea.scrollTop = messagesArea.scrollHeight;
 
             try {
-                // الاتصال بنقطة نهاية الخادم الوسيط
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: msg })
+                    body: JSON.stringify({ 
+                        message: msg,
+                        history: chatHistory 
+                    })
                 });
 
                 const data = await response.json();
                 loadingDiv.remove();
 
+                // تحديث ذاكرة الحوار
+                chatHistory.push({ role: 'user', content: msg });
+                if (data.reply) {
+                    chatHistory.push({ role: 'model', content: data.reply });
+                }
+
                 if (data.escalate) {
-                    // إذا وجد الخادم أن المشكلة معقدة أو تتطلب بشراً
-                    triggerSupportTransfer(data.reply || "يتطلب هذا الاستفسار مراجعة خاصة من فريق الدعم الفني.");
+                    renderEscalationCard(data.reply || "يتطلب هذا الاستفسار مراجعة مباشرة من فريق الدعم الفني.");
                 } else {
                     const botDiv = document.createElement('div');
                     botDiv.className = 'chat-bubble-msg msg-bot';
-                    botDiv.innerText = data.reply || "شكراً لتواصلك، هل لديك أي استفسار آخر بخصوص باقاتنا وأسعارنا؟";
+                    botDiv.innerText = data.reply || "كيف يمكنني مساعدتك أيضاً بخصوص خدمات المتجر؟";
                     messagesArea.appendChild(botDiv);
                 }
 
             } catch (err) {
                 loadingDiv.remove();
-                // في حال انقطاع السيرفر يتم تحويل العميل تلقائياً لضمان عدم تركه معلقاً
-                triggerSupportTransfer("نظام المحادثة الآلي قيد المزامنة حالياً. سأقوم بنقلك لنافذة الدعم المباشر لتلبية استفسارك دون تأخير.");
+                renderEscalationCard("أواجه صعوبة مؤقتة في الاتصال بالنظام. يمكنك إكمال استفسارك مباشرة عبر واتساب المتجر.");
             }
 
             messagesArea.scrollTop = messagesArea.scrollHeight;
