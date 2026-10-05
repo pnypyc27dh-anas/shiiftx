@@ -1,11 +1,7 @@
 const { GoogleGenAI, Type } = require('@google/genai');
 const { createClient } = require('@supabase/supabase-js');
 
-// تهيئة Supabase و Gemini باستخدام متغيرات البيئة
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-// تعريف الأدوات الرسمية للبوت (Function Calling)
+// تعريف الأدوات الرسمية للبوت
 const botTools = [
   {
     name: 'getProducts',
@@ -58,32 +54,6 @@ const botTools = [
   },
 ];
 
-// تنفيذ استعلامات دوال الـ RPC الآمنة داخل Supabase
-async function executeFunction(name, args) {
-  try {
-    if (name === 'getProducts') {
-      const { data, error } = await supabase.rpc('bot_get_products', { search_term: args.searchTerm || null });
-      return error ? { error: error.message } : data;
-    }
-    if (name === 'checkOrderStatus') {
-      const { data, error } = await supabase.rpc('bot_check_order_status', { order_query: args.orderRef });
-      return error ? { error: error.message } : (data && data.length > 0 ? data[0] : { message: 'الطلب غير موجود، تأكد من صحة الرقم المرجعي.' });
-    }
-    if (name === 'getPaymentAgents') {
-      const { data, error } = await supabase.rpc('bot_get_payment_agents');
-      return error ? { error: error.message } : data;
-    }
-    if (name === 'checkDepositStatus') {
-      const { data, error } = await supabase.rpc('bot_check_deposit_status', { deposit_query: args.depositRef });
-      return error ? { error: error.message } : (data && data.length > 0 ? data[0] : { message: 'طلب الإيداع غير موجود، تأكد من رقم الحوالة.' });
-    }
-    return { error: 'Unknown tool call' };
-  } catch (err) {
-    return { error: 'Internal database query failure' };
-  }
-}
-
-// تعليمات النظام وسياسة التحويل التلقائي
 const SYSTEM_INSTRUCTION = `
 أنت المساعد الذكي الرسمي لخدمة عملاء متجر SHIIFTX لبيع البطاقات الرقمية وشحن الألعاب.
 نبرتك: احترافية، ودودة، ومباشرة.
@@ -98,7 +68,6 @@ const SYSTEM_INSTRUCTION = `
 `;
 
 module.exports = async function handler(req, res) {
-  // تفعيل الترويسات لتفادي مشاكل الطلبات
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -112,13 +81,57 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { message, history = [] } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+    // فحص سلامة المفاتيح قبل محاولة الاتصال
+    if (!apiKey || !supabaseUrl || !supabaseKey) {
+      console.error('Missing Environment Variables Check:', {
+        hasGeminiKey: Boolean(apiKey),
+        hasSupabaseUrl: Boolean(supabaseUrl),
+        hasSupabaseKey: Boolean(supabaseKey),
+      });
+      return res.status(500).json({
+        reply: 'بيانات الربط مع السيرفر غير مكتملة في متغيرات البيئة.',
+        escalate: true,
+      });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const ai = new GoogleGenAI({ apiKey: apiKey });
+
+    async function executeFunction(name, args) {
+      try {
+        if (name === 'getProducts') {
+          const { data, error } = await supabase.rpc('bot_get_products', { search_term: args.searchTerm || null });
+          return error ? { error: error.message } : data;
+        }
+        if (name === 'checkOrderStatus') {
+          const { data, error } = await supabase.rpc('bot_check_order_status', { order_query: args.orderRef });
+          return error ? { error: error.message } : (data && data.length > 0 ? data[0] : { message: 'الطلب غير موجود، تأكد من صحة الرقم المرجعي.' });
+        }
+        if (name === 'getPaymentAgents') {
+          const { data, error } = await supabase.rpc('bot_get_payment_agents');
+          return error ? { error: error.message } : data;
+        }
+        if (name === 'checkDepositStatus') {
+          const { data, error } = await supabase.rpc('bot_check_deposit_status', { deposit_query: args.depositRef });
+          return error ? { error: error.message } : (data && data.length > 0 ? data[0] : { message: 'طلب الإيداع غير موجود، تأكد من رقم الحوالة.' });
+        }
+        return { error: 'Unknown tool call' };
+      } catch (err) {
+        return { error: 'Internal database query failure' };
+      }
+    }
+
+    const { message, history = [] } = req.body || {};
     if (!message) {
       return res.status(400).json({ error: 'الرسالة مطلوبة' });
     }
 
     const chat = ai.chats.create({
-      model: 'model: 'gemini-3.8-flash',
+      model: 'gemini-3.8-flash',
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
         tools: [{ functionDeclarations: botTools }],
@@ -128,7 +141,6 @@ module.exports = async function handler(req, res) {
 
     let response = await chat.sendMessage({ message });
 
-    // معالجة استدعاء الأدوات تلقائياً في حال طلب النموذج بيانات
     while (response.functionCalls && response.functionCalls.length > 0) {
       const call = response.functionCalls[0];
       const functionResult = await executeFunction(call.name, call.args);
@@ -152,7 +164,7 @@ module.exports = async function handler(req, res) {
       escalate: shouldEscalate,
     });
   } catch (error) {
-    console.error('Gemini API Error:', error);
+    console.error('Runtime Execution Error:', error);
     return res.status(500).json({
       reply: 'أواجه صعوبة مؤقتة في معالجة طلبك، سأقوم بتحويلك لمركز الدعم المباشر لمساعدتك.',
       escalate: true,
