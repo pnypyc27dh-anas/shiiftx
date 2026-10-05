@@ -20,10 +20,9 @@ module.exports = async function handler(req, res) {
     const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
     if (!apiKey || !supabaseUrl || !supabaseKey) {
-      console.error('Missing Environment Variables');
       return res.status(200).json({
-        reply: 'بيانات الربط مع السيرفر قيد التحديث حالياً.',
-        escalate: true,
+        reply: 'بيانات السيرفر قيد المزامنة حالياً.',
+        escalate: false,
       });
     }
 
@@ -34,7 +33,7 @@ module.exports = async function handler(req, res) {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // 1. جلب باقات المتجر المتاحة مباشرة
+    // 1. جلب باقات المتجر
     const { data: products } = await supabase
       .from('products')
       .select('platform, package_name, price, product_type')
@@ -44,26 +43,24 @@ module.exports = async function handler(req, res) {
     let catalogText = 'قائمة باقات وأسعار متجر SHIIFTX المتوفرة حالياً:\n';
     if (products && products.length > 0) {
       products.forEach((p) => {
-        catalogText += `- المنصة: ${p.platform} | الباقة: ${p.package_name} | السعر: $${parseFloat(p.price).toFixed(2)} | طريقة التسليم: ${p.product_type === 'CODE' ? 'كود رقمي فوري' : 'شحن مباشر بالـ ID'}\n`;
+        catalogText += `- المنصة: ${p.platform} | الباقة: ${p.package_name} | السعر: $${parseFloat(p.price).toFixed(2)} | التسليم: ${p.product_type === 'CODE' ? 'كود فوري' : 'شحن بالـ ID'}\n`;
       });
-    } else {
-      catalogText += 'لا توجد منتجات مسجلة حالياً في قاعدة البيانات.\n';
     }
 
-    // 2. جلب قائمة الوكلاء المعتمدين للإيداع
+    // 2. جلب قنوات الإيداع
     const { data: agents } = await supabase
       .from('agents')
       .select('agent_name, agent_code, payment_method, wallet_address')
       .limit(10);
 
-    let agentsText = '\nقائمة الوكلاء المعتمدين وطرق الإيداع وشحن الرصيد:\n';
+    let agentsText = '\nقائمة الوكلاء وطرق الإيداع المتاحة:\n';
     if (agents && agents.length > 0) {
       agents.forEach((a) => {
-        agentsText += `- الوكيل: ${a.agent_name} | رمز الوكيل: ${a.agent_code} | طريقة الدفع: ${a.payment_method} | رقم المحفظة: ${a.wallet_address}\n`;
+        agentsText += `- الوكيل: ${a.agent_name} | رمز الوكيل: ${a.agent_code} | طريقة الدفع: ${a.payment_method} | المحفظة: ${a.wallet_address}\n`;
       });
     }
 
-    // 3. فحص إذا كان العميل يستعلم عن طلب برقم مرجعي
+    // 3. فحص استعلام الطلبات برقم مرجعي
     let orderText = '';
     const refMatch = message.match(/TX-[A-Za-z0-9]+/i) || message.match(/TX\d+/i);
     if (refMatch) {
@@ -76,46 +73,63 @@ module.exports = async function handler(req, res) {
 
       if (orderData && orderData.length > 0) {
         const o = orderData[0];
-        orderText = `\n[بيانات الطلب المستعلم عنه ${o.transaction_ref}]:\n- النوع: ${o.transaction_type}\n- التفاصيل: ${o.details}\n- المبلغ: $${o.amount}\n- الحالة: ${o.status}\n- تاريخ الإنشاء: ${o.created_at}\n(تنبيه أمني: لا تذكر كود البطاقة للعميل في الدردشة مطلقاً، وأخبره أنه محفوظ ومتاح في صفحة "سجل المعاملات").\n`;
+        orderText = `\n[بيانات الطلب المستعلم عنه ${o.transaction_ref}]:\n- النوع: ${o.transaction_type}\n- التفاصيل: ${o.details}\n- المبلغ: $${o.amount}\n- الحالة: ${o.status}\n(تنبيه: لا تذكر كود البطاقة مطلقاً، وأخبره أنه محفوظ في حسابه بصفحة سجل المعاملات).\n`;
       } else {
-        orderText = `\n[ملاحظة استعلام الطلب]: العميل استعلم عن الطلب برقم (${ref})، ولم يتم العثور عليه في قاعدة البيانات. اطلب منه التأكد من صحة الرقم المرجعي.\n`;
+        orderText = `\n[ملاحظة]: الطلب رقم (${ref}) غير موجود بقاعدة البيانات. اطلب من العميل التأكد من الرقم.\n`;
       }
     }
 
-    // 4. تعليمات النظام الشاملة لنموذج الذكاء الاصطناعي
     const systemPrompt = `
-أنت المساعد الذكي الرسمي لخدمة عملاء متجر SHIIFTX (المحفظة الرقمية ومتجر الاشتراكات وشحن الألعاب في سوريا).
-نبرتك: احترافية، ودودة، ومختصرة باللغة العربية الفصحى.
+أنت المساعد الذكي الرسمي لخدمة عملاء متجر SHIIFTX لشحن الألعاب والبطاقات الرقمية في سوريا.
+نبرتك: احترافية، ودودة، ومختصرة باللغة العربية.
 
-بيانات المتجر الحية من قاعدة البيانات:
+بيانات المتجر المحدثة:
 ${catalogText}
 ${agentsText}
 ${orderText}
 
 قواعد الإجابة:
-1. الأسعار والباقات: اعتمد حصراً على قائمة الباقات المذكورة أعلاه. إذا سأل العميل عن لعبة موجودة (مثل ببجي، فري فاير، إلخ)، اذكر له الباقات وأسعارها بدقة. إذا سأل عن لعبة أو باقة غير متوفرة، أخبره بلطف أنها غير متوفرة حالياً واقترح عليه ما هو متوفر. لا تحوله للدعم لمجرد سؤاله عن باقة غير متوفرة!
-2. شحن الرصيد والإيداع: اشرح للعميل المحافظ المتاحة والوكلاء المعتمدين، ووضّح له خطوات التحويل ورفع رقم إشعار الحوالة في قسم "شحن الرصيد".
-3. الاستعلام عن الطلبات: إذا زودك العميل برقم الطلب، استخدم بيانات الطلب المذكورة أعلاه وأخبره بحالته. إذا لم يزودك برقم الطلب، اطلب منه تزويدك به (مثال: TX-D123456).
-4. التحويل الإلزامي للدعم البشري المباشر:
-أضف العبارة التالية في نهاية ردك فقط وحصراً: [ESCALATE_TO_SUPPORT]
-في الحالات التالية فقط:
-- إذا اشتكى العميل من مشكلة حقيقية تتطلب تدخلاً بشرياً (مثل: كود مستعمل، كود تالف لا يعمل، إيداع تم رفضه، أو شحن لمعرف خاطئ).
-- إذا طلب العميل صراحة التحدث مع إنسان أو موظف دعم بشري.
-في أي حالة أخرى (استفسار عن أسعار، باقات، طرق دفع، أسئلة عامة): أجب بنفسك ولا تضع [ESCALATE_TO_SUPPORT] أبداً.
+1. الأسعار والباقات: اعتمد حصراً على قائمة الباقات المذكورة أعلاه واعرض الأسعار بوضوح. إذا لم تكن الباقة موجودة، أخبره بلطف أنها غير متوفرة حالياً واسأله إن كان يريد بديلاً. لا تحوله للدعم لمجرد سؤاله عن باقة غير متوفرة!
+2. طرق الإيداع: اشرح للعميل طرق الدفع والوكلاء، وذكّره برفع رقم إشعار الحوالة في قسم "شحن الرصيد".
+3. الاستعلام عن الطلبات: إذا زودك العميل برقم الطلب، اشرح له حالته من البيانات أعلاه.
+4. قاعدة التحويل للدعم البشري:
+تضع العبارة التالية في نهاية ردك فقط: [ESCALATE_TO_SUPPORT]
+في حالتين فقط وحصراً:
+- إذا كانت رسالة العميل الحالية بالذات تشتكي من مشكلة حقيقية (مثل: كود لا يعمل، تم رفض الإيداع، خطأ في رقم ID).
+- إذا طلب العميل صراحة التحدث مع موظف بشري أو الدعم.
+*ملاحظة هامة جداً:* إذا طرح العميل سؤالاً عادياً (عن أسعار أو استفسار عام) حتى وإن كانت هناك مشكلة سابقة في المحادثة، أجب عن سؤاله الحالي بشكل طبيعي وتجاهل المشكلة السابقة ولا تضع [ESCALATE_TO_SUPPORT].
 `;
 
     const ai = new GoogleGenAI({ apiKey });
 
-    // بناء سياق المحادثة مع السجل السابق
+    // تنظيف وترتيب سجل المحادثة بدقة لمنع أخطاء السيرفر (Alternating Validation)
     const contents = [];
     if (Array.isArray(history) && history.length > 0) {
-      history.slice(-6).forEach((h) => {
-        contents.push({
-          role: h.role === 'user' ? 'user' : 'model',
-          parts: [{ text: String(h.text || h.content || '') }],
-        });
-      });
+      let lastRole = null;
+      for (const h of history) {
+        const text = String(h.content || h.text || '').trim();
+        if (!text) continue;
+        const role = h.role === 'user' ? 'user' : 'model';
+
+        // المحادثة في Gemini يجب أن تبدأ دائماً بـ user
+        if (contents.length === 0 && role !== 'user') continue;
+
+        // منع تكرار نفس الـ role مرتين متتاليتين
+        if (role === lastRole) {
+          contents[contents.length - 1].parts[0].text += `\n${text}`;
+        } else {
+          contents.push({ role, parts: [{ text }] });
+          lastRole = role;
+        }
+      }
+
+      // إذا كان آخر عنصر هو user، نزيله لأننا سنضيف رسالة المستخدم الحالية كـ user
+      if (contents.length > 0 && contents[contents.length - 1].role === 'user') {
+        contents.pop();
+      }
     }
+
+    // إضافة الرسالة الحالية
     contents.push({
       role: 'user',
       parts: [{ text: message }],
@@ -140,8 +154,8 @@ ${orderText}
   } catch (error) {
     console.error('API Handler Error:', error);
     return res.status(200).json({
-      reply: 'أهلاً بك في خدمة عملاء SHIIFTX! إذا كان استفسارك يتعلق بمشكلة في طلبك أو إيداعك، يمكنك التواصل فوراً مع الدعم المباشر عبر واتساب.',
-      escalate: true,
+      reply: 'أهلاً بك! يمكنك تصفح الباقات المتوفرة بالمتجر أو سؤالي عن أي لعبة تريدها.',
+      escalate: false,
     });
   }
 };
