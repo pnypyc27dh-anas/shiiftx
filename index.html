@@ -2340,10 +2340,9 @@
         }
 
         // ========================================================================
-        // 11. تشغيل والتحكم ببوت خدمة العملاء (تصفير ذكي وتلقائي للذاكرة)
+        // 11. المساعد التفاعلي الذكي لمتجر SHIIFTX (Interactive Menu Engine)
         // ========================================================================
-        let chatHistory = [];
-        const OFFICIAL_WHATSAPP_NUMBER = "963900000000"; // رقم واتساب المتجر الرسمي
+        const OFFICIAL_WHATSAPP_NUMBER = "963900000000"; // استبدله برقم واتساب المتجر الرسمي
 
         function toggleChat() {
             const modal = document.getElementById('chat-modal');
@@ -2352,109 +2351,326 @@
             modal.style.display = isOpen ? 'none' : 'flex';
             
             if (!isOpen) {
-                setTimeout(() => {
-                    const input = document.getElementById('chat-input');
-                    if (input) input.focus();
-                }, 100);
+                const messagesArea = document.getElementById('chat-messages');
+                // إذا كانت أول مرة يفتح فيها الشات، نعرض القائمة الرئيسية فوراً
+                if (messagesArea && messagesArea.children.length === 0) {
+                    renderMainMenu();
+                }
             }
         }
 
         function handleKeyPress(e) {
-            if (e.key === 'Enter') sendChatMessage();
+            if (e.key === 'Enter') sendManualInput();
         }
 
-        function renderEscalationCard(reasonText) {
+        // عرض القائمة الرئيسية بالأزرار
+        function renderMainMenu() {
             const messagesArea = document.getElementById('chat-messages');
             if (!messagesArea) return;
-            
-            const botDiv = document.createElement('div');
-            botDiv.className = 'chat-bubble-msg msg-bot';
-            botDiv.innerHTML = `
-                <div class="space-y-2.5">
-                    <p class="leading-relaxed">${reasonText}</p>
-                    <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800/50 flex flex-col gap-2 mt-1">
-                        <span class="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
-                            <i class="ph-fill ph-whatsapp-logo text-base text-emerald-600"></i> فريق الدعم المباشر جاهز لمساعدتك:
-                        </span>
-                        <div class="flex gap-2">
-                            <a href="https://wa.me/${OFFICIAL_WHATSAPP_NUMBER}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-center py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
-                                <span>محادثة واتساب</span>
-                                <i class="ph ph-arrow-square-out text-sm"></i>
-                            </a>
-                            <button onclick="if(typeof openSupportModal === 'function') openSupportModal();" class="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition">
-                                قنوات أخرى
-                            </button>
-                        </div>
+
+            const div = document.createElement('div');
+            div.className = 'chat-bubble-msg msg-bot';
+            div.innerHTML = `
+                <div class="space-y-3">
+                    <p class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                        <span>👋 مرحباً بك في مساعد SHIIFTX السريع!</span>
+                    </p>
+                    <p class="text-xs text-slate-600 dark:text-slate-300">اختر من القائمة أدناه للإجابة الفورية بضغطة زر:</p>
+                    <div class="grid grid-cols-1 gap-2 pt-1">
+                        <button onclick="botFetchPlatforms()" class="w-full text-right bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 p-2.5 rounded-xl border border-amber-500/20 text-xs font-bold transition flex items-center justify-between">
+                            <span class="flex items-center gap-2"><i class="ph-fill ph-game-controller text-base"></i> استعراض باقات وأسعار الألعاب</span>
+                            <i class="ph ph-caret-left"></i>
+                        </button>
+                        <button onclick="botFetchAgents()" class="w-full text-right bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 p-2.5 rounded-xl border border-emerald-500/20 text-xs font-bold transition flex items-center justify-between">
+                            <span class="flex items-center gap-2"><i class="ph-fill ph-wallet text-base"></i> أرقام المحافظ وطرق الإيداع المتاحة</span>
+                            <i class="ph ph-caret-left"></i>
+                        </button>
+                        <button onclick="botPromptTracking()" class="w-full text-right bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-400 p-2.5 rounded-xl border border-blue-500/20 text-xs font-bold transition flex items-center justify-between">
+                            <span class="flex items-center gap-2"><i class="ph-fill ph-magnifying-glass text-base"></i> تتبع حالة طلب برقم الفاتورة</span>
+                            <i class="ph ph-caret-left"></i>
+                        </button>
+                        <button onclick="botDirectSupport()" class="w-full text-right bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition flex items-center justify-between">
+                            <span class="flex items-center gap-2"><i class="ph-fill ph-headset text-base text-emerald-600"></i> التحدث مباشرة مع خدمة العملاء</span>
+                            <i class="ph ph-caret-left"></i>
+                        </button>
                     </div>
                 </div>
             `;
-            messagesArea.appendChild(botDiv);
+            messagesArea.appendChild(div);
             messagesArea.scrollTop = messagesArea.scrollHeight;
         }
 
-        async function sendChatMessage() {
-            const input = document.getElementById('chat-input');
-            const msg = input.value.trim();
-            if (!msg) return;
-
-            const messagesArea = document.getElementById('chat-messages');
-
-            // 1. إضافة رسالة العميل
-            const userDiv = document.createElement('div');
-            userDiv.className = 'chat-bubble-msg msg-user';
-            userDiv.innerText = msg;
-            messagesArea.appendChild(userDiv);
-            input.value = '';
-            messagesArea.scrollTop = messagesArea.scrollHeight;
-
-            // 2. مؤشر الانتظار
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'chat-bubble-msg msg-bot';
-            loadingDiv.id = 'chat-bot-loading';
-            loadingDiv.innerHTML = `<i class="ph ph-dots-three animate-pulse text-lg"></i> جاري المتابعة...`;
-            messagesArea.appendChild(loadingDiv);
-            messagesArea.scrollTop = messagesArea.scrollHeight;
+        // 1. جلب قائمة الألعاب
+        async function botFetchPlatforms() {
+            appendUserAction("استعراض الألعاب والمنصات");
+            const loading = appendLoading();
 
             try {
-                const response = await fetch('/api/chat', {
+                const res = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        message: msg,
-                        history: chatHistory 
-                    })
+                    body: JSON.stringify({ action: 'get_platforms' })
                 });
+                const data = await res.json();
+                loading.remove();
 
-                const data = await response.json();
-                loadingDiv.remove();
+                const messagesArea = document.getElementById('chat-messages');
+                const div = document.createElement('div');
+                div.className = 'chat-bubble-msg msg-bot';
 
-                if (data.escalate) {
-                    renderEscalationCard(data.reply || "يتطلب هذا الاستفسار مراجعة مباشرة من فريق الدعم الفني.");
-                    // تصفير الذاكرة تلقائياً حتى لا يعلق البوت في المشكلة السابقة عند السؤال التالي
-                    chatHistory = [];
+                if (data.platforms && data.platforms.length > 0) {
+                    let btns = data.platforms.map(p => `
+                        <button onclick="botFetchPackages('${p}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-white dark:hover:bg-amber-500 text-slate-700 dark:text-slate-200 py-1.5 px-3 rounded-lg text-xs font-bold transition border border-slate-200 dark:border-slate-700">
+                            ${p}
+                        </button>
+                    `).join('');
+
+                    div.innerHTML = `
+                        <p class="font-bold text-xs mb-2">اختر اللعبة أو المنصة لمعرفة الباقات:</p>
+                        <div class="flex flex-wrap gap-2 mb-3">${btns}</div>
+                        <button onclick="renderMainMenu()" class="text-[11px] text-amber-600 dark:text-amber-400 font-bold hover:underline flex items-center gap-1">
+                            <i class="ph ph-arrow-u-up-right"></i> العودة للقائمة الرئيسية
+                        </button>
+                    `;
                 } else {
-                    const botDiv = document.createElement('div');
-                    botDiv.className = 'chat-bubble-msg msg-bot';
-                    botDiv.innerText = data.reply || "كيف يمكنني مساعدتك أيضاً بخصوص خدمات المتجر؟";
-                    messagesArea.appendChild(botDiv);
-
-                    // حفظ السياق في الذاكرة للأسئلة العادية فقط
-                    chatHistory.push({ role: 'user', content: msg });
-                    if (data.reply) {
-                        chatHistory.push({ role: 'model', content: data.reply });
-                    }
+                    div.innerHTML = `<p class="text-xs">لا توجد ألعاب مضافة حالياً في المتجر.</p>`;
                 }
-
-            } catch (err) {
-                loadingDiv.remove();
-                const botDiv = document.createElement('div');
-                botDiv.className = 'chat-bubble-msg msg-bot';
-                botDiv.innerText = "أهلاً بك! يمكنك الاستفسار عن باقات المتجر أو إكمال محادثتك عبر واتساب الدعم الفني.";
-                messagesArea.appendChild(botDiv);
-                chatHistory = [];
+                messagesArea.appendChild(div);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            } catch (e) {
+                loading.remove();
             }
+        }
 
+        // 2. عرض أسعار باقات اللعبة المحددة
+        async function botFetchPackages(platform) {
+            appendUserAction(`باقات ${platform}`);
+            const loading = appendLoading();
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get_packages', platform: platform })
+                });
+                const data = await res.json();
+                loading.remove();
+
+                const messagesArea = document.getElementById('chat-messages');
+                const div = document.createElement('div');
+                div.className = 'chat-bubble-msg msg-bot';
+
+                if (data.packages && data.packages.length > 0) {
+                    let items = data.packages.map(p => `
+                        <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-100 dark:border-slate-700/50 text-xs">
+                            <div>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">${p.package_name}</span>
+                                <span class="block text-[10px] text-slate-400">${p.product_type === 'CODE' ? 'كود رقمي فوري' : 'شحن ID مباشر'}</span>
+                            </div>
+                            <span class="font-black text-amber-600 dark:text-amber-400 text-sm">$${parseFloat(p.price).toFixed(2)}</span>
+                        </div>
+                    `).join('');
+
+                    div.innerHTML = `
+                        <p class="font-bold text-xs mb-2.5 text-slate-800 dark:text-slate-100">باقات وأسعار (${platform}):</p>
+                        <div class="space-y-1.5 mb-3 max-h-60 overflow-y-auto pr-1">${items}</div>
+                        <div class="flex gap-2">
+                            <button onclick="botFetchPlatforms()" class="text-[11px] text-amber-600 dark:text-amber-400 font-bold hover:underline">
+                                ← لعبة أخرى
+                            </button>
+                            <span class="text-slate-300">|</span>
+                            <button onclick="renderMainMenu()" class="text-[11px] text-slate-500 hover:underline">
+                                القائمة الرئيسية
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    div.innerHTML = `<p class="text-xs">لا توجد باقات متوفرة حالياً لهذه اللعبة.</p>`;
+                }
+                messagesArea.appendChild(div);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            } catch (e) {
+                loading.remove();
+            }
+        }
+
+        // 3. عرض الوكلاء والمحافظ مع زر نسخ
+        async function botFetchAgents() {
+            appendUserAction("طرق الإيداع والمحافظ");
+            const loading = appendLoading();
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get_agents' })
+                });
+                const data = await res.json();
+                loading.remove();
+
+                const messagesArea = document.getElementById('chat-messages');
+                const div = document.createElement('div');
+                div.className = 'chat-bubble-msg msg-bot';
+
+                if (data.agents && data.agents.length > 0) {
+                    let agentCards = data.agents.map(a => `
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-bold text-slate-800 dark:text-slate-100">${a.payment_method}</span>
+                                <span class="text-[10px] text-slate-400">${a.agent_name}</span>
+                            </div>
+                            <div class="flex items-center justify-between bg-white dark:bg-slate-900 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800">
+                                <code class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 select-all">${a.wallet_address}</code>
+                                <button onclick="navigator.clipboard.writeText('${a.wallet_address}'); this.innerText='تم النسخ ✓';" class="text-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 px-2 py-0.5 rounded font-bold hover:bg-emerald-100 transition">
+                                    نسخ
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    div.innerHTML = `
+                        <p class="font-bold text-xs mb-2 text-slate-800 dark:text-slate-100">المحافظ المعتمدة للإيداع المالي:</p>
+                        <div class="space-y-2 mb-3">${agentCards}</div>
+                        <p class="text-[11px] text-slate-500 mb-2">📌 بعد التحويل، توجه لقسم <b>شحن الرصيد</b> لرفع رقم إشعار الحوالة لتأكيد رصيدك.</p>
+                        <button onclick="renderMainMenu()" class="text-[11px] text-amber-600 font-bold hover:underline">
+                            ← العودة للقائمة الرئيسية
+                        </button>
+                    `;
+                } else {
+                    div.innerHTML = `<p class="text-xs">بيانات المحافظ قيد التحديث حالياً.</p>`;
+                }
+                messagesArea.appendChild(div);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            } catch (e) {
+                loading.remove();
+            }
+        }
+
+        // 4. طلب رقم الطلب لتتبعه
+        function botPromptTracking() {
+            appendUserAction("تتبع حالة طلب");
+            const messagesArea = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'chat-bubble-msg msg-bot';
+            div.innerHTML = `
+                <div class="space-y-2">
+                    <p class="text-xs font-bold">يرجى كتابة الرقم المرجعي للطلب في حقل الرسالة أدناه (مثال: <code>TX-123456</code>):</p>
+                    <p class="text-[11px] text-slate-400">يمكنك العثور على الرقم المرجعي في صفحة سجل المعاملات بحسابك.</p>
+                </div>
+            `;
+            messagesArea.appendChild(div);
             messagesArea.scrollTop = messagesArea.scrollHeight;
+            const input = document.getElementById('chat-input');
+            if (input) {
+                input.placeholder = "اكتب رقم الطلب TX-... ثم اضغط إرسال";
+                input.focus();
+            }
+        }
+
+        // 5. التحدث المباشر مع الدعم الفني
+        function botDirectSupport() {
+            appendUserAction("التحدث مع الدعم الفني");
+            const messagesArea = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'chat-bubble-msg msg-bot';
+            div.innerHTML = `
+                <div class="space-y-2.5">
+                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100">فريق خدمة العملاء المباشر جاهز لمساعدتك عبر واتساب:</p>
+                    <div class="flex gap-2">
+                        <a href="https://wa.me/${OFFICIAL_WHATSAPP_NUMBER}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-center py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+                            <i class="ph-fill ph-whatsapp-logo text-base"></i>
+                            <span>فتح محادثة واتساب</span>
+                        </a>
+                        <button onclick="if(typeof openSupportModal==='function') openSupportModal();" class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-200 transition">
+                            قنوات أخرى
+                        </button>
+                    </div>
+                    <button onclick="renderMainMenu()" class="text-[11px] text-amber-600 font-bold hover:underline block pt-1">
+                        ← العودة للقائمة الرئيسية
+                    </button>
+                </div>
+            `;
+            messagesArea.appendChild(div);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        // معالجة الإدخال اليدوي إذا كتب العميل في مربع النص
+        async function sendManualInput() {
+            const input = document.getElementById('chat-input');
+            const val = input.value.trim();
+            if (!val) return;
+
+            appendUserAction(val);
+            input.value = '';
+            input.placeholder = "اكتب رسالتك أو رقم الطلب...";
+
+            const loading = appendLoading();
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: val })
+                });
+                const data = await res.json();
+                loading.remove();
+
+                const messagesArea = document.getElementById('chat-messages');
+                const div = document.createElement('div');
+                div.className = 'chat-bubble-msg msg-bot';
+
+                if (data.order) {
+                    const o = data.order;
+                    const statusText = o.status === 'completed' ? 'مكتمل بنجاح ✅' :
+                                       o.status === 'pending' ? 'قيد المراجعة ⏳' :
+                                       o.status === 'rejected' ? 'مرفوض ❌' : o.status;
+
+                    div.innerHTML = `
+                        <div class="space-y-1.5 text-xs">
+                            <p class="font-bold text-slate-800 dark:text-slate-100 border-b pb-1">📦 تفاصيل الطلب (${o.transaction_ref}):</p>
+                            <p><b>الخدمة:</b> ${o.details || o.transaction_type}</p>
+                            <p><b>المبلغ:</b> $${o.amount}</p>
+                            <p><b>الحالة:</b> <span class="font-bold">${statusText}</span></p>
+                            <p class="text-[10px] text-slate-400 pt-1">🔒 الأكواد الرقمية محفوظة دائماً في صفحة سجل المعاملات بحسابك.</p>
+                            <button onclick="renderMainMenu()" class="text-[11px] text-amber-600 font-bold hover:underline pt-2 block">
+                                ← العودة للقائمة الرئيسية
+                            </button>
+                        </div>
+                    `;
+                } else if (data.isOrderSearch) {
+                    div.innerHTML = `
+                        <p class="text-xs text-rose-500 font-bold">لم يتم العثور على طلب بهذا الرقم المرجعي. تأكد من الرقم في سجل معاملاتك.</p>
+                        <button onclick="renderMainMenu()" class="text-[11px] text-amber-600 font-bold hover:underline pt-1 block">العودة للقائمة</button>
+                    `;
+                } else {
+                    renderMainMenu();
+                    return;
+                }
+                messagesArea.appendChild(div);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            } catch (e) {
+                loading.remove();
+            }
+        }
+
+        // دوال مساعدة للواجهة
+        function appendUserAction(text) {
+            const messagesArea = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'chat-bubble-msg msg-user';
+            div.innerText = text;
+            messagesArea.appendChild(div);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function appendLoading() {
+            const messagesArea = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'chat-bubble-msg msg-bot';
+            div.innerHTML = `<i class="ph ph-dots-three animate-pulse text-lg"></i> جاري التحميل...`;
+            messagesArea.appendChild(div);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+            return div;
         }
     </script>
 </body>
