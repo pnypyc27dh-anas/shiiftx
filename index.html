@@ -2339,10 +2339,10 @@
             }
         }
 
+       // ========================================================================
+        // 11. المساعد الرقمي التفاعلي لمتجر SHIIFTX (تصميم وهوية متطابقة)
         // ========================================================================
-        // 11. المساعد التفاعلي الذكي لمتجر SHIIFTX (Interactive Menu Engine)
-        // ========================================================================
-        const OFFICIAL_WHATSAPP_NUMBER = "963900000000"; // استبدله برقم واتساب المتجر الرسمي
+        const OFFICIAL_WHATSAPP_NUMBER = "963900000000"; // استبدله برقم واتساب المتجر
 
         function toggleChat() {
             const modal = document.getElementById('chat-modal');
@@ -2352,7 +2352,6 @@
             
             if (!isOpen) {
                 const messagesArea = document.getElementById('chat-messages');
-                // إذا كانت أول مرة يفتح فيها الشات، نعرض القائمة الرئيسية فوراً
                 if (messagesArea && messagesArea.children.length === 0) {
                     renderMainMenu();
                 }
@@ -2363,7 +2362,7 @@
             if (e.key === 'Enter') sendManualInput();
         }
 
-        // عرض القائمة الرئيسية بالأزرار
+        // عرض القائمة الرئيسية بهوية SHIIFTX
         function renderMainMenu() {
             const messagesArea = document.getElementById('chat-messages');
             if (!messagesArea) return;
@@ -2372,26 +2371,50 @@
             div.className = 'chat-bubble-msg msg-bot';
             div.innerHTML = `
                 <div class="space-y-3">
-                    <p class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                        <span>👋 مرحباً بك في مساعد SHIIFTX السريع!</span>
-                    </p>
-                    <p class="text-xs text-slate-600 dark:text-slate-300">اختر من القائمة أدناه للإجابة الفورية بضغطة زر:</p>
+                    <div class="flex items-center gap-2 pb-1 border-b border-slate-700/50">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        <p class="font-bold text-xs text-slate-100">مرحباً بك في مركز خدمة SHIIFTX</p>
+                    </div>
+                    <p class="text-[11px] text-slate-300 leading-relaxed">حدد الخدمة المطلوبة للحصول على بياناتها وتفاصيلها بشكل فوري:</p>
                     <div class="grid grid-cols-1 gap-2 pt-1">
-                        <button onclick="botFetchPlatforms()" class="w-full text-right bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 p-2.5 rounded-xl border border-amber-500/20 text-xs font-bold transition flex items-center justify-between">
-                            <span class="flex items-center gap-2"><i class="ph-fill ph-game-controller text-base"></i> استعراض باقات وأسعار الألعاب</span>
-                            <i class="ph ph-caret-left"></i>
+                        <button onclick="botFetchPlatforms()" class="w-full text-right bg-slate-800/90 hover:bg-slate-700/90 text-slate-100 p-2.5 rounded-xl border border-slate-700/70 text-xs font-bold transition flex items-center justify-between group shadow-sm">
+                            <span class="flex items-center gap-2.5">
+                                <span class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-sm border border-amber-500/20 group-hover:bg-amber-500 group-hover:text-slate-900 transition">
+                                    <i class="ph-fill ph-squares-four"></i>
+                                </span>
+                                <span>البطاقات، الاشتراكات وشحن الألعاب</span>
+                            </span>
+                            <i class="ph ph-caret-left text-slate-400 group-hover:text-amber-400 transition"></i>
                         </button>
-                        <button onclick="botFetchAgents()" class="w-full text-right bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 p-2.5 rounded-xl border border-emerald-500/20 text-xs font-bold transition flex items-center justify-between">
-                            <span class="flex items-center gap-2"><i class="ph-fill ph-wallet text-base"></i> أرقام المحافظ وطرق الإيداع المتاحة</span>
-                            <i class="ph ph-caret-left"></i>
+
+                        <button onclick="botFetchAgents()" class="w-full text-right bg-slate-800/90 hover:bg-slate-700/90 text-slate-100 p-2.5 rounded-xl border border-slate-700/70 text-xs font-bold transition flex items-center justify-between group shadow-sm">
+                            <span class="flex items-center gap-2.5">
+                                <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-slate-900 transition">
+                                    <i class="ph-fill ph-wallet"></i>
+                                </span>
+                                <span>طرق الإيداع وعناوين المحافظ المعتمدة</span>
+                            </span>
+                            <i class="ph ph-caret-left text-slate-400 group-hover:text-emerald-400 transition"></i>
                         </button>
-                        <button onclick="botPromptTracking()" class="w-full text-right bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-400 p-2.5 rounded-xl border border-blue-500/20 text-xs font-bold transition flex items-center justify-between">
-                            <span class="flex items-center gap-2"><i class="ph-fill ph-magnifying-glass text-base"></i> تتبع حالة طلب برقم الفاتورة</span>
-                            <i class="ph ph-caret-left"></i>
+
+                        <button onclick="botPromptTracking()" class="w-full text-right bg-slate-800/90 hover:bg-slate-700/90 text-slate-100 p-2.5 rounded-xl border border-slate-700/70 text-xs font-bold transition flex items-center justify-between group shadow-sm">
+                            <span class="flex items-center gap-2.5">
+                                <span class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-sm border border-blue-500/20 group-hover:bg-blue-500 group-hover:text-slate-900 transition">
+                                    <i class="ph-fill ph-receipt"></i>
+                                </span>
+                                <span>تتبع حالة طلبك بالرقم المرجعي</span>
+                            </span>
+                            <i class="ph ph-caret-left text-slate-400 group-hover:text-blue-400 transition"></i>
                         </button>
-                        <button onclick="botDirectSupport()" class="w-full text-right bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition flex items-center justify-between">
-                            <span class="flex items-center gap-2"><i class="ph-fill ph-headset text-base text-emerald-600"></i> التحدث مباشرة مع خدمة العملاء</span>
-                            <i class="ph ph-caret-left"></i>
+
+                        <button onclick="botDirectSupport()" class="w-full text-right bg-slate-800/90 hover:bg-slate-700/90 text-slate-100 p-2.5 rounded-xl border border-slate-700/70 text-xs font-bold transition flex items-center justify-between group shadow-sm">
+                            <span class="flex items-center gap-2.5">
+                                <span class="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-sm border border-purple-500/20 group-hover:bg-purple-500 group-hover:text-slate-900 transition">
+                                    <i class="ph-fill ph-headset"></i>
+                                </span>
+                                <span>التحدث مع الدعم الفني المباشر</span>
+                            </span>
+                            <i class="ph ph-caret-left text-slate-400 group-hover:text-purple-400 transition"></i>
                         </button>
                     </div>
                 </div>
@@ -2400,9 +2423,9 @@
             messagesArea.scrollTop = messagesArea.scrollHeight;
         }
 
-        // 1. جلب قائمة الألعاب
+        // 1. استعراض المنصات والخدمات
         async function botFetchPlatforms() {
-            appendUserAction("استعراض الألعاب والمنصات");
+            appendUserAction("استعراض الخدمات والاشتراكات");
             const loading = appendLoading();
 
             try {
@@ -2420,20 +2443,30 @@
 
                 if (data.platforms && data.platforms.length > 0) {
                     let btns = data.platforms.map(p => `
-                        <button onclick="botFetchPackages('${p}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-white dark:hover:bg-amber-500 text-slate-700 dark:text-slate-200 py-1.5 px-3 rounded-lg text-xs font-bold transition border border-slate-200 dark:border-slate-700">
-                            ${p}
+                        <button onclick="botFetchPackages('${p}')" class="bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 py-1.5 px-3 rounded-lg text-xs font-bold transition border border-slate-700 hover:border-amber-500 shadow-sm flex items-center gap-1.5">
+                            <i class="ph-bold ph-caret-left text-[10px] opacity-60"></i>
+                            <span>${p}</span>
                         </button>
                     `).join('');
 
                     div.innerHTML = `
-                        <p class="font-bold text-xs mb-2">اختر اللعبة أو المنصة لمعرفة الباقات:</p>
-                        <div class="flex flex-wrap gap-2 mb-3">${btns}</div>
-                        <button onclick="renderMainMenu()" class="text-[11px] text-amber-600 dark:text-amber-400 font-bold hover:underline flex items-center gap-1">
-                            <i class="ph ph-arrow-u-up-right"></i> العودة للقائمة الرئيسية
-                        </button>
+                        <div class="space-y-2.5">
+                            <p class="font-bold text-xs text-slate-100 flex items-center gap-1.5">
+                                <i class="ph-fill ph-tag text-amber-400"></i>
+                                <span>اختر المنصة أو نوع الخدمة لعرض الباقات:</span>
+                            </p>
+                            <div class="flex flex-wrap gap-1.5 pt-1 mb-2">${btns}</div>
+                            <button onclick="renderMainMenu()" class="text-[11px] text-amber-400 font-bold hover:underline flex items-center gap-1 pt-1">
+                                <i class="ph ph-arrow-u-up-right"></i>
+                                <span>العودة للقائمة الرئيسية</span>
+                            </button>
+                        </div>
                     `;
                 } else {
-                    div.innerHTML = `<p class="text-xs">لا توجد ألعاب مضافة حالياً في المتجر.</p>`;
+                    div.innerHTML = `
+                        <p class="text-xs text-slate-300">لا توجد خدمات مضافة حالياً في المتجر.</p>
+                        <button onclick="renderMainMenu()" class="text-[11px] text-amber-400 font-bold hover:underline pt-2 block">← العودة للقائمة</button>
+                    `;
                 }
                 messagesArea.appendChild(div);
                 messagesArea.scrollTop = messagesArea.scrollHeight;
@@ -2442,9 +2475,9 @@
             }
         }
 
-        // 2. عرض أسعار باقات اللعبة المحددة
+        // 2. عرض تفاصيل الباقات والأسعار
         async function botFetchPackages(platform) {
-            appendUserAction(`باقات ${platform}`);
+            appendUserAction(`${platform}`);
             const loading = appendLoading();
 
             try {
@@ -2462,30 +2495,45 @@
 
                 if (data.packages && data.packages.length > 0) {
                     let items = data.packages.map(p => `
-                        <div class="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-100 dark:border-slate-700/50 text-xs">
-                            <div>
-                                <span class="font-bold text-slate-800 dark:text-slate-100">${p.package_name}</span>
-                                <span class="block text-[10px] text-slate-400">${p.product_type === 'CODE' ? 'كود رقمي فوري' : 'شحن ID مباشر'}</span>
+                        <div class="flex items-center justify-between p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 text-xs hover:border-slate-700 transition">
+                            <div class="pr-1">
+                                <span class="font-bold text-slate-100 block">${p.package_name}</span>
+                                <span class="inline-flex items-center gap-1 text-[10px] font-medium mt-0.5 ${p.product_type === 'CODE' ? 'text-amber-400' : 'text-blue-400'}">
+                                    <i class="${p.product_type === 'CODE' ? 'ph-bold ph-key' : 'ph-bold ph-identification-card'} text-[10px]"></i>
+                                    ${p.product_type === 'CODE' ? 'كود رقمي فوري' : 'شحن معرف ID مباشر'}
+                                </span>
                             </div>
-                            <span class="font-black text-amber-600 dark:text-amber-400 text-sm">$${parseFloat(p.price).toFixed(2)}</span>
+                            <span class="font-black text-amber-400 text-sm font-mono bg-amber-400/10 px-2 py-1 rounded-lg border border-amber-400/20">$${parseFloat(p.price).toFixed(2)}</span>
                         </div>
                     `).join('');
 
                     div.innerHTML = `
-                        <p class="font-bold text-xs mb-2.5 text-slate-800 dark:text-slate-100">باقات وأسعار (${platform}):</p>
-                        <div class="space-y-1.5 mb-3 max-h-60 overflow-y-auto pr-1">${items}</div>
-                        <div class="flex gap-2">
-                            <button onclick="botFetchPlatforms()" class="text-[11px] text-amber-600 dark:text-amber-400 font-bold hover:underline">
-                                ← لعبة أخرى
-                            </button>
-                            <span class="text-slate-300">|</span>
-                            <button onclick="renderMainMenu()" class="text-[11px] text-slate-500 hover:underline">
-                                القائمة الرئيسية
-                            </button>
+                        <div class="space-y-2.5">
+                            <div class="flex justify-between items-center pb-1 border-b border-slate-700/60">
+                                <span class="font-bold text-xs text-slate-100 flex items-center gap-1.5">
+                                    <i class="ph-fill ph-check-circle text-amber-400"></i>
+                                    <span>باقات وأسعار (${platform}):</span>
+                                </span>
+                                <span class="text-[10px] text-slate-400">${data.packages.length} باقة</span>
+                            </div>
+                            <div class="space-y-1.5 max-h-56 overflow-y-auto pr-1 select-text">${items}</div>
+                            <div class="flex items-center gap-3 pt-2 text-[11px] border-t border-slate-700/50">
+                                <button onclick="botFetchPlatforms()" class="text-amber-400 font-bold hover:underline flex items-center gap-1">
+                                    <i class="ph ph-caret-right"></i>
+                                    <span>خدمة أخرى</span>
+                                </button>
+                                <span class="text-slate-600">|</span>
+                                <button onclick="renderMainMenu()" class="text-slate-400 hover:text-slate-200 transition">
+                                    القائمة الرئيسية
+                                </button>
+                            </div>
                         </div>
                     `;
                 } else {
-                    div.innerHTML = `<p class="text-xs">لا توجد باقات متوفرة حالياً لهذه اللعبة.</p>`;
+                    div.innerHTML = `
+                        <p class="text-xs text-slate-300">لا توجد باقات متوفرة حالياً لهذه المنصة.</p>
+                        <button onclick="botFetchPlatforms()" class="text-[11px] text-amber-400 font-bold hover:underline pt-1 block">← اختيار منصة أخرى</button>
+                    `;
                 }
                 messagesArea.appendChild(div);
                 messagesArea.scrollTop = messagesArea.scrollHeight;
@@ -2494,7 +2542,7 @@
             }
         }
 
-        // 3. عرض الوكلاء والمحافظ مع زر نسخ
+        // 3. عرض طرق الإيداع وأرقام المحافظ
         async function botFetchAgents() {
             appendUserAction("طرق الإيداع والمحافظ");
             const loading = appendLoading();
@@ -2514,30 +2562,43 @@
 
                 if (data.agents && data.agents.length > 0) {
                     let agentCards = data.agents.map(a => `
-                        <div class="p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                        <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5 hover:border-slate-700 transition">
                             <div class="flex justify-between items-center text-xs">
-                                <span class="font-bold text-slate-800 dark:text-slate-100">${a.payment_method}</span>
-                                <span class="text-[10px] text-slate-400">${a.agent_name}</span>
+                                <span class="font-bold text-slate-100 flex items-center gap-1.5">
+                                    <i class="ph-fill ph-wallet text-emerald-400 text-sm"></i>
+                                    <span>${a.payment_method}</span>
+                                </span>
+                                <span class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700">${a.agent_name}</span>
                             </div>
-                            <div class="flex items-center justify-between bg-white dark:bg-slate-900 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800">
-                                <code class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 select-all">${a.wallet_address}</code>
-                                <button onclick="navigator.clipboard.writeText('${a.wallet_address}'); this.innerText='تم النسخ ✓';" class="text-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 px-2 py-0.5 rounded font-bold hover:bg-emerald-100 transition">
-                                    نسخ
+                            <div class="flex items-center justify-between bg-slate-950 p-2 rounded-lg border border-slate-800/80">
+                                <code class="text-xs font-mono font-bold text-emerald-400 select-all tracking-wider">${a.wallet_address}</code>
+                                <button onclick="navigator.clipboard.writeText('${a.wallet_address}'); this.innerText='تم النسخ ✓'; setTimeout(()=>this.innerText='نسخ', 2000);" class="text-[10px] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded font-bold transition flex items-center gap-1">
+                                    <i class="ph-bold ph-copy"></i>
+                                    <span>نسخ</span>
                                 </button>
                             </div>
                         </div>
                     `).join('');
 
                     div.innerHTML = `
-                        <p class="font-bold text-xs mb-2 text-slate-800 dark:text-slate-100">المحافظ المعتمدة للإيداع المالي:</p>
-                        <div class="space-y-2 mb-3">${agentCards}</div>
-                        <p class="text-[11px] text-slate-500 mb-2">📌 بعد التحويل، توجه لقسم <b>شحن الرصيد</b> لرفع رقم إشعار الحوالة لتأكيد رصيدك.</p>
-                        <button onclick="renderMainMenu()" class="text-[11px] text-amber-600 font-bold hover:underline">
-                            ← العودة للقائمة الرئيسية
-                        </button>
+                        <div class="space-y-2.5">
+                            <p class="font-bold text-xs text-slate-100 flex items-center gap-1.5 pb-1 border-b border-slate-700/60">
+                                <i class="ph-fill ph-shield-check text-emerald-400"></i>
+                                <span>المحافظ المعتمدة لشحن الرصيد:</span>
+                            </p>
+                            <div class="space-y-2 mb-2 max-h-56 overflow-y-auto pr-1">${agentCards}</div>
+                            <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 leading-relaxed flex items-start gap-1.5">
+                                <i class="ph-fill ph-info text-sm flex-shrink-0 mt-0.5"></i>
+                                <span>بعد التحويل، توجه لقسم <b>شحن الرصيد</b> وأدخل رقم إشعار الحوالة ليتم شحن محفظتك تلقائياً.</span>
+                            </div>
+                            <button onclick="renderMainMenu()" class="text-[11px] text-amber-400 font-bold hover:underline pt-1 flex items-center gap-1">
+                                <i class="ph ph-arrow-u-up-right"></i>
+                                <span>العودة للقائمة الرئيسية</span>
+                            </button>
+                        </div>
                     `;
                 } else {
-                    div.innerHTML = `<p class="text-xs">بيانات المحافظ قيد التحديث حالياً.</p>`;
+                    div.innerHTML = `<p class="text-xs text-slate-300">بيانات المحافظ قيد التحديث.</p>`;
                 }
                 messagesArea.appendChild(div);
                 messagesArea.scrollTop = messagesArea.scrollHeight;
@@ -2546,7 +2607,7 @@
             }
         }
 
-        // 4. طلب رقم الطلب لتتبعه
+        // 4. طلب كود تتبع الطلب
         function botPromptTracking() {
             appendUserAction("تتبع حالة طلب");
             const messagesArea = document.getElementById('chat-messages');
@@ -2554,38 +2615,45 @@
             div.className = 'chat-bubble-msg msg-bot';
             div.innerHTML = `
                 <div class="space-y-2">
-                    <p class="text-xs font-bold">يرجى كتابة الرقم المرجعي للطلب في حقل الرسالة أدناه (مثال: <code>TX-123456</code>):</p>
-                    <p class="text-[11px] text-slate-400">يمكنك العثور على الرقم المرجعي في صفحة سجل المعاملات بحسابك.</p>
+                    <p class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                        <i class="ph-fill ph-magnifying-glass text-blue-400"></i>
+                        <span>أدخل الرقم المرجعي للطلب أدناه:</span>
+                    </p>
+                    <p class="text-[11px] text-slate-300">اكتب الرقم المرجعي (مثال: <code class="bg-slate-800 px-1 py-0.5 rounded text-amber-400 font-mono">TX-123456</code>) في خانة المراسلة ثم اضغط إرسال.</p>
                 </div>
             `;
             messagesArea.appendChild(div);
             messagesArea.scrollTop = messagesArea.scrollHeight;
             const input = document.getElementById('chat-input');
             if (input) {
-                input.placeholder = "اكتب رقم الطلب TX-... ثم اضغط إرسال";
+                input.placeholder = "اكتب رقم المعاملة TX-... واضغط إرسال";
                 input.focus();
             }
         }
 
-        // 5. التحدث المباشر مع الدعم الفني
+        // 5. التحدث مع خدمة العملاء
         function botDirectSupport() {
-            appendUserAction("التحدث مع الدعم الفني");
+            appendUserAction("التحدث مع الدعم المباشر");
             const messagesArea = document.getElementById('chat-messages');
             const div = document.createElement('div');
             div.className = 'chat-bubble-msg msg-bot';
             div.innerHTML = `
-                <div class="space-y-2.5">
-                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100">فريق خدمة العملاء المباشر جاهز لمساعدتك عبر واتساب:</p>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2 pb-1 border-b border-slate-700/60">
+                        <i class="ph-fill ph-headset text-purple-400 text-sm"></i>
+                        <p class="text-xs font-bold text-slate-100">فريق خدمة العملاء متواجد لمساعدتك:</p>
+                    </div>
+                    <p class="text-[11px] text-slate-300">للاستفسارات الخاصة أو معالجة الحالات الفردية، يسعدنا تواصلك المباشر:</p>
                     <div class="flex gap-2">
-                        <a href="https://wa.me/${OFFICIAL_WHATSAPP_NUMBER}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-center py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <a href="https://wa.me/${OFFICIAL_WHATSAPP_NUMBER}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-center py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40">
                             <i class="ph-fill ph-whatsapp-logo text-base"></i>
-                            <span>فتح محادثة واتساب</span>
+                            <span>محادثة واتساب فورية</span>
                         </a>
-                        <button onclick="if(typeof openSupportModal==='function') openSupportModal();" class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-200 transition">
+                        <button onclick="if(typeof openSupportModal==='function') openSupportModal();" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition">
                             قنوات أخرى
                         </button>
                     </div>
-                    <button onclick="renderMainMenu()" class="text-[11px] text-amber-600 font-bold hover:underline block pt-1">
+                    <button onclick="renderMainMenu()" class="text-[11px] text-amber-400 font-bold hover:underline block pt-1">
                         ← العودة للقائمة الرئيسية
                     </button>
                 </div>
@@ -2594,7 +2662,7 @@
             messagesArea.scrollTop = messagesArea.scrollHeight;
         }
 
-        // معالجة الإدخال اليدوي إذا كتب العميل في مربع النص
+        // معالجة الإدخال اليدوي عند كتابة رقم الطلب
         async function sendManualInput() {
             const input = document.getElementById('chat-input');
             const val = input.value.trim();
@@ -2602,7 +2670,7 @@
 
             appendUserAction(val);
             input.value = '';
-            input.placeholder = "اكتب رسالتك أو رقم الطلب...";
+            input.placeholder = "اكتب رقم الطلب أو استفسارك...";
 
             const loading = appendLoading();
 
@@ -2621,26 +2689,33 @@
 
                 if (data.order) {
                     const o = data.order;
-                    const statusText = o.status === 'completed' ? 'مكتمل بنجاح ✅' :
-                                       o.status === 'pending' ? 'قيد المراجعة ⏳' :
-                                       o.status === 'rejected' ? 'مرفوض ❌' : o.status;
+                    const statusText = o.status === 'completed' ? '<span class="text-emerald-400">مكتمل بنجاح ✓</span>' :
+                                       o.status === 'pending' ? '<span class="text-amber-400">قيد المعالجة ⏳</span>' :
+                                       o.status === 'rejected' ? '<span class="text-rose-400">مرفوض ✕</span>' : o.status;
 
                     div.innerHTML = `
-                        <div class="space-y-1.5 text-xs">
-                            <p class="font-bold text-slate-800 dark:text-slate-100 border-b pb-1">📦 تفاصيل الطلب (${o.transaction_ref}):</p>
-                            <p><b>الخدمة:</b> ${o.details || o.transaction_type}</p>
-                            <p><b>المبلغ:</b> $${o.amount}</p>
-                            <p><b>الحالة:</b> <span class="font-bold">${statusText}</span></p>
-                            <p class="text-[10px] text-slate-400 pt-1">🔒 الأكواد الرقمية محفوظة دائماً في صفحة سجل المعاملات بحسابك.</p>
-                            <button onclick="renderMainMenu()" class="text-[11px] text-amber-600 font-bold hover:underline pt-2 block">
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between items-center pb-1.5 border-b border-slate-700/60 font-bold text-slate-100">
+                                <span>📦 تفاصيل الطلب:</span>
+                                <span class="font-mono text-amber-400">${o.transaction_ref}</span>
+                            </div>
+                            <div class="space-y-1 bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+                                <p><span class="text-slate-400">الخدمة:</span> <b class="text-slate-100">${o.details || o.transaction_type}</b></p>
+                                <p><span class="text-slate-400">المبلغ:</span> <b class="text-slate-100">$${o.amount}</b></p>
+                                <p><span class="text-slate-400">الحالة:</span> <b>${statusText}</b></p>
+                            </div>
+                            <p class="text-[10px] text-slate-400">🔒 الأكواد الرقمية محفوظة دائماً في صفحة سجل المعاملات بحسابك.</p>
+                            <button onclick="renderMainMenu()" class="text-[11px] text-amber-400 font-bold hover:underline pt-1 block">
                                 ← العودة للقائمة الرئيسية
                             </button>
                         </div>
                     `;
                 } else if (data.isOrderSearch) {
                     div.innerHTML = `
-                        <p class="text-xs text-rose-500 font-bold">لم يتم العثور على طلب بهذا الرقم المرجعي. تأكد من الرقم في سجل معاملاتك.</p>
-                        <button onclick="renderMainMenu()" class="text-[11px] text-amber-600 font-bold hover:underline pt-1 block">العودة للقائمة</button>
+                        <div class="space-y-2">
+                            <p class="text-xs text-rose-400 font-bold">لم يتم العثور على طلب بهذا الرقم المرجعي. يرجى مراجعة صفحة المعاملات.</p>
+                            <button onclick="renderMainMenu()" class="text-[11px] text-amber-400 font-bold hover:underline block">العودة للقائمة</button>
+                        </div>
                     `;
                 } else {
                     renderMainMenu();
@@ -2653,7 +2728,6 @@
             }
         }
 
-        // دوال مساعدة للواجهة
         function appendUserAction(text) {
             const messagesArea = document.getElementById('chat-messages');
             const div = document.createElement('div');
@@ -2667,7 +2741,7 @@
             const messagesArea = document.getElementById('chat-messages');
             const div = document.createElement('div');
             div.className = 'chat-bubble-msg msg-bot';
-            div.innerHTML = `<i class="ph ph-dots-three animate-pulse text-lg"></i> جاري التحميل...`;
+            div.innerHTML = `<i class="ph ph-dots-three animate-pulse text-lg text-amber-400"></i> <span class="text-xs text-slate-400 mr-1.5">جاري التحميل...</span>`;
             messagesArea.appendChild(div);
             messagesArea.scrollTop = messagesArea.scrollHeight;
             return div;
