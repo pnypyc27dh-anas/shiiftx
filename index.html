@@ -118,9 +118,28 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
         .input-field:focus { border-color: var(--primary) !important; background: #ffffff !important; box-shadow: 0 0 0 4px rgba(0, 91, 163, 0.1) !important; outline: none; }
-        .btn-primary { background: linear-gradient(135deg, #005ba3 0%, #004a85 100%); box-shadow: 0 8px 20px -6px var(--primary-glow); transition: all 0.2s ease; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 25px -8px var(--primary-glow); }
-        .btn-primary:active { transform: scale(0.97); }
+       .btn-primary {
+            background: linear-gradient(135deg, #005ba3 0%, #004a85 100%);
+            box-shadow: 0 8px 20px -6px var(--primary-glow);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px -8px var(--primary-glow);
+        }
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+        .btn-primary:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none !important;
+        }
         .financial-amount { font-family: 'Plus Jakarta Sans', monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
         .card-number-style { font-family: 'Plus Jakarta Sans', monospace; font-variant-numeric: tabular-nums; letter-spacing: 0.15em; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -310,48 +329,38 @@
         html.dark .border-t,
         html.dark .divide-y > * { border-color: rgba(255, 255, 255, 0.08) !important; }
 
-        /* ==================== تنسيقات نافذة وبوت خدمة العملاء ==================== */
-        #chat-bubble {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #005ba3, #0284c7);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 25px -5px rgba(0, 91, 163, 0.5);
-            cursor: pointer;
-            z-index: 9999;
-            transition: all 0.25s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        #chat-bubble:hover {
-            transform: scale(1.08) translateY(-2px);
-            box-shadow: 0 15px 30px -5px rgba(0, 91, 163, 0.6);
-        }
-        #chat-bubble svg { width: 28px; height: 28px; fill: #ffffff; }
-
+       /* ==================== نافذة خدمة العملاء المتجاوبة ==================== */
         #chat-modal {
             display: none;
             position: fixed;
-            bottom: 92px;
-            right: 24px;
-            width: 380px;
-            max-width: calc(100vw - 32px);
-            height: 540px;
+            inset: auto 0 0 0;
+            width: 100%;
+            height: 85dvh;
+            max-height: 85dvh;
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-bottom: none;
+            border-radius: 28px 28px 0 0;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
             flex-direction: column;
             overflow: hidden;
-            z-index: 9999;
+            z-index: 100;
             direction: rtl;
-            transition: all 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
         }
+
+        @media (min-width: 640px) {
+            #chat-modal {
+                inset: auto 24px 24px auto;
+                width: 380px;
+                height: 560px;
+                max-height: calc(100vh - 48px);
+                border-radius: 24px;
+                border-bottom: 1px solid #e2e8f0;
+                box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.25);
+            }
+        }
+
         html.dark #chat-modal {
             background: #0f172a;
             border-color: #1e293b;
@@ -1163,12 +1172,6 @@
             </div>
         </div>
     </div>
-
-    <!-- زر المحادثة العائم -->
-    <div id="chat-bubble" onclick="toggleChat()" title="خدمة العملاء">
-        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
-    </div>
-
     <!-- نافذة بوت خدمة العملاء (المساعد الذكي) -->
     <div id="chat-modal">
         <div class="chat-header">
@@ -1198,6 +1201,7 @@
 
         var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let currentUser = null, syncInterval = null, currentWalletBalance = 0.00;
+let isSettingNewPassword = false;
         let rawCardNumber = "", lastFourDigits = "", isCardVisible = false;
         let selectedProductId = "", selectedItemName = "", selectedItemPrice = 0.00, inputPlayerId = "", inputPlayerIdConfirm = "";
         let tempRegisterData = {}, globalProductsRaw = [], currentFlowType = "register", globalTransactionsRaw = [];
@@ -1221,7 +1225,8 @@
                 toggleView('register-step-password', true);
                 document.getElementById('register-modal-title').innerText = "تعيين كلمة المرور الجديدة";
                 toggleView('register-modal', true);
-            } else if (event === 'SIGNED_IN') {
+           } else if (event === 'SIGNED_IN') {
+                if (isSettingNewPassword) return; // منع التحويل للرئيسية حتى ينتهي من كلمة المرور
                 if (currentFlowType !== 'reset') {
                     const { data: prof } = await supabase
                         .from('profiles')
@@ -1357,11 +1362,15 @@
             if(!syncInterval) syncInterval = setInterval(silentSyncData, 30000);
         }
 
-        async function handleLogout() { 
+       async function handleLogout() { 
+            toggleSideMenu(false); // يغلق القائمة الجانبية على الفور
             if(syncInterval) { clearInterval(syncInterval); syncInterval = null; } 
             await supabase.auth.signOut(); 
             currentUser = null; 
-            ['login-email', 'login-password'].forEach(id => document.getElementById(id).value = ""); 
+            ['login-email', 'login-password'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+            }); 
             closeAllModals(); 
             toggleView('dashboard-screen', false); 
             toggleView('login-screen', true); 
@@ -1461,9 +1470,43 @@
                 if (!fName || !lName || !phone) return showCustomAlert("يرجى ملء كافة الخانات."); 
                 
                 tempRegisterData = { firstName: fName, lastName: lName, email: email, phone: phone }; 
+                
+                btn.disabled = true;
+                btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> إرسال رمز التحقق...`;
+
+                // ننشئ كلمة مرور مؤقتة في الخلفية لتمرير عملية الـ signUp في Supabase وإرسال كود الـ 6 أرقام
+                const tempPassword = "Temp#" + Math.random().toString(36).slice(-8) + "Aa1!";
+
+                const { data: signUpData, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: tempPassword,
+                    options: { 
+                        data: { 
+                            first_name: fName, 
+                            last_name: lName, 
+                            phone: phone 
+                        } 
+                    }
+                });
+
+                btn.disabled = false;
+                btn.innerHTML = `<span id="reg-submit-btn-text">المتابعة</span> <i class="ph ph-arrow-left"></i>`;
+
+                if (error) return showCustomAlert(error.message);
+
+                if (signUpData?.user && (!signUpData.user.identities || signUpData.user.identities.length === 0)) {
+                    toggleView('register-modal', false);
+                    document.getElementById('login-email').value = email;
+                    return showCustomAlert("هذا البريد مسجل مسبقاً. يرجى تسجيل الدخول.");
+                }
+
+                isSettingNewPassword = true; // تفعيل الحماية
+                showCustomAlert("تم إرسال رمز التحقق إلى بريدك الإلكتروني.", false);
                 toggleView('register-step-form', false); 
-                toggleView('register-step-password', true); 
-                document.getElementById('register-modal-title').innerText = "تعيين كلمة المرور";
+                toggleView('register-step-otp', true); // تظهر نافذة الرمز أولاً
+                document.getElementById('register-modal-title').innerText = "تأكيد الرمز";
+                startResendCooldown();
+
             } else { 
                 tempRegisterData = { email: email }; 
                 btn.disabled = true;
@@ -1480,8 +1523,7 @@
                 startResendCooldown();
             } 
         }
-
-        async function verifyRegistrationOtp() { 
+async function verifyRegistrationOtp() { 
             const code = document.getElementById('reg-otp-code').value.trim();
             const btn = document.getElementById('otp-verify-btn'); 
             
@@ -1490,6 +1532,7 @@
             btn.disabled = true; 
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> جاري التحقق...`; 
             
+            // التحقق من صحة كود التحقق لدى Supabase
             const { data, error } = await supabase.auth.verifyOtp({
                 email: tempRegisterData.email, 
                 token: code, 
@@ -1503,16 +1546,31 @@
                 return showCustomAlert("الرمز غير صحيح أو منتهي الصلاحية."); 
             } 
             
-            if (currentFlowType === "register") {
-                showCustomAlert("تم تفعيل حسابك بنجاح! يمكنك الآن تسجيل الدخول.", false); 
-                toggleView('register-modal', false);
-                document.getElementById('login-email').value = tempRegisterData.email;
-            } else {
-                showCustomAlert("تم تأكيد هويتك، أدخل كلمة المرور الجديدة.", false);
-                toggleView('register-step-otp', false);
-                toggleView('register-step-password', true);
-                document.getElementById('register-modal-title').innerText = "تعيين كلمة المرور الجديدة";
+            // 1. إشعار بنجاح التحقق
+            showCustomAlert("تم تأكيد الرمز بنجاح! عيّن كلمة المرور الخاصة بك الآن.", false);
+            
+            // 2. إخفاء واجهة رمز التحقق وتصفير حقول كلمة المرور
+            toggleView('register-step-otp', false);
+            document.getElementById('reg-new-pin').value = "";
+            document.getElementById('reg-confirm-pin').value = "";
+            document.getElementById('register-modal-title').innerText = "تعيين كلمة المرور";
+            
+            // 3. إظهار واجهة تعيين كلمة المرور
+            toggleView('register-step-password', true);
+
+            // 4. إعادة تشغيل حركة الانبثاق (Slide-Up) بصرياً
+            const modalBox = document.querySelector('#register-modal > div');
+            if (modalBox) {
+                modalBox.classList.remove('slide-up-modal');
+                void modalBox.offsetWidth; // إعادة تشغيل تأثير الحركة
+                modalBox.classList.add('slide-up-modal');
             }
+
+            // 5. وضع مؤشر الكتابة تلقائياً داخل خانة كلمة المرور
+            setTimeout(() => {
+                const passInput = document.getElementById('reg-new-pin');
+                if (passInput) passInput.focus();
+            }, 100);
         }
 
         async function executeFinalAccountCreationOrReset() { 
@@ -1526,53 +1584,28 @@
             btn.disabled = true; 
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> جاري الحفظ...`; 
             
-            if (currentFlowType === "register") {
-                const { data: signUpData, error } = await supabase.auth.signUp({
-                    email: tempRegisterData.email, 
-                    password: password,
-                    options: { 
-                        data: { 
-                            first_name: tempRegisterData.firstName, 
-                            last_name: tempRegisterData.lastName, 
-                            phone: tempRegisterData.phone 
-                        } 
-                    }
-                }); 
-                
-                btn.disabled = false; 
-                btn.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> تأكيد وحفظ`;
+            // تحديث كلمة المرور للمستخدم المسجل دخوله فعلياً عبر التحقق بالرمز
+            const { error } = await supabase.auth.updateUser({ password: password }); 
+            
+            btn.disabled = false; 
+            btn.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> تأكيد وحفظ`;
 
-                if (error) return showCustomAlert(error.message);
+            if (error) return showCustomAlert("فشل تحديث كلمة المرور: " + error.message); 
+            
+            // إلغاء وضع حماية تسجيل الدخول
+            isSettingNewPassword = false;
 
-                if (signUpData?.user && (!signUpData.user.identities || signUpData.user.identities.length === 0)) {
-                    toggleView('register-modal', false);
-                    document.getElementById('login-email').value = tempRegisterData.email;
-                    return showCustomAlert("هذا البريد مسجل مسبقاً. سجل دخولك بكلمة مرورك لتفعيل محفظتك.", false);
-                }
-                
-                showCustomAlert("تم إرسال رمز التحقق إلى بريدك للتفعيل.", false);
-                toggleView('register-step-password', false); 
-                toggleView('register-step-otp', true); 
-                document.getElementById('register-modal-title').innerText = "تفعيل الحساب";
-                startResendCooldown();
-            } else { 
-                const { error } = await supabase.auth.updateUser({ password: password }); 
-                
-                btn.disabled = false; 
-                btn.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> تأكيد وحفظ`;
-
-                if (error) return showCustomAlert("فشل تحديث كلمة المرور: " + error.message);
-                
-                showCustomAlert("تم تحديث كلمة المرور بنجاح! يرجى تسجيل الدخول بكلمتك الجديدة.", false);
-                await supabase.auth.signOut();
-                currentUser = null;
-                toggleView('register-modal', false);
-                document.getElementById('login-email').value = tempRegisterData.email;
-                document.getElementById('login-password').value = "";
-                switchTab('home');
-                toggleView('dashboard-screen', false);
-                toggleView('login-screen', true);
-            }
+            showCustomAlert("تم إنشاء وتأكيد الحساب بنجاح! سجّل دخولك بكلمتك الجديدة.", false);
+            
+            // تسجيل خروج نظيف لإعادة الدخول بكلمة المرور الجديدة
+            await supabase.auth.signOut();
+            currentUser = null;
+            toggleView('register-modal', false);
+            document.getElementById('login-email').value = tempRegisterData.email;
+            document.getElementById('login-password').value = "";
+            switchTab('home');
+            toggleView('dashboard-screen', false);
+            toggleView('login-screen', true);
         }
 
         async function resendOtpCode() {
@@ -1586,14 +1619,10 @@
 
             let error = null;
 
-            if (currentFlowType === "register") {
-                const res = await supabase.auth.resend({
-                    type: 'signup',
+           if (currentFlowType === "register") {
+                const res = await supabase.auth.signInWithOtp({
                     email: tempRegisterData.email
                 });
-                error = res.error;
-            } else {
-                const res = await supabase.auth.resetPasswordForEmail(tempRegisterData.email);
                 error = res.error;
             }
 
