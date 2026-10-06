@@ -481,6 +481,70 @@
             transition: all 0.2s;
         }
         .chat-input-area button:hover { background: #004a85; }
+      /* ==================== حركات تفاعلية حديثة للأزرار ==================== */
+        
+        /* 1. منحنى مرن وسريع للضغط والتحويم (Tactile Spring) */
+        .btn-spring {
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        box-shadow 0.25s ease, 
+                        background-color 0.2s ease,
+                        border-color 0.2s ease !important;
+        }
+        .btn-spring:active {
+            transform: scale(0.93) !important;
+        }
+
+        /* 2. تأثير الوميض الضوئي الخفيف لأزرار الدفع والتأكيد الرئيسية (Luxury Sheen) */
+        .btn-glow-sheen {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-glow-sheen::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -150%;
+            width: 50%;
+            height: 200%;
+            background: linear-gradient(
+                90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.25), 
+                transparent
+            );
+            transform: rotate(25deg);
+            transition: none;
+        }
+        .btn-glow-sheen:hover::after {
+            left: 200%;
+            transition: all 0.75s ease-in-out;
+        }
+
+        /* 3. زر الإغلاق العصري (توهج أحمر ناعم ودوران لطيف عند التحويم) */
+        .modal-btn-close {
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+        .modal-btn-close:hover {
+            background-color: rgba(239, 68, 68, 0.12) !important;
+            color: #ef4444 !important;
+        }
+        .modal-btn-close:hover i {
+            transform: rotate(90deg);
+        }
+        .modal-btn-close i {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* 4. زر الرجوع العصري (ارتداد السهم جهة اليمين عند التحويم) */
+        .modal-btn-back {
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+        .modal-btn-back:hover i {
+            transform: translateX(4px);
+        }
+        .modal-btn-back i {
+            transition: transform 0.25s ease;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased selection:bg-blue-200 selection:text-blue-900">
@@ -883,14 +947,14 @@
     <!-- نافذة سجل المعاملات الشامل -->
     <div id="all-orders-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
         <div class="bg-white w-full max-w-2xl rounded-t-[32px] sm:rounded-[28px] max-h-[85vh] flex flex-col p-6 shadow-2xl relative slide-up-modal text-right">
-            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-3">
+           <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-3">
              <!-- العنوان والأيقونة (جهة اليمين) -->
              <div class="flex items-center gap-2.5">
                  <div class="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"><i class="ph-fill ph-receipt text-xl"></i></div>
                  <h4 class="text-base font-black text-slate-800 dark:text-slate-100">سجل المعاملات والطلبات</h4>
              </div>
-             <!-- زر الإغلاق الموحد (جهة اليسار) -->
-             <button onclick="toggleView('all-orders-modal', false)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+             <!-- زر الإغلاق التفاعلي (جهة اليسار) -->
+             <button onclick="toggleView('all-orders-modal', false)" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm" title="إغلاق">
                  <i class="ph ph-x font-bold text-base"></i>
              </button>
          </div>
@@ -907,14 +971,14 @@
     <!-- نافذة دليل الوكلاء المعتمدين -->
     <div id="agents-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
         <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[28px] max-h-[85vh] flex flex-col p-6 shadow-2xl relative slide-up-modal text-right">
-            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+           <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
              <!-- العنوان والأيقونة (جهة اليمين) -->
              <div class="flex items-center gap-2.5">
                  <div class="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"><i class="ph-fill ph-users-three text-xl"></i></div>
                  <h4 class="text-base font-black text-slate-800 dark:text-slate-100">شبكة الوكلاء المعتمدين</h4>
              </div>
-             <!-- زر الإغلاق الموحد (جهة اليسار) -->
-             <button onclick="toggleView('agents-modal', false)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+             <!-- زر الإغلاق التفاعلي (جهة اليسار) -->
+             <button onclick="toggleView('agents-modal', false)" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm" title="إغلاق">
                  <i class="ph ph-x font-bold text-base"></i>
              </button>
          </div>
@@ -931,8 +995,8 @@
                  <div class="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400"><i class="ph-fill ph-headset text-xl"></i></div>
                  <h4 class="text-base font-black text-slate-800 dark:text-slate-100">مركز الدعم والمساعدة المباشر</h4>
              </div>
-             <!-- زر الإغلاق الموحد (جهة اليسار) -->
-             <button onclick="toggleView('support-modal', false)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+             <!-- زر الإغلاق التفاعلي (جهة اليسار) -->
+             <button onclick="toggleView('support-modal', false)" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm" title="إغلاق">
                  <i class="ph ph-x font-bold text-base"></i>
              </button>
          </div>
@@ -965,14 +1029,14 @@
     <!-- نافذة المعلومات الموحدة -->
     <div id="info-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
         <div class="bg-white w-full max-w-lg rounded-t-[32px] sm:rounded-[28px] max-h-[80vh] flex flex-col p-6 shadow-2xl relative slide-up-modal text-right">
-            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+           <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
              <!-- العنوان والأيقونة (جهة اليمين) -->
              <div class="flex items-center gap-2.5">
                  <div id="info-modal-icon" class="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-[#005ba3] dark:text-blue-400"><i class="ph ph-info text-xl"></i></div>
                  <h4 id="info-modal-title" class="text-base font-black text-slate-800 dark:text-slate-100">...</h4>
              </div>
-             <!-- زر الإغلاق الموحد (جهة اليسار) -->
-             <button onclick="toggleView('info-modal', false)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+             <!-- زر الإغلاق التفاعلي (جهة اليسار) -->
+             <button onclick="toggleView('info-modal', false)" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm" title="إغلاق">
                  <i class="ph ph-x font-bold text-base"></i>
              </button>
          </div>
@@ -987,15 +1051,15 @@
     <div id="plans-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[90]">
         <div class="bg-white w-full max-w-2xl rounded-t-[32px] sm:rounded-[28px] max-h-[85vh] sm:max-h-[75vh] flex flex-col p-6 shadow-2xl relative slide-up-modal">
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
-             <!-- زر الرجوع (جهة اليمين) -->
-             <button onclick="toggleView('plans-modal', false)" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition active:scale-95" title="رجوع">
+             <!-- زر الرجوع التفاعلي (جهة اليمين) -->
+             <button onclick="toggleView('plans-modal', false)" class="modal-btn-back btn-spring flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-sm" title="رجوع">
                  <i class="ph ph-caret-right font-bold text-sm"></i>
                  <span>رجوع</span>
              </button>
              <!-- العنوان (المنتصف) -->
              <h4 id="plans-modal-title" class="text-sm md:text-base font-black text-slate-800 dark:text-slate-100 text-center flex-grow">الباقات المتوفرة</h4>
-             <!-- زر الإغلاق (جهة اليسار) -->
-             <button onclick="closeAllModals()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+             <!-- زر الإغلاق التفاعلي (جهة اليسار) -->
+             <button onclick="closeAllModals()" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm" title="إغلاق">
                  <i class="ph ph-x font-bold text-base"></i>
              </button>
          </div>
@@ -1007,14 +1071,14 @@
         <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 space-y-5 shadow-2xl relative text-right slide-up-modal">
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
              <!-- زر الرجوع للباقات (جهة اليمين) -->
-             <button onclick="toggleView('account-inputs-modal', false); toggleView('plans-modal', true);" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition active:scale-95" title="رجوع">
+             <button onclick="toggleView('account-inputs-modal', false); toggleView('plans-modal', true);" class="modal-btn-back btn-spring flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-sm" title="رجوع">
                  <i class="ph ph-caret-right font-bold text-sm"></i>
                  <span>رجوع</span>
              </button>
              <!-- العنوان (المنتصف) -->
              <h3 class="text-sm md:text-base font-black text-slate-800 dark:text-slate-100 text-center flex-grow">معلومات الشحن</h3>
              <!-- زر الإغلاق (جهة اليسار) -->
-             <button onclick="closeAllModals()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+             <button onclick="closeAllModals()" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm" title="إغلاق">
                  <i class="ph ph-x font-bold text-base"></i>
              </button>
          </div>
@@ -1046,14 +1110,14 @@
         <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative text-right space-y-5 slide-up-modal">
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
              <!-- زر الرجوع والتعديل (جهة اليمين) -->
-             <button onclick="toggleView('purchase-modal', false); toggleView('account-inputs-modal', true)" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition active:scale-95" title="رجوع للتعديل">
+             <button onclick="toggleView('purchase-modal', false); toggleView('account-inputs-modal', true)" class="modal-btn-back btn-spring flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-sm" title="رجوع للتعديل">
                  <i class="ph ph-caret-right font-bold text-sm"></i>
                  <span>تعديل</span>
              </button>
              <!-- العنوان (المنتصف) -->
              <h3 class="text-sm md:text-base font-black text-slate-800 dark:text-slate-100 text-center flex-grow">تأكيد الفاتورة</h3>
              <!-- زر الإغلاق (جهة اليسار) -->
-             <button onclick="closeAllModals()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+             <button onclick="closeAllModals()" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm" title="إغلاق">
                  <i class="ph ph-x font-bold text-base"></i>
              </button>
          </div>
@@ -1119,11 +1183,11 @@
     <!-- نافذة التسجيل واستعادة كلمة المرور -->
     <div id="register-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[90]">
         <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative text-right slide-up-modal">
-            <div class="flex justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-5 items-center">
+          <div class="flex justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-5 items-center">
              <!-- العنوان (جهة اليمين) -->
              <h3 id="register-modal-title" class="font-black text-slate-800 dark:text-slate-100 text-base md:text-lg">فتح حساب جديد</h3>
-             <!-- زر الإغلاق الموحد (جهة اليسار) -->
-             <button onclick="toggleView('register-modal', false)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+             <!-- زر الإغلاق التفاعلي (جهة اليسار) -->
+             <button onclick="toggleView('register-modal', false)" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm" title="إغلاق">
                  <i class="ph ph-x font-bold text-base"></i>
              </button>
          </div>
