@@ -883,13 +883,17 @@
     <!-- نافذة سجل المعاملات الشامل -->
     <div id="all-orders-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
         <div class="bg-white w-full max-w-2xl rounded-t-[32px] sm:rounded-[28px] max-h-[85vh] flex flex-col p-6 shadow-2xl relative slide-up-modal text-right">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-3">
-                <div class="flex items-center gap-2">
-                    <div class="p-2 rounded-xl bg-blue-50 text-blue-600"><i class="ph-fill ph-receipt text-xl"></i></div>
-                    <h4 class="text-base font-black text-slate-800">سجل المعاملات والطلبات</h4>
-                </div>
-                <button onclick="toggleView('all-orders-modal', false)" class="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full"><i class="ph ph-x font-bold"></i></button>
-            </div>
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-3">
+             <!-- العنوان والأيقونة (جهة اليمين) -->
+             <div class="flex items-center gap-2.5">
+                 <div class="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"><i class="ph-fill ph-receipt text-xl"></i></div>
+                 <h4 class="text-base font-black text-slate-800 dark:text-slate-100">سجل المعاملات والطلبات</h4>
+             </div>
+             <!-- زر الإغلاق الموحد (جهة اليسار) -->
+             <button onclick="toggleView('all-orders-modal', false)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+                 <i class="ph ph-x font-bold text-base"></i>
+             </button>
+         </div>
             <div class="flex gap-2 pb-3 overflow-x-auto text-[11px] font-bold">
                 <button onclick="filterOrdersHistory('ALL')" class="order-filter-btn active bg-slate-900 text-white px-3 py-1.5 rounded-xl">الكل</button>
                 <button onclick="filterOrdersHistory('CODE')" class="order-filter-btn bg-slate-100 text-slate-600 px-3 py-1.5 rounded-xl">البطاقات الرقمية</button>
@@ -903,13 +907,17 @@
     <!-- نافذة دليل الوكلاء المعتمدين -->
     <div id="agents-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
         <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[28px] max-h-[85vh] flex flex-col p-6 shadow-2xl relative slide-up-modal text-right">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
-                <div class="flex items-center gap-2">
-                    <div class="p-2 rounded-xl bg-blue-50 text-blue-600"><i class="ph-fill ph-users-three text-xl"></i></div>
-                    <h4 class="text-base font-black text-slate-800">شبكة الوكلاء المعتمدين</h4>
-                </div>
-                <button onclick="toggleView('agents-modal', false)" class="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full"><i class="ph ph-x font-bold"></i></button>
-            </div>
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+             <!-- العنوان والأيقونة (جهة اليمين) -->
+             <div class="flex items-center gap-2.5">
+                 <div class="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"><i class="ph-fill ph-users-three text-xl"></i></div>
+                 <h4 class="text-base font-black text-slate-800 dark:text-slate-100">شبكة الوكلاء المعتمدين</h4>
+             </div>
+             <!-- زر الإغلاق الموحد (جهة اليسار) -->
+             <button onclick="toggleView('agents-modal', false)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+                 <i class="ph ph-x font-bold text-base"></i>
+             </button>
+         </div>
             <div id="agents-list-container" class="overflow-y-auto flex-grow space-y-3 pr-1 pb-2"></div>
         </div>
     </div>
@@ -917,13 +925,17 @@
     <!-- نافذة الدعم الفني المباشر (تفتح تلقائياً عند التحويل أو الحاجة) -->
     <div id="support-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
         <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative slide-up-modal text-right space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
-                <div class="flex items-center gap-2">
-                    <div class="p-2 rounded-xl bg-indigo-50 text-indigo-600"><i class="ph-fill ph-headset text-xl"></i></div>
-                    <h4 class="text-base font-black text-slate-800">مركز الدعم والمساعدة المباشر</h4>
-                </div>
-                <button onclick="toggleView('support-modal', false)" class="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full"><i class="ph ph-x font-bold"></i></button>
-            </div>
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+             <!-- العنوان والأيقونة (جهة اليمين) -->
+             <div class="flex items-center gap-2.5">
+                 <div class="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400"><i class="ph-fill ph-headset text-xl"></i></div>
+                 <h4 class="text-base font-black text-slate-800 dark:text-slate-100">مركز الدعم والمساعدة المباشر</h4>
+             </div>
+             <!-- زر الإغلاق الموحد (جهة اليسار) -->
+             <button onclick="toggleView('support-modal', false)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+                 <i class="ph ph-x font-bold text-base"></i>
+             </button>
+         </div>
             <p class="text-xs text-slate-500 font-medium leading-relaxed">فريق خدمة عملاء SHIIFTX متاح على مدار الساعة للإجابة على استفساراتكم ومتابعة أي مشكلة أو طلب تعليق في عمليات الشحن.</p>
             <div class="space-y-2.5 pt-1">
                 <a href="https://wa.me/963900000000" id="official-whatsapp-link" target="_blank" class="flex items-center justify-between p-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-2xl transition border border-emerald-100">
@@ -953,13 +965,17 @@
     <!-- نافذة المعلومات الموحدة -->
     <div id="info-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
         <div class="bg-white w-full max-w-lg rounded-t-[32px] sm:rounded-[28px] max-h-[80vh] flex flex-col p-6 shadow-2xl relative slide-up-modal text-right">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
-                <div class="flex items-center gap-2">
-                    <div id="info-modal-icon" class="p-2 rounded-xl bg-blue-50 text-[#005ba3]"><i class="ph ph-info text-xl"></i></div>
-                    <h4 id="info-modal-title" class="text-base font-black text-slate-800">...</h4>
-                </div>
-                <button onclick="toggleView('info-modal', false)" class="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full"><i class="ph ph-x font-bold"></i></button>
-            </div>
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+             <!-- العنوان والأيقونة (جهة اليمين) -->
+             <div class="flex items-center gap-2.5">
+                 <div id="info-modal-icon" class="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-[#005ba3] dark:text-blue-400"><i class="ph ph-info text-xl"></i></div>
+                 <h4 id="info-modal-title" class="text-base font-black text-slate-800 dark:text-slate-100">...</h4>
+             </div>
+             <!-- زر الإغلاق الموحد (جهة اليسار) -->
+             <button onclick="toggleView('info-modal', false)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+                 <i class="ph ph-x font-bold text-base"></i>
+             </button>
+         </div>
             <div id="info-modal-content" class="overflow-y-auto flex-grow text-xs leading-relaxed text-slate-600 space-y-4 pr-1 pl-1"></div>
             <div class="border-t border-slate-100 pt-4 mt-4">
                 <button onclick="toggleView('info-modal', false)" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl text-xs transition">إغلاق</button>
@@ -970,22 +986,38 @@
     <!-- النوافذ الأساسية للمتجر -->
     <div id="plans-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[90]">
         <div class="bg-white w-full max-w-2xl rounded-t-[32px] sm:rounded-[28px] max-h-[85vh] sm:max-h-[75vh] flex flex-col p-6 shadow-2xl relative slide-up-modal">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
-                <button onclick="toggleView('plans-modal', false)" class="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 hover:bg-blue-100"><i class="ph ph-caret-right"></i> رجوع</button>
-                <h4 id="plans-modal-title" class="text-base font-black text-slate-800 text-center flex-grow">الباقات المتوفرة</h4>
-                <button onclick="closeAllModals()" class="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full"><i class="ph ph-x font-bold"></i></button>
-            </div>
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+             <!-- زر الرجوع (جهة اليمين) -->
+             <button onclick="toggleView('plans-modal', false)" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition active:scale-95" title="رجوع">
+                 <i class="ph ph-caret-right font-bold text-sm"></i>
+                 <span>رجوع</span>
+             </button>
+             <!-- العنوان (المنتصف) -->
+             <h4 id="plans-modal-title" class="text-sm md:text-base font-black text-slate-800 dark:text-slate-100 text-center flex-grow">الباقات المتوفرة</h4>
+             <!-- زر الإغلاق (جهة اليسار) -->
+             <button onclick="closeAllModals()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+                 <i class="ph ph-x font-bold text-base"></i>
+             </button>
+         </div>
             <div id="plans-container" class="overflow-y-auto flex-grow space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-4 text-right pr-1 pb-4"></div>
         </div>
     </div>
 
     <div id="account-inputs-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[90]">
         <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 space-y-5 shadow-2xl relative text-right slide-up-modal">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
-                <button onclick="toggleView('account-inputs-modal', false)" class="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 hover:bg-blue-100"><i class="ph ph-caret-right"></i> رجوع</button>
-                <h3 class="text-base font-black text-slate-800 text-center flex-grow">معلومات الشحن</h3>
-                <button onclick="closeAllModals()" class="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full"><i class="ph ph-x font-bold"></i></button>
-            </div>
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+             <!-- زر الرجوع للباقات (جهة اليمين) -->
+             <button onclick="toggleView('account-inputs-modal', false); toggleView('plans-modal', true);" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition active:scale-95" title="رجوع">
+                 <i class="ph ph-caret-right font-bold text-sm"></i>
+                 <span>رجوع</span>
+             </button>
+             <!-- العنوان (المنتصف) -->
+             <h3 class="text-sm md:text-base font-black text-slate-800 dark:text-slate-100 text-center flex-grow">معلومات الشحن</h3>
+             <!-- زر الإغلاق (جهة اليسار) -->
+             <button onclick="closeAllModals()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+                 <i class="ph ph-x font-bold text-base"></i>
+             </button>
+         </div>
             <div class="space-y-4">
                 <div id="id-fields-container">
                     <div class="mb-4">
@@ -1012,11 +1044,19 @@
 
     <div id="purchase-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[90]">
         <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative text-right space-y-5 slide-up-modal">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
-                <button onclick="toggleView('purchase-modal', false); toggleView('account-inputs-modal', true)" class="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 hover:bg-blue-100"><i class="ph ph-caret-right"></i> تعديل</button>
-                <h3 class="text-base font-black text-slate-800 text-center flex-grow">تأكيد الفاتورة</h3>
-                <button onclick="closeAllModals()" class="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full"><i class="ph ph-x font-bold"></i></button>
-            </div>
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+             <!-- زر الرجوع والتعديل (جهة اليمين) -->
+             <button onclick="toggleView('purchase-modal', false); toggleView('account-inputs-modal', true)" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition active:scale-95" title="رجوع للتعديل">
+                 <i class="ph ph-caret-right font-bold text-sm"></i>
+                 <span>تعديل</span>
+             </button>
+             <!-- العنوان (المنتصف) -->
+             <h3 class="text-sm md:text-base font-black text-slate-800 dark:text-slate-100 text-center flex-grow">تأكيد الفاتورة</h3>
+             <!-- زر الإغلاق (جهة اليسار) -->
+             <button onclick="closeAllModals()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+                 <i class="ph ph-x font-bold text-base"></i>
+             </button>
+         </div>
             <div class="bg-slate-50 rounded-[20px] border border-slate-100 p-5 space-y-3 text-xs">
                 <div class="flex justify-between border-b border-slate-200/60 pb-3 items-center">
                     <span class="text-slate-500 font-medium">المنتج المطلوب:</span>
@@ -1079,10 +1119,14 @@
     <!-- نافذة التسجيل واستعادة كلمة المرور -->
     <div id="register-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[90]">
         <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative text-right slide-up-modal">
-            <div class="flex justify-between pb-4 border-b border-slate-100 mb-5 items-center">
-                <h3 id="register-modal-title" class="font-black text-slate-800 text-lg">فتح حساب جديد</h3>
-                <button onclick="toggleView('register-modal', false)" class="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full"><i class="ph ph-x font-bold"></i></button>
-            </div>
+            <div class="flex justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-5 items-center">
+             <!-- العنوان (جهة اليمين) -->
+             <h3 id="register-modal-title" class="font-black text-slate-800 dark:text-slate-100 text-base md:text-lg">فتح حساب جديد</h3>
+             <!-- زر الإغلاق الموحد (جهة اليسار) -->
+             <button onclick="toggleView('register-modal', false)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-95" title="إغلاق">
+                 <i class="ph ph-x font-bold text-base"></i>
+             </button>
+         </div>
 
             <div id="register-step-form" class="space-y-4">
                 <div id="reg-extra-fields" class="space-y-4">
@@ -1971,24 +2015,25 @@ async function verifyRegistrationOtp() {
                 container.appendChild(createTransactionCardElement(tx));
             });
         }
-
-        function createTransactionCardElement(tx) {
+function createTransactionCardElement(tx) {
             const card = document.createElement('div');
-            card.className = "p-4 bg-white border border-slate-100 rounded-2xl text-right mb-2.5 shadow-sm";
+            card.className = "p-4 bg-white dark:bg-slate-900/70 border border-slate-100 dark:border-slate-800 rounded-2xl text-right mb-2.5 shadow-sm transition hover:border-blue-200 dark:hover:border-slate-700";
             
-            const statusCfg = TX_STATUS_CONFIG[tx.status] || { text: tx.status, badge: 'bg-slate-50 text-slate-600 border-slate-100' };
+            const statusCfg = TX_STATUS_CONFIG[tx.status] || { text: tx.status, badge: 'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700' };
             const displayType = TX_TYPE_LABELS[tx.type] || tx.type;
 
             const cleanCode = tx.serial_code ? String(tx.serial_code).trim() : '';
             const hasCleanCode = cleanCode !== '' && !['null', 'undefined', 'none', 'n/a', '0', '-'].includes(cleanCode.toLowerCase());
+            const txRefCode = tx.tx_id || (tx.raw && tx.raw.transaction_ref) || '---';
 
             let extraContentHtml = '';
 
+            // صندوق الكود بألوان هادئة ومتناسقة تماماً مع الوضعين الليلي والنهاري
             if (tx.delivery_type === 'CODE' && hasCleanCode) {
                 extraContentHtml = `
-                    <div class="mt-2.5 p-2 px-3 bg-slate-900 text-emerald-400 rounded-xl font-mono text-[11px] flex items-center justify-between border border-slate-800" dir="ltr">
+                    <div class="mt-3 p-2.5 px-3 bg-slate-50 dark:bg-slate-800/80 text-emerald-700 dark:text-emerald-400 rounded-xl font-mono text-[11px] flex items-center justify-between border border-slate-200/80 dark:border-slate-700" dir="ltr">
                         <span class="tracking-wider font-bold select-all">${cleanCode}</span>
-                        <button onclick="copyToClipboard('${cleanCode}')" class="text-slate-400 hover:text-white p-1 transition" title="نسخ الكود">
+                        <button onclick="copyToClipboard('${cleanCode}')" class="text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-300 p-1 transition" title="نسخ الكود">
                             <i class="ph-fill ph-copy text-sm"></i>
                         </button>
                     </div>
@@ -1997,38 +2042,39 @@ async function verifyRegistrationOtp() {
                 const displayId = tx.player_id || (tx.details && tx.details.match(/ID:\s*([^\s)]+)/i) ? tx.details.match(/ID:\s*([^\s)]+)/i)[1] : '');
                 if (displayId) {
                     extraContentHtml = `
-                        <div class="mt-2.5 flex items-center gap-2 text-[10px] text-slate-500 bg-slate-50 border border-slate-100 rounded-xl px-3 py-1.5 w-fit">
+                        <div class="mt-3 flex items-center gap-2 text-[10px] text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-1.5 w-fit">
                             <i class="ph-fill ph-user-circle text-blue-500 text-sm"></i>
                             <span class="font-bold">معرف الشحن:</span>
-                            <span class="font-mono text-slate-800 font-bold" dir="ltr">${displayId}</span>
+                            <span class="font-mono text-slate-800 dark:text-slate-200 font-bold" dir="ltr">${displayId}</span>
                         </div>
                     `;
                 }
-            } else if (!tx.delivery_type) {
-                const isLegacyDirect = (tx.type && (tx.type.includes('مباشر') || tx.type.includes('Direct'))) ||
-                                       (tx.details && /id|معرف|لاعب/i.test(tx.details));
-
-                if (!isLegacyDirect && hasCleanCode) {
-                    extraContentHtml = `
-                        <div class="mt-2.5 p-2 px-3 bg-slate-900 text-emerald-400 rounded-xl font-mono text-[11px] flex items-center justify-between border border-slate-800" dir="ltr">
-                            <span class="tracking-wider font-bold select-all">${cleanCode}</span>
-                            <button onclick="copyToClipboard('${cleanCode}')" class="text-slate-400 hover:text-white p-1 transition" title="نسخ الكود">
-                                <i class="ph-fill ph-copy text-sm"></i>
-                            </button>
-                        </div>
-                    `;
-                }
+            } else if (!tx.delivery_type && hasCleanCode) {
+                extraContentHtml = `
+                    <div class="mt-3 p-2.5 px-3 bg-slate-50 dark:bg-slate-800/80 text-emerald-700 dark:text-emerald-400 rounded-xl font-mono text-[11px] flex items-center justify-between border border-slate-200/80 dark:border-slate-700" dir="ltr">
+                        <span class="tracking-wider font-bold select-all">${cleanCode}</span>
+                        <button onclick="copyToClipboard('${cleanCode}')" class="text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-300 p-1 transition" title="نسخ الكود">
+                            <i class="ph-fill ph-copy text-sm"></i>
+                        </button>
+                    </div>
+                `;
             }
 
+            // إظهار رمز العملية (TX-ID) مع إمكانية نسخه بضغطة واحدة
             card.innerHTML = `
-                <div class="flex justify-between items-start">
+                <div class="flex justify-between items-start gap-2">
                     <div>
-                        <p class="text-xs font-black text-slate-800">${displayType}</p>
-                        <p class="text-[10px] text-slate-500 mt-0.5">${tx.details}</p>
-                        <p class="text-[9px] text-slate-400 font-sans mt-1">${tx.date}</p>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <p class="text-xs font-black text-slate-800 dark:text-slate-100">${displayType}</p>
+                            <span onclick="copyToClipboard('${txRefCode}')" title="انقر لنسخ رمز العملية للتتبع" class="cursor-pointer font-mono text-[9px] font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 border border-blue-200/70 dark:border-blue-800/60 px-2 py-0.5 rounded-md flex items-center gap-1 transition select-all" dir="ltr">
+                                ${txRefCode} <i class="ph ph-copy text-[10px]"></i>
+                            </span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">${tx.details}</p>
+                        <p class="text-[9px] text-slate-400 dark:text-slate-500 font-sans mt-1">${tx.date}</p>
                     </div>
-                    <div class="flex flex-col items-end gap-1">
-                        <span class="text-sm font-black text-slate-800 font-sans tabular-numeric">${tx.amount}</span>
+                    <div class="flex flex-col items-end gap-1 shrink-0">
+                        <span class="text-sm font-black text-slate-800 dark:text-slate-100 font-sans tabular-numeric">${tx.amount}</span>
                         <span class="px-2 py-0.5 rounded-lg text-[9px] font-bold border ${statusCfg.badge}">${statusCfg.text}</span>
                     </div>
                 </div>
@@ -2392,6 +2438,7 @@ async function verifyRegistrationOtp() {
         }
 
         // عرض القائمة الرئيسية بهوية SHIIFTX
+        // عرض القائمة الرئيسية بتباين عالي ومتناسق في النهاري والليلي
         function renderMainMenu() {
             const messagesArea = document.getElementById('chat-messages');
             if (!messagesArea) return;
@@ -2400,50 +2447,50 @@ async function verifyRegistrationOtp() {
             div.className = 'chat-bubble-msg msg-bot';
             div.innerHTML = `
                 <div class="space-y-3">
-                    <div class="flex items-center gap-2 pb-1 border-b border-slate-700/50">
-                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                        <p class="font-bold text-xs text-slate-100">مرحباً بك في مركز خدمة SHIIFTX</p>
+                    <div class="flex items-center gap-2 pb-1.5 border-b border-slate-200 dark:border-slate-700/60">
+                        <span class="w-2 h-2 rounded-full bg-blue-600 dark:bg-amber-400 animate-pulse"></span>
+                        <p class="font-bold text-xs text-slate-800 dark:text-slate-100">مرحباً بك في مركز خدمة SHIIFTX</p>
                     </div>
-                    <p class="text-[11px] text-slate-300 leading-relaxed">حدد الخدمة المطلوبة للحصول على بياناتها وتفاصيلها بشكل فوري:</p>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">حدد الخدمة المطلوبة للحصول على بياناتها وتفاصيلها بشكل فوري:</p>
                     <div class="grid grid-cols-1 gap-2 pt-1">
-                        <button onclick="botFetchPlatforms()" class="w-full text-right bg-slate-800/90 hover:bg-slate-700/90 text-slate-100 p-2.5 rounded-xl border border-slate-700/70 text-xs font-bold transition flex items-center justify-between group shadow-sm">
+                        <button onclick="botFetchPlatforms()" class="w-full text-right bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-700/90 text-slate-800 dark:text-slate-100 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition flex items-center justify-between group shadow-sm">
                             <span class="flex items-center gap-2.5">
-                                <span class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-sm border border-amber-500/20 group-hover:bg-amber-500 group-hover:text-slate-900 transition">
+                                <span class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-amber-500/10 text-blue-600 dark:text-amber-400 flex items-center justify-center text-sm border border-blue-100 dark:border-amber-500/20">
                                     <i class="ph-fill ph-squares-four"></i>
                                 </span>
                                 <span>البطاقات، الاشتراكات وشحن الألعاب</span>
                             </span>
-                            <i class="ph ph-caret-left text-slate-400 group-hover:text-amber-400 transition"></i>
+                            <i class="ph ph-caret-left text-slate-400 group-hover:text-blue-600 dark:group-hover:text-amber-400 transition"></i>
                         </button>
 
-                        <button onclick="botFetchAgents()" class="w-full text-right bg-slate-800/90 hover:bg-slate-700/90 text-slate-100 p-2.5 rounded-xl border border-slate-700/70 text-xs font-bold transition flex items-center justify-between group shadow-sm">
+                        <button onclick="botFetchAgents()" class="w-full text-right bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-700/90 text-slate-800 dark:text-slate-100 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition flex items-center justify-between group shadow-sm">
                             <span class="flex items-center gap-2.5">
-                                <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-slate-900 transition">
+                                <span class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm border border-emerald-100 dark:border-emerald-500/20">
                                     <i class="ph-fill ph-wallet"></i>
                                 </span>
                                 <span>طرق الإيداع وعناوين المحافظ المعتمدة</span>
                             </span>
-                            <i class="ph ph-caret-left text-slate-400 group-hover:text-emerald-400 transition"></i>
+                            <i class="ph ph-caret-left text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition"></i>
                         </button>
 
-                        <button onclick="botPromptTracking()" class="w-full text-right bg-slate-800/90 hover:bg-slate-700/90 text-slate-100 p-2.5 rounded-xl border border-slate-700/70 text-xs font-bold transition flex items-center justify-between group shadow-sm">
+                        <button onclick="botPromptTracking()" class="w-full text-right bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-700/90 text-slate-800 dark:text-slate-100 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition flex items-center justify-between group shadow-sm">
                             <span class="flex items-center gap-2.5">
-                                <span class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-sm border border-blue-500/20 group-hover:bg-blue-500 group-hover:text-slate-900 transition">
+                                <span class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-blue-500/10 text-indigo-600 dark:text-blue-400 flex items-center justify-center text-sm border border-indigo-100 dark:border-blue-500/20">
                                     <i class="ph-fill ph-receipt"></i>
                                 </span>
                                 <span>تتبع حالة طلبك بالرقم المرجعي</span>
                             </span>
-                            <i class="ph ph-caret-left text-slate-400 group-hover:text-blue-400 transition"></i>
+                            <i class="ph ph-caret-left text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-blue-400 transition"></i>
                         </button>
 
-                        <button onclick="botDirectSupport()" class="w-full text-right bg-slate-800/90 hover:bg-slate-700/90 text-slate-100 p-2.5 rounded-xl border border-slate-700/70 text-xs font-bold transition flex items-center justify-between group shadow-sm">
+                        <button onclick="botDirectSupport()" class="w-full text-right bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-700/90 text-slate-800 dark:text-slate-100 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition flex items-center justify-between group shadow-sm">
                             <span class="flex items-center gap-2.5">
-                                <span class="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-sm border border-purple-500/20 group-hover:bg-purple-500 group-hover:text-slate-900 transition">
+                                <span class="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-sm border border-purple-100 dark:border-purple-500/20">
                                     <i class="ph-fill ph-headset"></i>
                                 </span>
                                 <span>التحدث مع الدعم الفني المباشر</span>
                             </span>
-                            <i class="ph ph-caret-left text-slate-400 group-hover:text-purple-400 transition"></i>
+                            <i class="ph ph-caret-left text-slate-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition"></i>
                         </button>
                     </div>
                 </div>
@@ -2452,7 +2499,6 @@ async function verifyRegistrationOtp() {
             messagesArea.scrollTop = messagesArea.scrollHeight;
         }
 
-        // 1. استعراض المنصات والخدمات
         async function botFetchPlatforms() {
             appendUserAction("استعراض الخدمات والاشتراكات");
             const loading = appendLoading();
@@ -2472,7 +2518,7 @@ async function verifyRegistrationOtp() {
 
                 if (data.platforms && data.platforms.length > 0) {
                     let btns = data.platforms.map(p => `
-                        <button onclick="botFetchPackages('${p}')" class="bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 py-1.5 px-3 rounded-lg text-xs font-bold transition border border-slate-700 hover:border-amber-500 shadow-sm flex items-center gap-1.5">
+                        <button onclick="botFetchPackages('${p}')" class="bg-slate-100 hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:hover:bg-amber-400 dark:hover:text-slate-900 text-slate-700 dark:text-slate-200 py-1.5 px-3 rounded-lg text-xs font-bold transition border border-slate-200 dark:border-slate-700 flex items-center gap-1.5">
                             <i class="ph-bold ph-caret-left text-[10px] opacity-60"></i>
                             <span>${p}</span>
                         </button>
@@ -2480,12 +2526,12 @@ async function verifyRegistrationOtp() {
 
                     div.innerHTML = `
                         <div class="space-y-2.5">
-                            <p class="font-bold text-xs text-slate-100 flex items-center gap-1.5">
-                                <i class="ph-fill ph-tag text-amber-400"></i>
+                            <p class="font-bold text-xs text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                                <i class="ph-fill ph-tag text-blue-600 dark:text-amber-400"></i>
                                 <span>اختر المنصة أو نوع الخدمة لعرض الباقات:</span>
                             </p>
                             <div class="flex flex-wrap gap-1.5 pt-1 mb-2">${btns}</div>
-                            <button onclick="renderMainMenu()" class="text-[11px] text-amber-400 font-bold hover:underline flex items-center gap-1 pt-1">
+                            <button onclick="renderMainMenu()" class="text-[11px] text-blue-600 dark:text-amber-400 font-bold hover:underline flex items-center gap-1 pt-1">
                                 <i class="ph ph-arrow-u-up-right"></i>
                                 <span>العودة للقائمة الرئيسية</span>
                             </button>
@@ -2493,8 +2539,8 @@ async function verifyRegistrationOtp() {
                     `;
                 } else {
                     div.innerHTML = `
-                        <p class="text-xs text-slate-300">لا توجد خدمات مضافة حالياً في المتجر.</p>
-                        <button onclick="renderMainMenu()" class="text-[11px] text-amber-400 font-bold hover:underline pt-2 block">← العودة للقائمة</button>
+                        <p class="text-xs text-slate-600 dark:text-slate-300">لا توجد خدمات مضافة حالياً في المتجر.</p>
+                        <button onclick="renderMainMenu()" class="text-[11px] text-blue-600 dark:text-amber-400 font-bold hover:underline pt-2 block">← العودة للقائمة</button>
                     `;
                 }
                 messagesArea.appendChild(div);
@@ -2504,7 +2550,6 @@ async function verifyRegistrationOtp() {
             }
         }
 
-        // 2. عرض تفاصيل الباقات والأسعار
         async function botFetchPackages(platform) {
             appendUserAction(`${platform}`);
             const loading = appendLoading();
@@ -2524,35 +2569,35 @@ async function verifyRegistrationOtp() {
 
                 if (data.packages && data.packages.length > 0) {
                     let items = data.packages.map(p => `
-                        <div class="flex items-center justify-between p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 text-xs hover:border-slate-700 transition">
+                        <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900/90 rounded-xl border border-slate-200 dark:border-slate-800 text-xs transition">
                             <div class="pr-1">
-                                <span class="font-bold text-slate-100 block">${p.package_name}</span>
-                                <span class="inline-flex items-center gap-1 text-[10px] font-medium mt-0.5 ${p.product_type === 'CODE' ? 'text-amber-400' : 'text-blue-400'}">
+                                <span class="font-bold text-slate-800 dark:text-slate-100 block">${p.package_name}</span>
+                                <span class="inline-flex items-center gap-1 text-[10px] font-medium mt-0.5 ${p.product_type === 'CODE' ? 'text-emerald-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'}">
                                     <i class="${p.product_type === 'CODE' ? 'ph-bold ph-key' : 'ph-bold ph-identification-card'} text-[10px]"></i>
                                     ${p.product_type === 'CODE' ? 'كود رقمي فوري' : 'شحن معرف ID مباشر'}
                                 </span>
                             </div>
-                            <span class="font-black text-amber-400 text-sm font-mono bg-amber-400/10 px-2 py-1 rounded-lg border border-amber-400/20">$${parseFloat(p.price).toFixed(2)}</span>
+                            <span class="font-black text-blue-600 dark:text-amber-400 text-sm font-mono bg-blue-50 dark:bg-amber-400/10 px-2 py-1 rounded-lg border border-blue-100 dark:border-amber-400/20">$${parseFloat(p.price).toFixed(2)}</span>
                         </div>
                     `).join('');
 
                     div.innerHTML = `
                         <div class="space-y-2.5">
-                            <div class="flex justify-between items-center pb-1 border-b border-slate-700/60">
-                                <span class="font-bold text-xs text-slate-100 flex items-center gap-1.5">
-                                    <i class="ph-fill ph-check-circle text-amber-400"></i>
+                            <div class="flex justify-between items-center pb-1 border-b border-slate-200 dark:border-slate-700/60">
+                                <span class="font-bold text-xs text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                                    <i class="ph-fill ph-check-circle text-blue-600 dark:text-amber-400"></i>
                                     <span>باقات وأسعار (${platform}):</span>
                                 </span>
-                                <span class="text-[10px] text-slate-400">${data.packages.length} باقة</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">${data.packages.length} باقة</span>
                             </div>
                             <div class="space-y-1.5 max-h-56 overflow-y-auto pr-1 select-text">${items}</div>
-                            <div class="flex items-center gap-3 pt-2 text-[11px] border-t border-slate-700/50">
-                                <button onclick="botFetchPlatforms()" class="text-amber-400 font-bold hover:underline flex items-center gap-1">
+                            <div class="flex items-center gap-3 pt-2 text-[11px] border-t border-slate-200 dark:border-slate-700/50">
+                                <button onclick="botFetchPlatforms()" class="text-blue-600 dark:text-amber-400 font-bold hover:underline flex items-center gap-1">
                                     <i class="ph ph-caret-right"></i>
                                     <span>خدمة أخرى</span>
                                 </button>
-                                <span class="text-slate-600">|</span>
-                                <button onclick="renderMainMenu()" class="text-slate-400 hover:text-slate-200 transition">
+                                <span class="text-slate-300 dark:text-slate-600">|</span>
+                                <button onclick="renderMainMenu()" class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition">
                                     القائمة الرئيسية
                                 </button>
                             </div>
@@ -2560,8 +2605,8 @@ async function verifyRegistrationOtp() {
                     `;
                 } else {
                     div.innerHTML = `
-                        <p class="text-xs text-slate-300">لا توجد باقات متوفرة حالياً لهذه المنصة.</p>
-                        <button onclick="botFetchPlatforms()" class="text-[11px] text-amber-400 font-bold hover:underline pt-1 block">← اختيار منصة أخرى</button>
+                        <p class="text-xs text-slate-600 dark:text-slate-300">لا توجد باقات متوفرة حالياً لهذه المنصة.</p>
+                        <button onclick="botFetchPlatforms()" class="text-[11px] text-blue-600 dark:text-amber-400 font-bold hover:underline pt-1 block">← اختيار منصة أخرى</button>
                     `;
                 }
                 messagesArea.appendChild(div);
@@ -2571,7 +2616,6 @@ async function verifyRegistrationOtp() {
             }
         }
 
-        // 3. عرض طرق الإيداع وأرقام المحافظ
         async function botFetchAgents() {
             appendUserAction("طرق الإيداع والمحافظ");
             const loading = appendLoading();
@@ -2591,17 +2635,17 @@ async function verifyRegistrationOtp() {
 
                 if (data.agents && data.agents.length > 0) {
                     let agentCards = data.agents.map(a => `
-                        <div class="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5 hover:border-slate-700 transition">
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-900/90 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5 transition">
                             <div class="flex justify-between items-center text-xs">
-                                <span class="font-bold text-slate-100 flex items-center gap-1.5">
-                                    <i class="ph-fill ph-wallet text-emerald-400 text-sm"></i>
+                                <span class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                                    <i class="ph-fill ph-wallet text-emerald-600 dark:text-emerald-400 text-sm"></i>
                                     <span>${a.payment_method}</span>
                                 </span>
-                                <span class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700">${a.agent_name}</span>
+                                <span class="text-[10px] bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded">${a.agent_name}</span>
                             </div>
-                            <div class="flex items-center justify-between bg-slate-950 p-2 rounded-lg border border-slate-800/80">
-                                <code class="text-xs font-mono font-bold text-emerald-400 select-all tracking-wider">${a.wallet_address}</code>
-                                <button onclick="navigator.clipboard.writeText('${a.wallet_address}'); this.innerText='تم النسخ ✓'; setTimeout(()=>this.innerText='نسخ', 2000);" class="text-[10px] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded font-bold transition flex items-center gap-1">
+                            <div class="flex items-center justify-between bg-white dark:bg-slate-950 p-2 rounded-lg border border-slate-200 dark:border-slate-800/80" dir="ltr">
+                                <code class="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 select-all tracking-wider">${a.wallet_address}</code>
+                                <button onclick="copyToClipboard('${a.wallet_address}')" class="text-[10px] bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 px-2.5 py-1 rounded-md font-bold transition flex items-center gap-1">
                                     <i class="ph-bold ph-copy"></i>
                                     <span>نسخ</span>
                                 </button>
@@ -2611,23 +2655,23 @@ async function verifyRegistrationOtp() {
 
                     div.innerHTML = `
                         <div class="space-y-2.5">
-                            <p class="font-bold text-xs text-slate-100 flex items-center gap-1.5 pb-1 border-b border-slate-700/60">
-                                <i class="ph-fill ph-shield-check text-emerald-400"></i>
+                            <p class="font-bold text-xs text-slate-800 dark:text-slate-100 flex items-center gap-1.5 pb-1 border-b border-slate-200 dark:border-slate-700/60">
+                                <i class="ph-fill ph-shield-check text-emerald-600 dark:text-emerald-400"></i>
                                 <span>المحافظ المعتمدة لشحن الرصيد:</span>
                             </p>
                             <div class="space-y-2 mb-2 max-h-56 overflow-y-auto pr-1">${agentCards}</div>
-                            <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 leading-relaxed flex items-start gap-1.5">
+                            <div class="p-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed flex items-start gap-1.5">
                                 <i class="ph-fill ph-info text-sm flex-shrink-0 mt-0.5"></i>
-                                <span>بعد التحويل، توجه لقسم <b>شحن الرصيد</b> وأدخل رقم إشعار الحوالة ليتم شحن محفظتك تلقائياً.</span>
+                                <span>بعد التحويل، توجه لقسم <b>شحن الرصيد</b> وأدخل رقم إشعار الحوالة لتأكيد شحن محفظتك.</span>
                             </div>
-                            <button onclick="renderMainMenu()" class="text-[11px] text-amber-400 font-bold hover:underline pt-1 flex items-center gap-1">
+                            <button onclick="renderMainMenu()" class="text-[11px] text-blue-600 dark:text-amber-400 font-bold hover:underline pt-1 flex items-center gap-1">
                                 <i class="ph ph-arrow-u-up-right"></i>
                                 <span>العودة للقائمة الرئيسية</span>
                             </button>
                         </div>
                     `;
                 } else {
-                    div.innerHTML = `<p class="text-xs text-slate-300">بيانات المحافظ قيد التحديث.</p>`;
+                    div.innerHTML = `<p class="text-xs text-slate-600 dark:text-slate-300">بيانات المحافظ قيد التحديث.</p>`;
                 }
                 messagesArea.appendChild(div);
                 messagesArea.scrollTop = messagesArea.scrollHeight;
@@ -2636,7 +2680,6 @@ async function verifyRegistrationOtp() {
             }
         }
 
-        // 4. طلب كود تتبع الطلب
         function botPromptTracking() {
             appendUserAction("تتبع حالة طلب");
             const messagesArea = document.getElementById('chat-messages');
@@ -2644,11 +2687,11 @@ async function verifyRegistrationOtp() {
             div.className = 'chat-bubble-msg msg-bot';
             div.innerHTML = `
                 <div class="space-y-2">
-                    <p class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
-                        <i class="ph-fill ph-magnifying-glass text-blue-400"></i>
+                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                        <i class="ph-fill ph-magnifying-glass text-blue-600 dark:text-blue-400"></i>
                         <span>أدخل الرقم المرجعي للطلب أدناه:</span>
                     </p>
-                    <p class="text-[11px] text-slate-300">اكتب الرقم المرجعي (مثال: <code class="bg-slate-800 px-1 py-0.5 rounded text-amber-400 font-mono">TX-123456</code>) في خانة المراسلة ثم اضغط إرسال.</p>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-300">اكتب رمز العملية (مثال: <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-blue-600 dark:text-amber-400 font-mono">TX-123456</code>) في خانة المراسلة ثم اضغط إرسال.</p>
                 </div>
             `;
             messagesArea.appendChild(div);
@@ -2660,7 +2703,6 @@ async function verifyRegistrationOtp() {
             }
         }
 
-        // 5. التحدث مع خدمة العملاء
         function botDirectSupport() {
             appendUserAction("التحدث مع الدعم المباشر");
             const messagesArea = document.getElementById('chat-messages');
@@ -2668,21 +2710,21 @@ async function verifyRegistrationOtp() {
             div.className = 'chat-bubble-msg msg-bot';
             div.innerHTML = `
                 <div class="space-y-3">
-                    <div class="flex items-center gap-2 pb-1 border-b border-slate-700/60">
-                        <i class="ph-fill ph-headset text-purple-400 text-sm"></i>
-                        <p class="text-xs font-bold text-slate-100">فريق خدمة العملاء متواجد لمساعدتك:</p>
+                    <div class="flex items-center gap-2 pb-1 border-b border-slate-200 dark:border-slate-700/60">
+                        <i class="ph-fill ph-headset text-purple-600 dark:text-purple-400 text-sm"></i>
+                        <p class="text-xs font-bold text-slate-800 dark:text-slate-100">فريق خدمة العملاء متواجد لمساعدتك:</p>
                     </div>
-                    <p class="text-[11px] text-slate-300">للاستفسارات الخاصة أو معالجة الحالات الفردية، يسعدنا تواصلك المباشر:</p>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-300">للاستفسارات الخاصة أو معالجة الحالات الفردية، يسعدنا تواصلك المباشر:</p>
                     <div class="flex gap-2">
-                        <a href="https://wa.me/${OFFICIAL_WHATSAPP_NUMBER}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-center py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40">
+                        <a href="https://wa.me/${OFFICIAL_WHATSAPP_NUMBER}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-center py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md">
                             <i class="ph-fill ph-whatsapp-logo text-base"></i>
                             <span>محادثة واتساب فورية</span>
                         </a>
-                        <button onclick="if(typeof openSupportModal==='function') openSupportModal();" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition">
+                        <button onclick="if(typeof openSupportModal==='function') openSupportModal();" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition">
                             قنوات أخرى
                         </button>
                     </div>
-                    <button onclick="renderMainMenu()" class="text-[11px] text-amber-400 font-bold hover:underline block pt-1">
+                    <button onclick="renderMainMenu()" class="text-[11px] text-blue-600 dark:text-amber-400 font-bold hover:underline block pt-1">
                         ← العودة للقائمة الرئيسية
                     </button>
                 </div>
