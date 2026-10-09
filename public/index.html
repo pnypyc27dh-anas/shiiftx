@@ -807,6 +807,48 @@
                         <div class="inline-flex justify-center items-center w-16 h-16 bg-slate-100 text-slate-600 rounded-full mb-2 border-4 border-white shadow-sm"><i class="ph-fill ph-user text-3xl"></i></div>
                         <h3 class="font-black text-lg text-slate-800">الملف الشخصي</h3>
                     </div>
+                  <!-- لوحة إحصائيات الوكيل التسويقي (تظهر فقط عندما يكون الحساب وكيلاً) -->
+                    <div id="agent-affiliate-dashboard" class="hidden bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 dark:border-amber-500/20 rounded-2xl p-5 space-y-4">
+                        <div class="flex justify-between items-center border-b border-amber-500/20 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg">
+                                    <i class="ph-fill ph-seal-check"></i>
+                                </span>
+                                <div>
+                                    <h4 class="text-xs font-black text-slate-800 dark:text-slate-100">لوحة الشريك التسويقي (وكيل معتمد)</h4>
+                                    <p class="text-[10px] text-slate-400">شارك كودك مع الزبائن واكسب عمولتك فورياً</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-mono font-bold bg-amber-500 text-slate-900 px-2 py-0.5 rounded-md">AGENT</span>
+                        </div>
+
+                        <!-- الكود ونسبة العمولة -->
+                        <div class="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-amber-200/60 dark:border-amber-900/40 flex items-center justify-between" dir="ltr">
+                            <div class="flex items-center gap-2">
+                                <button onclick="copyToClipboard(document.getElementById('agent-display-code').innerText)" type="button" class="btn-spring px-2.5 py-1 bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 rounded-lg text-[10px] font-bold flex items-center gap-1 hover:bg-amber-200 transition cursor-pointer">
+                                    <i class="ph-bold ph-copy"></i>
+                                    <span>نسخ الكود</span>
+                                </button>
+                                <span id="agent-display-code" class="font-mono font-black text-slate-900 dark:text-amber-400 text-sm tracking-wider select-all">---</span>
+                            </div>
+                            <div class="text-right text-xs" dir="rtl">
+                                <span class="text-[10px] text-slate-400 block font-medium">نسبة عمولتك:</span>
+                                <span id="agent-display-commission-rate" class="font-black text-emerald-600 dark:text-emerald-400 text-xs font-mono">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- أرقام المبيعات والعمولات -->
+                        <div class="grid grid-cols-2 gap-3 pt-1">
+                            <div class="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-slate-200/60 dark:border-slate-800 text-center">
+                                <span class="text-[10px] text-slate-400 block font-medium mb-1">الطلبات المكتملة بكودك</span>
+                                <span id="agent-display-orders-count" class="font-mono font-black text-base text-slate-800 dark:text-slate-100 tabular-nums">0</span>
+                            </div>
+                            <div class="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-slate-200/60 dark:border-slate-800 text-center">
+                                <span class="text-[10px] text-slate-400 block font-medium mb-1">أرباح العمولات المودعة</span>
+                                <span id="agent-display-total-earned" class="font-mono font-black text-base text-emerald-600 dark:text-emerald-400 tabular-nums">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
                     <div class="space-y-4">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
@@ -1000,23 +1042,7 @@
         </div>
     </div>
 
-    <!-- نافذة دليل الوكلاء المعتمدين -->
-    <div id="agents-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
-        <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[28px] max-h-[85vh] flex flex-col p-6 shadow-2xl relative slide-up-modal text-right">
-           <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
-             <!-- العنوان والأيقونة (جهة اليمين) -->
-             <div class="flex items-center gap-2.5">
-                 <div class="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"><i class="ph-fill ph-users-three text-xl"></i></div>
-                 <h4 class="text-base font-black text-slate-800 dark:text-slate-100">شبكة الوكلاء المعتمدين</h4>
-             </div>
-             <!-- زر الإغلاق التفاعلي (جهة اليسار) -->
-             <button onclick="toggleView('agents-modal', false)" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm" title="إغلاق">
-                 <i class="ph ph-x font-bold text-base"></i>
-             </button>
-         </div>
-            <div id="agents-list-container" class="overflow-y-auto flex-grow space-y-3 pr-1 pb-2"></div>
-        </div>
-    </div>
+  
 
     <!-- نافذة الدعم الفني المباشر (تفتح تلقائياً عند التحويل أو الحاجة) -->
     <div id="support-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
@@ -1832,7 +1858,7 @@ async function verifyRegistrationOtp() {
         // ========================================================================
         // 4. جلب ومزامنة البيانات
         // ========================================================================
-        async function silentSyncData() { 
+         async function silentSyncData() { 
             if (!currentUser) return;
             const { data: profile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
             if (profile) {
@@ -1846,13 +1872,31 @@ async function verifyRegistrationOtp() {
                 document.getElementById('prof-first-name').value = profile.first_name || "";
                 document.getElementById('prof-last-name').value = profile.last_name || "";
                 document.getElementById('prof-phone').value = profile.phone || "";
-                if(profile.created_at) {
+                if (profile.created_at) {
                     document.getElementById('live-join-date').innerText = new Date(profile.created_at).toLocaleDateString('en-GB');
+                }
+
+                // ==================== التحقق التلقائي من رتبة الوكيل ====================
+                const agentBox = document.getElementById('agent-affiliate-dashboard');
+                if (profile.role === 'agent') {
+                    if (agentBox) agentBox.classList.remove('hidden');
+                    
+                    // استدعاء إحصائيات الكود والعمولات لهذا الوكيل من قاعدة البيانات
+                    const { data: stats } = await supabase.rpc('get_my_agent_stats', { p_user_id: currentUser.id });
+                    if (stats && stats.is_agent) {
+                        document.getElementById('agent-display-code').innerText = stats.code;
+                        document.getElementById('agent-display-commission-rate').innerText = stats.commission_percent + "%";
+                        document.getElementById('agent-display-orders-count').innerText = stats.usage_count;
+                        document.getElementById('agent-display-total-earned').innerText = "$" + Number(stats.total_earned).toFixed(2);
+                    }
+                } else {
+                    // إذا كان عميلاً عادياً تظل اللوحة مخفية
+                    if (agentBox) agentBox.classList.add('hidden');
                 }
             }
             
             const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-            if(txs) {
+            if (txs) {
                 globalTransactionsRaw = txs.map(t => ({
                     type: t.transaction_type, 
                     details: t.details, 
@@ -1867,7 +1911,7 @@ async function verifyRegistrationOtp() {
                 }));
                 renderRecentDashboardTransactions(globalTransactionsRaw);
             }
-        } 
+        }
 
         async function fetchStoreProductsDirectly() { 
             const { data: prods, error } = await supabase
@@ -2107,9 +2151,9 @@ async function verifyRegistrationOtp() {
         function toggleView(id, show) { const el = document.getElementById(id); if(el) el.classList.toggle('hidden', !show); }
         
         function closeAllModals() { 
-            resetResendButtonState();
-            ['register-modal', 'plans-modal', 'account-inputs-modal', 'purchase-modal', 'code-delivery-modal', 'all-orders-modal', 'agents-modal', 'support-modal', 'info-modal', 'reactivate-modal'].forEach(id => toggleView(id, false)); 
-        }
+     resetResendButtonState();
+     ['register-modal', 'plans-modal', 'account-inputs-modal', 'purchase-modal', 'code-delivery-modal', 'all-orders-modal', 'support-modal', 'info-modal', 'reactivate-modal'].forEach(id => toggleView(id, false)); 
+ }
         
         function toggleSideMenu(open) {
             const overlay = document.getElementById('side-menu-overlay');
@@ -2400,46 +2444,6 @@ function createTransactionCardElement(tx) {
             list.forEach(tx => {
                 container.appendChild(createTransactionCardElement(tx));
             });
-        }
-
-        async function openAgentsDirectoryModal() {
-            toggleSideMenu(false);
-            const container = document.getElementById('agents-list-container');
-            container.innerHTML = `<div class="py-8 text-center text-slate-400 text-xs"><i class="ph ph-spinner animate-spin text-xl"></i> تحميل قائمة الوكلاء...</div>`;
-            toggleView('agents-modal', true);
-
-            const { data: agents } = await supabase.from('agents').select('*');
-            container.innerHTML = "";
-
-            if (!agents || agents.length === 0) {
-                const defaultAgents = [
-                    { name: "وكيل دمشق وريفها", code: "101", payment: "سيرياتل كاش / شام كاش", phone: "963900000001" },
-                    { name: "وكيل حلب والمنطقة الشمالية", code: "102", payment: "سيرياتل كاش / MTN", phone: "963900000002" },
-                    { name: "وكيل حمص والساحل", code: "103", payment: "شام كاش / سيرياتل كاش", phone: "963900000003" }
-                ];
-                defaultAgents.forEach(a => renderAgentCard(container, a.name, a.code, a.payment, a.phone));
-            } else {
-                agents.forEach(a => {
-                    renderAgentCard(container, a.agent_name, a.agent_code, a.payment_method, a.phone_number || "963900000000");
-                });
-            }
-        }
-
-        function renderAgentCard(container, name, code, method, phone) {
-            const card = document.createElement('div');
-            card.className = "bg-slate-50 border border-slate-100 rounded-2xl p-4 flex justify-between items-center";
-            card.innerHTML = `
-                <div>
-                    <h5 class="font-black text-xs text-slate-800">${name}</h5>
-                    <p class="text-[10px] text-slate-400 mt-0.5">القنوات: ${method}</p>
-                    <span class="inline-block mt-1.5 px-2 py-0.5 bg-blue-50 text-[#005ba3] font-mono text-[10px] font-bold rounded-md">رمز الوكيل: ${code}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="document.getElementById('sub-agent-code').value='${code}'; toggleView('agents-modal', false); switchTab('deposit');" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-3 py-2 rounded-xl transition">اختيار</button>
-                    <a href="https://wa.me/${phone}" target="_blank" class="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-xl transition" title="محادثة واتساب"><i class="ph-fill ph-whatsapp-logo text-base"></i></a>
-                </div>
-            `;
-            container.appendChild(card);
         }
 
         function openSupportModal() {
