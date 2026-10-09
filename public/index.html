@@ -64,7 +64,7 @@
 
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+ 
     <style>
         :root {
             --primary: #005ba3;
@@ -545,6 +545,16 @@
         .modal-btn-back i {
             transition: transform 0.25s ease;
         }
+      /* إلغاء أسهم عداد الأرقام المزعجة في جميع المتصفحات */
+        .no-spin::-webkit-outer-spin-button,
+        .no-spin::-webkit-inner-spin-button {
+            -webkit-appearance: none !important;
+            margin: 0 !important;
+        }
+        .no-spin {
+            -moz-appearance: textfield !important;
+        }
+      
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased selection:bg-blue-200 selection:text-blue-900">
@@ -696,72 +706,96 @@
             </div>
 
             <!-- صفحة الإيداع -->
-            <div id="view-deposit" class="hidden space-y-5 data-view fade-in md:max-w-xl md:mx-auto w-full">
-                <div class="glass-panel p-6 md:p-8 space-y-6">
-                    <div class="text-center space-y-1 mb-2">
-                        <div class="inline-flex justify-center items-center w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl mb-2"><i class="ph-fill ph-wallet text-2xl"></i></div>
-                        <h3 class="font-black text-lg text-slate-800">تمويل رصيد المحفظة</h3>
-                        <p class="text-[11px] text-slate-500 font-medium">قم بإيداع الأموال عبر وكلاء معتمدين.</p>
+         <!-- صفحة الإيداع (شحن مباشر مع مبالغ سريعة وإدخال حر) -->
+            <div id="view-deposit" class="hidden space-y-6 data-view fade-in md:max-w-xl md:mx-auto w-full">
+                <div class="glass-panel p-6 sm:p-8 space-y-6 border border-slate-200/70 dark:border-slate-800">
+                    
+                    <!-- الترويسة -->
+                    <div class="text-center space-y-1.5">
+                        <div class="inline-flex justify-center items-center w-12 h-12 bg-blue-50 dark:bg-blue-950/60 text-[#005ba3] dark:text-blue-400 rounded-2xl mb-1 shadow-sm border border-blue-100 dark:border-blue-900/40">
+                            <i class="ph-fill ph-wallet text-2xl"></i>
+                        </div>
+                        <h3 class="font-black text-lg text-slate-900 dark:text-slate-100 tracking-tight">تمويل رصيد المحفظة</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">حول المبلغ إلى حساب المتجر المعتمد، ثم سجّل رقم الحوالة لتأكيد الإيداع.</p>
                     </div>
 
-                    <div id="deposit-sub-step1" class="space-y-5 pt-2">
+                    <div class="space-y-5">
+                        
+                        <!-- 1. اختيار قناة الدفع المباشرة -->
                         <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="block text-[11px] font-bold text-slate-600">رمز الوكيل المعتمد</label>
-                                <button onclick="openAgentsDirectoryModal()" class="text-[10px] text-blue-600 font-bold hover:underline flex items-center gap-1"><i class="ph ph-magnifying-glass"></i> دليل الوكلاء</button>
-                            </div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">اختر قناة التحويل</label>
                             <div class="relative">
-                                <i class="ph ph-identification-badge absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                                <input id="sub-agent-code" type="number" placeholder="أدخل رمز الوكيل (مثال: 102)" class="input-field w-full pr-12 pl-4 py-3.5 text-sm">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-600 mb-2">قناة الإرسال المالي</label>
-                            <div class="relative">
-                                <i class="ph ph-bank absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg z-10"></i>
-                                <select id="sub-payment-method" class="input-field w-full pr-12 pl-4 py-3.5 text-sm appearance-none relative">
-                                    <option value="سيرياتل كاش">سيرياتل كاش (Syriatel Cash)</option>
-                                    <option value="إم تي إن كاش">إم تي إن كاش (MTN Cash)</option>
-                                    <option value="شام كاش">شام كاش (Cham Cash)</option>
+                                <i class="ph ph-bank absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg z-10 pointer-events-none"></i>
+                                <select id="sub-payment-method" onchange="updateDirectWalletInfo()" class="input-field w-full pr-12 pl-10 py-3.5 text-xs font-bold text-slate-800 dark:text-slate-100 appearance-none relative cursor-pointer">
+                                    <option value="سيرياتل كاش" data-wallet="0930000000">سيرياتل كاش (Syriatel Cash)</option>
+                                    <option value="شام كاش" data-wallet="1122334455">شام كاش (Cham Cash)</option>
+                                    <option value="إم تي إن كاش" data-wallet="0940000000">إم تي إن كاش (MTN Cash)</option>
                                 </select>
                                 <i class="ph ph-caret-down absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                             </div>
                         </div>
-                        <button id="sub-deposit-step1-btn" onclick="processSubWalletFetch()" class="w-full btn-primary text-white font-bold py-4 rounded-xl text-xs flex justify-center items-center gap-2 mt-2">
-                            <span>التحقق من حساب الوكيل</span><i class="ph ph-arrow-left font-bold"></i>
-                        </button>
-                    </div>
 
-                    <div id="deposit-sub-step2" class="hidden space-y-5">
-                        <div class="bg-slate-900 text-white p-6 rounded-[24px] border border-white/10 text-center space-y-2 relative overflow-hidden shadow-lg">
-                            <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl"></div>
-                            <p class="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mb-1">محفظة الوكيل المعتمد</p>
-                            <p id="sub-display-agent-name" class="text-sm font-bold text-blue-300">...</p>
-                            <div class="bg-black/30 mx-auto w-fit px-4 py-2 rounded-xl mt-2 border border-white/5 flex items-center gap-2">
-                                <i class="ph-fill ph-copy cursor-pointer text-slate-400 hover:text-white transition" onclick="copyToClipboard(document.getElementById('sub-display-wallet-number').innerText)"></i>
-                                <p id="sub-display-wallet-number" class="text-xl font-mono font-bold text-emerald-400 tracking-wider tabular-numeric">...</p>
+                        <!-- 2. بطاقة رقم الحساب للنسخ (مظهر مالي هادئ ومتناسق) -->
+                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 space-y-2.5 transition">
+                            <div class="flex items-center justify-between text-xs px-1">
+                                <span class="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                    <i class="ph-fill ph-check-circle text-blue-600 dark:text-blue-400 text-sm"></i>
+                                    <span id="direct-gateway-name-label">رقم حساب سيرياتل كاش:</span>
+                                </span>
+                                <span class="text-[10px] bg-blue-50 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 font-bold px-2 py-0.5 rounded-full border border-blue-200/50 dark:border-blue-900/40">حساب معتمد</span>
+                            </div>
+
+                            <div class="bg-white dark:bg-slate-900 py-3 px-4 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between shadow-sm" dir="ltr">
+                                <span id="direct-official-wallet-num" class="text-lg font-mono font-black text-slate-900 dark:text-emerald-400 tracking-wider tabular-nums select-all">0930000000</span>
+                                <button onclick="copyToClipboard(document.getElementById('direct-official-wallet-num').innerText)" type="button" class="btn-spring flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg shadow-sm cursor-pointer">
+                                    <i class="ph-bold ph-copy text-sm"></i>
+                                    <span>نسخ</span>
+                                </button>
+                            </div>
+                            <p class="text-[11px] text-slate-400 dark:text-slate-400 text-right">يرجى تحويل المبلغ بدقة إلى هذا الرقم قبل إرسال الطلب.</p>
+                        </div>
+
+                        <!-- 3. تحديد المبلغ (أزرار سريعة + إدخال حر) -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <label class="text-xs font-bold text-slate-700 dark:text-slate-200">المبلغ المراد شحنه ($)</label>
+                                <span class="text-[10px] text-slate-400 font-medium">اختر باقة أو أدخل أي مبلغ</span>
+                            </div>
+
+                            <!-- أزرار المبالغ السريعة -->
+                            <div class="grid grid-cols-5 gap-2 pb-1">
+                                <button type="button" onclick="setPresetAmount(5, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$5</button>
+                                <button type="button" onclick="setPresetAmount(10, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$10</button>
+                                <button type="button" onclick="setPresetAmount(25, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$25</button>
+                                <button type="button" onclick="setPresetAmount(50, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$50</button>
+                                <button type="button" onclick="setPresetAmount(100, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$100</button>
+                            </div>
+
+                            <!-- خانة الإدخال الحر بدون أسهم العداد -->
+                            <div class="relative">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm pointer-events-none">$</span>
+                                <input id="sub-form-amount-select" oninput="onCustomAmountTyped()" type="text" inputmode="decimal" placeholder="أو اكتب أي مبلغ تريده (مثال: 15.5)" class="input-field no-spin w-full pr-9 pl-4 py-3.5 text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400">
                             </div>
                         </div>
-                        <div class="space-y-4 pt-2">
-                            <div id="sub-amount-field-container">
-                                <label class="block text-[11px] font-bold text-slate-600 mb-2">المبلغ المراد شحنه ($)</label>
-                                <div class="relative">
-                                    <i class="ph ph-currency-dollar absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                                    <input id="sub-form-amount-select" type="number" min="1" step="any" placeholder="أدخل المبلغ (مثال: 10)" class="input-field w-full pr-12 pl-4 py-3.5 text-sm">
-                                </div>
+
+                        <!-- 4. رقم إشعار الحوالة (بدون أسهم عداد إطلاقاً) -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">رقم إشعار الحوالة (الرقم المرجعي)</label>
+                            <div class="relative">
+                                <i class="ph ph-receipt absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none"></i>
+                                <input id="sub-form-tx-number" type="text" inputmode="numeric" placeholder="مثال: 984521780" class="input-field no-spin w-full pr-12 pl-4 py-3.5 text-xs font-mono font-bold text-slate-900 dark:text-slate-100 tracking-wider text-left placeholder:text-slate-400" dir="ltr" autocomplete="off">
                             </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 mb-2">رقم الإشعار (الرقم المرجعي)</label>
-                                <input id="sub-form-tx-number" type="number" placeholder="أدخل رقم عملية التحويل بدقة" class="input-field w-full px-4 py-3.5 text-sm">
-                            </div>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-400 mt-1.5">رقم العملية كما وصلك في رسالة تأكيد الإرسال من شركة الدفع.</p>
                         </div>
-                        <div class="flex gap-3 pt-2">
-                            <button id="sub-deposit-final-btn" onclick="submitSubFinalDeposit()" class="btn-glow-sheen btn-spring w-2/3 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-4 rounded-xl text-xs shadow-[0_8px_20px_-4px_rgba(5,150,105,0.4)] flex justify-center items-center gap-2 cursor-pointer">
-    <i class="ph-fill ph-check-circle text-lg"></i>
-    <span class="tracking-wide">تأكيد الشحن</span>
-</button>
-                            <button onclick="backToSubStep1()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-xl text-xs transition">رجوع</button>
+
+                        <!-- 5. زر التأكيد والإرسال -->
+                        <div class="pt-2">
+                            <button id="sub-deposit-final-btn" onclick="submitSubFinalDeposit()" class="btn-glow-sheen btn-spring w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-4 rounded-xl text-xs shadow-[0_8px_20px_-4px_rgba(5,150,105,0.4)] flex justify-center items-center gap-2 cursor-pointer">
+                                <i class="ph-fill ph-check-circle text-lg"></i>
+                                <span class="tracking-wide">تأكيد وإرسال طلب الشحن</span>
+                            </button>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -880,20 +914,17 @@
                 <div>
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 px-2">المساعدة</p>
                     <div class="space-y-1">
-                        <!-- التبويبة الموحدة لخدمة العملاء (تفتح البوت مباشرة) -->
+ <!-- التبويبة الموحدة لخدمة العملاء (تفتح البوت مباشرة) -->
                         <button onclick="toggleChat(); toggleSideMenu(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-blue-50/70 text-blue-600 font-bold text-xs transition border border-blue-100/50">
                             <i class="ph-fill ph-headset text-lg text-[#005ba3]"></i>
                             <span>خدمة العملاء</span>
                         </button>
-                        
-                        <button onclick="openAgentsDirectoryModal()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-slate-50 font-bold text-xs transition">
-                            <i class="ph ph-users-three text-lg text-blue-600"></i>
-                            <span>دليل الوكلاء المعتمدين</span>
-                        </button>
+
                         <button onclick="sharePlatform()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-slate-50 font-bold text-xs transition">
                             <i class="ph ph-share-network text-lg text-teal-600"></i>
                             <span>مشاركة المنصة</span>
                         </button>
+
                         <button onclick="switchTab('profile')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-slate-50 font-bold text-xs transition">
                             <i class="ph ph-user-gear text-lg text-slate-600"></i>
                             <span>إعدادات الحساب</span>
@@ -1107,47 +1138,93 @@
         </div>
     </div>
 
-    <div id="purchase-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[90]">
-        <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative text-right space-y-5 slide-up-modal">
+    <!-- نافذة تأكيد الفاتورة والدفع (تصميم منسق وموحد) -->
+    <div id="purchase-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[90]">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative text-right space-y-5 slide-up-modal border border-slate-100 dark:border-slate-800">
+            
+            <!-- ترويسة النافذة الموحدة -->
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
-             <!-- زر الرجوع والتعديل (جهة اليمين) -->
-             <button onclick="toggleView('purchase-modal', false); toggleView('account-inputs-modal', true)" class="modal-btn-back btn-spring flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-sm" title="رجوع للتعديل">
-                 <i class="ph ph-caret-right font-bold text-sm"></i>
-                 <span>تعديل</span>
-             </button>
-             <!-- العنوان (المنتصف) -->
-             <h3 class="text-sm md:text-base font-black text-slate-800 dark:text-slate-100 text-center flex-grow">تأكيد الفاتورة</h3>
-             <!-- زر الإغلاق (جهة اليسار) -->
-             <button onclick="closeAllModals()" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm" title="إغلاق">
-                 <i class="ph ph-x font-bold text-base"></i>
-             </button>
-         </div>
-            <div class="bg-slate-50 rounded-[20px] border border-slate-100 p-5 space-y-3 text-xs">
-                <div class="flex justify-between border-b border-slate-200/60 pb-3 items-center">
-                    <span class="text-slate-500 font-medium">المنتج المطلوب:</span>
-                    <span id="review-item-name" class="font-bold text-slate-900 max-w-[60%] text-left line-clamp-2 leading-snug">...</span>
-                </div>
-                <div id="review-id-row" class="flex justify-between border-b border-slate-200/60 pb-3 items-center">
-                    <span class="text-slate-500 font-medium">معرف الشحن (ID):</span>
-                    <span id="review-item-player-id" class="font-mono font-black text-[#005ba3] bg-blue-50 px-2 py-1 rounded-md" dir="ltr">...</span>
-                </div>
-                <div id="review-delivery-row" class="flex justify-between border-b border-slate-200/60 pb-3 items-center">
-                    <span class="text-slate-500 font-medium">طريقة التسليم:</span>
-                    <span id="review-item-delivery-type" class="font-bold text-emerald-600 flex items-center gap-1"><i class="ph-fill ph-lightning"></i> ...</span>
-                </div>
-                <div class="flex justify-between pt-2 text-sm items-center">
-                    <span class="font-black text-slate-800">الإجمالي للدفع:</span>
-                    <span id="review-item-price" class="font-black text-2xl text-blue-600 financial-amount">...</span>
-                </div>
+                <button onclick="toggleView('purchase-modal', false); toggleView('account-inputs-modal', true)" class="modal-btn-back btn-spring flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-sm" title="رجوع للتعديل">
+                    <i class="ph ph-caret-right font-bold text-sm"></i>
+                    <span>تعديل</span>
+                </button>
+                <h3 class="text-sm md:text-base font-black text-slate-800 dark:text-slate-100 text-center flex-grow">تأكيد الفاتورة</h3>
+                <button onclick="closeAllModals()" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center shadow-sm" title="إغلاق">
+                    <i class="ph ph-x font-bold text-base"></i>
+                </button>
             </div>
-            <div class="pt-2">
+
+            <!-- بطاقة تفاصيل الفاتورة -->
+            <div class="bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200/70 dark:border-slate-800 p-4 space-y-3 text-xs">
+                
+                <!-- المنتج المطلوب -->
+                <div class="flex justify-between items-center border-b border-slate-200/60 dark:border-slate-700/60 pb-2.5">
+                    <span class="text-slate-500 dark:text-slate-400 font-medium">المنتج المطلوب:</span>
+                    <span id="review-item-name" class="font-bold text-slate-900 dark:text-slate-100 max-w-[60%] text-left line-clamp-2 leading-snug">...</span>
+                </div>
+                
+                <!-- معرف الشحن -->
+                <div id="review-id-row" class="flex justify-between items-center border-b border-slate-200/60 dark:border-slate-700/60 pb-2.5">
+                    <span class="text-slate-500 dark:text-slate-400 font-medium">معرف الشحن (ID):</span>
+                    <span id="review-item-player-id" class="font-mono font-black text-[#005ba3] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/40 px-2 py-0.5 rounded-lg" dir="ltr">...</span>
+                </div>
+                
+                <!-- طريقة التسليم -->
+                <div id="review-delivery-row" class="flex justify-between items-center border-b border-slate-200/60 dark:border-slate-700/60 pb-2.5">
+                    <span class="text-slate-500 dark:text-slate-400 font-medium">طريقة التسليم:</span>
+                    <span id="review-item-delivery-type" class="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <i class="ph-fill ph-lightning"></i>
+                        <span>...</span>
+                    </span>
+                </div>
+
+                <!-- حقل كود الخصم والقسيمة -->
+                <div class="pt-1 pb-1 border-b border-slate-200/60 dark:border-slate-700/60">
+                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1.5">هل لديك رمز قسيمة أو كود خصم؟</label>
+                    <div class="flex gap-2">
+                        <div class="relative flex-grow">
+                            <i class="ph ph-tag absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input id="coupon-code-input" type="text" placeholder="مثال: SHIIFTX3" class="w-full pr-8 pl-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono uppercase text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500 transition shadow-inner" dir="ltr">
+                        </div>
+                        <button id="apply-coupon-btn" onclick="applyCouponCode()" type="button" class="btn-spring px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition shrink-0 shadow-sm cursor-pointer">
+                            تطبيق
+                        </button>
+                    </div>
+                    <!-- رسالة نتيجة فحص الكود -->
+                    <p id="coupon-status-msg" class="text-[10px] mt-1.5 hidden font-bold"></p>
+                </div>
+
+                <!-- سطر الخصم المطبق -->
+                <div id="discount-breakdown-row" class="hidden justify-between items-center border-b border-slate-200/60 dark:border-slate-700/60 pb-2.5 text-emerald-600 dark:text-emerald-400 font-bold">
+                    <span class="flex items-center gap-1.5">
+                        <i class="ph-fill ph-seal-percent text-base"></i>
+                        <span id="discount-label-text">الخصم المطبق:</span>
+                    </span>
+                    <span id="discount-val-text" class="font-mono text-sm tabular-numeric font-black">-$0.00</span>
+                </div>
+
+                <!-- المبلغ النهائي المطلوب للدفع -->
+                <div class="flex justify-between items-center pt-1">
+                    <div>
+                        <span class="font-black text-slate-800 dark:text-slate-100 text-xs block">المبلغ المطلوب للدفع:</span>
+                        <span class="text-[10px] text-slate-400 font-medium">يُخصم من رصيد المحفظة</span>
+                    </div>
+                    <span id="review-item-price" class="font-black text-2xl text-blue-600 dark:text-blue-400 financial-amount tabular-numeric leading-none">$0.00</span>
+                </div>
+
+            </div>
+
+            <!-- زر التأكيد والدفع النهائي -->
+            <div class="pt-1">
                 <button id="confirm-purchase-btn" onclick="executeSubscriptionPurchase()" class="btn-glow-sheen btn-spring w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-4 rounded-xl text-sm shadow-[0_10px_25px_-5px_rgba(5,150,105,0.45)] flex justify-center items-center gap-2 active:scale-95 cursor-pointer">
-                <i class="ph-fill ph-check-circle text-xl"></i>
-                <span class="tracking-wide">تأكيد ودفع</span>
-            </button>
+                    <i class="ph-fill ph-check-circle text-xl"></i>
+                    <span class="tracking-wide">تأكيد ودفع</span>
+                </button>
             </div>
+
         </div>
     </div>
+
 
     <!-- نافذة تسليم الكود الرقمي -->
     <div id="code-delivery-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[100]">
@@ -1298,7 +1375,7 @@
         </div>
         <div class="chat-input-area">
             <input type="text" id="chat-input" placeholder="اكتب استفسارك هنا..." onkeypress="handleKeyPress(event)" />
-            <button onclick="sendChatMessage()">إرسال</button>
+            <button onclick="sendManualInput()">إرسال</button>
         </div>
     </div>
 
@@ -1313,7 +1390,8 @@
         let currentUser = null, syncInterval = null, currentWalletBalance = 0.00;
 let isSettingNewPassword = false;
         let rawCardNumber = "", lastFourDigits = "", isCardVisible = false;
-        let selectedProductId = "", selectedItemName = "", selectedItemPrice = 0.00, inputPlayerId = "", inputPlayerIdConfirm = "";
+       let selectedProductId = "", selectedItemName = "", selectedItemPrice = 0.00, inputPlayerId = "", inputPlayerIdConfirm = "";
+let activeCoupon = null, discountedPrice = 0.00;
         let tempRegisterData = {}, globalProductsRaw = [], currentFlowType = "register", globalTransactionsRaw = [];
         let resendTimer = null;
 
@@ -1718,34 +1796,38 @@ async function verifyRegistrationOtp() {
             toggleView('login-screen', true);
         }
 
-        async function resendOtpCode() {
-            const btn = document.getElementById('resend-otp-btn');
-            if (!tempRegisterData || !tempRegisterData.email) {
-                return showCustomAlert("حدث خطأ، يرجى إعادة المحاولة من البداية.");
-            }
+       async function resendOtpCode() {
+         const btn = document.getElementById('resend-otp-btn');
+         if (!tempRegisterData || !tempRegisterData.email) {
+             return showCustomAlert("حدث خطأ، يرجى إعادة المحاولة من البداية.");
+         }
 
-            btn.disabled = true;
-            btn.innerText = "جاري الإرسال...";
+         btn.disabled = true;
+         btn.innerText = "جاري الإرسال...";
 
-            let error = null;
+         let error = null;
 
-           if (currentFlowType === "register") {
-                const res = await supabase.auth.signInWithOtp({
-                    email: tempRegisterData.email
-                });
-                error = res.error;
-            }
+         if (currentFlowType === "register") {
+             const res = await supabase.auth.signInWithOtp({
+                 email: tempRegisterData.email
+             });
+             error = res.error;
+         } else {
+             // معالجة إعادة الإرسال في مسار استعادة كلمة المرور
+             const res = await supabase.auth.resetPasswordForEmail(tempRegisterData.email);
+             error = res.error;
+         }
 
-            if (error) {
-                btn.disabled = false;
-                btn.innerText = "إعادة إرسال الرمز";
-                return showCustomAlert("فشل الإرسال: " + error.message);
-            }
+         if (error) {
+             btn.disabled = false;
+             btn.innerText = "إعادة إرسال الرمز";
+             return showCustomAlert("فشل الإرسال: " + error.message);
+         }
 
-            showCustomAlert("تم إرسال رمز جديد إلى بريدك بنجاح!", false);
-            document.getElementById('reg-otp-code').value = "";
-            startResendCooldown();
-        }
+         showCustomAlert("تم إرسال رمز جديد إلى بريدك بنجاح!", false);
+         document.getElementById('reg-otp-code').value = "";
+         startResendCooldown();
+     }
 
         // ========================================================================
         // 4. جلب ومزامنة البيانات
@@ -1820,7 +1902,11 @@ async function verifyRegistrationOtp() {
         // 5. محرك الشراء والتمويل
         // ========================================================================
         async function executeSubscriptionPurchase() { 
-            if (currentWalletBalance < selectedItemPrice) return showCustomAlert("الرصيد غير كافٍ لإتمام الشراء."); 
+            const finalDuePrice = (activeCoupon && discountedPrice !== undefined) ? discountedPrice : selectedItemPrice;
+
+            if (currentWalletBalance < finalDuePrice) {
+                return showCustomAlert("الرصيد غير كافٍ لإتمام الشراء."); 
+            }
             
             const btn = document.getElementById('confirm-purchase-btn'); 
             btn.disabled = true; 
@@ -1831,7 +1917,8 @@ async function verifyRegistrationOtp() {
                     p_user_id: currentUser.id, 
                     p_product_id: selectedProductId, 
                     p_player_id: inputPlayerId || null, 
-                    p_player_id_confirm: inputPlayerIdConfirm || null
+                    p_player_id_confirm: inputPlayerIdConfirm || null,
+                    p_coupon_code: activeCoupon ? activeCoupon.code : null
                 }); 
                 
                 if (error) throw error;
@@ -1843,49 +1930,126 @@ async function verifyRegistrationOtp() {
                     if (r.mode === "CODE") {
                         showCodeDeliveryModal(r.code, selectedItemName);
                     } else {
-                        showCustomAlert("✅ تم استلام طلب الشحن بنجاح وهو قيد التنفيذ!", false);
+                        showDirectIdSuccessModal({
+                            itemName: selectedItemName,
+                            playerId: inputPlayerId,
+                            price: finalDuePrice,
+                            txRef: r.tx_ref || ''
+                        });
                     }
                 } else { 
                     showCustomAlert("فشلت العملية: " + (r ? r.message : "حدث خطأ غير متوقع")); 
                 }
             } catch (err) {
                 console.error("Purchase Error:", err);
-                showCustomAlert("خطأ في الاتصال: " + err.message);
-           } finally {
-             btn.disabled = false; 
-             btn.innerHTML = `<i class="ph-fill ph-check-circle text-xl"></i> <span class="tracking-wide">تأكيد ودفع</span>`; 
-         }
+                showCustomAlert(err.message || "فشلت معالجة الطلب");
+            } finally {
+                btn.disabled = false; 
+                btn.innerHTML = `
+                    <i class="ph-fill ph-check-circle text-xl"></i>
+                    <span class="tracking-wide">تأكيد ودفع</span>
+                `; 
+            }
         }
 
-        async function processSubWalletFetch() { 
-            const agent = document.getElementById('sub-agent-code').value.trim();
-            const method = document.getElementById('sub-payment-method').value;
-            const btn = document.getElementById('sub-deposit-step1-btn'); 
+      function showDirectIdSuccessModal(data) {
+            const oldModal = document.getElementById('direct-id-success-modal');
+            if (oldModal) oldModal.remove();
+
+            const modalHtml = `
+            <div id="direct-id-success-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[99]">
+                <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[28px] p-6 text-center space-y-4 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
+                    <div class="w-16 h-16 bg-amber-50 dark:bg-amber-950/40 text-amber-500 rounded-full flex items-center justify-center mx-auto text-3xl">
+                        <i class="ph-fill ph-hourglass-medium animate-pulse"></i>
+                    </div>
+
+                    <div class="space-y-1">
+                        <h3 class="text-base font-black text-slate-800 dark:text-slate-100">تم استلام طلب الشحن بنجاح!</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">طلبك قيد المراجعة والشحن المباشر لحسابك الآن.</p>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 text-xs space-y-2.5 text-right border border-slate-200/60 dark:border-slate-700/60">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">المنتج:</span>
+                            <span class="font-bold text-slate-800 dark:text-slate-200">${data.itemName}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">المعرف المستلم (ID):</span>
+                            <span class="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded" dir="ltr">${data.playerId}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">المبلغ المدفوع:</span>
+                            <span class="font-black text-slate-800 dark:text-slate-200">$${Number(data.price).toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-slate-200/60 dark:border-slate-700/60 pt-2 text-amber-600 dark:text-amber-400 font-bold">
+                            <span class="flex items-center gap-1"><i class="ph ph-clock"></i> وقت التنفيذ المتوقع:</span>
+                            <span>5 - 15 دقيقة</span>
+                        </div>
+                    </div>
+
+                    <p class="text-[11px] text-slate-400">يمكنك متابعة حالة الطلب في أي وقت عبر <b>سجل المعاملات والطلبات</b>.</p>
+
+                    <button onclick="document.getElementById('direct-id-success-modal').remove()" class="btn-spring w-full bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-md cursor-pointer">
+                        فهمت، شكراً لك
+                    </button>
+                </div>
+            </div>`;
             
-            if(!agent) return showCustomAlert("يرجى إدخال رمز الوكيل."); 
-            btn.disabled = true; 
-            
-            const { data: agentData } = await supabase.from('agents').select('*').eq('agent_code', agent).eq('payment_method', method).single();
-            if(agentData) { 
-                document.getElementById('sub-display-agent-name').innerText = agentData.agent_name; 
-                document.getElementById('sub-display-wallet-number').innerText = agentData.wallet_address; 
-                toggleView('deposit-sub-step1', false); 
-                toggleView('deposit-sub-step2', true); 
-            } else { 
-                showCustomAlert("رمز الوكيل غير مسجل."); 
-            } 
-            btn.disabled = false; 
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+// تحديث رقم المحفظة واسم البوابة فوراً عند الاختيار
+        function updateDirectWalletInfo() {
+            const select = document.getElementById('sub-payment-method');
+            const walletBox = document.getElementById('direct-official-wallet-num');
+            const labelBox = document.getElementById('direct-gateway-name-label');
+            if (!select || !walletBox) return;
+
+            const selectedOpt = select.options[select.selectedIndex];
+            const walletNum = selectedOpt.getAttribute('data-wallet') || '---';
+            const gatewayName = selectedOpt.value;
+
+            walletBox.innerText = walletNum;
+            if (labelBox) labelBox.innerText = `رقم حساب ${gatewayName}:`;
         }
 
+        // اختيار مبلغ سريع من الأزرار الجاهزة
+        function setPresetAmount(val, btnEl) {
+            const input = document.getElementById('sub-form-amount-select');
+            if (input) input.value = val;
+
+            // تمييز الزر المختار
+            document.querySelectorAll('.amount-preset-btn').forEach(btn => {
+                btn.className = "amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring";
+            });
+
+            if (btnEl) {
+                btnEl.className = "amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-blue-600 bg-blue-600 text-white shadow-sm transition btn-spring";
+            }
+        }
+
+        // عند قيام العميل بكتابة رقم مخصص في الخانة
+        function onCustomAmountTyped() {
+            // إلغاء تحديد الأزرار السريعة لبيان أن المبلغ مخصص
+            document.querySelectorAll('.amount-preset-btn').forEach(btn => {
+                btn.className = "amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring";
+            });
+        }
+
+        // إرسال طلب الشحن المباشر للإدارة
         async function submitSubFinalDeposit() { 
             const amtInput = document.getElementById('sub-form-amount-select');
-            const finalAmt = amtInput ? amtInput.value.trim() : "";
+            const rawAmt = amtInput ? amtInput.value.trim().replace(/[^0-9.]/g, '') : "";
+            const finalAmt = parseFloat(rawAmt);
             const txNum = document.getElementById('sub-form-tx-number').value.trim();
-            const agent = document.getElementById('sub-agent-code').value.trim();
             const method = document.getElementById('sub-payment-method').value;
             const btn = document.getElementById('sub-deposit-final-btn'); 
 
-            if(!finalAmt || !txNum) return showCustomAlert("البيانات الماليّة إجبارية."); 
+            if (!rawAmt || isNaN(finalAmt) || finalAmt <= 0) {
+                return showCustomAlert("يرجى إدخال مبلغ صحيح للشحن.");
+            }
+            if (!txNum) {
+                return showCustomAlert("يرجى إدخال رقم إشعار الحوالة لتأكيد العملية."); 
+            }
             
             btn.disabled = true; 
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> جاري الإرسال...`;
@@ -1895,46 +2059,49 @@ async function verifyRegistrationOtp() {
                 const { data: rpcRef, error: rpcErr } = await supabase.rpc('generate_ref', { prefix: 'TX-D' });
                 if (!rpcErr && rpcRef) txRef = rpcRef;
 
+                // 1. تسجيل في جدول طلبات الإيداع
                 const { error: depError } = await supabase.from('deposit_orders').insert({ 
                     transaction_ref: txRef, 
                     user_id: currentUser.id, 
-                    amount: parseFloat(finalAmt), 
+                    amount: finalAmt, 
                     payment_method: method, 
-                    agent_code: agent, 
+                    agent_code: null,
                     transfer_receipt_num: txNum,
                     status: 'pending'
-                });
+                }); 
 
                 if (depError) throw depError;
 
+                // 2. تسجيل في جدول المعاملات
                 const { error: txError } = await supabase.from('transactions').insert({ 
                     user_id: currentUser.id, 
                     transaction_type: 'Deposit', 
-                    details: 'طلب تمويل عبر الوكيل (' + method + ')', 
-                    amount: parseFloat(finalAmt), 
+                    details: 'طلب شحن محفظة عبر (' + method + ')', 
+                    amount: finalAmt, 
                     status: 'pending', 
                     transaction_ref: txRef,
                     delivery_type: 'WALLET_DEPOSIT',
                     player_id: null,
                     serial_code: null
-                });
+                }); 
 
                 if (txError) throw txError;
 
-                showCustomAlert("تم رفع الطلب بنجاح للتدقيق.", false); 
+                showCustomAlert("تم رفع طلب الشحن بنجاح وهو قيد المراجعة لدى الإدارة.", false); 
+                if (amtInput) amtInput.value = "";
+                document.getElementById('sub-form-tx-number').value = "";
+                onCustomAmountTyped();
                 switchTab('home'); 
                 silentSyncData(); 
 
             } catch (err) {
-                console.error("Supabase Insert Error:", err);
-                showCustomAlert("فشل الحفظ: " + (err.message || "خطأ في الصلاحيات أو قاعدة البيانات"));
+                console.error("Supabase Deposit Error:", err);
+                showCustomAlert("فشل رفع الطلب: " + (err.message || "خطأ في الاتصال"));
             } finally {
                 btn.disabled = false; 
-                btn.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> تأكيد الشحن`;
+                btn.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> تأكيد وإرسال طلب الشحن`;
             }
         }
-
-        // ========================================================================
         // 6. التحكم بالقائمة الجانبية والتنقل
         // ========================================================================
         function toggleView(id, show) { const el = document.getElementById(id); if(el) el.classList.toggle('hidden', !show); }
@@ -1980,15 +2147,51 @@ async function verifyRegistrationOtp() {
             });
         }
         
-        function showCustomAlert(text, isErr=true) {
-            document.getElementById('custom-alert-text').innerText = text;
-            const iconContainer = document.getElementById('alert-icon-container');
-            if (iconContainer) {
-                iconContainer.className = isErr ? "p-2 rounded-full bg-red-100 text-red-600 shrink-0" : "p-2 rounded-full bg-emerald-100 text-emerald-600 shrink-0";
-                iconContainer.innerHTML = isErr ? `<i class="ph-fill ph-warning-circle text-lg"></i>` : `<i class="ph-fill ph-check-circle text-lg"></i>`;
+        function showCustomAlert(msg, isError = true) {
+            let cleanMsg = (msg || "") + "";
+
+            if (isError) {
+                if (cleanMsg.includes("check_transaction_player_id_format")) {
+                    cleanMsg = "معرف الحساب (ID) غير صالح أو يحتوي على رموز غير مدعومة.";
+                } else if (cleanMsg.includes("check_transaction_serial_code_format")) {
+                    cleanMsg = "حدث خطأ في معالجة كود البطاقة، يرجى التواصل مع الدعم الفني.";
+                } else if (cleanMsg.includes("الرصيد غير كافٍ")) {
+                    cleanMsg = "رصيدك الحالي غير كافٍ لإتمام العملية. يرجى شحن المحفظة أولاً.";
+                } else if (cleanMsg.includes("المنتج غير متوفر")) {
+                    cleanMsg = "هذا المنتج غير متوفر حالياً في المخزون.";
+                } else if (cleanMsg.includes("User already registered") || cleanMsg.includes("already exists")) {
+                    cleanMsg = "هذا الحساب أو البريد مسجل مسبقاً، يرجى تسجيل الدخول بدلاً من ذلك.";
+                } else if (cleanMsg.includes("Invalid login credentials")) {
+                    cleanMsg = "اسم المستخدم أو كلمة المرور غير صحيحة.";
+                } else if (cleanMsg.includes("NetworkError") || cleanMsg.includes("Failed to fetch")) {
+                    cleanMsg = "تعذر الاتصال بالخادم، يرجى التحقق من اتصال الإنترنت.";
+                } else if (cleanMsg.includes("violates") || cleanMsg.includes("constraint") || cleanMsg.includes("syntax error")) {
+                    cleanMsg = "تعذر إكمال العملية بسبب خطأ في البيانات المدخلة، يرجى التحقق والمحاولة مجدداً.";
+                }
             }
-            toggleView('custom-alert', true); 
-            setTimeout(() => toggleView('custom-alert', false), 5000);
+
+            const existingAlert = document.getElementById('custom-toast-alert');
+            if (existingAlert) existingAlert.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'custom-toast-alert';
+            toast.className = `fixed top-5 left-1/2 -translate-x-1/2 z-[130] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold transition-all duration-300 animate-in fade-in slide-in-from-top-4 ${
+                isError 
+                    ? 'bg-rose-500 text-white shadow-rose-500/25' 
+                    : 'bg-emerald-600 text-white shadow-emerald-600/25'
+            }`;
+
+            toast.innerHTML = `
+                <i class="ph-bold ${isError ? 'ph-warning-circle text-lg' : 'ph-check-circle text-lg'} shrink-0"></i>
+                <span class="tracking-wide">${cleanMsg}</span>
+            `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         }
 
         function closeCustomAlert() { toggleView('custom-alert', false); }
@@ -2003,7 +2206,15 @@ async function verifyRegistrationOtp() {
             document.getElementById('card-eye-open').style.display = isCardVisible ? 'inline' : 'none';
             document.getElementById('card-eye-closed').style.display = isCardVisible ? 'none' : 'inline';
         }
-        function resetCardVisibility() { isCardVisible = false; toggleCardVisibility(); }
+       function resetCardVisibility() { 
+            isCardVisible = false; 
+            const cardEl = document.getElementById('live-card-number');
+            if (cardEl) cardEl.innerText = "•••• •••• •••• " + lastFourDigits;
+            const eyeOpen = document.getElementById('card-eye-open');
+            if (eyeOpen) eyeOpen.style.display = 'none';
+            const eyeClosed = document.getElementById('card-eye-closed');
+            if (eyeClosed) eyeClosed.style.display = 'inline';
+        }
         
         function showCustomPrompt(desc, callback) {
             document.getElementById('custom-prompt-desc').innerText = desc; toggleView('custom-prompt', true);
@@ -2436,10 +2647,73 @@ function createTransactionCardElement(tx) {
                 document.getElementById('review-item-delivery-type').innerText = `تسليم الكود فوراً`; 
             } 
             
+            // إعادة تصفير القسيمة عند كل فتح جديد
+            activeCoupon = null;
+            discountedPrice = selectedItemPrice;
+            const cInput = document.getElementById('coupon-code-input'); if(cInput) cInput.value = "";
+            const cMsg = document.getElementById('coupon-status-msg'); if(cMsg) { cMsg.className = "text-[10px] mt-1.5 hidden font-bold"; cMsg.innerText = ""; }
+            const dRow = document.getElementById('discount-breakdown-row'); if(dRow) { dRow.classList.add('hidden'); dRow.classList.remove('flex'); }
+
             toggleView('account-inputs-modal', false); 
             document.getElementById('review-item-name').innerText = selectedItemName; 
             document.getElementById('review-item-price').innerText = "$" + selectedItemPrice.toFixed(2); 
             toggleView('purchase-modal', true); 
+        }
+
+      async function applyCouponCode() {
+            const input = document.getElementById('coupon-code-input');
+            const statusMsg = document.getElementById('coupon-status-msg');
+            const btn = document.getElementById('apply-coupon-btn');
+            const code = input ? input.value.trim().toUpperCase() : '';
+
+            if (!code) {
+                activeCoupon = null;
+                discountedPrice = selectedItemPrice;
+                document.getElementById('discount-breakdown-row').classList.add('hidden');
+                document.getElementById('review-item-price').innerText = "$" + selectedItemPrice.toFixed(2);
+                if (statusMsg) statusMsg.classList.add('hidden');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "...";
+
+            try {
+                const { data: coupon, error } = await supabase
+                    .from('coupons')
+                    .select('*')
+                    .eq('code', code)
+                    .eq('is_active', true)
+                    .single();
+
+                if (error || !coupon) {
+                    activeCoupon = null;
+                    discountedPrice = selectedItemPrice;
+                    document.getElementById('discount-breakdown-row').classList.add('hidden');
+                    document.getElementById('review-item-price').innerText = "$" + selectedItemPrice.toFixed(2);
+                    
+                    statusMsg.className = "text-[10px] mt-1.5 text-rose-500 font-bold block";
+                    statusMsg.innerText = "✕ رمز القسيمة غير صالح أو منتهي الصلاحية.";
+                } else {
+                    activeCoupon = coupon;
+                    const discountAmt = (selectedItemPrice * (coupon.discount_percent / 100.0));
+                    discountedPrice = Math.max(0, selectedItemPrice - discountAmt);
+
+                    document.getElementById('discount-label-text').innerText = `خصم القسيمة (${coupon.discount_percent}%):`;
+                    document.getElementById('discount-val-text').innerText = `-$${discountAmt.toFixed(2)}`;
+                    document.getElementById('discount-breakdown-row').classList.remove('hidden');
+                    document.getElementById('discount-breakdown-row').classList.add('flex');
+                    document.getElementById('review-item-price').innerText = "$" + discountedPrice.toFixed(2);
+
+                    statusMsg.className = "text-[10px] mt-1.5 text-emerald-600 dark:text-emerald-400 font-bold block";
+                    statusMsg.innerText = `✓ تم تطبيق الخصم بنجاح! وفرت $${discountAmt.toFixed(2)}`;
+                }
+            } catch (err) {
+                console.error("Coupon check error:", err);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "تطبيق";
+            }
         }
 
         // ========================================================================
@@ -2493,7 +2767,8 @@ function createTransactionCardElement(tx) {
             
             if (!isOpen) {
                 const messagesArea = document.getElementById('chat-messages');
-                if (messagesArea && messagesArea.children.length === 0) {
+                // يتم عرض القائمة الرئيسية إذا كان الصندوق يحتوي فقط على رسالة الترحيب أو فارغاً
+                if (messagesArea && messagesArea.children.length <= 1) {
                     renderMainMenu();
                 }
             }
