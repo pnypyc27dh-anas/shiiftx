@@ -2313,22 +2313,21 @@ async function verifyRegistrationOtp() {
             if(!error) { showCustomAlert("تم تعديل البيانات بنجاح.", false); silentSyncData(); switchTab('home'); } 
         }
 
-     // ========================================================================
-        // 7. محرك عرض المعاملات الفاخر (Fintech Hierarchical Ledger)
+    // ========================================================================
+        // 7. محرك عرض المعاملات الفاخر (Fintech Platform & Package Ledger)
         // ========================================================================
 
-        const TX_CATEGORIES = {
-            'Deposit': { label: 'إيداع رصيد', icon: 'ph-bold ph-arrow-down-left', theme: 'emerald' },
-            'شحن رصيد': { label: 'إيداع رصيد', icon: 'ph-bold ph-arrow-down-left', theme: 'emerald' },
-            'Purchase Digital Code': { label: 'شراء كود رقمي', icon: 'ph-bold ph-barcode', theme: 'blue' },
-            'شراء كود رقمي': { label: 'شراء كود رقمي', icon: 'ph-bold ph-barcode', theme: 'blue' },
-            'Direct ID Top-up': { label: 'شحن مباشر (ID)', icon: 'ph-bold ph-game-controller', theme: 'indigo' },
-            'شحن مباشر (ID)': { label: 'شحن مباشر (ID)', icon: 'ph-bold ph-game-controller', theme: 'indigo' },
-            'Refund': { label: 'استرجاع رصيد', icon: 'ph-bold ph-arrow-u-up-left', theme: 'emerald' },
-            'استرجاع رصيد': { label: 'استرجاع رصيد', icon: 'ph-bold ph-arrow-u-up-left', theme: 'emerald' },
-            'Affiliate Commission': { label: 'عمولة تسويق', icon: 'ph-bold ph-seal-percent', theme: 'amber' },
-            'Commission Payout': { label: 'صرف أرباح كاش', icon: 'ph-bold ph-money', theme: 'amber' },
-            'Commission Reversal': { label: 'إلغاء عمولة', icon: 'ph-bold ph-x-circle', theme: 'rose' }
+        const TX_OP_CONFIG = {
+            'Deposit': { label: 'إيداع رصيد', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-900/50', icon: 'ph-bold ph-arrow-down-left' },
+            'شحن رصيد': { label: 'إيداع رصيد', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-900/50', icon: 'ph-bold ph-arrow-down-left' },
+            'Purchase Digital Code': { label: 'شراء كود رقمي', color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-900/50', icon: 'ph-bold ph-barcode' },
+            'شراء كود رقمي': { label: 'شراء كود رقمي', color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-900/50', icon: 'ph-bold ph-barcode' },
+            'Direct ID Top-up': { label: 'شحن مباشر (ID)', color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-900/50', icon: 'ph-bold ph-game-controller' },
+            'شحن مباشر (ID)': { label: 'شحن مباشر (ID)', color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-900/50', icon: 'ph-bold ph-game-controller' },
+            'Refund': { label: 'استرجاع رصيد', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-900/50', icon: 'ph-bold ph-arrow-u-up-left' },
+            'استرجاع رصيد': { label: 'استرجاع رصيد', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-900/50', icon: 'ph-bold ph-arrow-u-up-left' },
+            'Affiliate Commission': { label: 'عمولة تسويق', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900/50', icon: 'ph-bold ph-seal-percent' },
+            'Commission Payout': { label: 'صرف أرباح كاش', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900/50', icon: 'ph-bold ph-money' }
         };
 
         function renderRecentDashboardTransactions(txArray) {
@@ -2352,7 +2351,7 @@ async function verifyRegistrationOtp() {
 
         function createTransactionCardElement(tx) {
             const card = document.createElement('div');
-            card.className = "group relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 transition-all duration-200 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 mb-2.5 space-y-3 cursor-pointer";
+            card.className = "group relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700 mb-3 space-y-3 cursor-pointer";
 
             const rawTx = tx.raw || {};
             const statusKey = (tx.status || rawTx.status || '').toLowerCase();
@@ -2364,73 +2363,118 @@ async function verifyRegistrationOtp() {
             const isRefundedOrder = statusKey === 'refunded' || statusKey === 'مسترجع';
             const isPending = statusKey === 'pending' || statusKey === 'معلق';
 
-            // 1. استخراج وتحديد: عنوان العملية أولاً، ثم اسم الباقة
-            const catConfig = TX_CATEGORIES[tx.type] || { label: tx.type || 'معاملة مالية', icon: 'ph-bold ph-credit-card', theme: 'slate' };
-            const opTitle = isRefundedOrder ? 'طلب ملغي ومسترد' : catConfig.label;
-
+            // 1. استخراج النصوص وتنقيتها
             let rawDetails = tx.details || '';
-            let packageName = rawDetails;
             let cancelReason = '';
             let discountInfo = '';
 
-            // استخراج سبب الرفض إن وجد
             const refMatch = rawDetails.match(/\[مسترجع:\s*([^\]]+)\]/);
-            if (refMatch) {
-                cancelReason = refMatch[1].trim();
-                packageName = packageName.replace(/\[مسترجع:\s*[^\]]+\]/, '');
-            }
+            if (refMatch) cancelReason = refMatch[1].trim();
 
-            // استخراج كود الخصم
             const discMatch = rawDetails.match(/\(خصم كود\s*([^)]+)\)/);
-            if (discMatch) {
-                discountInfo = discMatch[1].trim();
-                packageName = packageName.replace(/\(خصم كود\s*[^)]+\)/, '');
-            }
+            if (discMatch) discountInfo = discMatch[1].trim();
 
-            // استخراج معرف اللاعب وتصفية اسم الباقة
             let playerId = tx.player_id || rawTx.player_id;
             const idMatch = rawDetails.match(/ID:\s*([^\s)]+)/i);
             if (!playerId && idMatch) playerId = idMatch[1];
-            packageName = packageName.replace(/\(ID:\s*[^)]+\)/gi, '').trim();
 
-            if (!packageName || packageName === tx.type) {
-                packageName = isDeposit ? 'تمويل المحفظة الرقمية' : (isRefund ? 'استرداد نقدي للحساب' : 'خدمة رقمية');
+            // تنظيف اسم الباقة الصافي للبحث عن المنصة
+            let cleanPackageName = rawDetails
+                .replace(/\[مسترجع:\s*[^\]]+\]/g, '')
+                .replace(/\(ID:\s*[^)]+\)/gi, '')
+                .replace(/\(خصم كود\s*[^)]+\)/gi, '')
+                .replace(/استرجاع رصيد طلب مرفوض:\s*/g, '')
+                .trim();
+
+            // 2. المحرك الذكي لتحديد [اسم المنصة] و [شعار المنصة] و [اسم الباقة]
+            let platformName = '';
+            let packageName = cleanPackageName;
+            let platformImageUrl = '';
+
+            // محاولة مطابقة الباقة مع قائمة منتجات المتجر المسجلة في الذاكرة
+            if (typeof globalProductsRaw !== 'undefined' && globalProductsRaw.length > 0) {
+                const matched = globalProductsRaw.find(p => 
+                    p.package_name.trim().toLowerCase() === cleanPackageName.toLowerCase() ||
+                    cleanPackageName.toLowerCase().includes(p.package_name.trim().toLowerCase()) ||
+                    p.package_name.trim().toLowerCase().includes(cleanPackageName.toLowerCase())
+                );
+                if (matched) {
+                    platformName = matched.platform;
+                    packageName = matched.package_name;
+                    platformImageUrl = matched.image_url || '';
+                }
             }
 
-            // 2. الهوية اللونية والأيقونة
-            let iconBox = '';
-            if (isRefundedOrder) {
-                iconBox = `<div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-500 border border-rose-200/60 dark:border-rose-900/40 flex items-center justify-center text-lg shrink-0">
-                    <i class="ph-bold ph-arrow-counter-clockwise"></i>
-                </div>`;
-            } else if (isRefund || isDeposit || (isCommission && !isPending)) {
-                iconBox = `<div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/40 flex items-center justify-center text-lg shrink-0">
-                    <i class="ph-bold ph-arrow-down-left"></i>
-                </div>`;
+            // معالجة المنصات لعمليات الإيداع والمحفظة والعمولات
+            if (!platformName) {
+                const methodMatch = rawDetails.match(/عبر\s*\(([^)]+)\)/);
+                if (methodMatch) {
+                    platformName = methodMatch[1];
+                    packageName = 'شحن رصيد المحفظة';
+                } else if (isDeposit) {
+                    platformName = 'قنوات الدفع المعتمدة';
+                    packageName = 'تمويل رصيد الحساب';
+                } else if (isRefund) {
+                    platformName = 'محفظة SHIIFTX';
+                    packageName = cleanPackageName || 'استرداد نقدي لطلب ملغي';
+                } else if (isCommission) {
+                    platformName = 'برنامج التسويق (وكيل)';
+                    packageName = 'أرباح عمولة من كود الخصم';
+                } else {
+                    // تفكيك تلقائي ذكي إذا لم تطابق قاعدة البيانات (مثل: "بيكو 1000" -> المنصة: بيكو، الباقة: 1000)
+                    const parts = cleanPackageName.split(' ');
+                    if (parts.length > 1) {
+                        platformName = parts[0];
+                        packageName = parts.slice(1).join(' ');
+                    } else {
+                        platformName = cleanPackageName || 'متجر SHIIFTX';
+                        packageName = 'اشتراك رقمي';
+                    }
+                }
+            }
+
+            // 3. تحديد نوع العملية وشارتها
+            const opConfig = TX_OP_CONFIG[tx.type] || { 
+                label: tx.type || 'معاملة مالية', 
+                color: 'text-slate-600 bg-slate-100 border-slate-200 dark:bg-slate-800 dark:text-slate-300', 
+                icon: 'ph-bold ph-receipt' 
+            };
+            const opLabel = isRefundedOrder ? 'طلب شحن مسترد' : opConfig.label;
+
+            // 4. تجهيز لوجو أو أيقونة المنصة
+            let logoMarkup = '';
+            if (platformImageUrl) {
+                logoMarkup = `
+                    <div class="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-white/10 p-1.5 shrink-0 flex items-center justify-center shadow-sm">
+                        <img src="${platformImageUrl}" alt="${platformName}" referrerpolicy="no-referrer" class="w-full h-full object-contain">
+                    </div>`;
             } else {
-                iconBox = `<div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-900/40 flex items-center justify-center text-lg shrink-0">
-                    <i class="${catConfig.icon}"></i>
-                </div>`;
+                let fallbackIcon = isRefund ? 'ph-bold ph-arrow-u-up-left' : (isDeposit ? 'ph-bold ph-wallet' : (isRefundedOrder ? 'ph-bold ph-prohibit' : opConfig.icon));
+                let fallbackColor = isRefund || isDeposit ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50' : (isRefundedOrder ? 'bg-rose-50 text-rose-500 dark:bg-rose-950/50 dark:text-rose-400 border-rose-200 dark:border-rose-900/50' : 'bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 border-blue-200 dark:border-blue-900/50');
+                logoMarkup = `
+                    <div class="w-12 h-12 rounded-2xl ${fallbackColor} border shrink-0 flex items-center justify-center text-xl shadow-sm">
+                        <i class="${fallbackIcon}"></i>
+                    </div>`;
             }
 
-            // 3. عرض المبلغ وحالة العملية في الجهة اليسرى
-            let amountMarkup = '';
+            // 5. المبلغ وشارة الحالة في الجهة اليسرى
+            let amountHtml = '';
             let statusPill = '';
 
             if (isRefundedOrder) {
-                amountMarkup = `<span class="font-mono text-sm font-bold text-slate-400 dark:text-slate-500 line-through">-$${numAmount.toFixed(2)}</span>`;
-                statusPill = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200/70 dark:border-rose-900/50">مسترد</span>`;
+                amountHtml = `<span class="font-mono text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 line-through">-$${numAmount.toFixed(2)}</span>`;
+                statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200/70 dark:border-rose-900/50">مسترد</span>`;
             } else if (isRefund || isDeposit || (isCommission && !isPending)) {
-                amountMarkup = `<span class="font-mono text-base font-black text-emerald-600 dark:text-emerald-400">+$${numAmount.toFixed(2)}</span>`;
-                statusPill = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-900/50">مكتمل</span>`;
+                amountHtml = `<span class="font-mono text-base font-black text-emerald-600 dark:text-emerald-400">+$${numAmount.toFixed(2)}</span>`;
+                statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-900/50">مكتمل</span>`;
             } else {
-                amountMarkup = `<span class="font-mono text-base font-black text-slate-800 dark:text-slate-100">-$${numAmount.toFixed(2)}</span>`;
+                amountHtml = `<span class="font-mono text-base font-black text-slate-900 dark:text-slate-100">-$${numAmount.toFixed(2)}</span>`;
                 statusPill = isPending
-                    ? `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200/70 dark:border-amber-900/50 animate-pulse">قيد التنفيذ</span>`
-                    : `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">مكتمل</span>`;
+                    ? `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200/70 dark:border-amber-900/50 animate-pulse">قيد التنفيذ</span>`
+                    : `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">مكتمل</span>`;
             }
 
-            // 4. الرقائق الذكية (المرجع • التاريخ • الـ ID • الخصم)
+            // 6. الوسوم الذكية (المرجع • التاريخ • معرف اللاعب • الخصم)
             const txRef = tx.tx_id || rawTx.transaction_ref || '---';
             let chipsHtml = `
                 <div class="flex items-center gap-1.5 flex-wrap text-[10px] text-slate-400 pt-0.5 font-sans">
@@ -2442,7 +2486,7 @@ async function verifyRegistrationOtp() {
                 </div>
             `;
 
-            // 5. شريط الكود الرقمي إذا وجد
+            // 7. شريط الكود الرقمي إذا وُجد
             const serialCode = tx.serial_code ? String(tx.serial_code).trim() : '';
             const hasCode = serialCode && !['null', 'undefined', 'none', '-'].includes(serialCode.toLowerCase());
             let codeRibbonHtml = '';
@@ -2464,7 +2508,7 @@ async function verifyRegistrationOtp() {
                 `;
             }
 
-            // 6. شريط التنبيه عند الرفض
+            // 8. شريط سبب الرفض إن وُجد
             let cancelAlertHtml = '';
             if (cancelReason) {
                 cancelAlertHtml = `
@@ -2475,40 +2519,48 @@ async function verifyRegistrationOtp() {
                 `;
             }
 
-            // الهيكل النهائي للبطاقة
+            // الهيكل النهائي المتكامل للبطاقة
             card.innerHTML = `
-                <div class="flex items-start justify-between gap-3">
-                    <div class="flex items-start gap-3 min-w-0">
-                        ${iconBox}
-                        <div class="min-w-0 space-y-0.5">
-                            <!-- 1. عنوان العملية أولاً -->
-                            <span class="text-[10px] font-black tracking-wide text-blue-600 dark:text-blue-400 block">${opTitle}</span>
-                            <!-- 2. اسم الباقة ثانياً -->
-                            <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 truncate">${packageName}</h4>
-                            <!-- 3. الرقائق الذكية (المرجع، التاريخ، الـ ID) -->
-                            ${chipsHtml}
-                        </div>
-                    </div>
-                    <!-- الجهة اليسرى: المبلغ والشارة -->
-                    <div class="flex flex-col items-end shrink-0 gap-1">
-                        ${amountMarkup}
+                <!-- السطر العلوي: وسم نوع العملية في اليمين، والمبلغ وشارة الحالة في اليسار -->
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/60 pb-2">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border ${opConfig.color}">
+                        <i class="${opConfig.icon}"></i>
+                        <span>${opLabel}</span>
+                    </span>
+                    <div class="flex items-center gap-2">
                         ${statusPill}
+                        ${amountHtml}
                     </div>
                 </div>
+
+                <!-- الكتلة الأساسية: شعار المنصة + اسم المنصة بارزاً + اسم الباقة تحته مباشرة -->
+                <div class="flex items-center gap-3.5">
+                    ${logoMarkup}
+                    <div class="min-w-0 space-y-0.5">
+                        <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-slate-100 truncate tracking-tight">
+                            ${platformName}
+                        </h4>
+                        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 truncate">
+                            ${packageName}
+                        </p>
+                        ${chipsHtml}
+                    </div>
+                </div>
+
                 ${codeRibbonHtml}
                 ${cancelAlertHtml}
             `;
 
-            // فتح الإيصال التفصيلي عند النقر
-            card.onclick = () => openTransactionReceiptModal(tx, opTitle, packageName, numAmount, statusKey, playerId, cancelReason);
+            // عند النقر على البطاقة، تفتح نافذة الإيصال الرقمي الكامل
+            card.onclick = () => openTransactionReceiptModal(tx, opLabel, platformName, packageName, numAmount, statusKey, playerId, cancelReason, platformImageUrl);
 
             return card;
         }
 
         // ========================================================================
-        // نافذة الإيصال الرقمي المالي (Digital Receipt)
+        // نافذة الإيصال الرقمي المالي الشامل (Digital Receipt)
         // ========================================================================
-        function openTransactionReceiptModal(tx, opTitle, packageName, amount, status, playerId, cancelReason) {
+        function openTransactionReceiptModal(tx, opLabel, platformName, packageName, amount, status, playerId, cancelReason, platformImageUrl) {
             const oldReceipt = document.getElementById('transaction-receipt-modal');
             if (oldReceipt) oldReceipt.remove();
 
@@ -2526,13 +2578,12 @@ async function verifyRegistrationOtp() {
                     </button>
 
                     <div class="text-center pt-1 space-y-1">
-                        <span class="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-xl border border-blue-100 dark:border-blue-900/40">
-                            <i class="ph-fill ph-receipt"></i>
-                        </span>
-                        <p class="text-[10px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-wider">${opTitle}</p>
-                        <h3 class="text-sm font-black text-slate-800 dark:text-slate-100">${packageName}</h3>
-                        <div class="pt-1">
-                            <span class="text-2xl font-black font-mono ${isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100'}">
+                        ${platformImageUrl ? `<img src="${platformImageUrl}" alt="${platformName}" referrerpolicy="no-referrer" class="w-14 h-14 mx-auto rounded-2xl p-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 object-contain shadow-sm mb-2">` : `<span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-2xl border border-blue-100 dark:border-blue-900/40 mb-2"><i class="ph-fill ph-receipt"></i></span>`}
+                        <span class="text-[10px] font-black tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-900/40">${opLabel}</span>
+                        <h3 class="text-base font-black text-slate-900 dark:text-slate-100 pt-1">${platformName}</h3>
+                        <p class="text-xs font-bold text-slate-500 dark:text-slate-400">${packageName}</p>
+                        <div class="pt-2">
+                            <span class="text-3xl font-black font-mono ${isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100'}">
                                 ${isCredit ? '+' : '-'}$${amount.toFixed(2)}
                             </span>
                         </div>
@@ -2546,6 +2597,10 @@ async function verifyRegistrationOtp() {
                         <div class="flex justify-between items-center">
                             <span class="text-slate-400">التاريخ والوقت:</span>
                             <span class="font-sans text-slate-600 dark:text-slate-300 text-[11px]">${dateStr}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">المنصة والخدمة:</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-200">${platformName} (${packageName})</span>
                         </div>
                         ${playerId ? `
                         <div class="flex justify-between items-center">
