@@ -1417,7 +1417,7 @@
 let isSettingNewPassword = false;
         let rawCardNumber = "", lastFourDigits = "", isCardVisible = false;
        let selectedProductId = "", selectedItemName = "", selectedItemPrice = 0.00, inputPlayerId = "", inputPlayerIdConfirm = "";
-let activeCoupon = null, discountedPrice = 0.00;
+let activeCoupon = null, discountedPrice = 0.00, currentUserRole = "customer";
         let tempRegisterData = {}, globalProductsRaw = [], currentFlowType = "register", globalTransactionsRaw = [];
         let resendTimer = null;
 
@@ -1862,6 +1862,7 @@ async function verifyRegistrationOtp() {
             if (!currentUser) return;
             const { data: profile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
             if (profile) {
+              currentUserRole = profile.role || 'customer';
                 currentWalletBalance = parseFloat(profile.balance || 0); 
                 document.getElementById('live-balance').innerText = "$" + currentWalletBalance.toFixed(2); 
                 const fullName = (profile.first_name || '') + " " + (profile.last_name || '');
@@ -2670,10 +2671,41 @@ function createTransactionCardElement(tx) {
             const btn = document.getElementById('apply-coupon-btn');
             const code = input ? input.value.trim().toUpperCase() : '';
 
+            // -------------------------------------------------------------
+            // 1. التحقق الحاسم: منع حساب الوكيل من استخدام أي كود نهائياً
+            // -------------------------------------------------------------
+            if (currentUserRole === 'agent') {
+                activeCoupon = null;
+                discountedPrice = selectedItemPrice;
+                
+                // إخفاء سطر التخفيض من الفاتورة وإعادة السعر الأصلي
+                const discountRow = document.getElementById('discount-breakdown-row');
+                if (discountRow) {
+                    discountRow.classList.add('hidden');
+                    discountRow.classList.remove('flex');
+                }
+                document.getElementById('review-item-price').innerText = "$" + selectedItemPrice.toFixed(2);
+                
+                // إظهار تنبيه المنع باللون الأحمر
+                if (statusMsg) {
+                    statusMsg.classList.remove('hidden');
+                    statusMsg.className = "text-[10px] mt-1.5 text-rose-500 font-bold block";
+                    statusMsg.innerText = "✕ حسابات الشركاء والوكلاء غير مخولة باستخدام أي كود خصم.";
+                }
+                return; // إيقاف التنفيذ فوراً ومنع التواصل مع قاعدة البيانات
+            }
+
+            // -------------------------------------------------------------
+            // 2. إذا مسح المستخدم الحقل وضغط تطبيق (إلغاء الكود)
+            // -------------------------------------------------------------
             if (!code) {
                 activeCoupon = null;
                 discountedPrice = selectedItemPrice;
-                document.getElementById('discount-breakdown-row').classList.add('hidden');
+                const discountRow = document.getElementById('discount-breakdown-row');
+                if (discountRow) {
+                    discountRow.classList.add('hidden');
+                    discountRow.classList.remove('flex');
+                }
                 document.getElementById('review-item-price').innerText = "$" + selectedItemPrice.toFixed(2);
                 if (statusMsg) statusMsg.classList.add('hidden');
                 return;
@@ -2682,6 +2714,9 @@ function createTransactionCardElement(tx) {
             btn.disabled = true;
             btn.innerText = "...";
 
+            // -------------------------------------------------------------
+            // 3. التحقق من صلاحية الكود للعملاء العاديين
+            // -------------------------------------------------------------
             try {
                 const { data: coupon, error } = await supabase
                     .from('coupons')
@@ -2693,24 +2728,39 @@ function createTransactionCardElement(tx) {
                 if (error || !coupon) {
                     activeCoupon = null;
                     discountedPrice = selectedItemPrice;
-                    document.getElementById('discount-breakdown-row').classList.add('hidden');
+                    const discountRow = document.getElementById('discount-breakdown-row');
+                    if (discountRow) {
+                        discountRow.classList.add('hidden');
+                        discountRow.classList.remove('flex');
+                    }
                     document.getElementById('review-item-price').innerText = "$" + selectedItemPrice.toFixed(2);
                     
-                    statusMsg.className = "text-[10px] mt-1.5 text-rose-500 font-bold block";
-                    statusMsg.innerText = "✕ رمز القسيمة غير صالح أو منتهي الصلاحية.";
+                    if (statusMsg) {
+                        statusMsg.classList.remove('hidden');
+                        statusMsg.className = "text-[10px] mt-1.5 text-rose-500 font-bold block";
+                        statusMsg.innerText = "✕ رمز القسيمة غير صالح أو منتهي الصلاحية.";
+                    }
                 } else {
+                    // الكود سليم والمستخدم عميل عادي: تطبيق نسبة التخفيض
                     activeCoupon = coupon;
                     const discountAmt = (selectedItemPrice * (coupon.discount_percent / 100.0));
                     discountedPrice = Math.max(0, selectedItemPrice - discountAmt);
 
                     document.getElementById('discount-label-text').innerText = `خصم القسيمة (${coupon.discount_percent}%):`;
                     document.getElementById('discount-val-text').innerText = `-$${discountAmt.toFixed(2)}`;
-                    document.getElementById('discount-breakdown-row').classList.remove('hidden');
-                    document.getElementById('discount-breakdown-row').classList.add('flex');
+                    
+                    const discountRow = document.getElementById('discount-breakdown-row');
+                    if (discountRow) {
+                        discountRow.classList.remove('hidden');
+                        discountRow.classList.add('flex');
+                    }
                     document.getElementById('review-item-price').innerText = "$" + discountedPrice.toFixed(2);
 
-                    statusMsg.className = "text-[10px] mt-1.5 text-emerald-600 dark:text-emerald-400 font-bold block";
-                    statusMsg.innerText = `✓ تم تطبيق الخصم بنجاح! وفرت $${discountAmt.toFixed(2)}`;
+                    if (statusMsg) {
+                        statusMsg.classList.remove('hidden');
+                        statusMsg.className = "text-[10px] mt-1.5 text-emerald-600 dark:text-emerald-400 font-bold block";
+                        statusMsg.innerText = `✓ تم تطبيق الخصم بنجاح! وفرت $${discountAmt.toFixed(2)}`;
+                    }
                 }
             } catch (err) {
                 console.error("Coupon check error:", err);
