@@ -695,7 +695,11 @@
                     <div id="dashboard-recent-tx" class="space-y-3 flex-grow"></div>
                 </div>
             </div>
-
+<!-- زر لوحة الإدارة (مخفي افتراضياً ولا يظهر إلا للأدمن) -->
+<a id="nav-admin-link" href="admin.html" class="hidden px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-sm">
+    <i class="ph-bold ph-shield-check text-sm text-rose-500"></i>
+    <span>لوحة الإدارة</span>
+</a>
             <!-- متجر المنتجات -->
             <div id="view-store" class="hidden space-y-6 data-view fade-in md:max-w-4xl md:mx-auto w-full">
                 <div class="flex justify-between items-center bg-white px-5 py-4 rounded-2xl shadow-sm border border-slate-100">
@@ -1588,6 +1592,8 @@ let activeCoupon = null, discountedPrice = 0.00, currentUserRole = "customer";
             closeAllModals(); 
             toggleView('dashboard-screen', false); 
             toggleView('login-screen', true); 
+         const adminLink = document.getElementById('nav-admin-link');
+if (adminLink) adminLink.classList.add('hidden');
         }
 
         function togglePasswordVisibility(fieldId, btnEl) {
@@ -1862,6 +1868,15 @@ async function verifyRegistrationOtp() {
             if (!currentUser) return;
             const { data: profile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
             if (profile) {
+              // التحقق من صلاحية الأدمن لإظهار زر لوحة الإدارة
+        const adminLink = document.getElementById('nav-admin-link');
+        if (adminLink) {
+            if (profile.role === 'admin') {
+                adminLink.classList.remove('hidden'); // إظهار الزر للأدمن
+            } else {
+                adminLink.classList.add('hidden');    // إخفاؤه عن أي عميل أو وكيل
+            }
+        }
               currentUserRole = profile.role || 'customer';
                 currentWalletBalance = parseFloat(profile.balance || 0); 
                 document.getElementById('live-balance').innerText = "$" + currentWalletBalance.toFixed(2); 
