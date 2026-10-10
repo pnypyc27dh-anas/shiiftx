@@ -633,19 +633,19 @@
                 <!-- الأزرار في أقصى اليسار -->
                 <div class="flex items-center gap-2.5">
                     <span id="nav-user-name" class="hidden"></span>
-                 
-                    <!-- زر لوحة الإدارة (مخفي افتراضياً ولا يظهر إلا للأدمن) -->
-<a id="nav-admin-link" href="admin.html" class="hidden px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-sm">
-    <i class="ph-bold ph-shield-check text-sm text-rose-500"></i>
-    <span class="hidden sm:inline">لوحة الإدارة</span>
-</a>
 
-                    <!-- زر لوحة الوكيل السريع (يظهر فقط للوكيل) -->
-                    <button id="nav-agent-link" onclick="switchTab('profile')" class="hidden px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer" title="لوحة إحصائيات الوكيل">
-                        <i class="ph-fill ph-seal-check text-base text-amber-500"></i>
+                    <!-- زر لوحة الإدارة (يظهر فقط للأدمن) -->
+                    <a id="nav-admin-link" href="admin.html" class="hidden px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-sm active:scale-95">
+                        <i class="ph-bold ph-shield-check text-sm text-rose-500"></i>
+                        <span class="hidden sm:inline">لوحة الإدارة</span>
+                    </a>
+
+                    <!-- زر لوحة الوكيل (مطابق لتنسيق زر الإدارة تماماً) -->
+                    <button id="nav-agent-link" onclick="openAgentModal()" class="hidden px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer">
+                        <i class="ph-bold ph-seal-check text-sm text-amber-500"></i>
                         <span class="hidden sm:inline">لوحة الوكيل</span>
                     </button>
-                    
+
                     <!-- زر تبديل المظهر -->
                     <button onclick="toggleTheme()" class="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-700 dark:text-amber-400 transition active:scale-90" title="تبديل المظهر">
                         <i id="theme-toggle-icon" class="ph-fill ph-moon text-xl"></i>
@@ -819,51 +819,6 @@
                         <div class="inline-flex justify-center items-center w-16 h-16 bg-slate-100 text-slate-600 rounded-full mb-2 border-4 border-white shadow-sm"><i class="ph-fill ph-user text-3xl"></i></div>
                         <h3 class="font-black text-lg text-slate-800">الملف الشخصي</h3>
                     </div>
-                  <!-- لوحة إحصائيات الوكيل التسويقي (تظهر فقط عندما يكون الحساب وكيلاً) -->
-                    <div id="agent-affiliate-dashboard" class="hidden bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 dark:border-amber-500/20 rounded-2xl p-5 space-y-4">
-                        <div class="flex justify-between items-center border-b border-amber-500/20 pb-3">
-                            <div class="flex items-center gap-2">
-                                <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg">
-                                    <i class="ph-fill ph-seal-check"></i>
-                                </span>
-                                <div>
-                                    <h4 class="text-xs font-black text-slate-800 dark:text-slate-100">لوحة الشريك التسويقي (وكيل معتمد)</h4>
-                                    <p class="text-[10px] text-slate-400">شارك كودك مع الزبائن واكسب عمولتك فورياً</p>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-mono font-bold bg-amber-500 text-slate-900 px-2 py-0.5 rounded-md">AGENT</span>
-                        </div>
-
-                        <!-- الكود ونسبة العمولة -->
-                        <div class="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-amber-200/60 dark:border-amber-900/40 flex items-center justify-between" dir="ltr">
-                            <div class="flex items-center gap-2">
-                                <button onclick="copyToClipboard(document.getElementById('agent-display-code').innerText)" type="button" class="btn-spring px-2.5 py-1 bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 rounded-lg text-[10px] font-bold flex items-center gap-1 hover:bg-amber-200 transition cursor-pointer">
-                                    <i class="ph-bold ph-copy"></i>
-                                    <span>نسخ الكود</span>
-                                </button>
-                                <span id="agent-display-code" class="font-mono font-black text-slate-900 dark:text-amber-400 text-sm tracking-wider select-all">---</span>
-                            </div>
-                            <div class="text-right text-xs" dir="rtl">
-                                <span class="text-[10px] text-slate-400 block font-medium">نسبة عمولتك:</span>
-                                <span id="agent-display-commission-rate" class="font-black text-emerald-600 dark:text-emerald-400 text-xs font-mono">0%</span>
-                            </div>
-                        </div>
-
-                        <!-- أرقام المبيعات والعمولات -->
-                        <div class="grid grid-cols-2 gap-3 pt-1">
-                            <div class="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-slate-200/60 dark:border-slate-800 text-center">
-                                <span class="text-[10px] text-slate-400 block font-medium mb-1">الطلبات المكتملة بكودك</span>
-                                <span id="agent-display-orders-count" class="font-mono font-black text-base text-slate-800 dark:text-slate-100 tabular-nums">0</span>
-                            </div>
-                            <div class="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-slate-200/60 dark:border-slate-800 text-center">
-                                <span class="text-[10px] text-slate-400 block font-medium mb-1">أرباح العمولات المودعة</span>
-                                <span id="agent-display-total-earned" class="font-mono font-black text-base text-emerald-600 dark:text-emerald-400 tabular-nums">$0.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
                                 <label class="block text-[10px] font-bold text-slate-500 mb-1.5">الاسم الأول</label>
                                 <input id="prof-first-name" type="text" class="input-field w-full px-4 py-3 text-sm">
                             </div>
@@ -1005,6 +960,65 @@
     </div>
 
     <!-- ==================== النوافذ المنبثقة ==================== -->
+
+    <!-- نافذة لوحة تحكم الوكيل الحصرية والمستقلة -->
+    <div id="agent-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative text-right space-y-5 slide-up-modal border border-slate-100 dark:border-slate-800">
+            
+            <!-- ترويسة النافذة -->
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl border border-amber-500/20">
+                        <i class="ph-fill ph-seal-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-slate-800 dark:text-slate-100">لوحة الشريك والوكيل المعتمد</h4>
+                        <p class="text-[10px] text-slate-400">إحصائيات الكود وعمولات التسويق</p>
+                    </div>
+                </div>
+                <button onclick="toggleView('agent-modal', false)" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm">
+                    <i class="ph ph-x font-bold text-base"></i>
+                </button>
+            </div>
+
+            <!-- بطاقة كود الخصم ونسبة العمولة -->
+            <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-amber-500/20 space-y-3">
+                <div class="flex items-center justify-between" dir="ltr">
+                    <div class="flex items-center gap-2">
+                        <button onclick="copyToClipboard(document.getElementById('modal-agent-code').innerText)" type="button" class="btn-spring px-3 py-1.5 bg-amber-500 text-slate-900 rounded-xl text-xs font-black flex items-center gap-1 shadow-sm hover:bg-amber-400 transition cursor-pointer">
+                            <i class="ph-bold ph-copy"></i>
+                            <span>نسخ</span>
+                        </button>
+                        <span id="modal-agent-code" class="font-mono font-black text-slate-900 dark:text-amber-400 text-lg tracking-wider select-all">---</span>
+                    </div>
+                    <div class="text-right text-xs" dir="rtl">
+                        <span class="text-[10px] text-slate-400 block font-medium">نسبة عمولتك:</span>
+                        <span id="modal-agent-commission-rate" class="font-black text-emerald-600 dark:text-emerald-400 text-sm font-mono">0%</span>
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-400 leading-relaxed">
+                    شارك هذا الكود مع عملائك؛ يحصلون على خصم فوري وتُودع عمولتك تلقائياً في رصيد محفظتك فور شحن الطلب.
+                </p>
+            </div>
+
+            <!-- بطاقات أرقام المبيعات والعمولات -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800 text-center space-y-1">
+                    <span class="text-[11px] text-slate-400 block font-medium">الطلبات المنفذة بالكود</span>
+                    <span id="modal-agent-orders-count" class="font-mono font-black text-xl text-slate-800 dark:text-slate-100 tabular-nums">0</span>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800 text-center space-y-1">
+                    <span class="text-[11px] text-slate-400 block font-medium">إجمالي العمولات المحققة</span>
+                    <span id="modal-agent-total-earned" class="font-mono font-black text-xl text-emerald-600 dark:text-emerald-400 tabular-nums">$0.00</span>
+                </div>
+            </div>
+
+            <!-- زر الإغلاق -->
+            <button onclick="toggleView('agent-modal', false)" class="btn-spring w-full py-3 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition">
+                إغلاق النافذة
+            </button>
+        </div>
+    </div>
 
     <!-- نافذة إعادة تفعيل الحساب المؤتمتة -->
     <div id="reactivate-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[115]">
@@ -2180,8 +2194,28 @@ async function verifyRegistrationOtp() {
         
         function closeAllModals() { 
      resetResendButtonState();
-     ['register-modal', 'plans-modal', 'account-inputs-modal', 'purchase-modal', 'code-delivery-modal', 'all-orders-modal', 'support-modal', 'info-modal', 'reactivate-modal'].forEach(id => toggleView(id, false)); 
+     ['register-modal', 'plans-modal', 'account-inputs-modal', 'purchase-modal', 'code-delivery-modal', 'all-orders-modal', 'support-modal', 'info-modal', 'reactivate-modal', 'agent-modal'].forEach(id => toggleView(id, false)); 
  }
+        // دالة فتح لوحة إحصائيات الوكيل المستقلة
+        async function openAgentModal() {
+            if (!currentUser) return;
+            toggleSideMenu(false);
+            toggleView('agent-modal', true);
+
+            // جلب أحدث إحصائيات للوكيل وتعبئة البيانات في النافذة
+            const { data: stats } = await supabase.rpc('get_my_agent_stats', { p_user_id: currentUser.id });
+            if (stats && stats.is_agent) {
+                const codeEl = document.getElementById('modal-agent-code');
+                const rateEl = document.getElementById('modal-agent-commission-rate');
+                const countEl = document.getElementById('modal-agent-orders-count');
+                const earnedEl = document.getElementById('modal-agent-total-earned');
+
+                if (codeEl) codeEl.innerText = stats.code;
+                if (rateEl) rateEl.innerText = stats.commission_percent + "%";
+                if (countEl) countEl.innerText = stats.usage_count;
+                if (earnedEl) earnedEl.innerText = "$" + Number(stats.total_earned).toFixed(2);
+            }
+        }
         
         function toggleSideMenu(open) {
             const overlay = document.getElementById('side-menu-overlay');
