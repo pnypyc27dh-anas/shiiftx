@@ -2110,7 +2110,7 @@ async function verifyRegistrationOtp() {
             });
         }
 
-        // إرسال طلب الشحن المباشر للإدارة
+        // إرسال طلب الشحن المباشر للإدارة عبر دالة RPC الموحدة
         async function submitSubFinalDeposit() { 
             const amtInput = document.getElementById('sub-form-amount-select');
             const rawAmt = amtInput ? amtInput.value.trim().replace(/[^0-9.]/g, '') : "";
@@ -2119,6 +2119,7 @@ async function verifyRegistrationOtp() {
             const method = document.getElementById('sub-payment-method').value;
             const btn = document.getElementById('sub-deposit-final-btn'); 
 
+            // 1. التحقق من المدخلات في الواجهة
             if (!rawAmt || isNaN(finalAmt) || finalAmt <= 0) {
                 return showCustomAlert("يرجى إدخال مبلغ صحيح للشحن.");
             }
@@ -2126,52 +2127,41 @@ async function verifyRegistrationOtp() {
                 return showCustomAlert("يرجى إدخال رقم إشعار الحوالة لتأكيد العملية."); 
             }
             
+            // 2. تفعيل حالة التحميل للزر
             btn.disabled = true; 
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> جاري الإرسال...`;
 
             try {
-                let txRef = 'TX-D' + Math.floor(100000 + Math.random() * 900000);
-                const { data: rpcRef, error: rpcErr } = await supabase.rpc('generate_ref', { prefix: 'TX-D' });
-                if (!rpcErr && rpcRef) txRef = rpcRef;
+                // 3. استدعاء دالة الخادم الموحدة (حزمة واحدة آمنة)
+                const { data: res, error } = await supabase.rpc('submit_deposit_request', {
+                    p_amount: finalAmt,
+                    p_payment_method: method,
+                    p_receipt_num: txNum
+                });
 
-                // 1. تسجيل في جدول طلبات الإيداع بشكل نظيف ومستقل
-                const { error: depError } = await supabase.from('deposit_orders').insert({ 
-                    transaction_ref: txRef, 
-                    user_id: currentUser.id, 
-                    amount: finalAmt, 
-                    payment_method: method, 
-                    transfer_receipt_num: txNum,
-                    status: 'pending'
-                }); 
+                if (error) throw error;
 
-                if (depError) throw depError;
-
-                // 2. تسجيل في جدول المعاملات مع حفظ رقم الإشعار في الحقل والتفاصيل
-                const { error: txError } = await supabase.from('transactions').insert({ 
-                    user_id: currentUser.id, 
-                    transaction_type: 'Deposit', 
-                    details: 'طلب شحن محفظة عبر (' + method + ') [إشعار: ' + txNum + ']', 
-                    amount: finalAmt, 
-                    status: 'pending', 
-                    transaction_ref: txRef,
-                    delivery_type: 'WALLET_DEPOSIT',
-                    player_id: txNum, // حفظ رقم الإشعار هنا لسهولة القراءة
-                    serial_code: null
-                }); 
-
-                if (txError) throw txError;
-
-                showCustomAlert("تم رفع طلب الشحن بنجاح وهو قيد المراجعة لدى الإدارة.", false); 
-                if (amtInput) amtInput.value = "";
-                document.getElementById('sub-form-tx-number').value = "";
-                onCustomAmountTyped();
-                switchTab('home'); 
-                silentSyncData(); 
+                // 4. معالجة نتيجة الدالة
+                if (res && res.status === 'success') {
+                    showCustomAlert("تم رفع طلب الشحن بنجاح وهو قيد المراجعة لدى الإدارة.", false); 
+                    
+                    // تصفير الحقول وإعادة ضبط الواجهة
+                    if (amtInput) amtInput.value = "";
+                    document.getElementById('sub-form-tx-number').value = "";
+                    onCustomAmountTyped();
+                    
+                    // الانتقال للرئيسية وتحديث البيانات فوراً
+                    switchTab('home'); 
+                    silentSyncData(); 
+                } else {
+                    showCustomAlert(res ? res.message : "فشل رفع الطلب، يرجى المحاولة لاحقاً.");
+                }
 
             } catch (err) {
-                console.error("Supabase Deposit Error:", err);
-                showCustomAlert("فشل رفع الطلب: " + (err.message || "خطأ في الاتصال"));
+                console.error("Supabase Deposit RPC Error:", err);
+                showCustomAlert("فشل رفع الطلب: " + (err.message || "خطأ في الاتصال بالخادم"));
             } finally {
+                // 5. استعادة حالة الزر الطبيعية
                 btn.disabled = false; 
                 btn.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> تأكيد وإرسال طلب الشحن`;
             }
