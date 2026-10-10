@@ -35,11 +35,11 @@
         <p class="text-sm font-bold tracking-wide">جاري التحقق من صلاحيات الدخول الإدارية...</p>
     </div>
 
-    <!-- المحتوى الرئيسي للوحة الإدارة -->
+    <!-- التطبيق الإداري الرئيسي -->
     <div id="admin-app" class="hidden">
         
         <!-- الشريط العلوي -->
-        <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
+        <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
             <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <span class="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center text-xl font-bold">
@@ -47,11 +47,14 @@
                     </span>
                     <div>
                         <h1 class="text-sm font-black text-slate-900 dark:text-white">مركز إدارة المنصة</h1>
-                        <p class="text-[10px] text-slate-400">لوحة التحكم التنفيذية والمالية</p>
+                        <p class="text-[10px] text-slate-400">لوحة العمليات والرقابة المالية</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <button onclick="loadAllAdminData()" class="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 transition" title="تحديث البيانات">
+                        <i class="ph-bold ph-arrows-clockwise text-sm"></i>
+                    </button>
                     <a href="index.html" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
                         <i class="ph-bold ph-storefront"></i>
                         <span>العودة للمتجر</span>
@@ -77,7 +80,7 @@
                     <span id="kpi-sales-month" class="font-mono font-black text-xl text-emerald-600 dark:text-emerald-400">$0.00</span>
                 </div>
                 <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <span class="text-xs text-slate-400 block font-medium mb-1">إجمالي عمولات الوكلاء</span>
+                    <span class="text-xs text-slate-400 block font-medium mb-1">عمولات الوكلاء المحررة</span>
                     <span id="kpi-commissions" class="font-mono font-black text-xl text-amber-500">$0.00</span>
                 </div>
                 <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -86,7 +89,7 @@
                 </div>
             </div>
 
-            <!-- شريط التبويبات -->
+            <!-- أشرطة التبويب -->
             <div class="flex gap-2 overflow-x-auto pb-1 text-xs font-black">
                 <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2">
                     <i class="ph-bold ph-device-mobile-speaker text-sm"></i>
@@ -94,30 +97,30 @@
                     <span id="badge-orders-count" class="px-1.5 py-0.2 bg-rose-500 text-white rounded-full text-[10px] hidden">0</span>
                 </button>
                 <button onclick="switchTab('deposits')" id="tab-deposits" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
-    <i class="ph-bold ph-hand-deposit text-sm"></i>
-    <span>طلبات شحن الرصيد</span>
-    <span id="badge-deposits-count" class="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[10px] hidden">0</span>
-</button>
+                    <i class="ph-bold ph-wallet text-sm"></i>
+                    <span>طلبات شحن الرصيد</span>
+                    <span id="badge-deposits-count" class="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[10px] hidden">0</span>
+                </button>
                 <button onclick="switchTab('agents')" id="tab-agents" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
                     <i class="ph-bold ph-users-three text-sm"></i>
-                    <span>إدارة الوكلاء وصرف الكاش</span>
+                    <span>الوكلاء وصرف الكاش</span>
                 </button>
                 <button onclick="switchTab('wallet')" id="tab-wallet" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
-                    <i class="ph-bold ph-wallet text-sm"></i>
-                    <span>شحن المحافظ اليدوي</span>
+                    <i class="ph-bold ph-hand-coins text-sm"></i>
+                    <span>إيداع يدوي</span>
                 </button>
                 <button onclick="switchTab('products')" id="tab-products" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
                     <i class="ph-bold ph-package text-sm"></i>
-                    <span>المنتجات وتعديل الأسعار</span>
+                    <span>المنتجات والأسعار</span>
                 </button>
             </div>
 
-            <!-- ================= تبويب 1: طلبات الشحن المباشر ================= -->
+            <!-- ================= تبويب 1: طلبات الـ ID المعلقة ================= -->
             <section id="sec-orders" class="tab-content bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div class="flex justify-between items-center">
                     <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 dark:text-slate-100">
                         <i class="ph-fill ph-clock-countdown text-amber-500 text-lg"></i>
-                        <span>الطلبات المعلقة التي تتطلب الشحن في اللعبة</span>
+                        <span>الطلبات المعلقة التي تتطلب الشحن بالـ ID في اللعبة</span>
                     </h2>
                     <button onclick="loadPendingOrders()" class="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 font-bold">
                         <i class="ph-bold ph-arrows-clockwise"></i> تحديث
@@ -141,9 +144,37 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 2: الوكلاء وصرف الأرباح ================= -->
+            <!-- ================= تبويب 2: طلبات شحن المحافظ المعلقة ================= -->
+            <section id="sec-deposits" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 dark:text-slate-100">
+                        <i class="ph-fill ph-wallet text-emerald-500 text-lg"></i>
+                        <span>طلبات شحن الرصيد بانتظار تأكيد الاستلام المالي</span>
+                    </h2>
+                    <button onclick="loadPendingDeposits()" class="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 font-bold">
+                        <i class="ph-bold ph-arrows-clockwise"></i> تحديث
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-100 dark:border-slate-800 text-slate-400 pb-2">
+                                <th class="pb-2">المرجع</th>
+                                <th class="pb-2">البيان / طريقة الدفع</th>
+                                <th class="pb-2">المبلغ المطلوب</th>
+                                <th class="pb-2">تاريخ الطلب</th>
+                                <th class="pb-2 text-center">الإجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deposits-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+                            <tr><td colspan="5" class="py-6 text-center text-slate-400">جاري تحميل طلبات الإيداع...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ================= تبويب 3: الوكلاء وصرف الكاش ================= -->
             <section id="sec-agents" class="tab-content hidden space-y-4">
-                <!-- ترقية وكيل -->
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
                     <h3 class="text-xs font-black">ترقية عميل إلى شريك تسويقي (وكيل معتمد)</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
@@ -153,13 +184,12 @@
                         <input id="agent-comm" type="number" step="0.5" placeholder="عمولة الوكيل %" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                     </div>
                     <button onclick="handlePromoteAgent()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition">
-                        ترقية وتفعيل الكود والنسبة فوراً
+                        ترقية وتفعيل الكود فوراً
                     </button>
                 </div>
 
-                <!-- صرف أرباح كاش -->
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-                    <h3 class="text-xs font-black">تسليم أرباح كاش للوكيل وخصمها من رصيده</h3>
+                    <h3 class="text-xs font-black">تسليم أرباح كاش للوكيل وخصمها من محفظته</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                         <input id="payout-email" type="email" placeholder="بريد الوكيل" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800" dir="ltr">
                         <input id="payout-amount" type="number" step="0.01" placeholder="المبلغ المسلّم ($)" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800" dir="ltr">
@@ -171,20 +201,20 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 3: شحن المحافظ ================= -->
+            <!-- ================= تبويب 4: الإيداع اليدوي ================= -->
             <section id="sec-wallet" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-                <h3 class="text-xs font-black">إيداع رصيد يدوي لعميل (دفع كاش في المحل أو حوالة خارجية)</h3>
+                <h3 class="text-xs font-black">إيداع رصيد يدوي لعميل (دفع كاش أو حوالة مباشرة)</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                     <input id="topup-email" type="email" placeholder="بريد الزبون" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800" dir="ltr">
                     <input id="topup-amount" type="number" step="0.01" placeholder="المبلغ المودع ($)" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800" dir="ltr">
-                    <input id="topup-note" type="text" placeholder="بيان الشحن (مثال: استلام كاش يداً بيد)" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                    <input id="topup-note" type="text" placeholder="بيان الشحن (مثال: استلام كاش في المحل)" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                 </div>
                 <button onclick="handleManualTopup()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition">
-                    إيداع الرصيد في محفظة العميل فوراً
+                    إيداع الرصيد في المحفظة فوراً
                 </button>
             </section>
 
-            <!-- ================= تبويب 4: المنتجات والأسعار ================= -->
+            <!-- ================= تبويب 5: المنتجات والأسعار ================= -->
             <section id="sec-products" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xs font-black">قائمة الباقات وتعديل الأسعار المباشر</h3>
@@ -212,25 +242,24 @@
         </main>
     </div>
 
-
-       <!-- كود المنطق البرمجي (JavaScript المصحح) -->
+    <!-- كود المنطق البرمجي (JavaScript) -->
     <script>
-        // 1. إعدادات الاتصال بدون أي تعارض في الأسماء
+        // 1. إعداد الاتصال بـ Supabase
         const SUPABASE_URL = "https://baytojjldklocifridcm.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJheXRvampsZGtsb2NpZnJpZGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MTU3MzMsImV4cCI6MjEwNTM5MTczM30.tAN7Qah-3VNwatn2CwgqsyphnkQQjagnKf4pR4WiSwQ";
+        // احرص على وضع مفتاح Anon Key الخاص بك هنا
+        const SUPABASE_ANON_KEY = "eyJh..."; 
         
-        // استخدام 'db' كعميل اتصال رسمي
+        // استخدام 'db' كعميل مستقل يمنع أي تعارض أسماء
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentAdminUser = null;
 
-        // 2. فحص الأمان والصلاحيات (Auth Guard)
+        // 2. فحص أمان تسجيل الدخول والصلاحية الإدارية
         async function checkAdminAuth() {
             const statusEl = document.querySelector('#auth-loading p');
             try {
                 if (statusEl) statusEl.innerText = "جاري التحقق من الجلسة والصلاحيات...";
 
-                // جلب الجلسة النشطة
                 const { data: { session }, error: sessionErr } = await db.auth.getSession();
                 
                 if (sessionErr) throw sessionErr;
@@ -240,7 +269,6 @@
                     return;
                 }
 
-                // جلب رتبة الحساب
                 const { data: profile, error: profileErr } = await db
                     .from('profiles')
                     .select('id, email, role')
@@ -255,7 +283,6 @@
                     return;
                 }
 
-                // نجاح التحقق
                 currentAdminUser = session.user;
                 document.getElementById('auth-loading').classList.add('hidden');
                 document.getElementById('admin-app').classList.remove('hidden');
@@ -268,14 +295,15 @@
             }
         }
 
-        // 3. تحميل كافة بيانات الإدارة
+        // 3. تحميل كل بيانات لوحة الإدارة
         async function loadAllAdminData() {
             loadKPIs();
             loadPendingOrders();
+            loadPendingDeposits();
             loadProducts();
         }
 
-        // جلب المؤشرات المالية (KPIs)
+        // جلب مؤشرات الأداء الحية
         async function loadKPIs() {
             const { data: kpis } = await db.rpc('admin_get_kpis');
             if (kpis) {
@@ -284,10 +312,16 @@
                 document.getElementById('kpi-commissions').innerText = "$" + Number(kpis.total_commissions).toFixed(2);
                 document.getElementById('kpi-balances').innerText = "$" + Number(kpis.customer_balances).toFixed(2);
 
-                const badge = document.getElementById('badge-orders-count');
-                if (badge) {
-                    badge.innerText = kpis.pending_orders;
-                    badge.classList.toggle('hidden', kpis.pending_orders === 0);
+                const ordersBadge = document.getElementById('badge-orders-count');
+                if (ordersBadge) {
+                    ordersBadge.innerText = kpis.pending_orders;
+                    ordersBadge.classList.toggle('hidden', kpis.pending_orders === 0);
+                }
+
+                const depositsBadge = document.getElementById('badge-deposits-count');
+                if (depositsBadge) {
+                    depositsBadge.innerText = kpis.pending_deposits;
+                    depositsBadge.classList.toggle('hidden', kpis.pending_deposits === 0);
                 }
             }
         }
@@ -303,7 +337,7 @@
                 .order('created_at', { ascending: false });
 
             if (!orders || orders.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">لا توجد أي طلبات شحن معلقة حالياً ✓</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">لا توجد أي طلبات شحن ID معلقة حالياً ✓</td></tr>`;
                 return;
             }
 
@@ -325,17 +359,76 @@
             `).join('');
         }
 
-        // معالجة تنفيذ أو استرجاع الطلب
+        // معالجة تنفيذ أو رفض طلب الـ ID
         async function handleProcessOrder(id, action) {
             const msg = action === 'complete' 
-                ? 'هل تم شحن هذا الحساب بالفعل داخل اللعبة؟' 
-                : 'هل أنت متأكد من رفض الطلب وإعادة المبلغ لمحفظة العميل تلقائياً؟';
+                ? 'هل تم شحن هذا الحساب بالفعل داخل اللعبة وتريد تحرير عمولة الوكيل؟' 
+                : 'هل أنت متأكد من رفض الطلب، إعادة المبلغ للعميل، وإلغاء العمولة المعلقة؟';
             if (!confirm(msg)) return;
 
             const reason = action === 'refund' ? prompt('سبب الرفض:', 'معرف الحساب غير صحيح') : '';
 
             const { data, error } = await db.rpc('admin_process_order', {
                 p_tx_id: id,
+                p_action: action,
+                p_reason: reason
+            });
+
+            if (error || data.status === 'error') {
+                alert(error ? error.message : data.message);
+            } else {
+                alert(data.message);
+                loadAllAdminData();
+            }
+        }
+
+        // جلب طلبات شحن الرصيد المعلقة
+        async function loadPendingDeposits() {
+            const tbody = document.getElementById('deposits-tbody');
+            if (!tbody) return;
+
+            const { data: deposits } = await db
+                .from('transactions')
+                .select('*')
+                .eq('status', 'pending')
+                .in('transaction_type', ['Deposit', 'شحن رصيد'])
+                .order('created_at', { ascending: false });
+
+            if (!deposits || deposits.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">لا توجد أي طلبات شحن رصيد معلقة حالياً ✓</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = deposits.map(d => `
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td class="py-3 font-mono text-[11px] text-slate-400">${d.transaction_ref}</td>
+                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${d.details}</td>
+                    <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs">+$${Number(d.amount).toFixed(2)}</td>
+                    <td class="py-3 text-[10px] text-slate-400">${new Date(d.created_at).toLocaleString('ar-EG')}</td>
+                    <td class="py-3 text-center flex justify-center gap-2">
+                        <button onclick="handleProcessDeposit('${d.id}', 'approve')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold">
+                            تأكيد الإيداع ✓
+                        </button>
+                        <button onclick="handleProcessDeposit('${d.id}', 'reject')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold">
+                            رفض الطلب ✕
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // معالجة قبول أو رفض طلب شحن الرصيد
+        async function handleProcessDeposit(txId, action) {
+            const confirmMsg = action === 'approve'
+                ? 'هل وصلك التحويل المالي بالفعل وتريد إيداع المبلغ في محفظة العميل الآن؟'
+                : 'هل أنت متأكد من رفض طلب الشحن وإلغائه؟';
+
+            if (!confirm(confirmMsg)) return;
+
+            const reason = action === 'reject' ? prompt('سبب الرفض (اختياري):', 'لم يتم استلام المبلغ في الحساب') : '';
+
+            const { data, error } = await db.rpc('admin_process_deposit', {
+                p_tx_id: txId,
                 p_action: action,
                 p_reason: reason
             });
@@ -394,14 +487,14 @@
             if (error || data.status === 'error') {
                 alert(error ? error.message : data.message);
             } else {
-                alert(`✓ تم توثيق التسليم وخصم $${amount.toFixed(2)} بنجاح! المتبقي للوكيل: $${Number(data.remaining_balance).toFixed(2)}`);
+                alert(`✓ تم توثيق التسليم وخصم $${amount.toFixed(2)} بنجاح! المتبقي: $${Number(data.remaining_balance).toFixed(2)}`);
                 document.getElementById('payout-email').value = '';
                 document.getElementById('payout-amount').value = '';
                 loadKPIs();
             }
         }
 
-        // شحن رصيد يدوي
+        // إيداع يدوي لمحفظة زبون
         async function handleManualTopup() {
             const email = document.getElementById('topup-email').value.trim();
             const amount = parseFloat(document.getElementById('topup-amount').value);
@@ -461,7 +554,7 @@
             loadProducts();
         }
 
-        // تبديل التبويبات
+        // التبديل بين التبويبات
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(b => {
@@ -477,6 +570,7 @@
             window.location.href = "index.html";
         }
 
-        // بدء الفحص فور تحميل الصفحة
         window.addEventListener('DOMContentLoaded', checkAdminAuth);
     </script>
+</body>
+</html>
