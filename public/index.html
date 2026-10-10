@@ -2313,9 +2313,23 @@ async function verifyRegistrationOtp() {
             if(!error) { showCustomAlert("تم تعديل البيانات بنجاح.", false); silentSyncData(); switchTab('home'); } 
         }
 
-      // ========================================================================
-        // 7. محرك عرض المعاملات الفاخر (Fintech-Grade Ledger System)
+     // ========================================================================
+        // 7. محرك عرض المعاملات الفاخر (Fintech Hierarchical Ledger)
         // ========================================================================
+
+        const TX_CATEGORIES = {
+            'Deposit': { label: 'إيداع رصيد', icon: 'ph-bold ph-arrow-down-left', theme: 'emerald' },
+            'شحن رصيد': { label: 'إيداع رصيد', icon: 'ph-bold ph-arrow-down-left', theme: 'emerald' },
+            'Purchase Digital Code': { label: 'شراء كود رقمي', icon: 'ph-bold ph-barcode', theme: 'blue' },
+            'شراء كود رقمي': { label: 'شراء كود رقمي', icon: 'ph-bold ph-barcode', theme: 'blue' },
+            'Direct ID Top-up': { label: 'شحن مباشر (ID)', icon: 'ph-bold ph-game-controller', theme: 'indigo' },
+            'شحن مباشر (ID)': { label: 'شحن مباشر (ID)', icon: 'ph-bold ph-game-controller', theme: 'indigo' },
+            'Refund': { label: 'استرجاع رصيد', icon: 'ph-bold ph-arrow-u-up-left', theme: 'emerald' },
+            'استرجاع رصيد': { label: 'استرجاع رصيد', icon: 'ph-bold ph-arrow-u-up-left', theme: 'emerald' },
+            'Affiliate Commission': { label: 'عمولة تسويق', icon: 'ph-bold ph-seal-percent', theme: 'amber' },
+            'Commission Payout': { label: 'صرف أرباح كاش', icon: 'ph-bold ph-money', theme: 'amber' },
+            'Commission Reversal': { label: 'إلغاء عمولة', icon: 'ph-bold ph-x-circle', theme: 'rose' }
+        };
 
         function renderRecentDashboardTransactions(txArray) {
             const container = document.getElementById('dashboard-recent-tx');
@@ -2324,8 +2338,8 @@ async function verifyRegistrationOtp() {
 
             if (!txArray || txArray.length === 0) {
                 container.innerHTML = `
-                    <div class="py-12 text-center text-slate-400 dark:text-slate-500 space-y-2">
-                        <i class="ph ph-receipt-x text-3xl opacity-40"></i>
+                    <div class="py-10 text-center text-slate-400 dark:text-slate-500 space-y-1.5">
+                        <i class="ph ph-receipt-x text-2xl opacity-40"></i>
                         <p class="text-xs font-bold">لا توجد معاملات مسجلة حتى الآن</p>
                     </div>`;
                 return;
@@ -2338,7 +2352,7 @@ async function verifyRegistrationOtp() {
 
         function createTransactionCardElement(tx) {
             const card = document.createElement('div');
-            card.className = "group relative bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg hover:border-blue-500/30 dark:hover:border-blue-500/20 mb-3 space-y-3 cursor-pointer overflow-hidden";
+            card.className = "group relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 transition-all duration-200 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 mb-2.5 space-y-3 cursor-pointer";
 
             const rawTx = tx.raw || {};
             const statusKey = (tx.status || rawTx.status || '').toLowerCase();
@@ -2347,120 +2361,102 @@ async function verifyRegistrationOtp() {
             const isRefund = tx.type === 'Refund' || tx.type === 'استرجاع رصيد';
             const isDeposit = tx.type === 'Deposit' || tx.type === 'شحن رصيد';
             const isCommission = tx.type === 'Affiliate Commission';
-            const isPayout = tx.type === 'Commission Payout' || tx.type === 'سحب أرباح';
             const isRefundedOrder = statusKey === 'refunded' || statusKey === 'مسترجع';
             const isPending = statusKey === 'pending' || statusKey === 'معلق';
-            const isCode = tx.delivery_type === 'CODE' || Boolean(tx.serial_code);
 
-            // 1. هندسة النصوص واستخراج البيانات المنظمة
-            let rawDetails = tx.details || tx.type || 'معاملة مالية';
-            let mainTitle = rawDetails;
+            // 1. استخراج وتحديد: عنوان العملية أولاً، ثم اسم الباقة
+            const catConfig = TX_CATEGORIES[tx.type] || { label: tx.type || 'معاملة مالية', icon: 'ph-bold ph-credit-card', theme: 'slate' };
+            const opTitle = isRefundedOrder ? 'طلب ملغي ومسترد' : catConfig.label;
+
+            let rawDetails = tx.details || '';
+            let packageName = rawDetails;
             let cancelReason = '';
             let discountInfo = '';
 
-            // استخراج سبب الرفض
+            // استخراج سبب الرفض إن وجد
             const refMatch = rawDetails.match(/\[مسترجع:\s*([^\]]+)\]/);
             if (refMatch) {
                 cancelReason = refMatch[1].trim();
-                mainTitle = mainTitle.replace(/\[مسترجع:\s*[^\]]+\]/, '');
+                packageName = packageName.replace(/\[مسترجع:\s*[^\]]+\]/, '');
             }
 
             // استخراج كود الخصم
             const discMatch = rawDetails.match(/\(خصم كود\s*([^)]+)\)/);
             if (discMatch) {
                 discountInfo = discMatch[1].trim();
-                mainTitle = mainTitle.replace(/\(خصم كود\s*[^)]+\)/, '');
+                packageName = packageName.replace(/\(خصم كود\s*[^)]+\)/, '');
             }
 
-            // استخراج معرف اللاعب
-            let extractedId = tx.player_id || rawTx.player_id;
+            // استخراج معرف اللاعب وتصفية اسم الباقة
+            let playerId = tx.player_id || rawTx.player_id;
             const idMatch = rawDetails.match(/ID:\s*([^\s)]+)/i);
-            if (!extractedId && idMatch) extractedId = idMatch[1];
-            mainTitle = mainTitle.replace(/\(ID:\s*[^)]+\)/gi, '').trim();
+            if (!playerId && idMatch) playerId = idMatch[1];
+            packageName = packageName.replace(/\(ID:\s*[^)]+\)/gi, '').trim();
 
-            if (isDeposit) mainTitle = rawDetails.includes('عبر') ? rawDetails : 'إيداع رصيد بالمحفظة';
-            if (isRefund) mainTitle = 'استرداد نقدي لحساب المحفظة';
-            if (isCommission) mainTitle = 'عمولة تسويقية مستحقة';
-            if (isPayout) mainTitle = 'صرف أرباح الشريك كاش';
+            if (!packageName || packageName === tx.type) {
+                packageName = isDeposit ? 'تمويل المحفظة الرقمية' : (isRefund ? 'استرداد نقدي للحساب' : 'خدمة رقمية');
+            }
 
-            // 2. ضبط الأيقونة والألوان
-            let iconMarkup = '';
+            // 2. الهوية اللونية والأيقونة
+            let iconBox = '';
+            if (isRefundedOrder) {
+                iconBox = `<div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-500 border border-rose-200/60 dark:border-rose-900/40 flex items-center justify-center text-lg shrink-0">
+                    <i class="ph-bold ph-arrow-counter-clockwise"></i>
+                </div>`;
+            } else if (isRefund || isDeposit || (isCommission && !isPending)) {
+                iconBox = `<div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/40 flex items-center justify-center text-lg shrink-0">
+                    <i class="ph-bold ph-arrow-down-left"></i>
+                </div>`;
+            } else {
+                iconBox = `<div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-900/40 flex items-center justify-center text-lg shrink-0">
+                    <i class="${catConfig.icon}"></i>
+                </div>`;
+            }
+
+            // 3. عرض المبلغ وحالة العملية في الجهة اليسرى
             let amountMarkup = '';
-            let badgeMarkup = '';
+            let statusPill = '';
 
             if (isRefundedOrder) {
-                iconMarkup = `
-                    <div class="relative w-11 h-11 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-500 flex items-center justify-center text-xl shrink-0 border border-rose-100 dark:border-rose-900/40">
-                        <i class="ph-bold ph-arrow-counter-clockwise"></i>
-                        <span class="absolute -bottom-1 -left-1 w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[9px] shadow-sm">✕</span>
-                    </div>`;
-                amountMarkup = `
-                    <div class="text-left font-mono">
-                        <span class="text-sm font-bold text-slate-400 dark:text-slate-500 line-through">-$${numAmount.toFixed(2)}</span>
-                        <span class="block text-[10px] font-bold text-rose-500 dark:text-rose-400">مسترد بالكامل</span>
-                    </div>`;
-                badgeMarkup = `<span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50">تم الاسترجاع</span>`;
+                amountMarkup = `<span class="font-mono text-sm font-bold text-slate-400 dark:text-slate-500 line-through">-$${numAmount.toFixed(2)}</span>`;
+                statusPill = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200/70 dark:border-rose-900/50">مسترد</span>`;
             } else if (isRefund || isDeposit || (isCommission && !isPending)) {
-                iconMarkup = `
-                    <div class="relative w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl shrink-0 border border-emerald-100 dark:border-emerald-900/40">
-                        <i class="ph-bold ph-arrow-down-left"></i>
-                        <span class="absolute -bottom-1 -left-1 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] shadow-sm">✓</span>
-                    </div>`;
-                amountMarkup = `
-                    <div class="text-left font-mono">
-                        <span class="text-base font-black text-emerald-600 dark:text-emerald-400">+$${numAmount.toFixed(2)}</span>
-                        <span class="block text-[10px] font-medium text-emerald-500/80">إيداع ناجح</span>
-                    </div>`;
-                badgeMarkup = `<span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50">مكتمل</span>`;
+                amountMarkup = `<span class="font-mono text-base font-black text-emerald-600 dark:text-emerald-400">+$${numAmount.toFixed(2)}</span>`;
+                statusPill = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-900/50">مكتمل</span>`;
             } else {
-                iconMarkup = `
-                    <div class="relative w-11 h-11 rounded-2xl ${isCode ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 border-blue-100 dark:border-blue-900/40' : 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900/40'} flex items-center justify-center text-xl shrink-0 border">
-                        <i class="ph-bold ${isCode ? 'ph-barcode' : 'ph-game-controller'}"></i>
-                    </div>`;
-                amountMarkup = `
-                    <div class="text-left font-mono">
-                        <span class="text-base font-black text-slate-900 dark:text-slate-100">-$${numAmount.toFixed(2)}</span>
-                        <span class="block text-[10px] font-medium text-slate-400">${isPending ? 'معلق' : 'مشتريات'}</span>
-                    </div>`;
-                badgeMarkup = isPending 
-                    ? `<span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50 animate-pulse">قيد التنفيذ</span>`
-                    : `<span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">مكتمل</span>`;
+                amountMarkup = `<span class="font-mono text-base font-black text-slate-800 dark:text-slate-100">-$${numAmount.toFixed(2)}</span>`;
+                statusPill = isPending
+                    ? `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200/70 dark:border-amber-900/50 animate-pulse">قيد التنفيذ</span>`
+                    : `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">مكتمل</span>`;
             }
 
-            // 3. الوسوم التفاعلية الذكية (Meta Chips)
+            // 4. الرقائق الذكية (المرجع • التاريخ • الـ ID • الخصم)
             const txRef = tx.tx_id || rawTx.transaction_ref || '---';
             let chipsHtml = `
-                <div class="flex items-center gap-1.5 flex-wrap pt-0.5 text-[10px]">
-                    <span onclick="event.stopPropagation(); copyToClipboard('${txRef}')" class="font-mono bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md flex items-center gap-1 font-bold transition select-all" title="انقر لنسخ المرجع">
-                        ${txRef} <i class="ph ph-copy text-[11px] opacity-60"></i>
-                    </span>
-                    <span class="text-slate-400 font-sans">${tx.date.split(',')[0]}</span>
-                    ${extractedId ? `
-                        <span onclick="event.stopPropagation(); copyToClipboard('${extractedId}')" class="font-mono font-bold bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-900/40 px-2 py-0.5 rounded-md flex items-center gap-1 transition" title="معرف الشحن المستلم">
-                            <i class="ph-bold ph-identification-card"></i> ID: ${extractedId}
-                        </span>` : ''}
-                    ${discountInfo ? `
-                        <span class="font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/40 px-2 py-0.5 rounded-md flex items-center gap-1">
-                            <i class="ph-fill ph-tag"></i> كود: ${discountInfo}
-                        </span>` : ''}
+                <div class="flex items-center gap-1.5 flex-wrap text-[10px] text-slate-400 pt-0.5 font-sans">
+                    <span class="font-mono font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded select-all cursor-pointer hover:bg-slate-200" onclick="event.stopPropagation(); copyToClipboard('${txRef}')" title="انقر لنسخ المرجع">${txRef}</span>
+                    <span>•</span>
+                    <span>${tx.date.split(',')[0]}</span>
+                    ${playerId ? `<span>•</span> <span class="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-900/40" dir="ltr">ID: ${playerId}</span>` : ''}
+                    ${discountInfo ? `<span>•</span> <span class="font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/40">خصم ${discountInfo}</span>` : ''}
                 </div>
             `;
 
-            // 4. بناء الكود الرقمي إذا وُجد بتصميم فاخر
+            // 5. شريط الكود الرقمي إذا وجد
             const serialCode = tx.serial_code ? String(tx.serial_code).trim() : '';
             const hasCode = serialCode && !['null', 'undefined', 'none', '-'].includes(serialCode.toLowerCase());
             let codeRibbonHtml = '';
 
             if (hasCode) {
                 codeRibbonHtml = `
-                    <div class="mt-2.5 p-3 rounded-xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between border border-slate-700/80 shadow-inner" dir="ltr" onclick="event.stopPropagation()">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/30">
+                    <div class="mt-2.5 p-2.5 rounded-xl bg-slate-900 text-white flex items-center justify-between border border-slate-800 shadow-inner" dir="ltr" onclick="event.stopPropagation()">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
                                 <i class="ph-bold ph-key"></i>
-                            </div>
+                            </span>
                             <span class="font-mono text-xs sm:text-sm font-black tracking-widest text-emerald-400 select-all">${serialCode}</span>
                         </div>
-                        <button onclick="copyToClipboard('${serialCode}')" class="btn-spring px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-black flex items-center gap-1 shadow-sm transition cursor-pointer">
+                        <button onclick="copyToClipboard('${serialCode}')" class="btn-spring px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer">
                             <i class="ph-bold ph-copy"></i>
                             <span>نسخ</span>
                         </button>
@@ -2468,118 +2464,112 @@ async function verifyRegistrationOtp() {
                 `;
             }
 
-            // 5. شريط التنبيه إن كان هناك سبب للرفض
+            // 6. شريط التنبيه عند الرفض
             let cancelAlertHtml = '';
             if (cancelReason) {
                 cancelAlertHtml = `
-                    <div class="mt-2 p-2.5 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 flex items-start gap-2 text-[11px] text-rose-600 dark:text-rose-400 leading-snug font-medium">
-                        <i class="ph-fill ph-warning-circle text-sm shrink-0 mt-0.5"></i>
-                        <span><b>ملاحظة الإدارة:</b> ${cancelReason} (تمت إعادة الرصيد لمحفظتك فوراً).</span>
+                    <div class="mt-2 p-2 rounded-xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 flex items-center gap-1.5 text-[10px] text-rose-600 dark:text-rose-400 font-bold">
+                        <i class="ph-fill ph-warning-circle text-xs shrink-0"></i>
+                        <span>سبب الرفض: ${cancelReason} (أعيد المبلغ لمحفظتك فوراً)</span>
                     </div>
                 `;
             }
 
-            // تجميع البطاقة الكاملة
+            // الهيكل النهائي للبطاقة
             card.innerHTML = `
                 <div class="flex items-start justify-between gap-3">
                     <div class="flex items-start gap-3 min-w-0">
-                        ${iconMarkup}
-                        <div class="min-w-0 space-y-1">
-                            <div class="flex items-center gap-2">
-                                <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 truncate">${mainTitle}</h4>
-                                ${badgeMarkup}
-                            </div>
+                        ${iconBox}
+                        <div class="min-w-0 space-y-0.5">
+                            <!-- 1. عنوان العملية أولاً -->
+                            <span class="text-[10px] font-black tracking-wide text-blue-600 dark:text-blue-400 block">${opTitle}</span>
+                            <!-- 2. اسم الباقة ثانياً -->
+                            <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 truncate">${packageName}</h4>
+                            <!-- 3. الرقائق الذكية (المرجع، التاريخ، الـ ID) -->
                             ${chipsHtml}
                         </div>
                     </div>
-                    ${amountMarkup}
+                    <!-- الجهة اليسرى: المبلغ والشارة -->
+                    <div class="flex flex-col items-end shrink-0 gap-1">
+                        ${amountMarkup}
+                        ${statusPill}
+                    </div>
                 </div>
                 ${codeRibbonHtml}
                 ${cancelAlertHtml}
             `;
 
-            // عند النقر على البطاقة، تفتح الإيصال المالي المفصل
-            card.onclick = () => openTransactionReceiptModal(tx, mainTitle, numAmount, statusKey, extractedId, cancelReason);
+            // فتح الإيصال التفصيلي عند النقر
+            card.onclick = () => openTransactionReceiptModal(tx, opTitle, packageName, numAmount, statusKey, playerId, cancelReason);
 
             return card;
         }
 
         // ========================================================================
-        // نافذة الإيصال المالي العالمي الشامل (Interactive Digital Receipt)
+        // نافذة الإيصال الرقمي المالي (Digital Receipt)
         // ========================================================================
-        function openTransactionReceiptModal(tx, title, amount, status, playerId, cancelReason) {
+        function openTransactionReceiptModal(tx, opTitle, packageName, amount, status, playerId, cancelReason) {
             const oldReceipt = document.getElementById('transaction-receipt-modal');
             if (oldReceipt) oldReceipt.remove();
 
             const rawTx = tx.raw || {};
             const ref = tx.tx_id || rawTx.transaction_ref || 'TX-UNKNOWN';
             const dateStr = tx.date || new Date().toLocaleString();
-
             const isCredit = tx.type === 'Refund' || tx.type === 'Deposit' || tx.type === 'Affiliate Commission';
 
             const receiptHtml = `
             <div id="transaction-receipt-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 z-[120] animate-in fade-in duration-200">
-                <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[32px] p-6 text-right space-y-5 shadow-2xl border border-slate-100 dark:border-slate-800 relative">
+                <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[28px] p-6 text-right space-y-4 shadow-2xl border border-slate-100 dark:border-slate-800 relative">
                     
-                    <!-- زر الإغلاق -->
                     <button onclick="document.getElementById('transaction-receipt-modal').remove()" class="modal-btn-close btn-spring absolute left-5 top-5 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
                         <i class="ph ph-x font-bold text-sm"></i>
                     </button>
 
-                    <!-- رأس الإيصال -->
-                    <div class="text-center pt-2 space-y-2">
-                        <span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-2xl shadow-sm border border-blue-100 dark:border-blue-900/40">
+                    <div class="text-center pt-1 space-y-1">
+                        <span class="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-xl border border-blue-100 dark:border-blue-900/40">
                             <i class="ph-fill ph-receipt"></i>
                         </span>
-                        <div>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">إيصال عملية رقمية معتمد</p>
-                            <h3 class="text-base font-black text-slate-800 dark:text-slate-100">${title}</h3>
-                        </div>
-                        <div class="py-2">
-                            <span class="text-3xl font-black font-mono ${isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100'}">
+                        <p class="text-[10px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-wider">${opTitle}</p>
+                        <h3 class="text-sm font-black text-slate-800 dark:text-slate-100">${packageName}</h3>
+                        <div class="pt-1">
+                            <span class="text-2xl font-black font-mono ${isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100'}">
                                 ${isCredit ? '+' : '-'}$${amount.toFixed(2)}
                             </span>
                         </div>
                     </div>
 
-                    <!-- شبكة بيانات العملية الرسمية -->
-                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 text-xs space-y-3 border border-slate-200/70 dark:border-slate-800">
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 text-xs space-y-2.5 border border-slate-200/70 dark:border-slate-800">
                         <div class="flex justify-between items-center">
-                            <span class="text-slate-400 font-medium">الرقم المرجعي (Ref):</span>
+                            <span class="text-slate-400">الرقم المرجعي:</span>
                             <span class="font-mono font-bold text-slate-700 dark:text-slate-200 select-all">${ref}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-slate-400 font-medium">التاريخ والوقت:</span>
-                            <span class="font-sans font-medium text-slate-600 dark:text-slate-300">${dateStr}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-400 font-medium">نوع الحركة:</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200">${tx.type || 'طلب خدمة'}</span>
+                            <span class="text-slate-400">التاريخ والوقت:</span>
+                            <span class="font-sans text-slate-600 dark:text-slate-300 text-[11px]">${dateStr}</span>
                         </div>
                         ${playerId ? `
                         <div class="flex justify-between items-center">
-                            <span class="text-slate-400 font-medium">معرف الحساب (ID):</span>
+                            <span class="text-slate-400">معرف الحساب (ID):</span>
                             <span class="font-mono font-bold text-blue-600 dark:text-blue-400 select-all" dir="ltr">${playerId}</span>
                         </div>` : ''}
-                        <div class="flex justify-between items-center border-t border-slate-200/60 dark:border-slate-700/60 pt-2.5">
-                            <span class="text-slate-400 font-medium">حالة السداد:</span>
+                        <div class="flex justify-between items-center border-t border-slate-200/60 dark:border-slate-700/60 pt-2">
+                            <span class="text-slate-400">حالة العملية:</span>
                             <span class="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                                <i class="ph-fill ph-check-circle"></i> مؤكد بالنظام
+                                <i class="ph-fill ph-check-circle"></i> مؤكدة ومسجلة
                             </span>
                         </div>
                         ${cancelReason ? `
-                        <div class="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 text-rose-500 font-bold">
+                        <div class="pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60 text-rose-500 font-bold text-[11px]">
                             <span>سبب الإلغاء: ${cancelReason}</span>
                         </div>` : ''}
                     </div>
 
-                    <!-- أزرار الإجراءات -->
-                    <div class="flex gap-2">
-                        <button onclick="copyToClipboard('${ref}'); showCustomAlert('تم نسخ الرقم المرجعي للإيصال!', false);" class="btn-spring flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <div class="flex gap-2 pt-1">
+                        <button onclick="copyToClipboard('${ref}'); showCustomAlert('تم نسخ الرقم المرجعي!', false);" class="btn-spring flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
                             <i class="ph-bold ph-copy"></i>
                             <span>نسخ المرجع</span>
                         </button>
-                        <button onclick="document.getElementById('transaction-receipt-modal').remove()" class="btn-spring flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition cursor-pointer">
+                        <button onclick="document.getElementById('transaction-receipt-modal').remove()" class="btn-spring flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition cursor-pointer">
                             إغلاق
                         </button>
                     </div>
