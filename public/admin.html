@@ -207,39 +207,50 @@
         </main>
     </div>
 
-    <!-- كود المنطق البرمجي (JavaScript) -->
+
+       <!-- كود المنطق البرمجي (JavaScript المصحح) -->
     <script>
-        // إعدادات اتصال Supabase الخاصة بمشروعك
+        // 1. إعدادات الاتصال بدون أي تعارض في الأسماء
         const SUPABASE_URL = "https://baytojjldklocifridcm.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJheXRvampsZGtsb2NpZnJpZGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MTU3MzMsImV4cCI6MjEwNTM5MTczM30.tAN7Qah-3VNwatn2CwgqsyphnkQQjagnKf4pR4WiSwQ";
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // استخدام 'db' كعميل اتصال رسمي
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentAdminUser = null;
 
-        // 1. فحص الأمان والصلاحيات (Auth Guard)
+        // 2. فحص الأمان والصلاحيات (Auth Guard)
         async function checkAdminAuth() {
+            const statusEl = document.querySelector('#auth-loading p');
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                if (statusEl) statusEl.innerText = "جاري التحقق من الجلسة والصلاحيات...";
+
+                // جلب الجلسة النشطة
+                const { data: { session }, error: sessionErr } = await db.auth.getSession();
+                
+                if (sessionErr) throw sessionErr;
                 if (!session) {
-                    alert("يجب تسجيل الدخول أولاً للوصول إلى لوحة الإدارة.");
+                    alert("يجب تسجيل الدخول من المتجر أولاً.");
                     window.location.href = "index.html";
                     return;
                 }
 
-                // فحص رتبة الحساب من جدول profiles
-                const { data: profile, error } = await supabase
+                // جلب رتبة الحساب
+                const { data: profile, error: profileErr } = await db
                     .from('profiles')
-                    .select('role')
+                    .select('id, email, role')
                     .eq('id', session.user.id)
                     .single();
 
-                if (error || !profile || profile.role !== 'admin') {
-                    alert("عذراً، هذا الحساب غير مصرح له بالدخول للوحة الإدارة.");
+                if (profileErr) throw profileErr;
+
+                if (!profile || profile.role !== 'admin') {
+                    alert(`عذراً، هذا الحساب رتبته (${profile?.role || 'غير محدد'}) وليس مسؤولاً.`);
                     window.location.href = "index.html";
                     return;
                 }
 
-                // الصلاحيات سليمة: إظهار اللوحة وبدء جلب البيانات
+                // نجاح التحقق
                 currentAdminUser = session.user;
                 document.getElementById('auth-loading').classList.add('hidden');
                 document.getElementById('admin-app').classList.remove('hidden');
@@ -247,11 +258,12 @@
                 loadAllAdminData();
             } catch (err) {
                 console.error("Auth Guard Error:", err);
+                alert("حدث خطأ أثناء فحص الصلاحيات: " + (err.message || err));
                 window.location.href = "index.html";
             }
         }
 
-        // 2. تحميل كافة بيانات الإدارة
+        // 3. تحميل كافة بيانات الإدارة
         async function loadAllAdminData() {
             loadKPIs();
             loadPendingOrders();
@@ -260,7 +272,7 @@
 
         // جلب المؤشرات المالية (KPIs)
         async function loadKPIs() {
-            const { data: kpis } = await supabase.rpc('admin_get_kpis');
+            const { data: kpis } = await db.rpc('admin_get_kpis');
             if (kpis) {
                 document.getElementById('kpi-sales-today').innerText = "$" + Number(kpis.sales_today).toFixed(2);
                 document.getElementById('kpi-sales-month').innerText = "$" + Number(kpis.sales_month).toFixed(2);
@@ -278,7 +290,7 @@
         // جلب طلبات الـ ID المعلقة
         async function loadPendingOrders() {
             const tbody = document.getElementById('orders-tbody');
-            const { data: orders } = await supabase
+            const { data: orders } = await db
                 .from('transactions')
                 .select('*')
                 .eq('status', 'pending')
@@ -308,16 +320,16 @@
             `).join('');
         }
 
-        // معالجة تنفيذ أو رفض الطلب
+        // معالجة تنفيذ أو استرجاع الطلب
         async function handleProcessOrder(id, action) {
             const msg = action === 'complete' 
                 ? 'هل تم شحن هذا الحساب بالفعل داخل اللعبة؟' 
-                : 'هل أنت متأكد من رفض الطلب وإعادة المبلغ لمحفظة العميل؟';
+                : 'هل أنت متأكد من رفض الطلب وإعادة المبلغ لمحفظة العميل تلقائياً؟';
             if (!confirm(msg)) return;
 
             const reason = action === 'refund' ? prompt('سبب الرفض:', 'معرف الحساب غير صحيح') : '';
 
-            const { data, error } = await supabase.rpc('admin_process_order', {
+            const { data, error } = await db.rpc('admin_process_order', {
                 p_tx_id: id,
                 p_action: action,
                 p_reason: reason
@@ -331,7 +343,7 @@
             }
         }
 
-        // ترقية وكيل وتعيين كوده
+        // ترقية وكيل
         async function handlePromoteAgent() {
             const email = document.getElementById('agent-email').value.trim();
             const code = document.getElementById('agent-code').value.trim();
@@ -342,7 +354,7 @@
                 return alert("يرجى إدخال جميع بيانات الوكيل بشكل صحيح.");
             }
 
-            const { data, error } = await supabase.rpc('admin_promote_agent', {
+            const { data, error } = await db.rpc('admin_promote_agent', {
                 p_email: email,
                 p_code: code,
                 p_discount_percent: discount,
@@ -358,7 +370,7 @@
             }
         }
 
-        // تسليم كاش للوكيل
+        // تسليم أرباح كاش
         async function handlePayoutCash() {
             const email = document.getElementById('payout-email').value.trim();
             const amount = parseFloat(document.getElementById('payout-amount').value);
@@ -368,7 +380,7 @@
                 return alert("يرجى إدخال بريد الوكيل ومبلغ صحيح.");
             }
 
-            const { data, error } = await supabase.rpc('payout_agent_cash', {
+            const { data, error } = await db.rpc('payout_agent_cash', {
                 p_agent_email: email,
                 p_payout_amount: amount,
                 p_note: note
@@ -394,7 +406,7 @@
                 return alert("يرجى إدخال بريد ومبلغ صحيح.");
             }
 
-            const { data, error } = await supabase.rpc('admin_manual_topup', {
+            const { data, error } = await db.rpc('admin_manual_topup', {
                 p_email: email,
                 p_amount: amount,
                 p_note: note
@@ -410,10 +422,10 @@
             }
         }
 
-        // إدارة المنتجات وتعديل الأسعار
+        // إدارة المنتجات
         async function loadProducts() {
             const tbody = document.getElementById('products-tbody');
-            const { data: products } = await supabase.from('products').select('*').order('created_at', { ascending: true });
+            const { data: products } = await db.from('products').select('*').order('created_at', { ascending: true });
 
             if (!products) return;
 
@@ -434,17 +446,17 @@
         }
 
         async function changeProductPrice(id, newPrice) {
-            await supabase.from('products').update({ price: parseFloat(newPrice) }).eq('id', id);
+            await db.from('products').update({ price: parseFloat(newPrice) }).eq('id', id);
             alert("✓ تم تحديث السعر بنجاح.");
         }
 
         async function toggleProduct(id, currentStatus) {
             const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
-            await supabase.from('products').update({ status: nextStatus }).eq('id', id);
+            await db.from('products').update({ status: nextStatus }).eq('id', id);
             loadProducts();
         }
 
-        // التنقل بين التبويبات
+        // تبديل التبويبات
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(b => {
@@ -456,12 +468,10 @@
         }
 
         async function handleLogout() {
-            await supabase.auth.signOut();
+            await db.auth.signOut();
             window.location.href = "index.html";
         }
 
-        // بدء الفحص عند تحميل الصفحة
+        // بدء الفحص فور تحميل الصفحة
         window.addEventListener('DOMContentLoaded', checkAdminAuth);
     </script>
-</body>
-</html>
