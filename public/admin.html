@@ -462,7 +462,7 @@
             }).join('');
         }
 
-        // معالجة قبول أو رفض طلب شحن الرصيد
+        // معالجة قبول أو رفض طلب شحن الرصيد وتحديث الجدولين معاً
         async function handleProcessDeposit(txId, action) {
             const confirmMsg = action === 'approve'
                 ? 'هل وصلك التحويل المالي بالفعل وتريد إيداع المبلغ في محفظة العميل الآن؟'
@@ -472,17 +472,24 @@
 
             const reason = action === 'reject' ? prompt('سبب الرفض (اختياري):', 'لم يتم استلام المبلغ في الحساب') : '';
 
-            const { data, error } = await db.rpc('admin_process_deposit', {
-                p_tx_id: txId,
-                p_action: action,
-                p_reason: reason
-            });
+            try {
+                const { data, error } = await db.rpc('admin_process_deposit', {
+                    p_tx_id: txId,
+                    p_action: action,
+                    p_reason: reason || ''
+                });
 
-            if (error || data.status === 'error') {
-                alert(error ? error.message : data.message);
-            } else {
-                alert(data.message);
-                loadAllAdminData();
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    alert(data.message);
+                    loadAllAdminData(); // يعيد تحميل المعلقات والـ KPIs
+                } else {
+                    alert("فشل الإجراء: " + (data ? data.message : "حدث خطأ غير متوقع"));
+                }
+            } catch (err) {
+                console.error("Deposit Process Error:", err);
+                alert("حدث خطأ في الاتصال: " + (err.message || err));
             }
         }
 
