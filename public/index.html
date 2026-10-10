@@ -2397,6 +2397,8 @@ async function verifyRegistrationOtp() {
             const isCommission = tx.type === 'Affiliate Commission';
             const isRefundedOrder = statusKey === 'refunded' || statusKey === 'مسترجع';
             const isPending = statusKey === 'pending' || statusKey === 'معلق';
+            const isRejected = statusKey === 'rejected' || statusKey === 'cancelled' || statusKey === 'مرفوض' || statusKey === 'ملغي';
+            const isCompleted = statusKey === 'completed' || statusKey === 'approved' || statusKey === 'مكتمل' || statusKey === 'مقبول';
 
             // 1. استخراج النصوص وتنقيتها
             let rawDetails = tx.details || '';
@@ -2416,17 +2418,17 @@ async function verifyRegistrationOtp() {
             // تنظيف اسم الباقة الصافي للبحث عن المنصة
             let cleanPackageName = rawDetails
                 .replace(/\[مسترجع:\s*[^\]]+\]/g, '')
+                .replace(/\[إشعار:\s*[^\]]+\]/g, '')
                 .replace(/\(ID:\s*[^)]+\)/gi, '')
                 .replace(/\(خصم كود\s*[^)]+\)/gi, '')
                 .replace(/استرجاع رصيد طلب مرفوض:\s*/g, '')
                 .trim();
 
-            // 2. المحرك الذكي لتحديد [اسم المنصة] و [شعار المنصة] و [اسم الباقة]
+            // 2. تحديد المنصة والشعار
             let platformName = '';
             let packageName = cleanPackageName;
             let platformImageUrl = '';
 
-            // محاولة مطابقة الباقة مع قائمة منتجات المتجر المسجلة في الذاكرة
             if (typeof globalProductsRaw !== 'undefined' && globalProductsRaw.length > 0) {
                 const matched = globalProductsRaw.find(p => 
                     p.package_name.trim().toLowerCase() === cleanPackageName.toLowerCase() ||
@@ -2440,7 +2442,6 @@ async function verifyRegistrationOtp() {
                 }
             }
 
-            // معالجة المنصات لعمليات الإيداع والمحفظة والعمولات
             if (!platformName) {
                 const methodMatch = rawDetails.match(/عبر\s*\(([^)]+)\)/);
                 if (methodMatch) {
@@ -2456,7 +2457,6 @@ async function verifyRegistrationOtp() {
                     platformName = 'برنامج التسويق (وكيل)';
                     packageName = 'أرباح عمولة من كود الخصم';
                 } else {
-                    // تفكيك تلقائي ذكي إذا لم تطابق قاعدة البيانات (مثل: "بيكو 1000" -> المنصة: بيكو، الباقة: 1000)
                     const parts = cleanPackageName.split(' ');
                     if (parts.length > 1) {
                         platformName = parts[0];
@@ -2468,7 +2468,7 @@ async function verifyRegistrationOtp() {
                 }
             }
 
-            // 3. تحديد نوع العملية وشارتها
+            // 3. تحديد نوع العملية
             const opConfig = TX_OP_CONFIG[tx.type] || { 
                 label: tx.type || 'معاملة مالية', 
                 color: 'text-slate-600 bg-slate-100 border-slate-200 dark:bg-slate-800 dark:text-slate-300', 
@@ -2476,7 +2476,45 @@ async function verifyRegistrationOtp() {
             };
             const opLabel = isRefundedOrder ? 'طلب شحن مسترد' : opConfig.label;
 
-            // 4. تجهيز لوجو أو أيقونة المنصة
+            // 4. ضبط شارة الحالة (Status Badge) بدقة حسب الحالة الفعلية
+            let statusPill = '';
+            if (isPending) {
+                statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200/70 dark:border-amber-900/50 animate-pulse">
+                    <i class="ph-bold ph-hourglass-medium"></i> قيد التدقيق
+                </span>`;
+            } else if (isRefundedOrder) {
+                statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200/70 dark:border-rose-900/50">مسترد</span>`;
+            } else if (isRejected) {
+                statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400 border border-red-200/70 dark:border-red-900/50">مرفوض</span>`;
+            } else {
+                statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-900/50">مكتمل</span>`;
+            }
+
+            // 5. ضبط المبلغ المالي وإشارته بحسب نوع الحركة وحالتها
+            let amountHtml = '';
+            if (isDeposit || isRefund || isCommission) {
+                if (isPending) {
+                    amountHtml = `<div class="text-left font-mono">
+                        <span class="text-base font-black text-amber-600 dark:text-amber-400">+$${numAmount.toFixed(2)}</span>
+                        <span class="block text-[9px] text-slate-400">بانتظار التأكيد</span>
+                    </div>`;
+                } else if (isRejected) {
+                    amountHtml = `<div class="text-left font-mono">
+                        <span class="text-sm font-bold text-slate-400 line-through">+$${numAmount.toFixed(2)}</span>
+                        <span class="block text-[9px] text-rose-500">لم يتم الإيداع</span>
+                    </div>`;
+                } else {
+                    amountHtml = `<span class="font-mono text-base font-black text-emerald-600 dark:text-emerald-400">+$${numAmount.toFixed(2)}</span>`;
+                }
+            } else {
+                if (isRefundedOrder || isRejected) {
+                    amountHtml = `<span class="font-mono text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 line-through">-$${numAmount.toFixed(2)}</span>`;
+                } else {
+                    amountHtml = `<span class="font-mono text-base font-black text-slate-900 dark:text-slate-100">-$${numAmount.toFixed(2)}</span>`;
+                }
+            }
+
+            // 6. تجهيز لوجو أو أيقونة المنصة
             let logoMarkup = '';
             if (platformImageUrl) {
                 logoMarkup = `
@@ -2484,44 +2522,34 @@ async function verifyRegistrationOtp() {
                         <img src="${platformImageUrl}" alt="${platformName}" referrerpolicy="no-referrer" class="w-full h-full object-contain">
                     </div>`;
             } else {
-                let fallbackIcon = isRefund ? 'ph-bold ph-arrow-u-up-left' : (isDeposit ? 'ph-bold ph-wallet' : (isRefundedOrder ? 'ph-bold ph-prohibit' : opConfig.icon));
-                let fallbackColor = isRefund || isDeposit ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50' : (isRefundedOrder ? 'bg-rose-50 text-rose-500 dark:bg-rose-950/50 dark:text-rose-400 border-rose-200 dark:border-rose-900/50' : 'bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 border-blue-200 dark:border-blue-900/50');
+                let fallbackIcon = isPending ? 'ph-bold ph-hourglass' : (isRefund ? 'ph-bold ph-arrow-u-up-left' : (isDeposit ? 'ph-bold ph-wallet' : (isRefundedOrder ? 'ph-bold ph-prohibit' : opConfig.icon)));
+                let fallbackColor = isPending 
+                    ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border-amber-200 dark:border-amber-900/50' 
+                    : (isRefund || (isDeposit && isCompleted) 
+                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50' 
+                        : (isRefundedOrder || isRejected 
+                            ? 'bg-rose-50 text-rose-500 dark:bg-rose-950/50 dark:text-rose-400 border-rose-200 dark:border-rose-900/50' 
+                            : 'bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 border-blue-200 dark:border-blue-900/50'));
+
                 logoMarkup = `
                     <div class="w-12 h-12 rounded-2xl ${fallbackColor} border shrink-0 flex items-center justify-center text-xl shadow-sm">
                         <i class="${fallbackIcon}"></i>
                     </div>`;
             }
 
-            // 5. المبلغ وشارة الحالة في الجهة اليسرى
-            let amountHtml = '';
-            let statusPill = '';
-
-            if (isRefundedOrder) {
-                amountHtml = `<span class="font-mono text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 line-through">-$${numAmount.toFixed(2)}</span>`;
-                statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200/70 dark:border-rose-900/50">مسترد</span>`;
-            } else if (isRefund || isDeposit || (isCommission && !isPending)) {
-                amountHtml = `<span class="font-mono text-base font-black text-emerald-600 dark:text-emerald-400">+$${numAmount.toFixed(2)}</span>`;
-                statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-900/50">مكتمل</span>`;
-            } else {
-                amountHtml = `<span class="font-mono text-base font-black text-slate-900 dark:text-slate-100">-$${numAmount.toFixed(2)}</span>`;
-                statusPill = isPending
-                    ? `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200/70 dark:border-amber-900/50 animate-pulse">قيد التنفيذ</span>`
-                    : `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">مكتمل</span>`;
-            }
-
-            // 6. الوسوم الذكية (المرجع • التاريخ • معرف اللاعب • الخصم)
+            // 7. الرقائق الذكية (المرجع • التاريخ • معرف اللاعب • الخصم)
             const txRef = tx.tx_id || rawTx.transaction_ref || '---';
             let chipsHtml = `
                 <div class="flex items-center gap-1.5 flex-wrap text-[10px] text-slate-400 pt-0.5 font-sans">
                     <span class="font-mono font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded select-all cursor-pointer hover:bg-slate-200" onclick="event.stopPropagation(); copyToClipboard('${txRef}')" title="انقر لنسخ المرجع">${txRef}</span>
                     <span>•</span>
                     <span>${tx.date.split(',')[0]}</span>
-                    ${playerId ? `<span>•</span> <span class="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-900/40" dir="ltr">ID: ${playerId}</span>` : ''}
+                    ${playerId ? `<span>•</span> <span class="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-900/40" dir="ltr">${isDeposit ? 'إشعار: ' : 'ID: '}${playerId}</span>` : ''}
                     ${discountInfo ? `<span>•</span> <span class="font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/40">خصم ${discountInfo}</span>` : ''}
                 </div>
             `;
 
-            // 7. شريط الكود الرقمي إذا وُجد
+            // 8. شريط الكود الرقمي إذا وُجد
             const serialCode = tx.serial_code ? String(tx.serial_code).trim() : '';
             const hasCode = serialCode && !['null', 'undefined', 'none', '-'].includes(serialCode.toLowerCase());
             let codeRibbonHtml = '';
@@ -2543,7 +2571,7 @@ async function verifyRegistrationOtp() {
                 `;
             }
 
-            // 8. شريط سبب الرفض إن وُجد
+            // 9. شريط سبب الرفض إن وُجد
             let cancelAlertHtml = '';
             if (cancelReason) {
                 cancelAlertHtml = `
@@ -2554,9 +2582,8 @@ async function verifyRegistrationOtp() {
                 `;
             }
 
-            // الهيكل النهائي المتكامل للبطاقة
+            // الهيكل النهائي للبطاقة
             card.innerHTML = `
-                <!-- السطر العلوي: وسم نوع العملية في اليمين، والمبلغ وشارة الحالة في اليسار -->
                 <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/60 pb-2">
                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border ${opConfig.color}">
                         <i class="${opConfig.icon}"></i>
@@ -2568,7 +2595,6 @@ async function verifyRegistrationOtp() {
                     </div>
                 </div>
 
-                <!-- الكتلة الأساسية: شعار المنصة + اسم المنصة بارزاً + اسم الباقة تحته مباشرة -->
                 <div class="flex items-center gap-3.5">
                     ${logoMarkup}
                     <div class="min-w-0 space-y-0.5">
@@ -2586,16 +2612,12 @@ async function verifyRegistrationOtp() {
                 ${cancelAlertHtml}
             `;
 
-            // عند النقر على البطاقة، تفتح نافذة الإيصال الرقمي الكامل
             card.onclick = () => openTransactionReceiptModal(tx, opLabel, platformName, packageName, numAmount, statusKey, playerId, cancelReason, platformImageUrl);
 
             return card;
         }
 
-        // ========================================================================
-        // نافذة الإيصال الرقمي المالي الشامل (Digital Receipt)
-        // ========================================================================
-        function openTransactionReceiptModal(tx, opLabel, platformName, packageName, amount, status, playerId, cancelReason, platformImageUrl) {
+        function openTransactionReceiptModal(tx, opLabel, platformName, packageName, amount, statusKey, playerId, cancelReason, platformImageUrl) {
             const oldReceipt = document.getElementById('transaction-receipt-modal');
             if (oldReceipt) oldReceipt.remove();
 
@@ -2603,6 +2625,28 @@ async function verifyRegistrationOtp() {
             const ref = tx.tx_id || rawTx.transaction_ref || 'TX-UNKNOWN';
             const dateStr = tx.date || new Date().toLocaleString();
             const isCredit = tx.type === 'Refund' || tx.type === 'Deposit' || tx.type === 'Affiliate Commission';
+
+            const isPending = statusKey === 'pending' || statusKey === 'معلق';
+            const isRejected = statusKey === 'rejected' || statusKey === 'cancelled' || statusKey === 'مرفوض';
+            const isRefunded = statusKey === 'refunded' || statusKey === 'مسترجع';
+
+            let statusLabel = 'مؤكدة ومكتملة ✓';
+            let statusClass = 'text-emerald-600 dark:text-emerald-400';
+            let statusIcon = 'ph-check-circle';
+
+            if (isPending) {
+                statusLabel = 'قيد المراجعة والتدقيق ⏳';
+                statusClass = 'text-amber-600 dark:text-amber-400 animate-pulse';
+                statusIcon = 'ph-hourglass-medium';
+            } else if (isRefunded) {
+                statusLabel = 'مستردة بالكامل';
+                statusClass = 'text-rose-500';
+                statusIcon = 'ph-arrow-counter-clockwise';
+            } else if (isRejected) {
+                statusLabel = 'مرفوضة وغير معتمدة ✕';
+                statusClass = 'text-red-600';
+                statusIcon = 'ph-x-circle';
+            }
 
             const receiptHtml = `
             <div id="transaction-receipt-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 z-[120] animate-in fade-in duration-200">
@@ -2613,12 +2657,12 @@ async function verifyRegistrationOtp() {
                     </button>
 
                     <div class="text-center pt-1 space-y-1">
-                        ${platformImageUrl ? `<img src="${platformImageUrl}" alt="${platformName}" referrerpolicy="no-referrer" class="w-14 h-14 mx-auto rounded-2xl p-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 object-contain shadow-sm mb-2">` : `<span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-2xl border border-blue-100 dark:border-blue-900/40 mb-2"><i class="ph-fill ph-receipt"></i></span>`}
+                        ${platformImageUrl ? `<img src="${platformImageUrl}" alt="${platformName}" referrerpolicy="no-referrer" class="w-14 h-14 mx-auto rounded-2xl p-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 object-contain shadow-sm mb-2">` : `<span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl ${isPending ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'} dark:bg-slate-800 text-2xl border border-slate-200 dark:border-slate-700 mb-2"><i class="ph-fill ph-receipt"></i></span>`}
                         <span class="text-[10px] font-black tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-900/40">${opLabel}</span>
                         <h3 class="text-base font-black text-slate-900 dark:text-slate-100 pt-1">${platformName}</h3>
                         <p class="text-xs font-bold text-slate-500 dark:text-slate-400">${packageName}</p>
                         <div class="pt-2">
-                            <span class="text-3xl font-black font-mono ${isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100'}">
+                            <span class="text-3xl font-black font-mono ${isPending ? 'text-amber-600 dark:text-amber-400' : (isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100')}">
                                 ${isCredit ? '+' : '-'}$${amount.toFixed(2)}
                             </span>
                         </div>
@@ -2639,13 +2683,13 @@ async function verifyRegistrationOtp() {
                         </div>
                         ${playerId ? `
                         <div class="flex justify-between items-center">
-                            <span class="text-slate-400">معرف الحساب (ID):</span>
+                            <span class="text-slate-400">${tx.type === 'Deposit' || tx.type === 'شحن رصيد' ? 'رقم الإشعار:' : 'معرف الحساب (ID):'}</span>
                             <span class="font-mono font-bold text-blue-600 dark:text-blue-400 select-all" dir="ltr">${playerId}</span>
                         </div>` : ''}
                         <div class="flex justify-between items-center border-t border-slate-200/60 dark:border-slate-700/60 pt-2">
                             <span class="text-slate-400">حالة العملية:</span>
-                            <span class="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                                <i class="ph-fill ph-check-circle"></i> مؤكدة ومسجلة
+                            <span class="font-bold ${statusClass} flex items-center gap-1">
+                                <i class="ph-fill ${statusIcon}"></i> ${statusLabel}
                             </span>
                         </div>
                         ${cancelReason ? `
