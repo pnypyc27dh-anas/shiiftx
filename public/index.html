@@ -634,18 +634,17 @@
                 <div class="flex items-center gap-2.5">
                     <span id="nav-user-name" class="hidden"></span>
 
-                    <!-- زر لوحة الإدارة (يظهر فقط للأدمن) -->
-                    <a id="nav-admin-link" href="admin.html" class="hidden px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-sm active:scale-95">
+                    <!-- زر لوحة الإدارة -->
+                    <a id="nav-admin-link" href="admin.html" class="hidden h-8 px-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
                         <i class="ph-bold ph-shield-check text-sm text-rose-500"></i>
                         <span class="hidden sm:inline">لوحة الإدارة</span>
                     </a>
 
-                    <!-- زر لوحة الوكيل (مطابق لتنسيق زر الإدارة تماماً) -->
-                    <button id="nav-agent-link" onclick="openAgentModal()" class="hidden px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer">
+                    <!-- زر لوحة الوكيل -->
+                    <button id="nav-agent-link" onclick="openAgentModal()" class="hidden h-8 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
                         <i class="ph-bold ph-seal-check text-sm text-amber-500"></i>
                         <span class="hidden sm:inline">لوحة الوكيل</span>
                     </button>
-
                     <!-- زر تبديل المظهر -->
                     <button onclick="toggleTheme()" class="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-700 dark:text-amber-400 transition active:scale-90" title="تبديل المظهر">
                         <i id="theme-toggle-icon" class="ph-fill ph-moon text-xl"></i>
@@ -812,13 +811,19 @@
                 </div>
             </div>
 
-            <!-- صفحة الملف الشخصي -->
+           <!-- صفحة الملف الشخصي -->
             <div id="view-profile" class="hidden space-y-5 data-view fade-in md:max-w-xl md:mx-auto w-full">
                 <div class="glass-panel p-6 md:p-8 space-y-6 text-right">
                     <div class="text-center space-y-1 mb-4">
-                        <div class="inline-flex justify-center items-center w-16 h-16 bg-slate-100 text-slate-600 rounded-full mb-2 border-4 border-white shadow-sm"><i class="ph-fill ph-user text-3xl"></i></div>
-                        <h3 class="font-black text-lg text-slate-800">الملف الشخصي</h3>
+                        <div class="inline-flex justify-center items-center w-16 h-16 bg-slate-100 text-slate-600 rounded-full mb-2 border-4 border-white shadow-sm">
+                            <i class="ph-fill ph-user text-3xl"></i>
+                        </div>
+                        <h3 class="font-black text-lg text-slate-800 dark:text-slate-100">الملف الشخصي</h3>
                     </div>
+
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
                                 <label class="block text-[10px] font-bold text-slate-500 mb-1.5">الاسم الأول</label>
                                 <input id="prof-first-name" type="text" class="input-field w-full px-4 py-3 text-sm">
                             </div>
@@ -831,15 +836,16 @@
                             <label class="block text-[10px] font-bold text-slate-500 mb-1.5">رقم الهاتف الجوال</label>
                             <input id="prof-phone" type="text" dir="ltr" class="input-field w-full px-4 py-3 text-sm text-right">
                         </div>
-                        <button onclick="handleUpdateProfileView()" id="prof-update-btn" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-4 rounded-xl transition shadow-md mt-2 flex justify-center items-center gap-2">
+                        <button onclick="handleUpdateProfileView()" id="prof-update-btn" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-4 rounded-xl transition shadow-md mt-2 flex justify-center items-center gap-2 cursor-pointer">
                             <i class="ph-fill ph-floppy-disk text-lg"></i> حفظ وتحديث البيانات
                         </button>
                     </div>
-                    <div class="border-t border-slate-100 pt-6 flex flex-col sm:flex-row gap-3">
-                        <button onclick="triggerPasswordResetFlow()" class="w-full bg-white text-blue-600 font-bold py-3.5 rounded-xl text-xs border border-blue-200 hover:bg-blue-50 transition flex justify-center items-center gap-1.5">
+
+                    <div class="border-t border-slate-100 dark:border-slate-800 pt-6 flex flex-col sm:flex-row gap-3">
+                        <button onclick="triggerPasswordResetFlow()" class="w-full bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold py-3.5 rounded-xl text-xs border border-blue-200 dark:border-blue-900/50 hover:bg-blue-50 transition flex justify-center items-center gap-1.5 cursor-pointer">
                             <i class="ph-fill ph-key"></i> تغيير كلمة المرور
                         </button>
-                        <button onclick="triggerDeleteAccountFlow()" class="w-full bg-white text-red-600 font-bold py-3.5 rounded-xl text-xs border border-red-200 hover:bg-red-50 transition flex justify-center items-center gap-1.5">
+                        <button onclick="triggerDeleteAccountFlow()" class="w-full bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 font-bold py-3.5 rounded-xl text-xs border border-red-200 dark:border-red-900/50 hover:bg-red-50 transition flex justify-center items-center gap-1.5 cursor-pointer">
                             <i class="ph-fill ph-warning-octagon"></i> تعطيل الحساب
                         </button>
                     </div>
@@ -1898,7 +1904,7 @@ async function verifyRegistrationOtp() {
                     adminLink.classList.toggle('hidden', profile.role !== 'admin');
                 }
 
-                // 2. فحص رتبة الوكيل لإظهار/إخفاء زر الوكيل الذهبي في الهيدر
+                // 2. فحص رتبة الوكيل لإظهار/إخفاء زر الوكيل في الهيدر
                 const agentLink = document.getElementById('nav-agent-link');
                 if (agentLink) {
                     agentLink.classList.toggle('hidden', profile.role !== 'agent');
@@ -1918,26 +1924,9 @@ async function verifyRegistrationOtp() {
                 if (profile.created_at) {
                     document.getElementById('live-join-date').innerText = new Date(profile.created_at).toLocaleDateString('en-GB');
                 }
-
-                // 3. لوحة إحصائيات الوكيل في صفحة الملف الشخصي
-                const agentBox = document.getElementById('agent-affiliate-dashboard');
-                if (profile.role === 'agent') {
-                    if (agentBox) agentBox.classList.remove('hidden');
-                    
-                    // استدعاء إحصائيات الكود والعمولات لهذا الوكيل
-                    const { data: stats } = await supabase.rpc('get_my_agent_stats', { p_user_id: currentUser.id });
-                    if (stats && stats.is_agent) {
-                        document.getElementById('agent-display-code').innerText = stats.code;
-                        document.getElementById('agent-display-commission-rate').innerText = stats.commission_percent + "%";
-                        document.getElementById('agent-display-orders-count').innerText = stats.usage_count;
-                        document.getElementById('agent-display-total-earned').innerText = "$" + Number(stats.total_earned).toFixed(2);
-                    }
-                } else {
-                    if (agentBox) agentBox.classList.add('hidden');
-                }
             }
             
-            // 4. جلب سجل المعاملات المالية وعرضها بالتصميم الجديد
+            // 3. جلب سجل المعاملات المالية وعرضها بالتصميم الجديد
             const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
             if (txs) {
                 globalTransactionsRaw = txs.map(t => ({
