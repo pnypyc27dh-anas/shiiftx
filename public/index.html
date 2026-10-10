@@ -640,6 +640,12 @@
     <span>لوحة الإدارة</span>
 </a>
 
+                    <!-- زر لوحة الوكيل السريع (يظهر فقط للوكيل) -->
+                    <button id="nav-agent-link" onclick="switchTab('profile')" class="hidden px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer" title="لوحة إحصائيات الوكيل">
+                        <i class="ph-fill ph-seal-check text-base text-amber-500"></i>
+                        <span class="hidden sm:inline">لوحة الوكيل</span>
+                    </button>
+                    
                     <!-- زر تبديل المظهر -->
                     <button onclick="toggleTheme()" class="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-700 dark:text-amber-400 transition active:scale-90" title="تبديل المظهر">
                         <i id="theme-toggle-icon" class="ph-fill ph-moon text-xl"></i>
