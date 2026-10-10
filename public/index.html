@@ -2313,29 +2313,35 @@ async function verifyRegistrationOtp() {
             if(!error) { showCustomAlert("تم تعديل البيانات بنجاح.", false); silentSyncData(); switchTab('home'); } 
         }
 
-        // ========================================================================
-        // 7. عرض المعاملات
+       // ========================================================================
+        // 7. عرض المعاملات (تصميم بنكي موحد وأنيق)
         // ========================================================================
         const TX_TYPE_LABELS = {
             'Deposit': 'شحن رصيد',
             'Purchase Digital Code': 'شراء كود رقمي',
             'Direct ID Top-up': 'شحن مباشر (ID)',
             'Refund': 'استرجاع رصيد',
+            'Affiliate Commission': 'عمولة تسويق',
+            'Commission Payout': 'تسليم أرباح كاش',
+            'Commission Reversal': 'إلغاء عمولة',
             'شراء كود رقمي': 'شراء كود رقمي',
             'شحن مباشر (ID)': 'شحن مباشر (ID)',
-            'شحن رصيد': 'شحن رصيد'
+            'شحن رصيد': 'شحن رصيد',
+            'استرجاع رصيد': 'استرجاع رصيد',
+            'سحب أرباح': 'تسليم أرباح كاش'
         };
 
         const TX_STATUS_CONFIG = {
-            'completed': { text: 'مكتمل', badge: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-            'approved': { text: 'مقبول', badge: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-            'مقبول': { text: 'مقبول', badge: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-            'مكتمل': { text: 'مكتمل', badge: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-            'pending': { text: 'قيد المراجعة', badge: 'bg-amber-50 text-amber-600 border-amber-100' },
-            'معلق': { text: 'قيد المراجعة', badge: 'bg-amber-50 text-amber-600 border-amber-100' },
-            'rejected': { text: 'مرفوض', badge: 'bg-red-50 text-red-600 border-red-100' },
-            'cancelled': { text: 'ملغي', badge: 'bg-red-50 text-red-600 border-red-100' },
-            'مرفوض': { text: 'مرفوض', badge: 'bg-red-50 text-red-600 border-red-100' }
+            'completed': { text: 'مكتمل', badge: 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/40', icon: 'ph-check-circle' },
+            'approved': { text: 'مقبول', badge: 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/40', icon: 'ph-check-circle' },
+            'مكتمل': { text: 'مكتمل', badge: 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/40', icon: 'ph-check-circle' },
+            'pending': { text: 'قيد المعالجة', badge: 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/40 animate-pulse', icon: 'ph-hourglass-medium' },
+            'معلق': { text: 'قيد المعالجة', badge: 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/40 animate-pulse', icon: 'ph-hourglass-medium' },
+            'refunded': { text: 'مسترد بالكامل', badge: 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900/40', icon: 'ph-arrow-counter-clockwise' },
+            'مسترجع': { text: 'مسترد بالكامل', badge: 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900/40', icon: 'ph-arrow-counter-clockwise' },
+            'rejected': { text: 'مرفوض', badge: 'bg-red-50 text-red-600 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900/40', icon: 'ph-x-circle' },
+            'cancelled': { text: 'ملغي', badge: 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700', icon: 'ph-prohibit' },
+            'مرفوض': { text: 'مرفوض', badge: 'bg-red-50 text-red-600 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900/40', icon: 'ph-x-circle' }
         };
 
         function renderRecentDashboardTransactions(txArray) {
@@ -2352,74 +2358,140 @@ async function verifyRegistrationOtp() {
                 container.appendChild(createTransactionCardElement(tx));
             });
         }
-function createTransactionCardElement(tx) {
+
+        function createTransactionCardElement(tx) {
             const card = document.createElement('div');
-            card.className = "p-4 bg-white dark:bg-slate-900/70 border border-slate-100 dark:border-slate-800 rounded-2xl text-right mb-2.5 shadow-sm transition hover:border-blue-200 dark:hover:border-slate-700";
-            
-            const statusCfg = TX_STATUS_CONFIG[tx.status] || { text: tx.status, badge: 'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700' };
-            const displayType = TX_TYPE_LABELS[tx.type] || tx.type;
+            card.className = "p-4 bg-white dark:bg-slate-900/90 border border-slate-100 dark:border-slate-800 rounded-2xl text-right mb-2.5 shadow-sm transition hover:border-blue-200 dark:hover:border-slate-700 space-y-2.5";
 
-            const cleanCode = tx.serial_code ? String(tx.serial_code).trim() : '';
-            const hasCleanCode = cleanCode !== '' && !['null', 'undefined', 'none', 'n/a', '0', '-'].includes(cleanCode.toLowerCase());
-            const txRefCode = tx.tx_id || (tx.raw && tx.raw.transaction_ref) || '---';
+            const rawTx = tx.raw || {};
+            const statusKey = (tx.status || rawTx.status || '').toLowerCase();
+            const statusCfg = TX_STATUS_CONFIG[statusKey] || { 
+                text: tx.status || 'غير محدد', 
+                badge: 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700',
+                icon: 'ph-info'
+            };
 
-            let extraContentHtml = '';
+            const displayType = TX_TYPE_LABELS[tx.type] || tx.type || 'معاملة مالية';
+            const numAmount = parseFloat(rawTx.amount || parseFloat(tx.amount) || 0);
+            const isRefund = tx.type === 'Refund' || tx.type === 'استرجاع رصيد';
+            const isDeposit = tx.type === 'Deposit' || tx.type === 'شحن رصيد';
+            const isCommission = tx.type === 'Affiliate Commission';
+            const isRefundedOrder = statusKey === 'refunded' || statusKey === 'مسترجع';
 
-            // صندوق الكود بألوان هادئة ومتناسقة تماماً مع الوضعين الليلي والنهاري
-            if (tx.delivery_type === 'CODE' && hasCleanCode) {
-                extraContentHtml = `
-                    <div class="mt-3 p-2.5 px-3 bg-slate-50 dark:bg-slate-800/80 text-emerald-700 dark:text-emerald-400 rounded-xl font-mono text-[11px] flex items-center justify-between border border-slate-200/80 dark:border-slate-700" dir="ltr">
-                        <span class="tracking-wider font-bold select-all">${cleanCode}</span>
-                        <button onclick="copyToClipboard('${cleanCode}')" class="text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-300 p-1 transition" title="نسخ الكود">
-                            <i class="ph-fill ph-copy text-sm"></i>
-                        </button>
+            // 1. تحديد الأيقونة ولونها بحسب طبيعة الحركة
+            let iconMarkup = '';
+            if (isRefund) {
+                iconMarkup = `<span class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg shrink-0 border border-emerald-500/20">
+                    <i class="ph-bold ph-arrow-u-up-left"></i>
+                </span>`;
+            } else if (isDeposit || isCommission) {
+                iconMarkup = `<span class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg shrink-0 border border-emerald-500/20">
+                    <i class="ph-bold ph-arrow-down-left"></i>
+                </span>`;
+            } else if (isRefundedOrder) {
+                iconMarkup = `<span class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center text-lg shrink-0 border border-slate-200 dark:border-slate-700">
+                    <i class="ph-bold ph-prohibit"></i>
+                </span>`;
+            } else if (tx.delivery_type === 'CODE') {
+                iconMarkup = `<span class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg shrink-0 border border-blue-500/20">
+                    <i class="ph-bold ph-barcode"></i>
+                </span>`;
+            } else {
+                iconMarkup = `<span class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg shrink-0 border border-indigo-500/20">
+                    <i class="ph-bold ph-game-controller"></i>
+                </span>`;
+            }
+
+            // 2. ضبط عرض المبلغ وإشارته الرياضية بدقة
+            let amountHtml = '';
+            if (isRefundedOrder) {
+                amountHtml = `
+                    <div class="text-left shrink-0">
+                        <span class="block font-mono text-xs text-slate-400 line-through">-$${numAmount.toFixed(2)}</span>
+                        <span class="text-[9px] font-bold text-rose-500 bg-rose-50 dark:bg-rose-950/40 px-1.5 py-0.5 rounded border border-rose-200/50 dark:border-rose-900/40 inline-block mt-0.5">لاغي</span>
                     </div>
                 `;
-            } else if (tx.delivery_type === 'DIRECT_ID') {
-                const displayId = tx.player_id || (tx.details && tx.details.match(/ID:\s*([^\s)]+)/i) ? tx.details.match(/ID:\s*([^\s)]+)/i)[1] : '');
-                if (displayId) {
-                    extraContentHtml = `
-                        <div class="mt-3 flex items-center gap-2 text-[10px] text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-1.5 w-fit">
-                            <i class="ph-fill ph-user-circle text-blue-500 text-sm"></i>
-                            <span class="font-bold">معرف الشحن:</span>
-                            <span class="font-mono text-slate-800 dark:text-slate-200 font-bold" dir="ltr">${displayId}</span>
-                        </div>
-                    `;
-                }
-            } else if (!tx.delivery_type && hasCleanCode) {
-                extraContentHtml = `
-                    <div class="mt-3 p-2.5 px-3 bg-slate-50 dark:bg-slate-800/80 text-emerald-700 dark:text-emerald-400 rounded-xl font-mono text-[11px] flex items-center justify-between border border-slate-200/80 dark:border-slate-700" dir="ltr">
-                        <span class="tracking-wider font-bold select-all">${cleanCode}</span>
-                        <button onclick="copyToClipboard('${cleanCode}')" class="text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-300 p-1 transition" title="نسخ الكود">
-                            <i class="ph-fill ph-copy text-sm"></i>
-                        </button>
+            } else if (isRefund || isDeposit || (isCommission && statusKey === 'completed')) {
+                amountHtml = `
+                    <div class="text-left shrink-0">
+                        <span class="block font-mono font-black text-sm text-emerald-600 dark:text-emerald-400">+$${numAmount.toFixed(2)}</span>
+                        <span class="text-[9px] text-slate-400 block font-medium">إيداع بالمحفظة</span>
+                    </div>
+                `;
+            } else {
+                amountHtml = `
+                    <div class="text-left shrink-0">
+                        <span class="block font-mono font-black text-sm text-slate-800 dark:text-slate-100">-$${numAmount.toFixed(2)}</span>
+                        <span class="text-[9px] text-slate-400 block font-medium">مشتريات</span>
                     </div>
                 `;
             }
 
-            // إظهار رمز العملية (TX-ID) مع إمكانية نسخه بضغطة واحدة
-            card.innerHTML = `
-                <div class="flex justify-between items-start gap-2">
-                    <div>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <p class="text-xs font-black text-slate-800 dark:text-slate-100">${displayType}</p>
-                            <span onclick="copyToClipboard('${txRefCode}')" title="انقر لنسخ رمز العملية للتتبع" class="cursor-pointer font-mono text-[9px] font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 border border-blue-200/70 dark:border-blue-800/60 px-2 py-0.5 rounded-md flex items-center gap-1 transition select-all" dir="ltr">
-                                ${txRefCode} <i class="ph ph-copy text-[10px]"></i>
-                            </span>
+            // 3. الأكواد الرقمية أو معرف الـ ID
+            const cleanCode = tx.serial_code ? String(tx.serial_code).trim() : '';
+            const hasCleanCode = cleanCode !== '' && !['null', 'undefined', 'none', 'n/a', '0', '-'].includes(cleanCode.toLowerCase());
+            const txRefCode = tx.tx_id || rawTx.transaction_ref || '---';
+
+            let extraContentHtml = '';
+            if (hasCleanCode) {
+                extraContentHtml = `
+                    <div class="p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2" dir="ltr">
+                        <span class="font-mono text-xs font-black text-emerald-600 dark:text-emerald-400 select-all tracking-wider">${cleanCode}</span>
+                        <button onclick="navigator.clipboard.writeText('${cleanCode}'); showCustomAlert('تم نسخ الكود!', false);" class="btn-spring px-2.5 py-1 bg-white dark:bg-slate-700 hover:bg-slate-100 text-slate-700 dark:text-slate-200 rounded-lg text-[10px] font-bold shadow-sm border border-slate-200 dark:border-slate-600 flex items-center gap-1 cursor-pointer">
+                            <i class="ph-bold ph-copy"></i>
+                            <span>نسخ الكود</span>
+                        </button>
+                    </div>
+                `;
+            } else if (tx.delivery_type === 'DIRECT_ID' || rawTx.player_id) {
+                const displayId = tx.player_id || rawTx.player_id || (tx.details && tx.details.match(/ID:\s*([^\s)]+)/i) ? tx.details.match(/ID:\s*([^\s)]+)/i)[1] : '');
+                if (displayId) {
+                    extraContentHtml = `
+                        <div class="flex items-center gap-2 text-[10px] text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 rounded-xl px-3 py-1.5 w-fit">
+                            <i class="ph-fill ph-user-circle text-blue-500 text-sm"></i>
+                            <span class="font-bold">معرف الشحن:</span>
+                            <span class="font-mono text-slate-800 dark:text-slate-200 font-bold select-all" dir="ltr">${displayId}</span>
                         </div>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">${tx.details}</p>
-                        <p class="text-[9px] text-slate-400 dark:text-slate-500 font-sans mt-1">${tx.date}</p>
+                    `;
+                }
+            }
+
+            // 4. بناء هيكل البطاقة المتكامل
+            card.innerHTML = `
+                <!-- رأس البطاقة: الأيقونة + العنوان + المبلغ -->
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        ${iconMarkup}
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h4 class="text-xs font-black text-slate-800 dark:text-slate-100 truncate">${displayType}</h4>
+                                <span onclick="copyToClipboard('${txRefCode}')" title="انقر لنسخ رمز المعاملة" class="cursor-pointer font-mono text-[9px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 border border-blue-200/70 dark:border-blue-900/60 px-1.5 py-0.5 rounded flex items-center gap-1 transition select-all" dir="ltr">
+                                    ${txRefCode} <i class="ph ph-copy text-[10px]"></i>
+                                </span>
+                            </div>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">${tx.details}</p>
+                            <p class="text-[9px] text-slate-400 dark:text-slate-500 font-sans mt-0.5">${tx.date}</p>
+                        </div>
                     </div>
-                    <div class="flex flex-col items-end gap-1 shrink-0">
-                        <span class="text-sm font-black text-slate-800 dark:text-slate-100 font-sans tabular-numeric">${tx.amount}</span>
-                        <span class="px-2 py-0.5 rounded-lg text-[9px] font-bold border ${statusCfg.badge}">${statusCfg.text}</span>
-                    </div>
+                    ${amountHtml}
                 </div>
+
+                <!-- محتوى إضافي (الكود الرقمي أو الـ ID) -->
                 ${extraContentHtml}
+
+                <!-- أسفل البطاقة: شارة الحالة ونوع التسليم -->
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800/70 flex items-center justify-between text-[10px]">
+                    <span class="px-2 py-0.5 rounded-md font-bold border ${statusCfg.badge} inline-flex items-center gap-1">
+                        <i class="ph-bold ${statusCfg.icon}"></i>
+                        <span>${statusCfg.text}</span>
+                    </span>
+                    <span class="text-slate-400 font-mono text-[9px]">
+                        ${tx.delivery_type === 'WALLET_DEPOSIT' ? 'محفظة رقمية' : (tx.delivery_type === 'CODE' ? 'بطاقة رقمية' : (tx.delivery_type === 'DIRECT_ID' ? 'شحن مباشر' : ''))}
+                    </span>
+                </div>
             `;
             return card;
         }
-
         // ========================================================================
         // 8. سجل المعاملات ودليل الوكلاء والمعلومات
         // ========================================================================
