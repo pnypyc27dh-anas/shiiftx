@@ -2132,16 +2132,16 @@ async function verifyRegistrationOtp() {
 
                 if (depError) throw depError;
 
-                // 2. تسجيل في جدول المعاملات
+                // 2. تسجيل في جدول المعاملات مع حفظ رقم الإشعار في الحقل والتفاصيل
                 const { error: txError } = await supabase.from('transactions').insert({ 
                     user_id: currentUser.id, 
                     transaction_type: 'Deposit', 
-                    details: 'طلب شحن محفظة عبر (' + method + ')', 
+                    details: 'طلب شحن محفظة عبر (' + method + ') [إشعار: ' + txNum + ']', 
                     amount: finalAmt, 
                     status: 'pending', 
                     transaction_ref: txRef,
                     delivery_type: 'WALLET_DEPOSIT',
-                    player_id: null,
+                    player_id: txNum, // حفظ رقم الإشعار هنا لسهولة القراءة
                     serial_code: null
                 }); 
 
