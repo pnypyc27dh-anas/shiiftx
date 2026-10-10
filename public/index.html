@@ -1602,6 +1602,8 @@ let activeCoupon = null, discountedPrice = 0.00, currentUserRole = "customer";
             toggleView('login-screen', true); 
          const adminLink = document.getElementById('nav-admin-link');
 if (adminLink) adminLink.classList.add('hidden');
+           const agentLink = document.getElementById('nav-agent-link');
+        if (agentLink) agentLink.classList.add('hidden');
         }
 
         function togglePasswordVisibility(fieldId, btnEl) {
@@ -1900,10 +1902,11 @@ async function verifyRegistrationOtp() {
                     document.getElementById('live-join-date').innerText = new Date(profile.created_at).toLocaleDateString('en-GB');
                 }
 
-                // ==================== التحقق التلقائي من رتبة الوكيل ====================
-                const agentBox = document.getElementById('agent-affiliate-dashboard');
-                if (profile.role === 'agent') {
-                    if (agentBox) agentBox.classList.remove('hidden');
+                // التحقق من رتبة الوكيل لإظهار الزر الذهبي
+        const agentLink = document.getElementById('nav-agent-link');
+        if (agentLink) {
+            agentLink.classList.toggle('hidden', profile.role !== 'agent');
+        }
                     
                     // استدعاء إحصائيات الكود والعمولات لهذا الوكيل من قاعدة البيانات
                     const { data: stats } = await supabase.rpc('get_my_agent_stats', { p_user_id: currentUser.id });
