@@ -2134,13 +2134,12 @@ async function verifyRegistrationOtp() {
                 const { data: rpcRef, error: rpcErr } = await supabase.rpc('generate_ref', { prefix: 'TX-D' });
                 if (!rpcErr && rpcRef) txRef = rpcRef;
 
-                // 1. تسجيل في جدول طلبات الإيداع
+                // 1. تسجيل في جدول طلبات الإيداع بشكل نظيف ومستقل
                 const { error: depError } = await supabase.from('deposit_orders').insert({ 
                     transaction_ref: txRef, 
                     user_id: currentUser.id, 
                     amount: finalAmt, 
                     payment_method: method, 
-                    agent_code: null,
                     transfer_receipt_num: txNum,
                     status: 'pending'
                 }); 
