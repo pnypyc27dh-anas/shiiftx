@@ -25,8 +25,12 @@
     <meta name="twitter:description" content="اشحن رصيدك واشترِ بطاقاتك واشتراكاتك الرقمية فوراً وبأمان.">
     <meta name="twitter:image" content="/assets/og-cover.png">
     <title>SHIIFTX - المحفظة الرقمية ومتجر الاشتراكات</title>
-  <!-- أيقونة تبويب المتصفح الفورية SHIIFT X -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='200 95 145 145'><rect width='100%25' height='100%25' rx='35' fill='%230D0E12'/><path fill='%235CE1E6' d='M234.6 132.7L270.4 187.6L234.7 235.3H212.4L246 187.7L212.8 133.3H234.6ZM332.7 132.7L299.2 187.7L332.4 234.9H310.6L274.8 188L310.5 132.9H332.7ZM225.7 104.6C232.8 104.6 238.4 110.2 238.4 115.7C238.4 121.1 232.8 126.7 225.7 126.7C218.6 126.7 212.8 121.1 212.8 115.7C212.8 110.2 218.6 104.6 225.7 104.6ZM319.5 104.6C326.6 104.6 332.5 110.2 332.5 115.7C332.5 121.1 326.6 126.7 319.5 126.7C312.4 126.7 306.8 121.1 306.8 115.7C306.8 110.2 312.4 104.6 319.5 104.6Z'/></svg>">
+  <!-- حزمة الأيقونات المعتمدة للمتصفحات ومحركات البحث (Favicon Suite) -->
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
+    
+    <!-- الأيقونة المتجهة فائقة الدقة للشاشات عالية الكثافة (Retina/4K) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='200 95 145 145'><rect width='100%25' height='100%25' rx='32' fill='%230D0E12'/><path fill='%235CE1E6' d='M234.6 132.7L270.4 187.6L234.7 235.3H212.4L246 187.7L212.8 133.3H234.6ZM332.7 132.7L299.2 187.7L332.4 234.9H310.6L274.8 188L310.5 132.9H332.7ZM225.7 104.6C232.8 104.6 238.4 110.2 238.4 115.7C238.4 121.1 232.8 126.7 225.7 126.7C218.6 126.7 212.8 121.1 212.8 115.7C212.8 110.2 218.6 104.6 225.7 104.6ZM319.5 104.6C326.6 104.6 332.5 110.2 332.5 115.7C332.5 121.1 326.6 126.7 319.5 126.7C312.4 126.7 306.8 121.1 306.8 115.7C306.8 110.2 312.4 104.6 319.5 104.6Z'/></svg>">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -3907,7 +3911,7 @@ async function verifyRegistrationOtp() {
                     div.innerHTML = `
                         <div class="space-y-2 text-xs">
                             <div class="flex justify-between items-center pb-1.5 border-b border-slate-700/60 font-bold text-slate-100">
-                                <span>📦 تفاصيل الطلب:</span>
+                                <span> تفاصيل الطلب:</span>
                                 <span class="font-mono text-amber-400">${o.transaction_ref}</span>
                             </div>
                             <div class="space-y-1 bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
