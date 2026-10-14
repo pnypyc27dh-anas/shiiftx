@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="referrer" content="no-referrer">
-  <!-- 1. أيقونة تطبيق الهاتف عند التثبيت على الشاشة الرئيسية (iOS & Android) -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/app-icon-512.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <title>SHIIFTX - المحفظة الرقمية ومتجر الاشتراكات</title>
+
+    <!-- 1. ملف تثبيت التطبيق وشاشة الترحيب (PWA Manifest) -->
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0D0E12">
 
-    <!-- 2. بطاقة المشاركة الذكية للروابط (Open Graph لـ WhatsApp & Telegram & Facebook) -->
+    <!-- 2. إعدادات تطبيق هواتف الآيفون (iOS Apple Web App) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SHIIFT X">
+    <link rel="apple-touch-icon" href="/assets/app-icon-512.png">
+
+    <!-- 3. بطاقة المشاركة الذكية للروابط (Open Graph لـ WhatsApp & Telegram & Facebook) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="SHIIFT X — المحفظة الرقمية ومتجر الاشتراكات">
     <meta property="og:description" content="البنية التحتية لشحن الرصيد الفوري، بطاقات الألعاب، والاشتراكات الرقمية بأعلى معايير الأمان.">
@@ -19,19 +26,22 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
 
-    <!-- 3. بطاقة المشاركة لمنصة X (Twitter Card) -->
+    <!-- 4. بطاقة المشاركة لمنصة X (Twitter Card) -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="SHIIFT X — Premium Digital Wallet">
     <meta name="twitter:description" content="اشحن رصيدك واشترِ بطاقاتك واشتراكاتك الرقمية فوراً وبأمان.">
     <meta name="twitter:image" content="/assets/og-cover.png">
-    <title>SHIIFTX - المحفظة الرقمية ومتجر الاشتراكات</title>
-  <!-- حزمة الأيقونات المعتمدة للمتصفحات ومحركات البحث (Favicon Suite) -->
-    <link rel="icon" type="image/x-icon" href="./favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
-    
-    <!-- الأيقونة المتجهة فائقة الدقة للشاشات عالية الكثافة (Retina/4K) -->
+
+    <!-- 5. حزمة الأيقونات المعتمدة للمتصفحات ومحركات البحث (Favicon Suite) -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='200 95 145 145'><rect width='100%25' height='100%25' rx='32' fill='%230D0E12'/><path fill='%235CE1E6' d='M234.6 132.7L270.4 187.6L234.7 235.3H212.4L246 187.7L212.8 133.3H234.6ZM332.7 132.7L299.2 187.7L332.4 234.9H310.6L274.8 188L310.5 132.9H332.7ZM225.7 104.6C232.8 104.6 238.4 110.2 238.4 115.7C238.4 121.1 232.8 126.7 225.7 126.7C218.6 126.7 212.8 121.1 212.8 115.7C212.8 110.2 218.6 104.6 225.7 104.6ZM319.5 104.6C326.6 104.6 332.5 110.2 332.5 115.7C332.5 121.1 326.6 126.7 319.5 126.7C312.4 126.7 306.8 121.1 306.8 115.7C306.8 110.2 312.4 104.6 319.5 104.6Z'/></svg>">
 
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- كود تبديل الوضع الليلي والنهاري -->
+    <script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
