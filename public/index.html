@@ -1,10 +1,32 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="referrer" content="no-referrer">
+  <!-- 1. أيقونة تطبيق الهاتف عند التثبيت على الشاشة الرئيسية (iOS & Android) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/app-icon-512.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0D0E12">
+
+    <!-- 2. بطاقة المشاركة الذكية للروابط (Open Graph لـ WhatsApp & Telegram & Facebook) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="SHIIFT X — المحفظة الرقمية ومتجر الاشتراكات">
+    <meta property="og:description" content="البنية التحتية لشحن الرصيد الفوري، بطاقات الألعاب، والاشتراكات الرقمية بأعلى معايير الأمان.">
+    <meta property="og:image" content="/assets/og-cover.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- 3. بطاقة المشاركة لمنصة X (Twitter Card) -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SHIIFT X — Premium Digital Wallet">
+    <meta name="twitter:description" content="اشحن رصيدك واشترِ بطاقاتك واشتراكاتك الرقمية فوراً وبأمان.">
+    <meta name="twitter:image" content="/assets/og-cover.png">
     <title>SHIIFTX - المحفظة الرقمية ومتجر الاشتراكات</title>
+  <!-- أيقونة تبويب المتصفح الفورية SHIIFT X -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='200 95 145 145'><rect width='100%25' height='100%25' rx='35' fill='%230D0E12'/><path fill='%235CE1E6' d='M234.6 132.7L270.4 187.6L234.7 235.3H212.4L246 187.7L212.8 133.3H234.6ZM332.7 132.7L299.2 187.7L332.4 234.9H310.6L274.8 188L310.5 132.9H332.7ZM225.7 104.6C232.8 104.6 238.4 110.2 238.4 115.7C238.4 121.1 232.8 126.7 225.7 126.7C218.6 126.7 212.8 121.1 212.8 115.7C212.8 110.2 218.6 104.6 225.7 104.6ZM319.5 104.6C326.6 104.6 332.5 110.2 332.5 115.7C332.5 121.1 326.6 126.7 319.5 126.7C312.4 126.7 306.8 121.1 306.8 115.7C306.8 110.2 312.4 104.6 319.5 104.6Z'/></svg>">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -235,6 +257,22 @@
         }
         .cyber-card {
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 20px 40px -15px var(--primary-glow);
+        }
+      /* حركة نبض وتوهج نواة SHIIFT X */
+        .glyph-pulse {
+            animation: glyphPulseGlow 1.2s ease-in-out infinite alternate;
+        }
+        @keyframes glyphPulseGlow {
+            0% {
+                transform: scale(0.92);
+                opacity: 0.65;
+                filter: drop-shadow(0 0 2px rgba(92, 225, 230, 0.4));
+            }
+            100% {
+                transform: scale(1.08);
+                opacity: 1;
+                filter: drop-shadow(0 0 10px rgba(92, 225, 230, 0.95));
+            }
         }
         .code-shimmer-box { position: relative; overflow: hidden; }
         .code-shimmer-box::after {
@@ -575,11 +613,16 @@
         <div class="absolute top-10 left-10 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl mix-blend-multiply"></div>
         <div class="absolute bottom-10 right-10 w-64 h-64 bg-purple-400/20 rounded-full blur-3xl mix-blend-multiply"></div>
 
-        <div class="text-center space-y-2 mb-10 relative z-10">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-400 text-white shadow-lg mb-4">
-                <i class="ph ph-wallet text-3xl"></i>
-            </div>
-            <h1 class="text-5xl font-black text-slate-900 tracking-tight">SHIIFT<span class="text-[#005ba3]">X</span></h1>
+        <div class="flex flex-col items-center mb-10 relative z-10">
+            <!-- شعار SHIIFT X الفيكتور الرسمي الكامل -->
+            <svg class="h-14 md:h-16 w-auto mb-2 transition-transform duration-300 hover:scale-105" viewBox="70 100 405 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- أحرف SH -->
+                <path class="fill-slate-900 dark:fill-white transition-colors" d="M102.584 151.616C106.853 151.616 110.767 152.034 114.324 152.871C117.871 153.706 121.098 154.808 124.002 156.179L124.289 156.315L124.185 156.615L121.162 165.332L121.035 165.698L120.682 165.538C118.039 164.34 115.144 163.327 111.994 162.501H111.992C108.929 161.679 105.721 161.268 102.368 161.268C99.163 161.268 96.5183 161.754 94.4189 162.708C92.3171 163.663 90.7558 165.014 89.7178 166.756L89.7148 166.762C88.6751 168.434 88.1484 170.405 88.1484 172.689C88.1485 175.36 88.6793 177.557 89.7178 179.3C90.758 181.046 92.4705 182.63 94.8828 184.044C97.3071 185.465 100.597 187.005 104.761 188.661H104.762C109.309 190.402 113.145 192.298 116.265 194.352L116.856 194.73C119.772 196.644 121.995 198.937 123.511 201.611H123.51C125.204 204.471 126.039 208.046 126.039 212.315C126.039 217.201 124.91 221.385 122.635 224.849L122.633 224.852C120.359 228.236 117.1 230.841 112.874 232.676L112.875 232.677C108.718 234.513 103.809 235.425 98.1582 235.425C95.2674 235.425 92.4834 235.273 89.8066 234.97L89.8047 234.969C87.2021 234.666 84.8129 234.248 82.6377 233.716L82.626 233.713C80.4497 233.104 78.5209 232.38 76.8418 231.537L76.6465 231.44V220.93L77.1494 221.164C79.7146 222.36 82.8951 223.447 86.6953 224.425H86.6943C90.5515 225.399 94.5164 225.886 98.5898 225.886C102.374 225.886 105.528 225.362 108.064 224.327C110.602 223.292 112.482 221.823 113.731 219.931C114.984 218.033 115.616 215.801 115.616 213.22C115.616 210.626 115.086 208.465 114.047 206.721C113.01 204.981 111.194 203.358 108.562 201.866L108.553 201.861C105.99 200.293 102.379 198.642 97.7109 196.909L97.707 196.907C94.3838 195.619 91.452 194.253 88.915 192.809L88.9043 192.803C86.4318 191.278 84.3524 189.557 82.6709 187.64C80.9858 185.719 79.7044 183.529 78.8262 181.073L78.8223 181.064V181.063C78.0167 178.605 77.6182 175.774 77.6182 172.575C77.6182 168.214 78.6769 164.48 80.8115 161.392C82.9379 158.24 85.8691 155.823 89.5928 154.138L89.5947 154.137C93.3894 152.453 97.7216 151.616 102.584 151.616ZM156.342 152.748V186.94H195.144V152.748H205.566V234.292H195.144V196.591H156.342V234.292H145.918V152.748H156.342Z"/>
+                <!-- أحرف FT -->
+                <path class="fill-slate-900 dark:fill-white transition-colors" d="M389.967 151.616V161.519H350.874V190.257H387.563V200.159H350.874V235.425H338.781V151.616H389.967ZM467.7 151.616V161.519H439.615V235.425H427.521V161.519H399.308V151.616H467.7Z"/>
+                <!-- النواة المركزية ii / X بالتوهج النيوني -->
+                <path class="fill-[#005ba3] dark:fill-[#5CE1E6] drop-shadow-[0_0_12px_rgba(92,225,230,0.6)] transition-colors" d="M234.632 132.734L234.737 132.895L270.402 187.555L270.537 187.763L270.388 187.961L234.723 235.284L234.616 235.425H212.435L212.827 234.867L246.018 187.733L212.815 133.272L212.487 132.734H234.632ZM332.739 132.734L332.41 133.272L299.206 187.733L332.398 234.867L332.79 235.425H310.609L310.502 235.284L274.837 187.961L274.688 187.763L274.823 187.555L310.489 132.895L310.593 132.734H332.739ZM225.717 104.646C229.012 104.647 231.91 105.552 234.396 107.37C237.099 109.098 238.429 111.887 238.429 115.655C238.429 119.302 237.094 122.079 234.406 123.931L234.406 123.932C231.918 125.755 229.017 126.664 225.717 126.664C222.102 126.664 219.037 125.76 216.542 123.932C214.011 122.077 212.763 119.296 212.763 115.655C212.763 111.893 214.007 109.103 216.552 107.371C219.045 105.548 222.107 104.646 225.717 104.646ZM319.508 104.646C323.118 104.646 326.181 105.548 328.673 107.371L328.907 107.537C331.294 109.279 332.462 112.011 332.462 115.655C332.462 119.296 331.214 122.077 328.683 123.932C326.189 125.76 323.123 126.664 319.508 126.664C316.208 126.664 313.307 125.755 310.819 123.932V123.931C308.13 122.079 306.796 119.301 306.796 115.655C306.796 111.888 308.126 109.098 310.828 107.37C313.314 105.552 316.213 104.647 319.508 104.646Z"/>
+            </svg>
             <p class="text-[10px] text-slate-500 font-bold tracking-[0.25em] uppercase">Premium Digital Wallet</p>
         </div>
 
@@ -623,11 +666,13 @@
         <header class="bg-white/80 backdrop-blur-xl px-6 py-4 border-b border-slate-200/60 sticky top-0 z-30 flex justify-center shadow-sm">
             <div class="w-full max-w-5xl flex justify-between items-center">
                 <!-- الشعار في جهة اليمين -->
-                <div onclick="switchTab('home')" class="flex items-center gap-3 cursor-pointer hover:opacity-90 active:scale-95 transition select-none" title="الرئيسية">
-                    <div class="bg-gradient-to-tr from-blue-600 to-blue-400 text-white p-2 rounded-xl shadow-md">
-                        <i class="ph ph-wallet text-xl"></i>
-                    </div>
-                    <h1 class="text-2xl font-black text-slate-800 tracking-tight">SHIIFT<span class="text-[#005ba3]">X</span></h1>
+                <!-- الشعار في جهة اليمين -->
+                <div onclick="switchTab('home')" class="flex items-center cursor-pointer select-none group" title="الرئيسية">
+                    <svg class="h-8 md:h-8.5 w-auto transition-transform duration-200 active:scale-95 group-hover:scale-105" viewBox="70 100 405 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path class="fill-slate-900 dark:fill-white transition-colors" d="M102.584 151.616C106.853 151.616 110.767 152.034 114.324 152.871C117.871 153.706 121.098 154.808 124.002 156.179L124.289 156.315L124.185 156.615L121.162 165.332L121.035 165.698L120.682 165.538C118.039 164.34 115.144 163.327 111.994 162.501H111.992C108.929 161.679 105.721 161.268 102.368 161.268C99.163 161.268 96.5183 161.754 94.4189 162.708C92.3171 163.663 90.7558 165.014 89.7178 166.756L89.7148 166.762C88.6751 168.434 88.1484 170.405 88.1484 172.689C88.1485 175.36 88.6793 177.557 89.7178 179.3C90.758 181.046 92.4705 182.63 94.8828 184.044C97.3071 185.465 100.597 187.005 104.761 188.661H104.762C109.309 190.402 113.145 192.298 116.265 194.352L116.856 194.73C119.772 196.644 121.995 198.937 123.511 201.611H123.51C125.204 204.471 126.039 208.046 126.039 212.315C126.039 217.201 124.91 221.385 122.635 224.849L122.633 224.852C120.359 228.236 117.1 230.841 112.874 232.676L112.875 232.677C108.718 234.513 103.809 235.425 98.1582 235.425C95.2674 235.425 92.4834 235.273 89.8066 234.97L89.8047 234.969C87.2021 234.666 84.8129 234.248 82.6377 233.716L82.626 233.713C80.4497 233.104 78.5209 232.38 76.8418 231.537L76.6465 231.44V220.93L77.1494 221.164C79.7146 222.36 82.8951 223.447 86.6953 224.425H86.6943C90.5515 225.399 94.5164 225.886 98.5898 225.886C102.374 225.886 105.528 225.362 108.064 224.327C110.602 223.292 112.482 221.823 113.731 219.931C114.984 218.033 115.616 215.801 115.616 213.22C115.616 210.626 115.086 208.465 114.047 206.721C113.01 204.981 111.194 203.358 108.562 201.866L108.553 201.861C105.99 200.293 102.379 198.642 97.7109 196.909L97.707 196.907C94.3838 195.619 91.452 194.253 88.915 192.809L88.9043 192.803C86.4318 191.278 84.3524 189.557 82.6709 187.64C80.9858 185.719 79.7044 183.529 78.8262 181.073L78.8223 181.064V181.063C78.0167 178.605 77.6182 175.774 77.6182 172.575C77.6182 168.214 78.6769 164.48 80.8115 161.392C82.9379 158.24 85.8691 155.823 89.5928 154.138L89.5947 154.137C93.3894 152.453 97.7216 151.616 102.584 151.616ZM156.342 152.748V186.94H195.144V152.748H205.566V234.292H195.144V196.591H156.342V234.292H145.918V152.748H156.342Z"/>
+                        <path class="fill-slate-900 dark:fill-white transition-colors" d="M389.967 151.616V161.519H350.874V190.257H387.563V200.159H350.874V235.425H338.781V151.616H389.967ZM467.7 151.616V161.519H439.615V235.425H427.521V161.519H399.308V151.616H467.7Z"/>
+                        <path class="fill-[#005ba3] dark:fill-[#5CE1E6] drop-shadow-[0_0_8px_rgba(92,225,230,0.5)] transition-colors" d="M234.632 132.734L234.737 132.895L270.402 187.555L270.537 187.763L270.388 187.961L234.723 235.284L234.616 235.425H212.435L212.827 234.867L246.018 187.733L212.815 133.272L212.487 132.734H234.632ZM332.739 132.734L332.41 133.272L299.206 187.733L332.398 234.867L332.79 235.425H310.609L310.502 235.284L274.837 187.961L274.688 187.763L274.823 187.555L310.489 132.895L310.593 132.734H332.739ZM225.717 104.646C229.012 104.647 231.91 105.552 234.396 107.37C237.099 109.098 238.429 111.887 238.429 115.655C238.429 119.302 237.094 122.079 234.406 123.931L234.406 123.932C231.918 125.755 229.017 126.664 225.717 126.664C222.102 126.664 219.037 125.76 216.542 123.932C214.011 122.077 212.763 119.296 212.763 115.655C212.763 111.893 214.007 109.103 216.552 107.371C219.045 105.548 222.107 104.646 225.717 104.646ZM319.508 104.646C323.118 104.646 326.181 105.548 328.673 107.371L328.907 107.537C331.294 109.279 332.462 112.011 332.462 115.655C332.462 119.296 331.214 122.077 328.683 123.932C326.189 125.76 323.123 126.664 319.508 126.664C316.208 126.664 313.307 125.755 310.819 123.932V123.931C308.13 122.079 306.796 119.301 306.796 115.655C306.796 111.888 308.126 109.098 310.828 107.37C313.314 105.552 316.213 104.647 319.508 104.646Z"/>
+                    </svg>
                 </div>
                 
                 <!-- الأزرار في أقصى اليسار -->
@@ -889,14 +934,12 @@
     <div id="side-menu-panel" class="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-[85] shadow-2xl p-5 flex flex-col justify-between transform -translate-x-full transition-transform duration-300 ease-in-out text-right overflow-y-auto">
         <div class="space-y-6">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4">
-                <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchTab('home')">
-                    <div class="bg-gradient-to-tr from-blue-600 to-blue-400 text-white p-2 rounded-xl shadow-sm">
-                        <i class="ph ph-wallet text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-black text-slate-800 text-base leading-tight">SHIIFT<span class="text-[#005ba3]">X</span></h3>
-                        <p class="text-[10px] text-slate-400 font-bold">بوابتك للرصيد الرقمي</p>
-                    </div>
+                <div class="flex items-center cursor-pointer py-1" onclick="switchTab('home')">
+                    <svg class="h-7 w-auto transition-transform hover:scale-105" viewBox="70 100 405 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path class="fill-slate-900 dark:fill-white transition-colors" d="M102.584 151.616C106.853 151.616 110.767 152.034 114.324 152.871C117.871 153.706 121.098 154.808 124.002 156.179L124.289 156.315L124.185 156.615L121.162 165.332L121.035 165.698L120.682 165.538C118.039 164.34 115.144 163.327 111.994 162.501H111.992C108.929 161.679 105.721 161.268 102.368 161.268C99.163 161.268 96.5183 161.754 94.4189 162.708C92.3171 163.663 90.7558 165.014 89.7178 166.756L89.7148 166.762C88.6751 168.434 88.1484 170.405 88.1484 172.689C88.1485 175.36 88.6793 177.557 89.7178 179.3C90.758 181.046 92.4705 182.63 94.8828 184.044C97.3071 185.465 100.597 187.005 104.761 188.661H104.762C109.309 190.402 113.145 192.298 116.265 194.352L116.856 194.73C119.772 196.644 121.995 198.937 123.511 201.611H123.51C125.204 204.471 126.039 208.046 126.039 212.315C126.039 217.201 124.91 221.385 122.635 224.849L122.633 224.852C120.359 228.236 117.1 230.841 112.874 232.676L112.875 232.677C108.718 234.513 103.809 235.425 98.1582 235.425C95.2674 235.425 92.4834 235.273 89.8066 234.97L89.8047 234.969C87.2021 234.666 84.8129 234.248 82.6377 233.716L82.626 233.713C80.4497 233.104 78.5209 232.38 76.8418 231.537L76.6465 231.44V220.93L77.1494 221.164C79.7146 222.36 82.8951 223.447 86.6953 224.425H86.6943C90.5515 225.399 94.5164 225.886 98.5898 225.886C102.374 225.886 105.528 225.362 108.064 224.327C110.602 223.292 112.482 221.823 113.731 219.931C114.984 218.033 115.616 215.801 115.616 213.22C115.616 210.626 115.086 208.465 114.047 206.721C113.01 204.981 111.194 203.358 108.562 201.866L108.553 201.861C105.99 200.293 102.379 198.642 97.7109 196.909L97.707 196.907C94.3838 195.619 91.452 194.253 88.915 192.809L88.9043 192.803C86.4318 191.278 84.3524 189.557 82.6709 187.64C80.9858 185.719 79.7044 183.529 78.8262 181.073L78.8223 181.064V181.063C78.0167 178.605 77.6182 175.774 77.6182 172.575C77.6182 168.214 78.6769 164.48 80.8115 161.392C82.9379 158.24 85.8691 155.823 89.5928 154.138L89.5947 154.137C93.3894 152.453 97.7216 151.616 102.584 151.616ZM156.342 152.748V186.94H195.144V152.748H205.566V234.292H195.144V196.591H156.342V234.292H145.918V152.748H156.342Z"/>
+                        <path class="fill-slate-900 dark:fill-white transition-colors" d="M389.967 151.616V161.519H350.874V190.257H387.563V200.159H350.874V235.425H338.781V151.616H389.967ZM467.7 151.616V161.519H439.615V235.425H427.521V161.519H399.308V151.616H467.7Z"/>
+                        <path class="fill-[#005ba3] dark:fill-[#5CE1E6] transition-colors" d="M234.632 132.734L234.737 132.895L270.402 187.555L270.537 187.763L270.388 187.961L234.723 235.284L234.616 235.425H212.435L212.827 234.867L246.018 187.733L212.815 133.272L212.487 132.734H234.632ZM332.739 132.734L332.41 133.272L299.206 187.733L332.398 234.867L332.79 235.425H310.609L310.502 235.284L274.837 187.961L274.688 187.763L274.823 187.555L310.489 132.895L310.593 132.734H332.739ZM225.717 104.646C229.012 104.647 231.91 105.552 234.396 107.37C237.099 109.098 238.429 111.887 238.429 115.655C238.429 119.302 237.094 122.079 234.406 123.931L234.406 123.932C231.918 125.755 229.017 126.664 225.717 126.664C222.102 126.664 219.037 125.76 216.542 123.932C214.011 122.077 212.763 119.296 212.763 115.655C212.763 111.893 214.007 109.103 216.552 107.371C219.045 105.548 222.107 104.646 225.717 104.646ZM319.508 104.646C323.118 104.646 326.181 105.548 328.673 107.371L328.907 107.537C331.294 109.279 332.462 112.011 332.462 115.655C332.462 119.296 331.214 122.077 328.683 123.932C326.189 125.76 323.123 126.664 319.508 126.664C316.208 126.664 313.307 125.755 310.819 123.932V123.931C308.13 122.079 306.796 119.301 306.796 115.655C306.796 111.888 308.126 109.098 310.828 107.37C313.314 105.552 316.213 104.647 319.508 104.646Z"/>
+                    </svg>
                 </div>
                 <button onclick="toggleSideMenu(false)" class="text-slate-400 hover:text-slate-600 p-2 rounded-full bg-slate-50 transition">
                     <i class="ph ph-x text-base font-bold"></i>
@@ -1421,7 +1464,7 @@
     <div id="chat-modal">
         <div class="chat-header">
             <div class="chat-header-title">
-                <span class="chat-status-dot"></span>
+                <img src="./assets/avatar-social.png" alt="SHIIFT Bot" class="w-6 h-6 rounded-full border border-[#5CE1E6]/40 object-cover shadow-sm">
                 <span>خدمة عملاء SHIIFTX ⚡</span>
             </div>
             <span class="chat-header-close" onclick="toggleChat()">✕</span>
@@ -1452,6 +1495,7 @@ let isSettingNewPassword = false;
 let activeCoupon = null, discountedPrice = 0.00, currentUserRole = "customer";
         let tempRegisterData = {}, globalProductsRaw = [], currentFlowType = "register", globalTransactionsRaw = [];
         let resendTimer = null;
+      const BRAND_LOADER_SVG = `<svg class="w-5 h-5 inline-block glyph-pulse" viewBox="210 100 125 140" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#5CE1E6" d="M234.632 132.734L234.737 132.895L270.402 187.555L270.537 187.763L270.388 187.961L234.723 235.284L234.616 235.425H212.435L212.827 234.867L246.018 187.733L212.815 133.272L212.487 132.734H234.632ZM332.739 132.734L332.41 133.272L299.206 187.733L332.398 234.867L332.79 235.425H310.609L310.502 235.284L274.837 187.961L274.688 187.763L274.823 187.555L310.489 132.895L310.593 132.734H332.739ZM225.717 104.646C229.012 104.647 231.91 105.552 234.396 107.37C237.099 109.098 238.429 111.887 238.429 115.655C238.429 119.302 237.094 122.079 234.406 123.931L234.406 123.932C231.918 125.755 229.017 126.664 225.717 126.664C222.102 126.664 219.037 125.76 216.542 123.932C214.011 122.077 212.763 119.296 212.763 115.655C212.763 111.893 214.007 109.103 216.552 107.371C219.045 105.548 222.107 104.646 225.717 104.646ZM319.508 104.646C323.118 104.646 326.181 105.548 328.673 107.371L328.907 107.537C331.294 109.279 332.462 112.011 332.462 115.655C332.462 119.296 331.214 122.077 328.683 123.932C326.189 125.76 323.123 126.664 319.508 126.664C316.208 126.664 313.307 125.755 310.819 123.932V123.931C308.13 122.079 306.796 119.301 306.796 115.655C306.796 111.888 308.126 109.098 310.828 107.37C313.314 105.552 316.213 104.647 319.508 104.646Z"/></svg>`;
 
         // استماع لحالات المصادقة
         supabase.auth.onAuthStateChange(async (event, session) => {
@@ -1534,7 +1578,7 @@ let activeCoupon = null, discountedPrice = 0.00, currentUserRole = "customer";
             const pass = document.getElementById('login-password').value;
             const btn = document.getElementById('login-btn'); 
             if (!email || !pass) return showCustomAlert("يرجى إدخال البريد الإلكتروني وكلمة المرور."); 
-            btn.disabled = true; btn.innerHTML = `<i class="ph ph-spinner animate-spin text-xl"></i> جاري التحقق...`; 
+            btn.disabled = true; btn.innerHTML = `<span class="flex items-center justify-center gap-2">${BRAND_LOADER_SVG} <span>جاري التحقق...</span></span>`; 
             
             const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass }); 
             
@@ -1985,7 +2029,7 @@ async function verifyRegistrationOtp() {
             
             const btn = document.getElementById('confirm-purchase-btn'); 
             btn.disabled = true; 
-            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-xl"></i> جاري المعالجة...`; 
+            btn.innerHTML = `<span class="flex items-center justify-center gap-2">${BRAND_LOADER_SVG} <span>جاري تنفيذ الشحن...</span></span>`; 
             
             try {
                 const { data: r, error } = await supabase.rpc('buy_product', {
@@ -2129,7 +2173,7 @@ async function verifyRegistrationOtp() {
             
             // 2. تفعيل حالة التحميل للزر
             btn.disabled = true; 
-            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> جاري الإرسال...`;
+            btn.innerHTML = `<span class="flex items-center justify-center gap-2">${BRAND_LOADER_SVG} <span>جاري رفع الإشعار...</span></span>`;
 
             try {
                 // 3. استدعاء دالة الخادم الموحدة (حزمة واحدة آمنة)
@@ -2605,8 +2649,8 @@ async function verifyRegistrationOtp() {
 
             return card;
         }
-
-        function openTransactionReceiptModal(tx, opLabel, platformName, packageName, amount, statusKey, playerId, cancelReason, platformImageUrl) {
+        
+      function openTransactionReceiptModal(tx, opLabel, platformName, packageName, amount, statusKey, playerId, cancelReason, platformImageUrl) {
             const oldReceipt = document.getElementById('transaction-receipt-modal');
             if (oldReceipt) oldReceipt.remove();
 
@@ -2615,93 +2659,498 @@ async function verifyRegistrationOtp() {
             const dateStr = tx.date || new Date().toLocaleString();
             const isCredit = tx.type === 'Refund' || tx.type === 'Deposit' || tx.type === 'Affiliate Commission';
 
-            const isPending = statusKey === 'pending' || statusKey === 'معلق';
-            const isRejected = statusKey === 'rejected' || statusKey === 'cancelled' || statusKey === 'مرفوض';
-            const isRefunded = statusKey === 'refunded' || statusKey === 'مسترجع';
-
             let statusLabel = 'مؤكدة ومكتملة ✓';
             let statusClass = 'text-emerald-600 dark:text-emerald-400';
-            let statusIcon = 'ph-check-circle';
 
-            if (isPending) {
+            if (statusKey === 'pending' || statusKey === 'معلق') {
                 statusLabel = 'قيد المراجعة والتدقيق ⏳';
                 statusClass = 'text-amber-600 dark:text-amber-400 animate-pulse';
-                statusIcon = 'ph-hourglass-medium';
-            } else if (isRefunded) {
+            } else if (statusKey === 'refunded' || statusKey === 'مسترجع') {
                 statusLabel = 'مستردة بالكامل';
                 statusClass = 'text-rose-500';
-                statusIcon = 'ph-arrow-counter-clockwise';
-            } else if (isRejected) {
+            } else if (statusKey === 'rejected' || statusKey === 'cancelled' || statusKey === 'مرفوض') {
                 statusLabel = 'مرفوضة وغير معتمدة ✕';
                 statusClass = 'text-red-600';
-                statusIcon = 'ph-x-circle';
             }
 
             const receiptHtml = `
-            <div id="transaction-receipt-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 z-[120] animate-in fade-in duration-200">
+            <div id="transaction-receipt-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 z-[120]">
                 <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[28px] p-6 text-right space-y-4 shadow-2xl border border-slate-100 dark:border-slate-800 relative">
-                    
-                    <button onclick="document.getElementById('transaction-receipt-modal').remove()" class="modal-btn-close btn-spring absolute left-5 top-5 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
+                    <button onclick="document.getElementById('transaction-receipt-modal').remove()" class="modal-btn-close absolute left-5 top-5 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
                         <i class="ph ph-x font-bold text-sm"></i>
                     </button>
-
                     <div class="text-center pt-1 space-y-1">
-                        ${platformImageUrl ? `<img src="${platformImageUrl}" alt="${platformName}" referrerpolicy="no-referrer" class="w-14 h-14 mx-auto rounded-2xl p-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 object-contain shadow-sm mb-2">` : `<span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl ${isPending ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'} dark:bg-slate-800 text-2xl border border-slate-200 dark:border-slate-700 mb-2"><i class="ph-fill ph-receipt"></i></span>`}
-                        <span class="text-[10px] font-black tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-900/40">${opLabel}</span>
+                        <span class="text-[10px] font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full">${opLabel}</span>
                         <h3 class="text-base font-black text-slate-900 dark:text-slate-100 pt-1">${platformName}</h3>
                         <p class="text-xs font-bold text-slate-500 dark:text-slate-400">${packageName}</p>
                         <div class="pt-2">
-                            <span class="text-3xl font-black font-mono ${isPending ? 'text-amber-600 dark:text-amber-400' : (isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100')}">
+                            <span class="text-3xl font-black font-mono ${isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100'}">
                                 ${isCredit ? '+' : '-'}$${amount.toFixed(2)}
                             </span>
                         </div>
                     </div>
-
-                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 text-xs space-y-2.5 border border-slate-200/70 dark:border-slate-800">
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-400">الرقم المرجعي:</span>
-                            <span class="font-mono font-bold text-slate-700 dark:text-slate-200 select-all">${ref}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-400">التاريخ والوقت:</span>
-                            <span class="font-sans text-slate-600 dark:text-slate-300 text-[11px]">${dateStr}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-400">المنصة والخدمة:</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200">${platformName} (${packageName})</span>
-                        </div>
-                        ${playerId ? `
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-400">${tx.type === 'Deposit' || tx.type === 'شحن رصيد' ? 'رقم الإشعار:' : 'معرف الحساب (ID):'}</span>
-                            <span class="font-mono font-bold text-blue-600 dark:text-blue-400 select-all" dir="ltr">${playerId}</span>
-                        </div>` : ''}
-                        <div class="flex justify-between items-center border-t border-slate-200/60 dark:border-slate-700/60 pt-2">
-                            <span class="text-slate-400">حالة العملية:</span>
-                            <span class="font-bold ${statusClass} flex items-center gap-1">
-                                <i class="ph-fill ${statusIcon}"></i> ${statusLabel}
-                            </span>
-                        </div>
-                        ${cancelReason ? `
-                        <div class="pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60 text-rose-500 font-bold text-[11px]">
-                            <span>سبب الإلغاء: ${cancelReason}</span>
-                        </div>` : ''}
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 text-xs space-y-2 border border-slate-200/70 dark:border-slate-800">
+                        <div class="flex justify-between"><span>المرجع:</span><span class="font-mono font-bold select-all">${ref}</span></div>
+                        <div class="flex justify-between"><span>التاريخ:</span><span>${dateStr}</span></div>
+                        <div class="flex justify-between"><span>الحالة:</span><span class="font-bold ${statusClass}">${statusLabel}</span></div>
                     </div>
-
                     <div class="flex gap-2 pt-1">
-                        <button onclick="copyToClipboard('${ref}'); showCustomAlert('تم نسخ الرقم المرجعي!', false);" class="btn-spring flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
-                            <i class="ph-bold ph-copy"></i>
-                            <span>نسخ المرجع</span>
+                        <button onclick="printOfficialInvoice('${ref}', '${platformName}', '${packageName}', '${amount.toFixed(2)}', '${dateStr}', '${statusLabel}')" class="btn-spring flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-blue-600 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="ph-bold ph-printer"></i>
+                            <span>طباعة الفاتورة</span>
                         </button>
-                        <button onclick="document.getElementById('transaction-receipt-modal').remove()" class="btn-spring flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition cursor-pointer">
+                        <button onclick="copyToClipboard('${ref}'); showCustomAlert('تم نسخ الرقم المرجعي!', false);" class="btn-spring px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold cursor-pointer">
+                            <i class="ph-bold ph-copy text-sm"></i>
+                        </button>
+                        <button onclick="document.getElementById('transaction-receipt-modal').remove()" class="btn-spring px-4 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold cursor-pointer">
                             إغلاق
                         </button>
                     </div>
                 </div>
             </div>`;
-
             document.body.insertAdjacentHTML('beforeend', receiptHtml);
         }
-        // ========================================================================
+
+// دالة توليد وطباعة الفاتورة الفاخرة للجيل الجديد (Executive Fintech Architecture)
+        function printOfficialInvoice(ref, platform, pkg, amount, date, playerId, status) {
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) return;
+
+            const cleanId = (playerId && playerId !== 'undefined' && playerId !== 'null') ? playerId : 'حساب مباشر / فوري';
+            const cleanStatus = status || 'مكتمل وموثق ✓';
+            const numAmount = parseFloat(amount || 0).toFixed(2);
+            const safeRef = (ref || 'TX-SHIIFTX').trim();
+
+            const invoiceHtml = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>إشعار تسوية مالية - ${safeRef}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #F1F5F9;
+            color: #0F172A;
+            padding: 40px 15px;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .invoice-sheet {
+            max-width: 700px;
+            margin: auto;
+            background: #FFFFFF;
+            border-radius: 28px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.08), 0 0 1px 1px rgba(15, 23, 42, 0.02);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* العلامة المائية الفيكتور في خلفية الفاتورة */
+        .watermark-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-12deg);
+            opacity: 0.025;
+            pointer-events: none;
+            width: 420px;
+            height: auto;
+            z-index: 1;
+        }
+
+        .sheet-content {
+            position: relative;
+            z-index: 2;
+            padding: 44px 44px 36px;
+        }
+
+        /* خط الأمان العلوي */
+        .accent-bar {
+            height: 6px;
+            background: linear-gradient(90deg, #008B94 0%, #005ba3 50%, #5CE1E6 100%);
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 28px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .company-meta {
+            font-size: 10px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: 0.15em;
+            color: #64748B;
+            font-weight: 700;
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+
+        .doc-identifier {
+            text-align: left;
+        }
+
+        .badge-verified {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            color: #15803D;
+            font-size: 11px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .barcode-container {
+            display: inline-block;
+            margin-top: 6px;
+        }
+
+        .ref-number {
+            font-family: 'Plus Jakarta Sans', monospace;
+            font-size: 14px;
+            font-weight: 800;
+            color: #0F172A;
+            letter-spacing: 0.05em;
+        }
+
+        /* شبكة المواصفات البنكية */
+        .params-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 26px 0;
+            padding: 16px;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 18px;
+        }
+
+        .param-cell span {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .param-cell strong {
+            display: block;
+            font-size: 12px;
+            font-weight: 800;
+            color: #0F172A;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .param-cell code {
+            font-family: 'Plus Jakarta Sans', monospace;
+            font-size: 11px;
+            color: #008B94;
+            font-weight: 800;
+        }
+
+        /* جدول التفاصيل المالية */
+        .line-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+
+        .line-items th {
+            text-align: right;
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+            border-bottom: 2px solid #E2E8F0;
+            background: #F8FAFC;
+        }
+
+        .line-items td {
+            padding: 18px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid #F1F5F9;
+            vertical-align: middle;
+        }
+
+        .item-main-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #0F172A;
+        }
+
+        .item-subtext {
+            font-size: 11px;
+            color: #64748B;
+            margin-top: 3px;
+        }
+
+        /* كرت الحساب المالي والإجمالي */
+        .calculation-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0D0E12;
+            color: #FFFFFF;
+            border-radius: 20px;
+            padding: 22px 28px;
+            margin-bottom: 26px;
+            border: 1px solid #1E293B;
+        }
+
+        .calc-details p {
+            font-size: 11px;
+            color: #94A3B8;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .calc-details h4 {
+            font-size: 15px;
+            font-weight: 900;
+            color: #FFFFFF;
+        }
+
+        .calc-total {
+            text-align: left;
+        }
+
+        .calc-total-label {
+            font-size: 10px;
+            color: #008B94;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .calc-amount {
+            font-family: 'Plus Jakarta Sans', monospace;
+            font-size: 34px;
+            font-weight: 900;
+            color: #5CE1E6;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        /* تذييل الفاتورة وختم الأمان */
+        .footer-seal {
+            border-top: 1px dashed #CBD5E1;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .seal-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: #F0FDF4;
+            border: 1px solid #DCFCE7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #16A34A;
+        }
+
+        .security-text h6 {
+            font-size: 11px;
+            font-weight: 800;
+            color: #0F172A;
+        }
+
+        .security-text p {
+            font-size: 10px;
+            color: #64748B;
+        }
+
+        .audit-tag {
+            text-align: left;
+            font-family: 'Plus Jakarta Sans', monospace;
+            font-size: 10px;
+            color: #94A3B8;
+            font-weight: 600;
+        }
+
+        @media print {
+            body { background: #FFFFFF; padding: 0; }
+            .invoice-sheet { border: none; box-shadow: none; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="invoice-sheet">
+        <div class="accent-bar"></div>
+
+        <!-- العلامة المائية الفيكتور في المنتصف خلف البيانات -->
+        <svg class="watermark-bg" viewBox="70 100 405 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#000000" d="M102.584 151.616C106.853 151.616 110.767 152.034 114.324 152.871C117.871 153.706 121.098 154.808 124.002 156.179L124.289 156.315L124.185 156.615L121.162 165.332L121.035 165.698L120.682 165.538C118.039 164.34 115.144 163.327 111.994 162.501H111.992C108.929 161.679 105.721 161.268 102.368 161.268C99.163 161.268 96.5183 161.754 94.4189 162.708C92.3171 163.663 90.7558 165.014 89.7178 166.756L89.7148 166.762C88.6751 168.434 88.1484 170.405 88.1484 172.689C88.1485 175.36 88.6793 177.557 89.7178 179.3C90.758 181.046 92.4705 182.63 94.8828 184.044C97.3071 185.465 100.597 187.005 104.761 188.661H104.762C109.309 190.402 113.145 192.298 116.265 194.352L116.856 194.73C119.772 196.644 121.995 198.937 123.511 201.611H123.51C125.204 204.471 126.039 208.046 126.039 212.315C126.039 217.201 124.91 221.385 122.635 224.849L122.633 224.852C120.359 228.236 117.1 230.841 112.874 232.676L112.875 232.677C108.718 234.513 103.809 235.425 98.1582 235.425C95.2674 235.425 92.4834 235.273 89.8066 234.97L89.8047 234.969C87.2021 234.666 84.8129 234.248 82.6377 233.716L82.626 233.713C80.4497 233.104 78.5209 232.38 76.8418 231.537L76.6465 231.44V220.93L77.1494 221.164C79.7146 222.36 82.8951 223.447 86.6953 224.425H86.6943C90.5515 225.399 94.5164 225.886 98.5898 225.886C102.374 225.886 105.528 225.362 108.064 224.327C110.602 223.292 112.482 221.823 113.731 219.931C114.984 218.033 115.616 215.801 115.616 213.22C115.616 210.626 115.086 208.465 114.047 206.721C113.01 204.981 111.194 203.358 108.562 201.866L108.553 201.861C105.99 200.293 102.379 198.642 97.7109 196.909L97.707 196.907C94.3838 195.619 91.452 194.253 88.915 192.809L88.9043 192.803C86.4318 191.278 84.3524 189.557 82.6709 187.64C80.9858 185.719 79.7044 183.529 78.8262 181.073L78.8223 181.064V181.063C78.0167 178.605 77.6182 175.774 77.6182 172.575C77.6182 168.214 78.6769 164.48 80.8115 161.392C82.9379 158.24 85.8691 155.823 89.5928 154.138L89.5947 154.137C93.3894 152.453 97.7216 151.616 102.584 151.616ZM156.342 152.748V186.94H195.144V152.748H205.566V234.292H195.144V196.591H156.342V234.292H145.918V152.748H156.342Z"/>
+            <path fill="#000000" d="M389.967 151.616V161.519H350.874V190.257H387.563V200.159H350.874V235.425H338.781V151.616H389.967ZM467.7 151.616V161.519H439.615V235.425H427.521V161.519H399.308V151.616H467.7Z"/>
+            <path fill="#000000" d="M234.632 132.734L234.737 132.895L270.402 187.555L270.537 187.763L270.388 187.961L234.723 235.284L234.616 235.425H212.435L212.827 234.867L246.018 187.733L212.815 133.272L212.487 132.734H234.632ZM332.739 132.734L332.41 133.272L299.206 187.733L332.398 234.867L332.79 235.425H310.609L310.502 235.284L274.837 187.961L274.688 187.763L274.823 187.555L310.489 132.895L310.593 132.734H332.739ZM225.717 104.646C229.012 104.647 231.91 105.552 234.396 107.37C237.099 109.098 238.429 111.887 238.429 115.655C238.429 119.302 237.094 122.079 234.406 123.931L234.406 123.932C231.918 125.755 229.017 126.664 225.717 126.664C222.102 126.664 219.037 125.76 216.542 123.932C214.011 122.077 212.763 119.296 212.763 115.655C212.763 111.893 214.007 109.103 216.552 107.371C219.045 105.548 222.107 104.646 225.717 104.646ZM319.508 104.646C323.118 104.646 326.181 105.548 328.673 107.371L328.907 107.537C331.294 109.279 332.462 112.011 332.462 115.655C332.462 119.296 331.214 122.077 328.683 123.932C326.189 125.76 323.123 126.664 319.508 126.664C316.208 126.664 313.307 125.755 310.819 123.932V123.931C308.13 122.079 306.796 119.301 306.796 115.655C306.796 111.888 308.126 109.098 310.828 107.37C313.314 105.552 316.213 104.647 319.508 104.646Z"/>
+        </svg>
+
+        <div class="sheet-content">
+            
+            <!-- الترويسة والشعار الرسمي المفرغ للطباعة -->
+            <div class="header-section">
+                <div>
+                    <svg width="180" height="50" viewBox="70 100 405 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#0F172A" d="M102.584 151.616C106.853 151.616 110.767 152.034 114.324 152.871C117.871 153.706 121.098 154.808 124.002 156.179L124.289 156.315L124.185 156.615L121.162 165.332L121.035 165.698L120.682 165.538C118.039 164.34 115.144 163.327 111.994 162.501H111.992C108.929 161.679 105.721 161.268 102.368 161.268C99.163 161.268 96.5183 161.754 94.4189 162.708C92.3171 163.663 90.7558 165.014 89.7178 166.756L89.7148 166.762C88.6751 168.434 88.1484 170.405 88.1484 172.689C88.1485 175.36 88.6793 177.557 89.7178 179.3C90.758 181.046 92.4705 182.63 94.8828 184.044C97.3071 185.465 100.597 187.005 104.761 188.661H104.762C109.309 190.402 113.145 192.298 116.265 194.352L116.856 194.73C119.772 196.644 121.995 198.937 123.511 201.611H123.51C125.204 204.471 126.039 208.046 126.039 212.315C126.039 217.201 124.91 221.385 122.635 224.849L122.633 224.852C120.359 228.236 117.1 230.841 112.874 232.676L112.875 232.677C108.718 234.513 103.809 235.425 98.1582 235.425C95.2674 235.425 92.4834 235.273 89.8066 234.97L89.8047 234.969C87.2021 234.666 84.8129 234.248 82.6377 233.716L82.626 233.713C80.4497 233.104 78.5209 232.38 76.8418 231.537L76.6465 231.44V220.93L77.1494 221.164C79.7146 222.36 82.8951 223.447 86.6953 224.425H86.6943C90.5515 225.399 94.5164 225.886 98.5898 225.886C102.374 225.886 105.528 225.362 108.064 224.327C110.602 223.292 112.482 221.823 113.731 219.931C114.984 218.033 115.616 215.801 115.616 213.22C115.616 210.626 115.086 208.465 114.047 206.721C113.01 204.981 111.194 203.358 108.562 201.866L108.553 201.861C105.99 200.293 102.379 198.642 97.7109 196.909L97.707 196.907C94.3838 195.619 91.452 194.253 88.915 192.809L88.9043 192.803C86.4318 191.278 84.3524 189.557 82.6709 187.64C80.9858 185.719 79.7044 183.529 78.8262 181.073L78.8223 181.064V181.063C78.0167 178.605 77.6182 175.774 77.6182 172.575C77.6182 168.214 78.6769 164.48 80.8115 161.392C82.9379 158.24 85.8691 155.823 89.5928 154.138L89.5947 154.137C93.3894 152.453 97.7216 151.616 102.584 151.616ZM156.342 152.748V186.94H195.144V152.748H205.566V234.292H195.144V196.591H156.342V234.292H145.918V152.748H156.342Z"/>
+                        <path fill="#0F172A" d="M389.967 151.616V161.519H350.874V190.257H387.563V200.159H350.874V235.425H338.781V151.616H389.967ZM467.7 151.616V161.519H439.615V235.425H427.521V161.519H399.308V151.616H467.7Z"/>
+                        <path fill="#008B94" d="M234.632 132.734L234.737 132.895L270.402 187.555L270.537 187.763L270.388 187.961L234.723 235.284L234.616 235.425H212.435L212.827 234.867L246.018 187.733L212.815 133.272L212.487 132.734H234.632ZM332.739 132.734L332.41 133.272L299.206 187.733L332.398 234.867L332.79 235.425H310.609L310.502 235.284L274.837 187.961L274.688 187.763L274.823 187.555L310.489 132.895L310.593 132.734H332.739ZM225.717 104.646C229.012 104.647 231.91 105.552 234.396 107.37C237.099 109.098 238.429 111.887 238.429 115.655C238.429 119.302 237.094 122.079 234.406 123.931L234.406 123.932C231.918 125.755 229.017 126.664 225.717 126.664C222.102 126.664 219.037 125.76 216.542 123.932C214.011 122.077 212.763 119.296 212.763 115.655C212.763 111.893 214.007 109.103 216.552 107.371C219.045 105.548 222.107 104.646 225.717 104.646ZM319.508 104.646C323.118 104.646 326.181 105.548 328.673 107.371L328.907 107.537C331.294 109.279 332.462 112.011 332.462 115.655C332.462 119.296 331.214 122.077 328.683 123.932C326.189 125.76 323.123 126.664 319.508 126.664C316.208 126.664 313.307 125.755 310.819 123.932V123.931C308.13 122.079 306.796 119.301 306.796 115.655C306.796 111.888 308.126 109.098 310.828 107.37C313.314 105.552 316.213 104.647 319.508 104.646Z"/>
+                    </svg>
+                    <div class="company-meta">SHIIFT X FINANCIAL INFRASTRUCTURE</div>
+                </div>
+
+                <div class="doc-identifier" dir="ltr">
+                    <div class="badge-verified">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>${cleanStatus}</span>
+                    </div>
+                    <div class="ref-number">${safeRef}</div>
+                    
+                    <!-- باركود فيكتور مصغر -->
+                    <div class="barcode-container">
+                        <svg width="130" height="28" viewBox="0 0 130 28" fill="#0F172A">
+                            <rect x="0" y="0" width="3" height="28"/>
+                            <rect x="5" y="0" width="1.5" height="28"/>
+                            <rect x="9" y="0" width="4" height="28"/>
+                            <rect x="15" y="0" width="1.5" height="28"/>
+                            <rect x="18" y="0" width="3" height="28"/>
+                            <rect x="23" y="0" width="1" height="28"/>
+                            <rect x="26" y="0" width="5" height="28"/>
+                            <rect x="33" y="0" width="2" height="28"/>
+                            <rect x="38" y="0" width="3.5" height="28"/>
+                            <rect x="44" y="0" width="1.5" height="28"/>
+                            <rect x="48" y="0" width="4.5" height="28"/>
+                            <rect x="55" y="0" width="2" height="28"/>
+                            <rect x="59" y="0" width="3.5" height="28"/>
+                            <rect x="65" y="0" width="1.5" height="28"/>
+                            <rect x="69" y="0" width="5" height="28"/>
+                            <rect x="76" y="0" width="2" height="28"/>
+                            <rect x="80" y="0" width="3.5" height="28"/>
+                            <rect x="86" y="0" width="1" height="28"/>
+                            <rect x="89" y="0" width="4.5" height="28"/>
+                            <rect x="96" y="0" width="2" height="28"/>
+                            <rect x="100" y="0" width="3" height="28"/>
+                            <rect x="105" y="0" width="1.5" height="28"/>
+                            <rect x="109" y="0" width="4" height="28"/>
+                            <rect x="115" y="0" width="2" height="28"/>
+                            <rect x="119" y="0" width="5" height="28"/>
+                            <rect x="126" y="0" width="3" height="28"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- شبكة تفاصيل العملية والدافع -->
+            <div class="params-grid">
+                <div class="param-cell">
+                    <span>تاريخ وتوقيت القيد:</span>
+                    <strong>${date}</strong>
+                </div>
+                <div class="param-cell">
+                    <span>قناة التسوية:</span>
+                    <strong>محفظة SHIIFT X</strong>
+                </div>
+                <div class="param-cell">
+                    <span>المنصة / الناشر:</span>
+                    <strong>${platform}</strong>
+                </div>
+                <div class="param-cell">
+                    <span>معرف الوجهة (ID):</span>
+                    <code>${cleanId}</code>
+                </div>
+            </div>
+
+            <!-- جدول البنود المالية المفصل -->
+            <table class="line-items">
+                <thead>
+                    <tr>
+                        <th>الوصف والبيان المالي</th>
+                        <th style="text-align: center; width: 80px;">الكمية</th>
+                        <th style="text-align: left; width: 120px;">القيمة المسجلة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="item-main-title">${platform} — ${pkg}</div>
+                            <div class="item-subtext">قسيمة دفع رقمية صادرة ومعتمدة فورياً عبر نظام التسوية الرقمية</div>
+                        </td>
+                        <td style="text-align: center; font-weight: 800; font-family: 'Plus Jakarta Sans', monospace;">1</td>
+                        <td style="text-align: left; font-family: 'Plus Jakarta Sans', monospace; font-weight: 800; font-size: 15px;">$${numAmount}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div style="font-size: 12px; font-weight: 700; color: #64748B;">رسوم الخدمة والمعالجة الفورية (Service Fee)</div>
+                        </td>
+                        <td style="text-align: center; font-family: 'Plus Jakarta Sans', monospace; color: #94A3B8;">—</td>
+                        <td style="text-align: left; font-family: 'Plus Jakarta Sans', monospace; font-weight: 800; color: #16A34A;">$0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- بطاقة المجموع التنفيذية الداكنة -->
+            <div class="calculation-card">
+                <div class="calc-details">
+                    <p>صافي الخصم المحتسب من رصيدك:</p>
+                    <h4>إجمالي الدفع النهائي المعتمد</h4>
+                </div>
+                <div class="calc-total" dir="ltr">
+                    <div class="calc-total-label">TOTAL SETTLED</div>
+                    <div class="calc-amount">$${numAmount}</div>
+                </div>
+            </div>
+
+            <!-- تذييل الفاتورة وختم التوثيق الأمني -->
+            <div class="footer-seal">
+                <div class="security-badge">
+                    <div class="seal-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </div>
+                    <div class="security-text">
+                        <h6>معاملة مشفرة وموثقة</h6>
+                        <p>وثيقة إلكترونية رسمية صادرة آلياً ومسجلة في قاعدة بيانات SHIIFT X المعتمدة.</p>
+                    </div>
+                </div>
+                <div class="audit-tag" dir="ltr">
+                    AUTHENTICATED LEDGER<br>
+                    #${safeRef.replace(/[^a-zA-Z0-9]/g, '')}-SEC
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>`;
+
+            printWindow.document.write(invoiceHtml);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => { printWindow.print(); }, 400);
+        }
+      
         // 8. سجل المعاملات ودليل الوكلاء والمعلومات
         // ========================================================================
         let currentOrderFilter = 'ALL';
