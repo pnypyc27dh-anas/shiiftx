@@ -328,6 +328,55 @@
             }
         }
 
+        <!-- ================= قسم شحن وتعبئة مخزون الأكواد ================= -->
+<div class="inventory-card" style="background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; margin-bottom: 24px; color: #f9fafb; direction: rtl; font-family: inherit;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #374151; padding-bottom: 12px;">
+        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+            <span style="color: #10b981;">📦</span> تعبئة مخزون الأكواد الرقمية (Bulk Restock)
+        </h3>
+        <button type="button" onclick="loadInventoryProducts()" style="background: #1f2937; border: 1px solid #374151; color: #9ca3af; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">
+            🔄 تحديث الباقات
+        </button>
+    </div>
+
+    <form id="restockForm" onsubmit="handleRestockSubmit(event)">
+        <!-- 1. اختيار الباقة -->
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: #d1d5db;">
+                اختر الباقة المراد تزويدها بالأكواد:
+            </label>
+            <select id="restockProductSelect" required onchange="updateSelectedProductBadge()" style="width: 100%; background: #1f2937; border: 1px solid #374151; border-radius: 8px; padding: 12px; color: #fff; font-size: 0.95rem; outline: none;">
+                <option value="" disabled selected>جاري تحميل الباقات المتوفرة...</option>
+            </select>
+            <div id="productStockBadge" style="margin-top: 8px; font-size: 0.85rem; color: #9ca3af;"></div>
+        </div>
+
+        <!-- 2. حقل إدخال الأكواد بالجملة -->
+        <div style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="font-weight: 600; font-size: 0.9rem; color: #d1d5db;">
+                    الصق الأكواد هنا (كود واحد في كل سطر أو مفصولة بفواصل):
+                </label>
+                <span id="codesCountBadge" style="background: #374151; color: #10b981; padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: bold;">
+                    0 كود مكتشف
+                </span>
+            </div>
+            <textarea id="restockCodesInput" required rows="6" placeholder="مثال:&#10;PUBG-60UC-XXXX-1111&#10;PUBG-60UC-YYYY-2222&#10;PUBG-60UC-ZZZZ-3333" oninput="updateCodesCountLive()" style="width: 100%; box-sizing: border-box; background: #1f2937; border: 1px solid #374151; border-radius: 8px; padding: 12px; color: #fff; font-family: monospace; font-size: 0.9rem; outline: none; resize: vertical;"></textarea>
+            <small style="color: #6b7280; font-size: 0.8rem; display: block; margin-top: 4px;">
+                💡 يتم تجاهل الأكواد المكررة أو الأسطر الفارغة تلقائياً لحماية قاعدة البيانات من التكرار.
+            </small>
+        </div>
+
+        <!-- 3. زر الحفظ وحالة المعالجة -->
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button type="submit" id="btnRestockSubmit" style="background: #10b981; color: #ffffff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                <span id="restockBtnSpinner" style="display: none;">⏳</span>
+                <span id="restockBtnText">إضافة الأكواد إلى المخزون</span>
+            </button>
+            <div id="restockStatusMsg" style="font-size: 0.9rem; font-weight: 600; display: none;"></div>
+        </div>
+    </form>
+</div>
         // جلب طلبات الـ ID المعلقة
         async function loadPendingOrders() {
             const tbody = document.getElementById('orders-tbody');
