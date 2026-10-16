@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ب<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -776,40 +776,242 @@
             }
         }
 
-        // إدارة المنتجات
+        // ================= إدارة المنتجات والمنصات =================
+        let allProductsCache = [];
+
+        // 1. جلب المنتجات وترتيبها
         async function loadProducts() {
             const tbody = document.getElementById('products-tbody');
-            const { data: products } = await db.from('products').select('*').order('created_at', { ascending: true });
+            if (!tbody) return;
 
-            if (!products) return;
+            try {
+                const { data: products, error } = await db
+                    .from('products')
+                    .select('*')
+                    .neq('status', 'archived')
+                    .order('platform', { ascending: true })
+                    .order('price', { ascending: true });
+
+                if (error) throw error;
+                allProductsCache = products || [];
+
+                populatePlatformFilters(allProductsCache);
+                renderProductsTable(allProductsCache);
+            } catch (err) {
+                console.error("Products Load Error:", err);
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-rose-500">حدث خطأ أثناء تحميل المنتجات</td></tr>`;
+            }
+        }
+
+        // 2. تعبئة قائمة المنصات التلقائية
+        function populatePlatformFilters(products) {
+            const platforms = [...new Set(products.map(p => p.platform).filter(Boolean))].sort();
+            
+            const filterSelect = document.getElementById('products-platform-filter');
+            if (filterSelect) {
+                const currentVal = filterSelect.value;
+                filterSelect.innerHTML = '<option value="ALL">جميع المنصات</option>' + 
+                    platforms.map(p => `<option value="${p}">${p}</option>`).join('');
+                if (platforms.includes(currentVal)) filterSelect.value = currentVal;
+            }
+
+            const datalist = document.getElementById('platform-suggestions');
+            if (datalist) {
+                datalist.innerHTML = platforms.map(p => `<option value="${p}">`).join('');
+            }
+        }
+
+        // 3. فلترة الجدول بحسب المنصة
+        function filterProductsByPlatform() {
+            const filterVal = document.getElementById('products-platform-filter').value;
+            if (filterVal === 'ALL') {
+                renderProductsTable(allProductsCache);
+            } else {
+                renderProductsTable(allProductsCache.filter(p => p.platform === filterVal));
+            }
+        }
+
+        // 4. رسم جدول المنتجات مع الخيارات
+        function renderProductsTable(products) {
+            const tbody = document.getElementById('products-tbody');
+            if (!products || products.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">لا توجد باقات معروضة حالياً</td></tr>`;
+                return;
+            }
 
             tbody.innerHTML = products.map(p => `
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td class="py-2.5 font-bold">${p.package_name}</td>
-                    <td class="py-2.5">
-                        <input type="number" step="0.01" value="${p.price}" onchange="changeProductPrice('${p.id}', this.value)" class="w-20 px-2 py-1 rounded border border-slate-300 dark:border-slate-700 font-mono text-xs dark:bg-slate-800">
+                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.platform}</td>
+                    <td class="py-3 font-bold">${p.package_name}</td>
+                    <td class="py-3">
+                        <div class="flex items-center gap-1">
+                            <span class="text-slate-400 font-mono">$</span>
+                            <input type="number" step="0.01" value="${Number(p.price).toFixed(2)}" 
+                                   onchange="inlineUpdateProductPrice('${p.id}', this.value)" 
+                                   class="w-20 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 font-mono text-xs font-bold dark:bg-slate-800 outline-none focus:border-brand-500">
+                        </div>
                     </td>
-                    <td class="py-2.5 font-mono text-[11px]">${p.product_type}</td>
-                    <td class="py-2.5">
-                        <button onclick="toggleProduct('${p.id}', '${p.status}')" class="px-2 py-0.5 rounded text-[10px] font-bold ${p.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-                            ${p.status === 'active' ? 'نشط' : 'معطل'}
+                    <td class="py-3">
+                        <span class="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold ${p.product_type === 'CODE' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-amber-500/10 text-amber-500'}">
+                            ${p.product_type === 'CODE' ? 'كود رقمي' : 'شحن ID'}
+                        </span>
+                    </td>
+                    <td class="py-3 text-center">
+                        <button onclick="toggleProduct('${p.id}', '${p.status}')" class="px-2.5 py-1 rounded-lg text-[10px] font-black transition ${p.status === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20' : 'bg-slate-500/10 text-slate-400 hover:bg-slate-500/20'}">
+                            ${p.status === 'active' ? 'نشط ✓' : 'معطل ✕'}
                         </button>
+                    </td>
+                    <td class="py-3 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick='openProductModal(${JSON.stringify(p)})' class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل">
+                                <i class="ph-bold ph-pencil-simple text-sm"></i>
+                            </button>
+                            <button onclick="deleteProduct('${p.id}', '${p.package_name}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="حذف أو أرشفة">
+                                <i class="ph-bold ph-trash text-sm"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
         }
 
-        async function changeProductPrice(id, newPrice) {
-            await db.from('products').update({ price: parseFloat(newPrice) }).eq('id', id);
-            alert("✓ تم تحديث السعر بنجاح.");
+        // 5. تعديل السعر المباشر من الجدول
+        async function inlineUpdateProductPrice(id, newPrice) {
+            const price = parseFloat(newPrice);
+            if (isNaN(price) || price <= 0) return alert("يرجى إدخال سعر صالح.");
+
+            const prod = allProductsCache.find(x => x.id === id);
+            if (!prod) return;
+
+            const { data, error } = await db.rpc('admin_save_product', {
+                p_id: id,
+                p_platform: prod.platform,
+                p_package_name: prod.package_name,
+                p_price: price,
+                p_product_type: prod.product_type,
+                p_category: prod.category || 'Games',
+                p_image_url: prod.image_url || null,
+                p_status: prod.status || 'active'
+            });
+
+            if (error || data.status === 'error') {
+                alert(error ? error.message : data.message);
+                loadProducts();
+            } else {
+                loadProducts();
+            }
         }
 
+        // 6. تفعيل أو تعطيل الباقة
         async function toggleProduct(id, currentStatus) {
             const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
-            await db.from('products').update({ status: nextStatus }).eq('id', id);
-            loadProducts();
+            const prod = allProductsCache.find(x => x.id === id);
+            if (!prod) return;
+
+            const { data, error } = await db.rpc('admin_save_product', {
+                p_id: id,
+                p_platform: prod.platform,
+                p_package_name: prod.package_name,
+                p_price: prod.price,
+                p_product_type: prod.product_type,
+                p_category: prod.category || 'Games',
+                p_image_url: prod.image_url || null,
+                p_status: nextStatus
+            });
+
+            if (error || data.status === 'error') {
+                alert(error ? error.message : data.message);
+            } else {
+                loadProducts();
+            }
         }
 
+        // 7. حذف أو أرشفة الباقة
+        async function deleteProduct(id, packageName) {
+            if (!confirm(`هل أنت متأكد من حذف أو أرشفة باقة (${packageName})؟`)) return;
+
+            const { data, error } = await db.rpc('admin_delete_product', { p_id: id });
+            if (error || data.status === 'error') {
+                alert(error ? error.message : data.message);
+            } else {
+                alert("✓ " + data.message);
+                loadProducts();
+                if (typeof loadInventoryData === 'function') loadInventoryData();
+            }
+        }
+
+        // 8. التحكم بالنافذة المنبثقة (فتح وإغلاق)
+        function openProductModal(prod = null) {
+            const modal = document.getElementById('product-modal');
+            const title = document.getElementById('product-modal-title');
+            
+            if (prod) {
+                title.innerHTML = `<i class="ph-bold ph-pencil-simple text-blue-500"></i><span>تعديل بيانات الباقة</span>`;
+                document.getElementById('modal-product-id').value = prod.id;
+                document.getElementById('modal-product-platform').value = prod.platform;
+                document.getElementById('modal-product-name').value = prod.package_name;
+                document.getElementById('modal-product-price').value = prod.price;
+                document.getElementById('modal-product-type').value = prod.product_type;
+                document.getElementById('modal-product-category').value = prod.category || 'Games';
+                document.getElementById('modal-product-image').value = prod.image_url || '';
+            } else {
+                title.innerHTML = `<i class="ph-bold ph-plus-circle text-emerald-500"></i><span>إضافة باقة جديدة</span>`;
+                document.getElementById('product-form').reset();
+                document.getElementById('modal-product-id').value = '';
+                document.getElementById('modal-product-category').value = 'Games';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        // 9. إرسال النموذج وحفظ الباقة الجديدة
+        async function handleProductFormSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-product');
+            const idVal = document.getElementById('modal-product-id').value || null;
+            const platform = document.getElementById('modal-product-platform').value.trim();
+            const name = document.getElementById('modal-product-name').value.trim();
+            const price = parseFloat(document.getElementById('modal-product-price').value);
+            const type = document.getElementById('modal-product-type').value;
+            const category = document.getElementById('modal-product-category').value.trim();
+            const imageUrl = document.getElementById('modal-product-image').value.trim();
+
+            btn.disabled = true;
+            btn.innerText = "جاري الحفظ...";
+
+            try {
+                const { data, error } = await db.rpc('admin_save_product', {
+                    p_id: idVal,
+                    p_platform: platform,
+                    p_package_name: name,
+                    p_price: price,
+                    p_product_type: type,
+                    p_category: category,
+                    p_image_url: imageUrl || null
+                });
+
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    alert("✓ " + data.message);
+                    closeProductModal();
+                    await loadProducts();
+                    if (typeof loadInventoryData === 'function') await loadInventoryData();
+                } else {
+                    alert("فشل الحفظ: " + (data ? data.message : "خطأ غير متوقع"));
+                }
+            } catch (err) {
+                console.error("Save Product Error:", err);
+                alert("حدث خطأ: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "حفظ الباقة";
+            }
+        }
         // التبديل بين التبويبات
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
