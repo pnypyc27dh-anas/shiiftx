@@ -91,25 +91,29 @@
 
             <!-- أشرطة التبويب -->
             <div class="flex gap-2 overflow-x-auto pb-1 text-xs font-black">
-                <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2">
+                <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-device-mobile-speaker text-sm"></i>
                     <span>طلبات الـ ID المعلقة</span>
                     <span id="badge-orders-count" class="px-1.5 py-0.2 bg-rose-500 text-white rounded-full text-[10px] hidden">0</span>
                 </button>
-                <button onclick="switchTab('deposits')" id="tab-deposits" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
+                <button onclick="switchTab('deposits')" id="tab-deposits" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-wallet text-sm"></i>
                     <span>طلبات شحن الرصيد</span>
                     <span id="badge-deposits-count" class="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[10px] hidden">0</span>
                 </button>
-                <button onclick="switchTab('agents')" id="tab-agents" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
+                <button onclick="switchTab('inventory')" id="tab-inventory" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
+                    <i class="ph-bold ph-barcode text-sm"></i>
+                    <span>مخزون الأكواد الرقمية 📦</span>
+                </button>
+                <button onclick="switchTab('agents')" id="tab-agents" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-users-three text-sm"></i>
                     <span>الوكلاء وصرف الكاش</span>
                 </button>
-                <button onclick="switchTab('wallet')" id="tab-wallet" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
+                <button onclick="switchTab('wallet')" id="tab-wallet" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-hand-coins text-sm"></i>
                     <span>إيداع يدوي</span>
                 </button>
-                <button onclick="switchTab('products')" id="tab-products" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2">
+                <button onclick="switchTab('products')" id="tab-products" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-package text-sm"></i>
                     <span>المنتجات والأسعار</span>
                 </button>
@@ -144,7 +148,6 @@
                 </div>
             </section>
 
-          
             <!-- ================= تبويب 2: طلبات شحن المحافظ المعلقة ================= -->
             <section id="sec-deposits" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div class="flex justify-between items-center">
@@ -175,7 +178,74 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 3: الوكلاء وصرف الكاش ================= -->
+            <!-- ================= تبويب 3 (الجديد): مخزون وتعبئة الأكواد الرقمية ================= -->
+            <section id="sec-inventory" class="tab-content hidden space-y-6">
+                <!-- بطاقة تعبئة الأكواد بالجملة -->
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+                        <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 dark:text-slate-100">
+                            <i class="ph-fill ph-plus-circle text-emerald-500 text-lg"></i>
+                            <span>تعبئة مخزون باقة (شحن أكواد رقمية جديدة)</span>
+                        </h2>
+                        <button onclick="loadInventoryData()" class="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 font-bold">
+                            <i class="ph-bold ph-arrows-clockwise"></i> تحديث المخزون
+                        </button>
+                    </div>
+
+                    <form onsubmit="handleRestockSubmit(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">اختر الباقة المراد تزويدها:</label>
+                                <select id="restock-product-select" required onchange="updateSelectedStockBadge()" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold outline-none">
+                                    <option value="" disabled selected>جاري جلب الباقات المتوفرة...</option>
+                                </select>
+                                <div id="selected-stock-badge" class="mt-1.5 text-xs font-medium"></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="text-xs font-bold text-slate-600 dark:text-slate-300">الصق الأكواد (كل كود بسطر أو بفواصل):</label>
+                                    <span id="codes-count-badge" class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-black">
+                                        0 كود
+                                    </span>
+                                </div>
+                                <textarea id="restock-codes" required rows="4" placeholder="XXXX-YYYY-ZZZZ-1111&#10;XXXX-YYYY-ZZZZ-2222" oninput="updateCodesCountLive()" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs outline-none resize-y" dir="ltr"></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btn-restock-submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition flex items-center justify-center gap-2 shadow-sm">
+                            <i class="ph-bold ph-plus-circle text-sm"></i>
+                            <span>إضافة الأكواد إلى المخزون فوراً</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- جدول إحصائيات المخزون المتوفر والمباع لكل باقة -->
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                    <h3 class="text-xs font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <i class="ph-bold ph-chart-bar text-brand-500"></i>
+                        <span>حالة المخزون لجميع الباقات الرقمية المعروضة</span>
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-100 dark:border-slate-800 text-slate-400 pb-2">
+                                    <th class="pb-2">المنصة</th>
+                                    <th class="pb-2">اسم الباقة</th>
+                                    <th class="pb-2">السعر</th>
+                                    <th class="pb-2 text-center">المتوفر للبيع</th>
+                                    <th class="pb-2 text-center">إجمالي المباع</th>
+                                    <th class="pb-2 text-center">إجراء سريع</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+                                <tr><td colspan="6" class="py-6 text-center text-slate-400">جاري تحميل حالة المخزون...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= تبويب 4: الوكلاء وصرف الكاش ================= -->
             <section id="sec-agents" class="tab-content hidden space-y-4">
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
                     <h3 class="text-xs font-black">ترقية عميل إلى شريك تسويقي (وكيل معتمد)</h3>
@@ -203,7 +273,7 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 4: الإيداع اليدوي ================= -->
+            <!-- ================= تبويب 5: الإيداع اليدوي ================= -->
             <section id="sec-wallet" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
                 <h3 class="text-xs font-black">إيداع رصيد يدوي لعميل (دفع كاش أو حوالة مباشرة)</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
@@ -216,7 +286,7 @@
                 </button>
             </section>
 
-            <!-- ================= تبويب 5: المنتجات والأسعار ================= -->
+            <!-- ================= تبويب 6: المنتجات والأسعار ================= -->
             <section id="sec-products" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xs font-black">قائمة الباقات وتعديل الأسعار المباشر</h3>
@@ -248,10 +318,9 @@
     <script>
         // 1. إعداد الاتصال بـ Supabase
         const SUPABASE_URL = "https://baytojjldklocifridcm.supabase.co";
-        // احرص على وضع مفتاح Anon Key الخاص بك هنا
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJheXRvampsZGtsb2NpZnJpZGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MTU3MzMsImV4cCI6MjEwNTM5MTczM30.tAN7Qah-3VNwatn2CwgqsyphnkQQjagnKf4pR4WiSwQ"; 
         
-        // استخدام 'db' كعميل مستقل يمنع أي تعارض أسماء
+        // استخدام 'db' كعميل مستقل يمنع أي تعارض
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentAdminUser = null;
@@ -303,6 +372,7 @@
             loadPendingOrders();
             loadPendingDeposits();
             loadProducts();
+            loadInventoryData();
         }
 
         // جلب مؤشرات الأداء الحية
@@ -389,7 +459,6 @@
             const tbody = document.getElementById('deposits-tbody');
             if (!tbody) return;
 
-            // 1. جلب طلبات الإيداع المعلقة من جدول المعاملات
             const { data: deposits } = await db
                 .from('transactions')
                 .select('*')
@@ -397,22 +466,17 @@
                 .in('transaction_type', ['Deposit', 'شحن رصيد'])
                 .order('created_at', { ascending: false });
 
-            // 2. جلب أرقام الإشعارات من جدول طلبات الإيداع deposit_orders
             const { data: depOrders } = await db
                 .from('deposit_orders')
                 .select('transaction_ref, transfer_receipt_num, payment_method');
 
-            // إنشاء خريطة مطابقة سريعة بين المرجع ورقم الإشعار
             const receiptMap = {};
             if (depOrders) {
                 depOrders.forEach(o => {
-                    if (o.transaction_ref) {
-                        receiptMap[o.transaction_ref] = o.transfer_receipt_num;
-                    }
+                    if (o.transaction_ref) receiptMap[o.transaction_ref] = o.transfer_receipt_num;
                 });
             }
 
-            // تحديث عداد الشارة التنبيهية
             const badge = document.getElementById('badge-deposits-count');
             if (badge) {
                 const count = deposits ? deposits.length : 0;
@@ -426,11 +490,7 @@
             }
 
             tbody.innerHTML = deposits.map(d => {
-                // البحث عن رقم الإشعار من جدول deposit_orders أو حقل player_id أو استخراجه من نص التفاصيل
-                let receiptNum = receiptMap[d.transaction_ref] 
-                              || d.player_id 
-                              || d.transfer_receipt_num 
-                              || '---';
+                let receiptNum = receiptMap[d.transaction_ref] || d.player_id || d.transfer_receipt_num || '---';
 
                 if (receiptNum === '---' && d.details) {
                     const match = d.details.match(/(?:إشعار|اشعار|حوالة|وصل)[\s:#-]*([A-Za-z0-9_-]+)/i);
@@ -462,7 +522,7 @@
             }).join('');
         }
 
-        // معالجة قبول أو رفض طلب شحن الرصيد وتحديث الجدولين معاً
+        // معالجة قبول أو رفض طلب شحن الرصيد
         async function handleProcessDeposit(txId, action) {
             const confirmMsg = action === 'approve'
                 ? 'هل وصلك التحويل المالي بالفعل وتريد إيداع المبلغ في محفظة العميل الآن؟'
@@ -483,13 +543,157 @@
 
                 if (data && data.status === 'success') {
                     alert(data.message);
-                    loadAllAdminData(); // يعيد تحميل المعلقات والـ KPIs
+                    loadAllAdminData();
                 } else {
                     alert("فشل الإجراء: " + (data ? data.message : "حدث خطأ غير متوقع"));
                 }
             } catch (err) {
                 console.error("Deposit Process Error:", err);
                 alert("حدث خطأ في الاتصال: " + (err.message || err));
+            }
+        }
+
+        // ================= منطق إدارة وتعبئة مخزون الأكواد =================
+        async function loadInventoryData() {
+            const selectElem = document.getElementById('restock-product-select');
+            const tbody = document.getElementById('inventory-tbody');
+            if (!selectElem || !tbody) return;
+
+            try {
+                const { data: products, error: pErr } = await db
+                    .from('products')
+                    .select('id, platform, package_name, price, status')
+                    .eq('product_type', 'CODE')
+                    .order('platform', { ascending: true })
+                    .order('price', { ascending: true });
+
+                if (pErr) throw pErr;
+
+                const { data: inv, error: iErr } = await db
+                    .from('code_inventory')
+                    .select('product_id, status');
+
+                if (iErr) throw iErr;
+
+                const stockCount = {};
+                if (inv) {
+                    inv.forEach(item => {
+                        const pid = item.product_id;
+                        if (!stockCount[pid]) stockCount[pid] = { available: 0, sold: 0 };
+                        if (item.status === 'available') stockCount[pid].available++;
+                        if (item.status === 'sold') stockCount[pid].sold++;
+                    });
+                }
+
+                // تعبئة القائمة المنسدلة
+                selectElem.innerHTML = '<option value="" disabled selected>-- اختر الباقة لتعبئة مخزونها --</option>';
+                products.forEach(p => {
+                    const avail = stockCount[p.id]?.available || 0;
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = `[${p.platform}] ${p.package_name} - ($${Number(p.price).toFixed(2)}) (المتوفر: ${avail})`;
+                    opt.dataset.stock = avail;
+                    selectElem.appendChild(opt);
+                });
+
+                // تعبئة جدول المخزون
+                tbody.innerHTML = products.map(p => {
+                    const avail = stockCount[p.id]?.available || 0;
+                    const sold = stockCount[p.id]?.sold || 0;
+                    const statusColor = avail > 0 
+                        ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10' 
+                        : 'text-rose-500 bg-rose-500/10';
+                    return `
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                            <td class="py-3 font-bold">${p.platform}</td>
+                            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.package_name}</td>
+                            <td class="py-3 font-mono font-bold">$${Number(p.price).toFixed(2)}</td>
+                            <td class="py-3 font-mono font-black text-center">
+                                <span class="px-2.5 py-1 rounded-lg text-xs ${statusColor}">${avail} كود</span>
+                            </td>
+                            <td class="py-3 font-mono text-slate-400 text-center">${sold} مباع</td>
+                            <td class="py-3 text-center">
+                                <button onclick="quickSelectProduct('${p.id}')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-200 transition">
+                                    + تعبئة
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error("Inventory Load Error:", err);
+                selectElem.innerHTML = '<option value="" disabled>فشل جلب الباقات</option>';
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-rose-500">حدث خطأ أثناء تحميل بيانات المخزون</td></tr>`;
+            }
+        }
+
+        function updateSelectedStockBadge() {
+            const select = document.getElementById('restock-product-select');
+            const badge = document.getElementById('selected-stock-badge');
+            const opt = select.options[select.selectedIndex];
+            if (opt && opt.dataset.stock !== undefined) {
+                const stock = parseInt(opt.dataset.stock, 10);
+                const color = stock === 0 ? 'text-rose-500' : (stock < 3 ? 'text-amber-500' : 'text-emerald-500');
+                badge.innerHTML = `المخزون المتاح حالياً لهذه الباقة: <strong class="${color}">${stock} كود</strong>`;
+            } else {
+                badge.innerHTML = '';
+            }
+        }
+
+        function updateCodesCountLive() {
+            const val = document.getElementById('restock-codes').value;
+            const badge = document.getElementById('codes-count-badge');
+            const count = val.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length >= 3).length;
+            badge.innerText = `${count} كود`;
+        }
+
+        function quickSelectProduct(productId) {
+            const selectElem = document.getElementById('restock-product-select');
+            if (selectElem) {
+                selectElem.value = productId;
+                updateSelectedStockBadge();
+                document.getElementById('restock-codes').focus();
+                selectElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        async function handleRestockSubmit(e) {
+            e.preventDefault();
+            const productId = document.getElementById('restock-product-select').value;
+            const codes = document.getElementById('restock-codes').value.trim();
+            const btn = document.getElementById('btn-restock-submit');
+
+            if (!productId) return alert('يرجى اختيار الباقة أولاً.');
+            if (!codes) return alert('يرجى لصق الأكواد المراد إضافتها.');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الحفظ...`;
+
+            try {
+                const { data, error } = await db.rpc('admin_add_inventory_codes', {
+                    p_product_id: productId,
+                    p_codes_text: codes
+                });
+
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    alert("✓ " + data.message);
+                    document.getElementById('restock-codes').value = '';
+                    updateCodesCountLive();
+                    await loadInventoryData();
+                    document.getElementById('restock-product-select').value = productId;
+                    updateSelectedStockBadge();
+                } else {
+                    alert("فشل الحفظ: " + (data ? data.message : "خطأ غير متوقع"));
+                }
+            } catch (err) {
+                console.error("Restock Error:", err);
+                alert("حدث خطأ: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-plus-circle text-sm"></i> <span>إضافة الأكواد إلى المخزون فوراً</span>`;
             }
         }
 
@@ -610,11 +814,13 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(b => {
-                b.className = "tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2";
+                b.className = "tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap";
             });
 
-            document.getElementById(`sec-${tabId}`).classList.remove('hidden');
-            document.getElementById(`tab-${tabId}`).className = "tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2";
+            const activeSec = document.getElementById(`sec-${tabId}`);
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if (activeSec) activeSec.classList.remove('hidden');
+            if (activeTab) activeTab.className = "tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap";
         }
 
         async function handleLogout() {
