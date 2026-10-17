@@ -917,9 +917,16 @@
                         </button>
                     </td>
                     <td class="py-3 text-center">
-                        <button onclick="deleteProduct('${p.id}', '${p.package_name}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="حذف">
-                            <i class="ph-bold ph-trash text-sm"></i>
-                        </button>
+                        <div class="flex items-center justify-center gap-1.5">
+                            <!-- زر التعديل الشامل -->
+                            <button onclick="openEditModal('${p.id}')" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل بيانات الباقة">
+                                <i class="ph-bold ph-pencil-simple text-sm"></i>
+                            </button>
+                            <!-- زر الحذف -->
+                            <button onclick="deleteProduct('${p.id}', '${p.package_name}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="حذف الباقة">
+                                <i class="ph-bold ph-trash text-sm"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
@@ -971,6 +978,74 @@
                 alert(error ? error.message : data.message);
             } else {
                 loadProducts();
+            }
+        }
+        // فتح نافذة التعديل وتعبئة بيانات الباقة المختارة
+        function openEditModal(prodId) {
+            const prod = allProductsCache.find(p => p.id === prodId);
+            if (!prod) return;
+
+            document.getElementById('edit-prod-id').value = prod.id;
+            document.getElementById('edit-prod-platform').value = prod.platform; // تظل ثابتة ومقفلة
+            document.getElementById('edit-prod-name').value = prod.package_name;
+            document.getElementById('edit-prod-price').value = prod.price;
+            document.getElementById('edit-prod-type').value = prod.product_type || 'CODE';
+            document.getElementById('edit-prod-category').value = prod.category || 'Games';
+            document.getElementById('edit-prod-image').value = prod.image_url || '';
+            document.getElementById('edit-prod-status').value = prod.status || 'active';
+
+            document.getElementById('edit-product-modal').classList.remove('hidden');
+        }
+
+        // إغلاق نافذة التعديل
+        function closeEditModal() {
+            document.getElementById('edit-product-modal').classList.add('hidden');
+        }
+
+        // إرسال التعديلات إلى Supabase
+        async function handleEditProductSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-edit-prod');
+            const id = document.getElementById('edit-prod-id').value;
+            const platform = document.getElementById('edit-prod-platform').value;
+            const name = document.getElementById('edit-prod-name').value.trim();
+            const price = parseFloat(document.getElementById('edit-prod-price').value);
+            const type = document.getElementById('edit-prod-type').value;
+            const category = document.getElementById('edit-prod-category').value.trim();
+            const imageUrl = document.getElementById('edit-prod-image').value.trim();
+            const status = document.getElementById('edit-prod-status').value;
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الحفظ...`;
+
+            try {
+                const { data, error } = await db.rpc('admin_save_product', {
+                    p_id: id,
+                    p_platform: platform,
+                    p_package_name: name,
+                    p_price: price,
+                    p_product_type: type,
+                    p_category: category,
+                    p_image_url: imageUrl || null,
+                    p_status: status
+                });
+
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    alert("✓ " + data.message);
+                    closeEditModal();
+                    await loadProducts();
+                    if (typeof loadInventoryData === 'function') await loadInventoryData();
+                } else {
+                    alert("فشل التعديل: " + (data ? data.message : "خطأ غير متوقع"));
+                }
+            } catch (err) {
+                console.error("Edit Product Error:", err);
+                alert("حدث خطأ أثناء تعديل الباقة: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-floppy-disk text-sm"></i> <span>حفظ التعديلات</span>`;
             }
         }
 
