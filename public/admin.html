@@ -270,7 +270,7 @@
                             <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نوع التسليم:</label>
                             <select id="modal-product-type" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
                                 <option value="CODE">كود رقمي فوري (CODE)</option>
-                                <option value="DIRECT_ID">شحن مباشر بالـ Player ID</option>
+                                <option value="ID">شحن مباشر بالـ Player ID</option>
                             </select>
                         </div>
                     </div>
@@ -414,7 +414,7 @@
                     <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نوع التسليم:</label>
                     <select id="edit-prod-type" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
                         <option value="CODE">كود رقمي فوري (CODE)</option>
-                        <option value="DIRECT_ID">شحن مباشر بالـ Player ID</option>
+                        <option value="ID">شحن مباشر بالـ Player ID</option>
                     </select>
                 </div>
             </div>
@@ -982,21 +982,24 @@
         }
         // فتح نافذة التعديل وتعبئة بيانات الباقة المختارة
         function openEditModal(prodId) {
-            const prod = allProductsCache.find(p => p.id === prodId);
-            if (!prod) return;
+    const prod = allProductsCache.find(p => p.id === prodId);
+    if (!prod) return;
 
-            document.getElementById('edit-prod-id').value = prod.id;
-            document.getElementById('edit-prod-platform').value = prod.platform; // تظل ثابتة ومقفلة
-            document.getElementById('edit-prod-name').value = prod.package_name;
-            document.getElementById('edit-prod-price').value = prod.price;
-            document.getElementById('edit-prod-type').value = prod.product_type || 'CODE';
-            document.getElementById('edit-prod-category').value = prod.category || 'Games';
-            document.getElementById('edit-prod-image').value = prod.image_url || '';
-            document.getElementById('edit-prod-status').value = prod.status || 'active';
+    document.getElementById('edit-prod-id').value = prod.id;
+    document.getElementById('edit-prod-platform').value = prod.platform;
+    document.getElementById('edit-prod-name').value = prod.package_name;
+    document.getElementById('edit-prod-price').value = prod.price;
 
-            document.getElementById('edit-product-modal').classList.remove('hidden');
-        }
+    // مطابقة القيمة الحرفية: إذا كانت تحتوي على ID تُحدد ID، وغير ذلك تُحدد CODE
+    const currentType = (prod.product_type || 'CODE').toUpperCase();
+    document.getElementById('edit-prod-type').value = currentType.includes('ID') ? 'ID' : 'CODE';
 
+    document.getElementById('edit-prod-category').value = prod.category || 'Games';
+    document.getElementById('edit-prod-image').value = prod.image_url || '';
+    document.getElementById('edit-prod-status').value = prod.status || 'active';
+
+    document.getElementById('edit-product-modal').classList.remove('hidden');
+}
         // إغلاق نافذة التعديل
         function closeEditModal() {
             document.getElementById('edit-product-modal').classList.add('hidden');
