@@ -26,40 +26,6 @@
     <style>
         body { font-family: 'Cairo', sans-serif; }
     </style>
-    <!-- سكربت التنقل المستقل: يعمل فوراً ومحمياً من أي أخطاء خارجية -->
-    <script>
-        function switchTab(tabId) {
-            // إخفاء كل محتويات التبويبات
-            document.querySelectorAll('.tab-content').forEach(function(sec) {
-                sec.classList.add('hidden');
-            });
-
-            // إعادة ضبط تصميم الأزرار للوضع العادي
-            document.querySelectorAll('.tab-btn').forEach(function(btn) {
-                btn.className = "tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap";
-            });
-
-            // إظهار التبويب المطلوب وتمييز زرّه
-            var targetSec = document.getElementById('sec-' + tabId);
-            var targetBtn = document.getElementById('tab-' + tabId);
-
-            if (targetSec) targetSec.classList.remove('hidden');
-            if (targetBtn) targetBtn.className = "tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap";
-
-            // جلب بيانات التبويب بأمان في الخلفية
-            try {
-                if (tabId === 'affiliates' && typeof loadAffiliatesData === 'function') loadAffiliatesData();
-                else if (tabId === 'agents' && typeof loadAgentsData === 'function') loadAgentsData();
-                else if (tabId === 'products' && typeof loadProducts === 'function') loadProducts();
-                else if (tabId === 'inventory' && typeof loadInventoryData === 'function') loadInventoryData();
-                else if (tabId === 'orders' && typeof loadPendingOrders === 'function') loadPendingOrders();
-                else if (tabId === 'deposits' && typeof loadPendingDeposits === 'function') loadPendingDeposits();
-            } catch (err) {
-                console.warn("Data load warning for tab:", tabId, err);
-            }
-        }
-    </script>
-</head>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen">
 
@@ -70,7 +36,7 @@
     </div>
 
     <!-- التطبيق الإداري الرئيسي -->
-    <div id="admin-app">
+    <div id="admin-app" class="transition-opacity duration-200">
         
         <!-- الشريط العلوي -->
         <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
@@ -128,12 +94,12 @@
                 <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-device-mobile-speaker text-sm"></i>
                     <span>طلبات الـ ID المعلقة</span>
-                    <span id="badge-orders-count" class="px-1.5 py-0.2 bg-rose-500 text-white rounded-full text-[10px] hidden">0</span>
+                    <span id="badge-orders-count" class="px-1.5 py-0.5 bg-rose-500 text-white rounded-full text-[10px] hidden">0</span>
                 </button>
                 <button onclick="switchTab('deposits')" id="tab-deposits" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-wallet text-sm"></i>
                     <span>طلبات شحن الرصيد</span>
-                    <span id="badge-deposits-count" class="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[10px] hidden">0</span>
+                    <span id="badge-deposits-count" class="px-1.5 py-0.5 bg-amber-500 text-white rounded-full text-[10px] hidden">0</span>
                 </button>
                 <button onclick="switchTab('inventory')" id="tab-inventory" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-barcode text-sm"></i>
@@ -157,7 +123,7 @@
                 </button>
             </div>
 
-            <!-- ================= تبويب 1: طلبات الـ ID المعلقة ================= -->
+            <!-- تبويب 1: طلبات الـ ID المعلقة -->
             <section id="sec-orders" class="tab-content bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div class="flex justify-between items-center">
                     <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 dark:text-slate-100">
@@ -186,7 +152,7 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 2: طلبات شحن المحافظ المعلقة ================= -->
+            <!-- تبويب 2: طلبات شحن الرصيد -->
             <section id="sec-deposits" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div class="flex justify-between items-center">
                     <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 dark:text-slate-100">
@@ -216,7 +182,7 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 3: مخزون الأكواد الرقمية ================= -->
+            <!-- تبويب 3: مخزون الأكواد الرقمية -->
             <section id="sec-inventory" class="tab-content hidden space-y-6">
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                     <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -279,7 +245,7 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 4: المنصات والباقات ================= -->
+            <!-- تبويب 4: المنصات والباقات -->
             <section id="sec-products" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
                     <div>
@@ -325,7 +291,7 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 5: الشركاء التسويقيين ================= -->
+            <!-- تبويب 5: الشركاء التسويقيين -->
             <section id="sec-affiliates" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
                     <div>
@@ -366,7 +332,7 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 6: الوكلاء الماليين ================= -->
+            <!-- تبويب 6: الوكلاء الماليين -->
             <section id="sec-agents" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
                     <div>
@@ -405,7 +371,7 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 7: الإيداع اليدوي ================= -->
+            <!-- تبويب 7: الإيداع اليدوي -->
             <section id="sec-wallet" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
                 <h3 class="text-xs font-black">إيداع رصيد يدوي لعميل (دفع كاش أو حوالة مباشرة)</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
@@ -421,7 +387,7 @@
         </main>
     </div>
 
-    <!-- نافذة منبثقة موحدة: إضافة أو تعديل باقة -->
+    <!-- نافذة منبثقة: إضافة أو تعديل باقة -->
     <div id="product-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -495,7 +461,7 @@
         </div>
     </div>
 
-    <!-- نافذة تعيين / تعديل شريك تسويقي -->
+    <!-- نافذة شريك تسويقي -->
     <div id="affiliate-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -542,7 +508,7 @@
         </div>
     </div>
 
-    <!-- نافذة تعيين وكيل مالي معتمد -->
+    <!-- نافذة وكيل مالي -->
     <div id="agent-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -589,12 +555,23 @@
         let currentAdminUser = null;
         let allProductsCache = [];
 
-        // فحص تسجيل الدخول في الخلفية دون حجب الشاشة
+        // دالة حماية من هجمات XSS
+        function escapeHtml(str) {
+            if (!str && str !== 0) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // فحص صلاحيات الإدارة
         async function checkAdminAuth() {
             try {
                 const { data: { session }, error: sessionErr } = await db.auth.getSession();
                 if (sessionErr || !session) {
-                    showAuthAlert("⚠️ يجب تسجيل الدخول بالحساب الإداري من المتجر أولاً لتفعيل العمليات.");
+                    lockAdminApp("⚠️ يجب تسجيل الدخول بالحساب الإداري من المتجر أولاً لتفعيل العمليات.");
                     return;
                 }
 
@@ -605,25 +582,30 @@
                     .single();
 
                 if (profileErr || !profile || profile.role !== 'admin') {
-                    showAuthAlert(`⛔ هذا الحساب (${profile?.role || 'مستخدم عادي'}) لا يملك صلاحيات المشرف.`);
+                    lockAdminApp(`⛔ هذا الحساب (${escapeHtml(profile?.role || 'مستخدم عادي')}) لا يملك صلاحيات المشرف.`);
                     return;
                 }
 
                 currentAdminUser = session.user;
                 document.getElementById('auth-alert-bar').classList.add('hidden');
+                document.getElementById('admin-app').classList.remove('opacity-25', 'pointer-events-none');
                 loadAllAdminData();
             } catch (err) {
                 console.error("Auth Guard Error:", err);
-                showAuthAlert("حدث خطأ في الاتصال بالخادم: " + (err.message || err));
+                lockAdminApp("حدث خطأ في الاتصال بالخادم: " + (err.message || err));
             }
         }
 
-        function showAuthAlert(msg) {
+        function lockAdminApp(msg) {
             const bar = document.getElementById('auth-alert-bar');
             const txt = document.getElementById('auth-alert-text');
+            const app = document.getElementById('admin-app');
             if (bar && txt) {
                 txt.innerText = msg;
                 bar.classList.remove('hidden');
+            }
+            if (app) {
+                app.classList.add('opacity-25', 'pointer-events-none');
             }
         }
 
@@ -638,21 +620,21 @@
         async function loadKPIs() {
             const { data: kpis } = await db.rpc('admin_get_kpis');
             if (kpis) {
-                document.getElementById('kpi-sales-today').innerText = "$" + Number(kpis.sales_today).toFixed(2);
-                document.getElementById('kpi-sales-month').innerText = "$" + Number(kpis.sales_month).toFixed(2);
-                document.getElementById('kpi-commissions').innerText = "$" + Number(kpis.total_commissions).toFixed(2);
-                document.getElementById('kpi-balances').innerText = "$" + Number(kpis.customer_balances).toFixed(2);
+                document.getElementById('kpi-sales-today').innerText = "$" + Number(kpis.sales_today || 0).toFixed(2);
+                document.getElementById('kpi-sales-month').innerText = "$" + Number(kpis.sales_month || 0).toFixed(2);
+                document.getElementById('kpi-commissions').innerText = "$" + Number(kpis.total_commissions || 0).toFixed(2);
+                document.getElementById('kpi-balances').innerText = "$" + Number(kpis.customer_balances || 0).toFixed(2);
 
                 const ordersBadge = document.getElementById('badge-orders-count');
                 if (ordersBadge) {
-                    ordersBadge.innerText = kpis.pending_orders;
-                    ordersBadge.classList.toggle('hidden', kpis.pending_orders === 0);
+                    ordersBadge.innerText = kpis.pending_orders || 0;
+                    ordersBadge.classList.toggle('hidden', (kpis.pending_orders || 0) === 0);
                 }
 
                 const depositsBadge = document.getElementById('badge-deposits-count');
                 if (depositsBadge) {
-                    depositsBadge.innerText = kpis.pending_deposits;
-                    depositsBadge.classList.toggle('hidden', kpis.pending_deposits === 0);
+                    depositsBadge.innerText = kpis.pending_deposits || 0;
+                    depositsBadge.classList.toggle('hidden', (kpis.pending_deposits || 0) === 0);
                 }
             }
         }
@@ -673,15 +655,15 @@
 
             tbody.innerHTML = orders.map(o => `
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td class="py-3 font-mono text-[11px] text-slate-400">${o.transaction_ref}</td>
-                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${o.details}</td>
-                    <td class="py-3 font-mono font-black text-amber-600 dark:text-amber-400 select-all">${o.player_id || '---'}</td>
-                    <td class="py-3 font-mono font-bold">$${Number(o.amount).toFixed(2)}</td>
+                    <td class="py-3 font-mono text-[11px] text-slate-400">${escapeHtml(o.transaction_ref)}</td>
+                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${escapeHtml(o.details)}</td>
+                    <td class="py-3 font-mono font-black text-amber-600 dark:text-amber-400 select-all">${escapeHtml(o.player_id || '---')}</td>
+                    <td class="py-3 font-mono font-bold">$${Number(o.amount || 0).toFixed(2)}</td>
                     <td class="py-3 text-center flex justify-center gap-2">
-                        <button onclick="handleProcessOrder('${o.id}', 'complete')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold">
+                        <button onclick="handleProcessOrder('${escapeHtml(o.id)}', 'complete')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold">
                             تم الشحن ✓
                         </button>
-                        <button onclick="handleProcessOrder('${o.id}', 'refund')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold">
+                        <button onclick="handleProcessOrder('${escapeHtml(o.id)}', 'refund')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold">
                             رفض واسترجاع ✕
                         </button>
                     </td>
@@ -755,21 +737,21 @@
 
                 return `
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td class="py-3 font-mono text-[11px] text-slate-400">${d.transaction_ref}</td>
-                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${d.details}</td>
+                    <td class="py-3 font-mono text-[11px] text-slate-400">${escapeHtml(d.transaction_ref)}</td>
+                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${escapeHtml(d.details)}</td>
                     <td class="py-3 text-center">
-                        <span class="px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-black rounded-lg text-xs select-all border border-amber-500/30 inline-flex items-center gap-1.5 cursor-pointer shadow-sm hover:bg-amber-500/20 transition" onclick="navigator.clipboard.writeText('${receiptNum}'); alert('تم نسخ رقم الإشعار: ' + '${receiptNum}')" title="انقر لنسخ رقم الإشعار">
+                        <span class="px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-black rounded-lg text-xs select-all border border-amber-500/30 inline-flex items-center gap-1.5 cursor-pointer shadow-sm hover:bg-amber-500/20 transition" onclick="navigator.clipboard.writeText('${escapeHtml(receiptNum)}'); alert('تم نسخ رقم الإشعار: ${escapeHtml(receiptNum)}')" title="انقر لنسخ رقم الإشعار">
                             <i class="ph-bold ph-receipt text-xs"></i>
-                            <span dir="ltr">${receiptNum}</span>
+                            <span dir="ltr">${escapeHtml(receiptNum)}</span>
                         </span>
                     </td>
-                    <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs">+$${Number(d.amount).toFixed(2)}</td>
+                    <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs">+$${Number(d.amount || 0).toFixed(2)}</td>
                     <td class="py-3 text-[10px] text-slate-400">${new Date(d.created_at).toLocaleString('ar-EG')}</td>
                     <td class="py-3 text-center flex justify-center gap-2">
-                        <button onclick="handleProcessDeposit('${d.id}', 'approve')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold transition shadow-sm">
+                        <button onclick="handleProcessDeposit('${escapeHtml(d.id)}', 'approve')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold transition shadow-sm">
                             تأكيد الإيداع ✓
                         </button>
-                        <button onclick="handleProcessDeposit('${d.id}', 'reject')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold transition shadow-sm">
+                        <button onclick="handleProcessDeposit('${escapeHtml(d.id)}', 'reject')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold transition shadow-sm">
                             رفض الطلب ✕
                         </button>
                     </td>
@@ -807,7 +789,7 @@
             }
         }
 
-        // ================= مخزون الأكواد الرقمية =================
+        // مخزون الأكواد الرقمية
         async function loadInventoryData() {
             const selectElem = document.getElementById('restock-product-select');
             const tbody = document.getElementById('inventory-tbody');
@@ -857,15 +839,15 @@
                         : 'text-rose-500 bg-rose-500/10';
                     return `
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                            <td class="py-3 font-bold">${p.platform}</td>
-                            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.package_name}</td>
-                            <td class="py-3 font-mono font-bold">$${Number(p.price).toFixed(2)}</td>
+                            <td class="py-3 font-bold">${escapeHtml(p.platform)}</td>
+                            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${escapeHtml(p.package_name)}</td>
+                            <td class="py-3 font-mono font-bold">$${Number(p.price || 0).toFixed(2)}</td>
                             <td class="py-3 font-mono font-black text-center">
                                 <span class="px-2.5 py-1 rounded-lg text-xs ${statusColor}">${avail} كود</span>
                             </td>
                             <td class="py-3 font-mono text-slate-400 text-center">${sold} مباع</td>
                             <td class="py-3 text-center">
-                                <button onclick="quickSelectProduct('${p.id}')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-200 transition">
+                                <button onclick="quickSelectProduct('${escapeHtml(p.id)}')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-200 transition">
                                     + تعبئة
                                 </button>
                             </td>
@@ -947,7 +929,7 @@
             }
         }
 
-        // ================= إدارة المنتجات والمنصات =================
+        // إدارة المنتجات
         async function loadProducts() {
             const tbody = document.getElementById('products-tbody');
             if (!tbody) return;
@@ -977,13 +959,13 @@
             if (filterSelect) {
                 const currentVal = filterSelect.value;
                 filterSelect.innerHTML = '<option value="ALL">جميع المنصات</option>' + 
-                    platforms.map(p => `<option value="${p}">${p}</option>`).join('');
+                    platforms.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
                 if (platforms.includes(currentVal)) filterSelect.value = currentVal;
             }
 
             const datalist = document.getElementById('platform-suggestions');
             if (datalist) {
-                datalist.innerHTML = platforms.map(p => `<option value="${p}">`).join('');
+                datalist.innerHTML = platforms.map(p => `<option value="${escapeHtml(p)}">`).join('');
             }
         }
 
@@ -1005,10 +987,10 @@
 
             tbody.innerHTML = products.map(p => `
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.platform}</td>
-                    <td class="py-3 font-bold text-slate-700 dark:text-slate-200">${p.package_name}</td>
+                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${escapeHtml(p.platform)}</td>
+                    <td class="py-3 font-bold text-slate-700 dark:text-slate-200">${escapeHtml(p.package_name)}</td>
                     <td class="py-3 font-mono font-black text-slate-900 dark:text-white">
-                        $${Number(p.price).toFixed(2)}
+                        $${Number(p.price || 0).toFixed(2)}
                     </td>
                     <td class="py-3">
                         <span class="px-2.5 py-1 rounded-md font-mono text-[10px] font-bold ${p.product_type === 'CODE' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-amber-500/10 text-amber-500'}">
@@ -1022,10 +1004,10 @@
                     </td>
                     <td class="py-3 text-center">
                         <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="openEditModal('${p.id}')" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل بيانات الباقة">
+                            <button onclick="openEditModal('${escapeHtml(p.id)}')" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل بيانات الباقة">
                                 <i class="ph-bold ph-pencil-simple text-sm"></i>
                             </button>
-                            <button onclick="deleteProduct('${p.id}', '${p.package_name}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="حذف الباقة">
+                            <button onclick="deleteProduct('${escapeHtml(p.id)}', '${escapeHtml(p.package_name)}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="حذف الباقة">
                                 <i class="ph-bold ph-trash text-sm"></i>
                             </button>
                         </div>
@@ -1042,7 +1024,6 @@
             document.getElementById('btn-modal-submit').className = 'flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5';
 
             const platformInput = document.getElementById('modal-prod-platform');
-            platformInput.disabled = false;
             platformInput.value = '';
             platformInput.className = 'w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none';
             document.getElementById('modal-platform-label').innerHTML = 'المنصة:';
@@ -1068,10 +1049,9 @@
             document.getElementById('btn-modal-submit').className = 'flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5';
 
             const platformInput = document.getElementById('modal-prod-platform');
-            platformInput.disabled = true;
             platformInput.value = prod.platform;
-            platformInput.className = 'w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-bold outline-none cursor-not-allowed';
-            document.getElementById('modal-platform-label').innerHTML = 'المنصة (ثابتة 🔒):';
+            platformInput.className = 'w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none';
+            document.getElementById('modal-platform-label').innerHTML = 'المنصة:';
 
             document.getElementById('modal-prod-name').value = prod.package_name;
             document.getElementById('modal-prod-price').value = prod.price;
@@ -1150,7 +1130,7 @@
             }
         }
 
-        // ================= الإيداع اليدوي =================
+        // الإيداع اليدوي
         async function handleManualTopup() {
             const email = document.getElementById('topup-email').value.trim();
             const amount = parseFloat(document.getElementById('topup-amount').value);
@@ -1169,14 +1149,15 @@
             if (error || data.status === 'error') {
                 alert(error ? error.message : data.message);
             } else {
-                alert(`✓ تم شحن $${amount.toFixed(2)} بنجاح! رصيد العميل الجديد: $${Number(data.new_balance).toFixed(2)}`);
+                alert(`✓ تم شحن $${amount.toFixed(2)} بنجاح! رصيد العميل الجديد: $${Number(data.new_balance || 0).toFixed(2)}`);
                 document.getElementById('topup-email').value = '';
                 document.getElementById('topup-amount').value = '';
+                document.getElementById('topup-note').value = '';
                 loadKPIs();
             }
         }
 
-        // ================= التبديل بين التبويبات =================
+        // التبديل بين التبويبات
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(b => {
@@ -1188,20 +1169,12 @@
             if (activeSec) activeSec.classList.remove('hidden');
             if (activeTab) activeTab.className = "tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap";
             
-            // تحميل البيانات تلقائياً عند الدخول للتبويب
-            if (tabId === 'affiliates') {
-                loadAffiliatesData();
-            } else if (tabId === 'agents') {
-                loadAgentsData();
-            } else if (tabId === 'products') {
-                loadProducts();
-            } else if (tabId === 'inventory') {
-                loadInventoryData();
-            } else if (tabId === 'orders') {
-                loadPendingOrders();
-            } else if (tabId === 'deposits') {
-                loadPendingDeposits();
-            }
+            if (tabId === 'affiliates') loadAffiliatesData();
+            else if (tabId === 'agents') loadAgentsData();
+            else if (tabId === 'products') loadProducts();
+            else if (tabId === 'inventory') loadInventoryData();
+            else if (tabId === 'orders') loadPendingOrders();
+            else if (tabId === 'deposits') loadPendingDeposits();
         }
 
         async function handleLogout() {
@@ -1209,7 +1182,7 @@
             window.location.href = "index.html";
         }
 
-        // ================= إدارة الشركاء التسويقيين (Affiliates) =================
+        // الشركاء التسويقيين
         async function loadAffiliatesData() {
             const tbody = document.getElementById('affiliates-tbody');
             if (!tbody) return;
@@ -1240,16 +1213,16 @@
 
                     return `
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${partnerName}</td>
+                            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${escapeHtml(partnerName)}</td>
                             <td class="py-3">
-                                <span class="px-2.5 py-1 rounded font-mono font-black text-purple-600 bg-purple-500/10">${c.code}</span>
+                                <span class="px-2.5 py-1 rounded font-mono font-black text-purple-600 bg-purple-500/10">${escapeHtml(c.code)}</span>
                             </td>
                             <td class="py-3 font-mono font-bold text-slate-600 dark:text-slate-300">${c.discount_percent}%</td>
                             <td class="py-3 font-mono font-bold text-emerald-600">${c.affiliate_commission_percent}%</td>
                             <td class="py-3 font-mono text-slate-500">${c.usage_count || 0} طلب</td>
                             <td class="py-3 font-mono font-black text-slate-900 dark:text-white">$${Number(p?.balance || 0).toFixed(2)}</td>
                             <td class="py-3 text-center">
-                                <button onclick="editAffiliate('${p?.id}', '${c.code}', ${c.discount_percent}, ${c.affiliate_commission_percent})" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل نسب الكود">
+                                <button onclick="editAffiliate('${escapeHtml(p?.id)}', '${escapeHtml(c.code)}', ${c.discount_percent}, ${c.affiliate_commission_percent})" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل نسب الكود">
                                     <i class="ph-bold ph-pencil-simple text-sm"></i>
                                 </button>
                             </td>
@@ -1258,7 +1231,7 @@
                 }).join('');
             } catch (err) {
                 console.error("Affiliates load error:", err);
-                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-500">فشل تحميل الشركاء: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-500">فشل تحميل الشركاء: ${escapeHtml(err.message)}</td></tr>`;
             }
         }
 
@@ -1321,7 +1294,7 @@
             }
         }
 
-        // ================= إدارة الوكلاء الماليين (Cash Agents) =================
+        // الوكلاء الماليين
         async function loadAgentsData() {
             const tbody = document.getElementById('agents-tbody');
             if (!tbody) return;
@@ -1346,14 +1319,14 @@
 
                     return `
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${agentName}</td>
-                            <td class="py-3 font-mono text-slate-500">${a.email || '—'}</td>
+                            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${escapeHtml(agentName)}</td>
+                            <td class="py-3 font-mono text-slate-500">${escapeHtml(a.email || '—')}</td>
                             <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400">$${Number(a.balance || 0).toFixed(2)}</td>
                             <td class="py-3 text-center">
                                 <span class="px-2.5 py-1 rounded-md text-[10px] font-black bg-emerald-500/10 text-emerald-600">وكيل معتمد ✓</span>
                             </td>
                             <td class="py-3 text-center">
-                                <button onclick="demoteAgent('${a.id}', '${agentName}')" class="px-2.5 py-1 text-rose-500 hover:bg-rose-500/10 rounded-lg font-bold transition text-[11px]">
+                                <button onclick="demoteAgent('${escapeHtml(a.id)}', '${escapeHtml(agentName)}')" class="px-2.5 py-1 text-rose-500 hover:bg-rose-500/10 rounded-lg font-bold transition text-[11px]">
                                     إلغاء صفة الوكيل
                                 </button>
                             </td>
@@ -1362,7 +1335,7 @@
                 }).join('');
             } catch (err) {
                 console.error("Agents load error:", err);
-                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-rose-500">فشل تحميل الوكلاء: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-rose-500">فشل تحميل الوكلاء: ${escapeHtml(err.message)}</td></tr>`;
             }
         }
 
@@ -1423,7 +1396,6 @@
             }
         }
 
-        // تعبئة القائمة المنسدلة مع دمج الاسمين برمجياً في المتصفح فقط
         async function populateUserDropdown(selectElementId) {
             const select = document.getElementById(selectElementId);
             if (!select) return;
@@ -1443,10 +1415,10 @@
                         ${users.map(u => {
                             const firstName = u.first_name ? u.first_name.trim() : '';
                             const lastName = u.last_name ? u.last_name.trim() : '';
-                            const fullName = `${firstName}${lastName}`.trim();
+                            const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
                             const displayName = fullName !== '' ? fullName : (u.email ? u.email.split('@')[0] : 'مستخدم');
 
-return `<option value="${u.id}">${displayName} (${u.email || 'بدون إيميل'}) [${u.role || 'customer'}]</option>`;
+                            return `<option value="${escapeHtml(u.id)}">${escapeHtml(displayName)} (${escapeHtml(u.email \vert{}\vert{} 'بدون إيميل')}) [${escapeHtml(u.role || 'customer')}]</option>`;
                         }).join('')}
                     `;
                 } else {
@@ -1454,9 +1426,18 @@ return `<option value="${u.id}">${displayName} (${u.email || 'بدون إيمي�
                 }
             } catch (err) {
                 console.error("Dropdown error:", err);
-                select.innerHTML = `<option value="">فشل تحميل الحسابات (${err.message || 'خطأ'})</option>`;
+                select.innerHTML = `<option value="">فشل تحميل الحسابات (${escapeHtml(err.message || 'خطأ')})</option>`;
             }
         }
+
+        // إغلاق النوافذ المنبثقة بالضغط على زر Escape
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeProductModal();
+                closeAffiliateModal();
+                closeAgentModal();
+            }
+        });
 
         // تشغيل فحص الصلاحيات عند بدء تشغيل الصفحة
         checkAdminAuth();
