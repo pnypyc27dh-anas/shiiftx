@@ -1,4 +1,4 @@
-ب<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -89,7 +89,7 @@
                 </div>
             </div>
 
-            <!-- أشرطة التبويب -->
+            <!-- أشرطة التبويب العلوية -->
             <div class="flex gap-2 overflow-x-auto pb-1 text-xs font-black">
                 <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-device-mobile-speaker text-sm"></i>
@@ -105,6 +105,15 @@
                     <i class="ph-bold ph-barcode text-sm"></i>
                     <span>مخزون الأكواد الرقمية 📦</span>
                 </button>
+                <!-- التبويبة المستقلة الجديدة -->
+                <button onclick="switchTab('new-product')" id="tab-new-product" class="tab-btn px-4 py-2.5 rounded-xl bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-2 whitespace-nowrap">
+                    <i class="ph-bold ph-plus-circle text-sm"></i>
+                    <span>إضافة باقة أو منصة ➕</span>
+                </button>
+                <button onclick="switchTab('products')" id="tab-products" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
+                    <i class="ph-bold ph-package text-sm"></i>
+                    <span>المنتجات والأسعار</span>
+                </button>
                 <button onclick="switchTab('agents')" id="tab-agents" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-users-three text-sm"></i>
                     <span>الوكلاء وصرف الكاش</span>
@@ -112,10 +121,6 @@
                 <button onclick="switchTab('wallet')" id="tab-wallet" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-hand-coins text-sm"></i>
                     <span>إيداع يدوي</span>
-                </button>
-                <button onclick="switchTab('products')" id="tab-products" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
-                    <i class="ph-bold ph-package text-sm"></i>
-                    <span>المنتجات والأسعار</span>
                 </button>
             </div>
 
@@ -178,14 +183,13 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 3 (الجديد): مخزون وتعبئة الأكواد الرقمية ================= -->
+            <!-- ================= تبويب 3: مخزون الأكواد الرقمية ================= -->
             <section id="sec-inventory" class="tab-content hidden space-y-6">
-                <!-- بطاقة تعبئة الأكواد بالجملة -->
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                     <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
                         <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 dark:text-slate-100">
                             <i class="ph-fill ph-plus-circle text-emerald-500 text-lg"></i>
-                            <span>تعبئة مخزون باقة (شحن أكواد رقمية جديدة)</span>
+                            <span>تعبئة مخزون باقة (شحن أكواد جديدة)</span>
                         </h2>
                         <button onclick="loadInventoryData()" class="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 font-bold">
                             <i class="ph-bold ph-arrows-clockwise"></i> تحديث المخزون
@@ -203,10 +207,8 @@
                             </div>
                             <div>
                                 <div class="flex justify-between items-center mb-1">
-                                    <label class="text-xs font-bold text-slate-600 dark:text-slate-300">الصق الأكواد (كل كود بسطر أو بفواصل):</label>
-                                    <span id="codes-count-badge" class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-black">
-                                        0 كود
-                                    </span>
+                                    <label class="text-xs font-bold text-slate-600 dark:text-slate-300">الصق الأكواد (كود في كل سطر):</label>
+                                    <span id="codes-count-badge" class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-black">0 كود</span>
                                 </div>
                                 <textarea id="restock-codes" required rows="4" placeholder="XXXX-YYYY-ZZZZ-1111&#10;XXXX-YYYY-ZZZZ-2222" oninput="updateCodesCountLive()" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs outline-none resize-y" dir="ltr"></textarea>
                             </div>
@@ -219,7 +221,6 @@
                     </form>
                 </div>
 
-                <!-- جدول إحصائيات المخزون المتوفر والمباع لكل باقة -->
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                     <h3 class="text-xs font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
                         <i class="ph-bold ph-chart-bar text-brand-500"></i>
@@ -245,7 +246,105 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 4: الوكلاء وصرف الكاش ================= -->
+            <!-- ================= تبويب 4 (الجديد المستقل): إضافة باقة أو منصة جديدة ================= -->
+            <section id="sec-new-product" class="tab-content hidden bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-5 max-w-2xl mx-auto shadow-sm">
+                <div class="border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <i class="ph-bold ph-plus-circle text-emerald-500 text-lg"></i>
+                        <span>إضافة باقة جديدة أو منصة جديدة للمتجر</span>
+                    </h3>
+                    <p class="text-[11px] text-slate-400">إذا كتبت اسم منصة جديد سيتم إنشاؤها فوراً وإضافتها لتصنيفات المتجر ولوحة الإدارة</p>
+                </div>
+
+                <form id="standalone-product-form" onsubmit="handleProductFormSubmit(event)" class="space-y-4 text-xs">
+                    <input type="hidden" id="modal-product-id">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">المنصة (اختر أو اكتب منصة جديدة):</label>
+                            <input list="platform-suggestions" id="modal-product-platform" required placeholder="مثال: Steam, PUBG, Netflix" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                            <datalist id="platform-suggestions"></datalist>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نوع التسليم:</label>
+                            <select id="modal-product-type" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                                <option value="CODE">كود رقمي فوري (CODE)</option>
+                                <option value="DIRECT_ID">شحن مباشر بالـ Player ID</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اسم الباقة المعروضة:</label>
+                        <input id="modal-product-name" required placeholder="مثال: بطاقة 50 يورو أو 660 شدة" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">السعر ($):</label>
+                            <input type="number" step="0.01" min="0.01" id="modal-product-price" required placeholder="0.00" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">التصنيف:</label>
+                            <input id="modal-product-category" placeholder="Games" value="Games" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">رابط صورة الباقة (اختياري):</label>
+                        <input type="url" id="modal-product-image" placeholder="https://example.com/logo.png" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-[11px] outline-none" dir="ltr">
+                    </div>
+
+                    <button type="submit" id="btn-save-product" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs transition shadow-sm flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-check text-sm"></i>
+                        <span>حفظ وإضافة الباقة للمتجر فوراً</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- ================= تبويب 5: المنتجات والأسعار ================= -->
+            <section id="sec-products" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                            <i class="ph-bold ph-package text-brand-500 text-lg"></i>
+                            <span>قائمة المنتجات والأسعار</span>
+                        </h3>
+                        <p class="text-[11px] text-slate-400">التحكم المباشر في الأسعار والحالات وحذف الباقات</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <select id="products-platform-filter" onchange="filterProductsByPlatform()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold outline-none">
+                            <option value="ALL">جميع المنصات</option>
+                        </select>
+                        <button onclick="loadProducts()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800" title="تحديث">
+                            <i class="ph-bold ph-arrows-clockwise"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-100 dark:border-slate-800 text-slate-400 pb-2">
+                                <th class="pb-2">المنصة</th>
+                                <th class="pb-2">اسم الباقة</th>
+                                <th class="pb-2">السعر الحالي ($)</th>
+                                <th class="pb-2">نوع التسليم</th>
+                                <th class="pb-2 text-center">الحالة</th>
+                                <th class="pb-2 text-center">حذف</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+                            <tr><td colspan="6" class="py-6 text-center text-slate-400">جاري تحميل المنتجات...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ================= تبويب 6: الوكلاء وصرف الكاش ================= -->
             <section id="sec-agents" class="tab-content hidden space-y-4">
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
                     <h3 class="text-xs font-black">ترقية عميل إلى شريك تسويقي (وكيل معتمد)</h3>
@@ -273,7 +372,7 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 5: الإيداع اليدوي ================= -->
+            <!-- ================= تبويب 7: الإيداع اليدوي ================= -->
             <section id="sec-wallet" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
                 <h3 class="text-xs font-black">إيداع رصيد يدوي لعميل (دفع كاش أو حوالة مباشرة)</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
@@ -286,53 +385,24 @@
                 </button>
             </section>
 
-            <!-- ================= تبويب 6: المنتجات والأسعار ================= -->
-            <section id="sec-products" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xs font-black">قائمة الباقات وتعديل الأسعار المباشر</h3>
-                    <button onclick="loadProducts()" class="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 font-bold">
-                        <i class="ph-bold ph-arrows-clockwise"></i> تحديث
-                    </button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right text-xs">
-                        <thead>
-                            <tr class="border-b border-slate-100 dark:border-slate-800 text-slate-400 pb-2">
-                                <th class="pb-2">اسم الباقة</th>
-                                <th class="pb-2">السعر الحالي ($)</th>
-                                <th class="pb-2">نوع التسليم</th>
-                                <th class="pb-2">الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody id="products-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
-                            <tr><td colspan="4" class="py-6 text-center text-slate-400">جاري تحميل المنتجات...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
         </main>
     </div>
 
     <!-- كود المنطق البرمجي (JavaScript) -->
     <script>
-        // 1. إعداد الاتصال بـ Supabase
         const SUPABASE_URL = "https://baytojjldklocifridcm.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJheXRvampsZGtsb2NpZnJpZGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MTU3MzMsImV4cCI6MjEwNTM5MTczM30.tAN7Qah-3VNwatn2CwgqsyphnkQQjagnKf4pR4WiSwQ"; 
         
-        // استخدام 'db' كعميل مستقل يمنع أي تعارض
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         let currentAdminUser = null;
+        let allProductsCache = [];
 
-        // 2. فحص أمان تسجيل الدخول والصلاحية الإدارية
         async function checkAdminAuth() {
             const statusEl = document.querySelector('#auth-loading p');
             try {
                 if (statusEl) statusEl.innerText = "جاري التحقق من الجلسة والصلاحيات...";
 
                 const { data: { session }, error: sessionErr } = await db.auth.getSession();
-                
                 if (sessionErr) throw sessionErr;
                 if (!session) {
                     alert("يجب تسجيل الدخول من المتجر أولاً.");
@@ -347,7 +417,6 @@
                     .single();
 
                 if (profileErr) throw profileErr;
-
                 if (!profile || profile.role !== 'admin') {
                     alert(`عذراً، هذا الحساب رتبته (${profile?.role || 'غير محدد'}) وليس مسؤولاً.`);
                     window.location.href = "index.html";
@@ -366,7 +435,6 @@
             }
         }
 
-        // 3. تحميل كل بيانات لوحة الإدارة
         async function loadAllAdminData() {
             loadKPIs();
             loadPendingOrders();
@@ -375,7 +443,6 @@
             loadInventoryData();
         }
 
-        // جلب مؤشرات الأداء الحية
         async function loadKPIs() {
             const { data: kpis } = await db.rpc('admin_get_kpis');
             if (kpis) {
@@ -398,7 +465,6 @@
             }
         }
         
-        // جلب طلبات الـ ID المعلقة
         async function loadPendingOrders() {
             const tbody = document.getElementById('orders-tbody');
             const { data: orders } = await db
@@ -431,7 +497,6 @@
             `).join('');
         }
 
-        // معالجة تنفيذ أو رفض طلب الـ ID
         async function handleProcessOrder(id, action) {
             const msg = action === 'complete' 
                 ? 'هل تم شحن هذا الحساب بالفعل داخل اللعبة وتريد تحرير عمولة الوكيل؟' 
@@ -454,7 +519,6 @@
             }
         }
 
-        // جلب طلبات شحن الرصيد المعلقة مع رقم إشعار التحويل
         async function loadPendingDeposits() {
             const tbody = document.getElementById('deposits-tbody');
             if (!tbody) return;
@@ -522,7 +586,6 @@
             }).join('');
         }
 
-        // معالجة قبول أو رفض طلب شحن الرصيد
         async function handleProcessDeposit(txId, action) {
             const confirmMsg = action === 'approve'
                 ? 'هل وصلك التحويل المالي بالفعل وتريد إيداع المبلغ في محفظة العميل الآن؟'
@@ -540,7 +603,6 @@
                 });
 
                 if (error) throw error;
-
                 if (data && data.status === 'success') {
                     alert(data.message);
                     loadAllAdminData();
@@ -553,7 +615,7 @@
             }
         }
 
-        // ================= منطق إدارة وتعبئة مخزون الأكواد =================
+        // ================= مخزون الأكواد الرقمية =================
         async function loadInventoryData() {
             const selectElem = document.getElementById('restock-product-select');
             const tbody = document.getElementById('inventory-tbody');
@@ -585,7 +647,6 @@
                     });
                 }
 
-                // تعبئة القائمة المنسدلة
                 selectElem.innerHTML = '<option value="" disabled selected>-- اختر الباقة لتعبئة مخزونها --</option>';
                 products.forEach(p => {
                     const avail = stockCount[p.id]?.available || 0;
@@ -596,7 +657,6 @@
                     selectElem.appendChild(opt);
                 });
 
-                // تعبئة جدول المخزون
                 tbody.innerHTML = products.map(p => {
                     const avail = stockCount[p.id]?.available || 0;
                     const sold = stockCount[p.id]?.sold || 0;
@@ -623,8 +683,6 @@
 
             } catch (err) {
                 console.error("Inventory Load Error:", err);
-                selectElem.innerHTML = '<option value="" disabled>فشل جلب الباقات</option>';
-                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-rose-500">حدث خطأ أثناء تحميل بيانات المخزون</td></tr>`;
             }
         }
 
@@ -677,7 +735,6 @@
                 });
 
                 if (error) throw error;
-
                 if (data && data.status === 'success') {
                     alert("✓ " + data.message);
                     document.getElementById('restock-codes').value = '';
@@ -697,89 +754,7 @@
             }
         }
 
-        // ترقية وكيل
-        async function handlePromoteAgent() {
-            const email = document.getElementById('agent-email').value.trim();
-            const code = document.getElementById('agent-code').value.trim();
-            const discount = parseFloat(document.getElementById('agent-discount').value);
-            const comm = parseFloat(document.getElementById('agent-comm').value);
-
-            if (!email || !code || isNaN(discount) || isNaN(comm)) {
-                return alert("يرجى إدخال جميع بيانات الوكيل بشكل صحيح.");
-            }
-
-            const { data, error } = await db.rpc('admin_promote_agent', {
-                p_email: email,
-                p_code: code,
-                p_discount_percent: discount,
-                p_commission_percent: comm
-            });
-
-            if (error || data.status === 'error') {
-                alert(error ? error.message : data.message);
-            } else {
-                alert("✓ " + data.message);
-                document.getElementById('agent-email').value = '';
-                document.getElementById('agent-code').value = '';
-            }
-        }
-
-        // تسليم أرباح كاش
-        async function handlePayoutCash() {
-            const email = document.getElementById('payout-email').value.trim();
-            const amount = parseFloat(document.getElementById('payout-amount').value);
-            const note = document.getElementById('payout-note').value.trim() || 'تسليم كاش يداً بيد';
-
-            if (!email || isNaN(amount) || amount <= 0) {
-                return alert("يرجى إدخال بريد الوكيل ومبلغ صحيح.");
-            }
-
-            const { data, error } = await db.rpc('payout_agent_cash', {
-                p_agent_email: email,
-                p_payout_amount: amount,
-                p_note: note
-            });
-
-            if (error || data.status === 'error') {
-                alert(error ? error.message : data.message);
-            } else {
-                alert(`✓ تم توثيق التسليم وخصم $${amount.toFixed(2)} بنجاح! المتبقي: $${Number(data.remaining_balance).toFixed(2)}`);
-                document.getElementById('payout-email').value = '';
-                document.getElementById('payout-amount').value = '';
-                loadKPIs();
-            }
-        }
-
-        // إيداع يدوي لمحفظة زبون
-        async function handleManualTopup() {
-            const email = document.getElementById('topup-email').value.trim();
-            const amount = parseFloat(document.getElementById('topup-amount').value);
-            const note = document.getElementById('topup-note').value.trim() || 'إيداع يدوي';
-
-            if (!email || isNaN(amount) || amount <= 0) {
-                return alert("يرجى إدخال بريد ومبلغ صحيح.");
-            }
-
-            const { data, error } = await db.rpc('admin_manual_topup', {
-                p_email: email,
-                p_amount: amount,
-                p_note: note
-            });
-
-            if (error || data.status === 'error') {
-                alert(error ? error.message : data.message);
-            } else {
-                alert(`✓ تم شحن $${amount.toFixed(2)} بنجاح! رصيد العميل الجديد: $${Number(data.new_balance).toFixed(2)}`);
-                document.getElementById('topup-email').value = '';
-                document.getElementById('topup-amount').value = '';
-                loadKPIs();
-            }
-        }
-
         // ================= إدارة المنتجات والمنصات =================
-        let allProductsCache = [];
-
-        // 1. جلب المنتجات وترتيبها
         async function loadProducts() {
             const tbody = document.getElementById('products-tbody');
             if (!tbody) return;
@@ -799,11 +774,9 @@
                 renderProductsTable(allProductsCache);
             } catch (err) {
                 console.error("Products Load Error:", err);
-                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-rose-500">حدث خطأ أثناء تحميل المنتجات</td></tr>`;
             }
         }
 
-        // 2. تعبئة قائمة المنصات التلقائية
         function populatePlatformFilters(products) {
             const platforms = [...new Set(products.map(p => p.platform).filter(Boolean))].sort();
             
@@ -821,7 +794,6 @@
             }
         }
 
-        // 3. فلترة الجدول بحسب المنصة
         function filterProductsByPlatform() {
             const filterVal = document.getElementById('products-platform-filter').value;
             if (filterVal === 'ALL') {
@@ -831,7 +803,6 @@
             }
         }
 
-        // 4. رسم جدول المنتجات مع الخيارات
         function renderProductsTable(products) {
             const tbody = document.getElementById('products-tbody');
             if (!products || products.length === 0) {
@@ -862,20 +833,14 @@
                         </button>
                     </td>
                     <td class="py-3 text-center">
-                        <div class="flex items-center justify-center gap-1.5">
-                            <button onclick='openProductModal(${JSON.stringify(p)})' class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل">
-                                <i class="ph-bold ph-pencil-simple text-sm"></i>
-                            </button>
-                            <button onclick="deleteProduct('${p.id}', '${p.package_name}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="حذف أو أرشفة">
-                                <i class="ph-bold ph-trash text-sm"></i>
-                            </button>
-                        </div>
+                        <button onclick="deleteProduct('${p.id}', '${p.package_name}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="حذف">
+                            <i class="ph-bold ph-trash text-sm"></i>
+                        </button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        // 5. تعديل السعر المباشر من الجدول
         async function inlineUpdateProductPrice(id, newPrice) {
             const price = parseFloat(newPrice);
             if (isNaN(price) || price <= 0) return alert("يرجى إدخال سعر صالح.");
@@ -902,7 +867,6 @@
             }
         }
 
-        // 6. تفعيل أو تعطيل الباقة
         async function toggleProduct(id, currentStatus) {
             const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
             const prod = allProductsCache.find(x => x.id === id);
@@ -926,7 +890,6 @@
             }
         }
 
-        // 7. حذف أو أرشفة الباقة
         async function deleteProduct(id, packageName) {
             if (!confirm(`هل أنت متأكد من حذف أو أرشفة باقة (${packageName})؟`)) return;
 
@@ -936,43 +899,14 @@
             } else {
                 alert("✓ " + data.message);
                 loadProducts();
-                if (typeof loadInventoryData === 'function') loadInventoryData();
+                loadInventoryData();
             }
         }
 
-        // 8. التحكم بالنافذة المنبثقة (فتح وإغلاق)
-        function openProductModal(prod = null) {
-            const modal = document.getElementById('product-modal');
-            const title = document.getElementById('product-modal-title');
-            
-            if (prod) {
-                title.innerHTML = `<i class="ph-bold ph-pencil-simple text-blue-500"></i><span>تعديل بيانات الباقة</span>`;
-                document.getElementById('modal-product-id').value = prod.id;
-                document.getElementById('modal-product-platform').value = prod.platform;
-                document.getElementById('modal-product-name').value = prod.package_name;
-                document.getElementById('modal-product-price').value = prod.price;
-                document.getElementById('modal-product-type').value = prod.product_type;
-                document.getElementById('modal-product-category').value = prod.category || 'Games';
-                document.getElementById('modal-product-image').value = prod.image_url || '';
-            } else {
-                title.innerHTML = `<i class="ph-bold ph-plus-circle text-emerald-500"></i><span>إضافة باقة جديدة</span>`;
-                document.getElementById('product-form').reset();
-                document.getElementById('modal-product-id').value = '';
-                document.getElementById('modal-product-category').value = 'Games';
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        function closeProductModal() {
-            document.getElementById('product-modal').classList.add('hidden');
-        }
-
-        // 9. إرسال النموذج وحفظ الباقة الجديدة
+        // إرسال نموذج إضافة باقة جديدة
         async function handleProductFormSubmit(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-save-product');
-            const idVal = document.getElementById('modal-product-id').value || null;
             const platform = document.getElementById('modal-product-platform').value.trim();
             const name = document.getElementById('modal-product-name').value.trim();
             const price = parseFloat(document.getElementById('modal-product-price').value);
@@ -985,7 +919,7 @@
 
             try {
                 const { data, error } = await db.rpc('admin_save_product', {
-                    p_id: idVal,
+                    p_id: null,
                     p_platform: platform,
                     p_package_name: name,
                     p_price: price,
@@ -995,42 +929,12 @@
                 });
 
                 if (error) throw error;
-
                 if (data && data.status === 'success') {
                     alert("✓ " + data.message);
-                    closeProductModal();
+                    document.getElementById('standalone-product-form').reset();
                     await loadProducts();
-                    if (typeof loadInventoryData === 'function') await loadInventoryData();
+                    await loadInventoryData();
+                    // الانتقال تلقائياً لجدول المنتجات لمشاهدتها
+                    switchTab('products');
                 } else {
-                    alert("فشل الحفظ: " + (data ? data.message : "خطأ غير متوقع"));
-                }
-            } catch (err) {
-                console.error("Save Product Error:", err);
-                alert("حدث خطأ: " + (err.message || err));
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "حفظ الباقة";
-            }
-        }
-        // التبديل بين التبويبات
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.className = "tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap";
-            });
-
-            const activeSec = document.getElementById(`sec-${tabId}`);
-            const activeTab = document.getElementById(`tab-${tabId}`);
-            if (activeSec) activeSec.classList.remove('hidden');
-            if (activeTab) activeTab.className = "tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap";
-        }
-
-        async function handleLogout() {
-            await db.auth.signOut();
-            window.location.href = "index.html";
-        }
-
-        window.addEventListener('DOMContentLoaded', checkAdminAuth);
-    </script>
-</body>
-</html>
+                    alert
