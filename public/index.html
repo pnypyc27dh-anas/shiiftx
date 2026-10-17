@@ -2006,32 +2006,24 @@ async function verifyRegistrationOtp() {
             if (!currentUser) return;
             const { data: profile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
             if (profile) {
-                // 1. فحص رتبة الأدمن
+                // 1. فحص زر لوحة الإدارة (يظهر فقط لمن رتبته admin)
                 const adminLink = document.getElementById('nav-admin-link');
                 if (adminLink) {
                     adminLink.classList.toggle('hidden', profile.role !== 'admin');
                 }
 
-                // 2. فحص رتبة الوكيل المالي لإظهار/إخفاء زر الوكيل
+                // 2. فحص زر لوحة الوكيل (يظهر فقط لمن رتبته agent)
                 const agentLink = document.getElementById('nav-agent-link');
                 if (agentLink) {
                     agentLink.classList.toggle('hidden', profile.role !== 'agent');
                 }
 
-                // 3. فحص هل المستخدم شريك تسويقي (يملك كوبون نشط) لإظهار/إخفاء زر الشريك
-                const { data: activeCoupon } = await supabase
-                    .from('coupons')
-                    .select('id')
-                    .eq('affiliate_id', currentUser.id)
-                    .eq('is_active', true)
-                    .maybeSingle();
-
-                // فحص زر لوحة الشريك التسويقي (يظهر حصرياً لرتبة affiliate أو admin)
+                // 3. فحص زر لوحة الشريك التسويقي (يظهر فقط لمن رتبته affiliate)
                 const partnerLink = document.getElementById('nav-partner-link');
                 if (partnerLink) {
-                    const isAffiliateOrAdmin = (profile.role === 'affiliate' || profile.role === 'admin');
-                    partnerLink.classList.toggle('hidden', !isAffiliateOrAdmin);
+                    partnerLink.classList.toggle('hidden', profile.role !== 'affiliate');
                 }
+
 
                 currentUserRole = profile.role || 'customer';
                 currentWalletBalance = parseFloat(profile.balance || 0); 
