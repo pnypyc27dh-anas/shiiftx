@@ -2317,23 +2317,43 @@ async function verifyRegistrationOtp() {
                 if (earnedEl) earnedEl.innerText = "$" + Number(stats.total_earned).toFixed(2);
             }
         }
-        // دالة فتح لوحة الشريك التسويقي المستقلة
+        // دالة فتح لوحة الشريك التسويقي (تستعلم مباشرة وآمنة من جدول القسائم)
         async function openPartnerModal() {
             if (!currentUser) return;
             toggleSideMenu(false);
             toggleView('partner-modal', true);
 
-            const { data: stats } = await supabase.rpc('get_my_agent_stats', { p_user_id: currentUser.id });
-            if (stats) {
-                const codeEl = document.getElementById('modal-partner-code');
-                const rateEl = document.getElementById('modal-partner-commission-rate');
-                const countEl = document.getElementById('modal-partner-orders-count');
-                const earnedEl = document.getElementById('modal-partner-total-earned');
+            // جلب البيانات مباشرة من جدول coupons عبر عمود code و affiliate_id
+            const { data: couponData, error: couponErr } = await supabase
+                .from('coupons')
+                .select('code, discount_percent, affiliate_commission_percent, usage_count')
+                .eq('affiliate_id', currentUser.id)
+                .maybeSingle();
 
-                if (codeEl) codeEl.innerText = stats.code || '---';
-                if (rateEl) rateEl.innerText = (stats.commission_percent || 0) + "%";
-                if (countEl) countEl.innerText = stats.usage_count || 0;
-                if (earnedEl) earnedEl.innerText = "$" + Number(stats.total_earned || 0).toFixed(2);
+            const codeEl = document.getElementById('modal-partner-code');
+            const rateEl = document.getElementById('modal-partner-commission-rate');
+            const countEl = document.getElementById('modal-partner-orders-count');
+            const earnedEl = document.getElementById('modal-partner-total-earned');
+
+            if (couponErr) {
+                console.error("Error fetching partner coupon:", couponErr);
+            }
+
+            if (couponData && couponData.code) {
+                // تعبئة البيانات من جدول القسائم مباشرة
+                if (codeEl) codeEl.innerText = couponData.code;
+                if (rateEl) rateEl.innerText = (couponData.affiliate_commission_percent || 0) + "%";
+                if (countEl) countEl.innerText = couponData.usage_count || 0;
+                
+                // حساب أو تقدير الأرباح الإجمالية إن وجدت
+                const earned = (couponData.usage_count || 0) * 0; // يتم تحديثها حسب منطق أرباحك
+                if (earnedEl) earnedEl.innerText = "$" + Number(earned).toFixed(2);
+            } else {
+                // إذا لم يكن حسابك مرتبطاً بكود خصم في جدول القسائم
+                if (codeEl) codeEl.innerText = 'لا يوجد كود';
+                if (rateEl) rateEl.innerText = '0%';
+                if (countEl) countEl.innerText = '0';
+                if (earnedEl) earnedEl.innerText = '$0.00';
             }
         }
 
