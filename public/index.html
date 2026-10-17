@@ -704,15 +704,23 @@
                         <span class="hidden sm:inline">لوحة الإدارة</span>
                     </a>
 
-                    <!-- زر لوحة الوكيل -->
-                    <button id="nav-agent-link" onclick="openAgentModal()" class="hidden h-8 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
-                        <i class="ph-bold ph-seal-check text-sm text-amber-500"></i>
-                        <span class="hidden sm:inline">لوحة الوكيل</span>
-                    </button>
-                    <!-- زر تبديل المظهر -->
-                    <button onclick="toggleTheme()" class="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-700 dark:text-amber-400 transition active:scale-90" title="تبديل المظهر">
-                        <i id="theme-toggle-icon" class="ph-fill ph-moon text-xl"></i>
-                    </button>
+                   <!-- زر لوحة الشريك التسويقي -->
+    <button id="nav-partner-link" onclick="openPartnerModal()" class="hidden h-8 px-3 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
+        <i class="ph-bold ph-megaphone text-sm text-purple-500"></i>
+        <span class="hidden sm:inline">لوحة الشريك التسويقي</span>
+    </button>
+
+    <!-- زر لوحة الشريك التسويقي -->
+    <button id="nav-partner-link" onclick="openPartnerModal()" class="hidden h-8 px-3 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
+        <i class="ph-bold ph-megaphone text-sm text-purple-500"></i>
+        <span class="hidden sm:inline">لوحة الشريك</span>
+    </button>
+
+    <!-- زر لوحة الوكيل المعتمد -->
+    <button id="nav-agent-link" onclick="openAgentModal()" class="hidden h-8 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
+        <i class="ph-bold ph-shield-check text-sm text-amber-500"></i>
+        <span class="hidden sm:inline">لوحة الوكيل</span>
+    </button>
 
                     <!-- زر القائمة الجانبية -->
                     <button onclick="toggleSideMenu(true)" class="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-700 dark:text-slate-200 transition" title="القائمة">
@@ -1029,39 +1037,36 @@
 
     <!-- ==================== النوافذ المنبثقة ==================== -->
 
-    <!-- نافذة لوحة تحكم الوكيل الحصرية والمستقلة -->
-    <div id="agent-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
+   <!-- 1. نافذة لوحة الشريك التسويقي المستقلة -->
+    <div id="partner-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
         <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative text-right space-y-5 slide-up-modal border border-slate-100 dark:border-slate-800">
-            
-            <!-- ترويسة النافذة -->
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl border border-amber-500/20">
-                        <i class="ph-fill ph-seal-check"></i>
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl border border-purple-500/20">
+                        <i class="ph-fill ph-megaphone"></i>
                     </div>
                     <div>
-                        <h4 class="text-sm font-black text-slate-800 dark:text-slate-100">لوحة الشريك والوكيل المعتمد</h4>
-                        <p class="text-[10px] text-slate-400">إحصائيات الكود وعمولات التسويق</p>
+                        <h4 class="text-sm font-black text-slate-800 dark:text-slate-100">لوحة الشريك التسويقي</h4>
+                        <p class="text-[10px] text-slate-400">إحصائيات الكود وعمولات التسويق الخاصة بك</p>
                     </div>
                 </div>
-                <button onclick="toggleView('agent-modal', false)" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm">
+                <button onclick="toggleView('partner-modal', false)" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm">
                     <i class="ph ph-x font-bold text-base"></i>
                 </button>
             </div>
 
-            <!-- بطاقة كود الخصم ونسبة العمولة -->
-            <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-amber-500/20 space-y-3">
+            <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-purple-500/20 space-y-3">
                 <div class="flex items-center justify-between" dir="ltr">
                     <div class="flex items-center gap-2">
-                        <button onclick="copyToClipboard(document.getElementById('modal-agent-code').innerText)" type="button" class="btn-spring px-3 py-1.5 bg-amber-500 text-slate-900 rounded-xl text-xs font-black flex items-center gap-1 shadow-sm hover:bg-amber-400 transition cursor-pointer">
+                        <button onclick="copyToClipboard(document.getElementById('modal-partner-code').innerText)" type="button" class="btn-spring px-3 py-1.5 bg-purple-600 text-white rounded-xl text-xs font-black flex items-center gap-1 shadow-sm hover:bg-purple-500 transition cursor-pointer">
                             <i class="ph-bold ph-copy"></i>
                             <span>نسخ</span>
                         </button>
-                        <span id="modal-agent-code" class="font-mono font-black text-slate-900 dark:text-amber-400 text-lg tracking-wider select-all">---</span>
+                        <span id="modal-partner-code" class="font-mono font-black text-slate-900 dark:text-purple-400 text-lg tracking-wider select-all">---</span>
                     </div>
                     <div class="text-right text-xs" dir="rtl">
                         <span class="text-[10px] text-slate-400 block font-medium">نسبة عمولتك:</span>
-                        <span id="modal-agent-commission-rate" class="font-black text-emerald-600 dark:text-emerald-400 text-sm font-mono">0%</span>
+                        <span id="modal-partner-commission-rate" class="font-black text-emerald-600 dark:text-emerald-400 text-sm font-mono">0%</span>
                     </div>
                 </div>
                 <p class="text-[10px] text-slate-400 leading-relaxed">
@@ -1069,25 +1074,67 @@
                 </p>
             </div>
 
-            <!-- بطاقات أرقام المبيعات والعمولات -->
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800 text-center space-y-1">
                     <span class="text-[11px] text-slate-400 block font-medium">الطلبات المنفذة بالكود</span>
-                    <span id="modal-agent-orders-count" class="font-mono font-black text-xl text-slate-800 dark:text-slate-100 tabular-nums">0</span>
+                    <span id="modal-partner-orders-count" class="font-mono font-black text-xl text-slate-800 dark:text-slate-100 tabular-nums">0</span>
                 </div>
                 <div class="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800 text-center space-y-1">
                     <span class="text-[11px] text-slate-400 block font-medium">إجمالي العمولات المحققة</span>
-                    <span id="modal-agent-total-earned" class="font-mono font-black text-xl text-emerald-600 dark:text-emerald-400 tabular-nums">$0.00</span>
+                    <span id="modal-partner-total-earned" class="font-mono font-black text-xl text-emerald-600 dark:text-emerald-400 tabular-nums">$0.00</span>
                 </div>
             </div>
 
-            <!-- زر الإغلاق -->
-            <button onclick="toggleView('agent-modal', false)" class="btn-spring w-full py-3 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition">
+            <button onclick="toggleView('partner-modal', false)" class="btn-spring w-full py-3 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition">
                 إغلاق النافذة
             </button>
         </div>
     </div>
 
+    <!-- 2. نافذة لوحة الوكيل المعتمد المستقلة -->
+    <div id="agent-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative text-right space-y-5 slide-up-modal border border-slate-100 dark:border-slate-800">
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl border border-amber-500/20">
+                        <i class="ph-fill ph-shield-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-slate-800 dark:text-slate-100">لوحة الوكيل المالي المعتمد</h4>
+                        <p class="text-[10px] text-slate-400">نقطة كاش معتمدة لاستقبال الإيداعات</p>
+                    </div>
+                </div>
+                <button onclick="toggleView('agent-modal', false)" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm">
+                    <i class="ph ph-x font-bold text-base"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleAgentTransferToCustomer(event)" class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-amber-500/20 space-y-3 text-xs">
+                <h4 class="font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                    <i class="ph-bold ph-paper-plane-tilt text-amber-500"></i>
+                    <span>شحن رصيد لعميل (خصماً من رصيدك كوكيل)</span>
+                </h4>
+                <div class="space-y-2.5">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">البريد الإلكتروني للعميل</label>
+                        <input type="email" id="agent-target-email" required placeholder="client@example.com" class="input-field w-full px-3.5 py-2.5 text-xs font-mono text-left" dir="ltr">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">المبلغ المراد تحويله ($)</label>
+                        <input type="number" step="0.01" min="0.5" id="agent-transfer-amount" required placeholder="0.00" class="input-field w-full px-3.5 py-2.5 text-xs font-mono font-bold text-left" dir="ltr">
+                    </div>
+                </div>
+                <button type="submit" id="btn-agent-transfer" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-black transition shadow-sm">
+                    تنفيذ التحويل الفوري للعميل
+                </button>
+            </form>
+
+            <button onclick="toggleView('agent-modal', false)" class="btn-spring w-full py-3 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition">
+                إغلاق النافذة
+            </button>
+        </div>
+    </div>
+    
     <!-- نافذة إعادة تفعيل الحساب المؤتمتة -->
     <div id="reactivate-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[115]">
         <div class="bg-white w-full max-w-sm rounded-[28px] p-6 shadow-2xl text-center space-y-4">
@@ -1961,16 +2008,29 @@ async function verifyRegistrationOtp() {
             if (!currentUser) return;
             const { data: profile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
             if (profile) {
-                // 1. فحص رتبة الأدمن لإظهار/إخفاء زر الإدارة في الهيدر
+                // 1. فحص رتبة الأدمن
                 const adminLink = document.getElementById('nav-admin-link');
                 if (adminLink) {
                     adminLink.classList.toggle('hidden', profile.role !== 'admin');
                 }
 
-                // 2. فحص رتبة الوكيل لإظهار/إخفاء زر الوكيل في الهيدر
+                // 2. فحص رتبة الوكيل المالي لإظهار/إخفاء زر الوكيل
                 const agentLink = document.getElementById('nav-agent-link');
                 if (agentLink) {
                     agentLink.classList.toggle('hidden', profile.role !== 'agent');
+                }
+
+                // 3. فحص هل المستخدم شريك تسويقي (يملك كوبون نشط) لإظهار/إخفاء زر الشريك
+                const { data: activeCoupon } = await supabase
+                    .from('coupons')
+                    .select('id')
+                    .eq('affiliate_id', currentUser.id)
+                    .eq('is_active', true)
+                    .maybeSingle();
+
+                const partnerLink = document.getElementById('nav-partner-link');
+                if (partnerLink) {
+                    partnerLink.classList.toggle('hidden', !activeCoupon && profile.role !== 'admin');
                 }
 
                 currentUserRole = profile.role || 'customer';
@@ -2234,9 +2294,9 @@ async function verifyRegistrationOtp() {
         function toggleView(id, show) { const el = document.getElementById(id); if(el) el.classList.toggle('hidden', !show); }
         
         function closeAllModals() { 
-     resetResendButtonState();
-     ['register-modal', 'plans-modal', 'account-inputs-modal', 'purchase-modal', 'code-delivery-modal', 'all-orders-modal', 'support-modal', 'info-modal', 'reactivate-modal', 'agent-modal'].forEach(id => toggleView(id, false)); 
- }
+    resetResendButtonState();
+    ['register-modal', 'plans-modal', 'account-inputs-modal', 'purchase-modal', 'code-delivery-modal', 'all-orders-modal', 'support-modal', 'info-modal', 'reactivate-modal', 'agent-modal', 'partner-modal'].forEach(id => toggleView(id, false)); 
+}
         // دالة فتح لوحة إحصائيات الوكيل المستقلة
         async function openAgentModal() {
             if (!currentUser) return;
@@ -2255,6 +2315,65 @@ async function verifyRegistrationOtp() {
                 if (rateEl) rateEl.innerText = stats.commission_percent + "%";
                 if (countEl) countEl.innerText = stats.usage_count;
                 if (earnedEl) earnedEl.innerText = "$" + Number(stats.total_earned).toFixed(2);
+            }
+        }
+        // دالة فتح لوحة الشريك التسويقي المستقلة
+        async function openPartnerModal() {
+            if (!currentUser) return;
+            toggleSideMenu(false);
+            toggleView('partner-modal', true);
+
+            const { data: stats } = await supabase.rpc('get_my_agent_stats', { p_user_id: currentUser.id });
+            if (stats) {
+                const codeEl = document.getElementById('modal-partner-code');
+                const rateEl = document.getElementById('modal-partner-commission-rate');
+                const countEl = document.getElementById('modal-partner-orders-count');
+                const earnedEl = document.getElementById('modal-partner-total-earned');
+
+                if (codeEl) codeEl.innerText = stats.code || '---';
+                if (rateEl) rateEl.innerText = (stats.commission_percent || 0) + "%";
+                if (countEl) countEl.innerText = stats.usage_count || 0;
+                if (earnedEl) earnedEl.innerText = "$" + Number(stats.total_earned || 0).toFixed(2);
+            }
+        }
+
+        // دالة تنفيذ تحويل رصيد من رصيد الوكيل لعميل آخر
+        async function handleAgentTransferToCustomer(e) {
+            e.preventDefault();
+            const email = document.getElementById('agent-target-email').value.trim();
+            const amount = parseFloat(document.getElementById('agent-transfer-amount').value);
+            const btn = document.getElementById('btn-agent-transfer');
+
+            if (!email || isNaN(amount) || amount <= 0) {
+                return showCustomAlert("يرجى إدخال بريد الكتروني صحيح ومبلغ مقبول.");
+            }
+
+            if (!confirm(`هل أنت متأكد من تحويل مبلغ $${amount.toFixed(2)} إلى الحساب (${email}) من رصيدك؟`)) return;
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ph ph-spinner animate-spin"></i> جاري تنفيذ التحويل...`;
+
+            try {
+                const { data, error } = await supabase.rpc('agent_transfer_to_customer', {
+                    p_target_email: email,
+                    p_amount: amount
+                });
+
+                if (error) throw error;
+                if (data && data.status === 'success') {
+                    showCustomAlert("✓ " + data.message, false);
+                    document.getElementById('agent-target-email').value = '';
+                    document.getElementById('agent-transfer-amount').value = '';
+                    toggleView('agent-modal', false);
+                    silentSyncData();
+                } else {
+                    showCustomAlert("فشل التحويل: " + (data ? data.message : "خطأ غير متوقع"));
+                }
+            } catch (err) {
+                showCustomAlert("حدث خطأ أثناء التحويل: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "تنفيذ التحويل الفوري للعميل";
             }
         }
         
