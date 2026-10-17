@@ -2026,9 +2026,11 @@ async function verifyRegistrationOtp() {
                     .eq('is_active', true)
                     .maybeSingle();
 
+                // فحص زر لوحة الشريك التسويقي (يظهر حصرياً لرتبة affiliate أو admin)
                 const partnerLink = document.getElementById('nav-partner-link');
                 if (partnerLink) {
-                    partnerLink.classList.toggle('hidden', !activeCoupon && profile.role !== 'admin');
+                    const isAffiliateOrAdmin = (profile.role === 'affiliate' || profile.role === 'admin');
+                    partnerLink.classList.toggle('hidden', !isAffiliateOrAdmin);
                 }
 
                 currentUserRole = profile.role || 'customer';
