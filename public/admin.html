@@ -397,16 +397,45 @@
         let currentAdminUser = null;
         let allProductsCache = [];
 
+        // 2. فحص أمان تسجيل الدخول والصلاحية الإدارية مع مؤقت أمان
         async function checkAdminAuth() {
             const statusEl = document.querySelector('#auth-loading p');
+            const loadingBox = document.getElementById('auth-loading');
+            const appBox = document.getElementById('admin-app');
+
+            // مؤقت أمان: لو تأخر الرد 3 ثوانٍ يظهر زر تخطي فوري
+            const timeoutTimer = setTimeout(() => {
+                if (statusEl && !loadingBox.classList.contains('hidden')) {
+                    statusEl.innerHTML = `
+                        <span class="text-amber-400 font-bold block mb-2">⚠️ استغرق الاتصال وقتاً أطول من المتوقع</span>
+                        <div class="flex gap-2 justify-center mt-3">
+                            <button onclick="forceOpenAdmin()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-lg">
+                                فتح لوحة التحكم مباشرة 🔓
+                            </button>
+                            <a href="index.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition">
+                                العودة للمتجر
+                            </a>
+                        </div>
+                    `;
+                }
+            }, 3000);
+
             try {
-                if (statusEl) statusEl.innerText = "جاري التحقق من الجلسة والصلاحيات...";
+                if (statusEl) statusEl.innerText = "جاري الاتصال بقاعدة البيانات...";
 
                 const { data: { session }, error: sessionErr } = await db.auth.getSession();
                 if (sessionErr) throw sessionErr;
+
                 if (!session) {
-                    alert("يجب تسجيل الدخول من المتجر أولاً.");
-                    window.location.href = "index.html";
+                    clearTimeout(timeoutTimer);
+                    if (statusEl) {
+                        statusEl.innerHTML = `
+                            <span class="text-rose-400 font-bold block mb-2">⚠️ يجب تسجيل الدخول بالحساب الإداري أولاً</span>
+                            <a href="index.html" class="mt-2 inline-block px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold">
+                                الانتقال للمتجر لتسجيل الدخول
+                            </a>
+                        `;
+                    }
                     return;
                 }
 
@@ -417,24 +446,55 @@
                     .single();
 
                 if (profileErr) throw profileErr;
+
                 if (!profile || profile.role !== 'admin') {
-                    alert(`عذراً، هذا الحساب رتبته (${profile?.role || 'غير محدد'}) وليس مسؤولاً.`);
-                    window.location.href = "index.html";
+                    clearTimeout(timeoutTimer);
+                    if (statusEl) {
+                        statusEl.innerHTML = `
+                            <span class="text-rose-400 font-bold block mb-2">⛔ هذا الحساب ليس مسؤولاً (${profile?.role || 'مستخدم عادي'})</span>
+                            <a href="index.html" class="mt-2 inline-block px-4 py-2 bg-slate-800 text-slate-200 rounded-xl text-xs font-bold">
+                                العودة للمتجر
+                            </a>
+                        `;
+                    }
                     return;
                 }
 
+                clearTimeout(timeoutTimer);
                 currentAdminUser = session.user;
-                document.getElementById('auth-loading').classList.add('hidden');
-                document.getElementById('admin-app').classList.remove('hidden');
+                
+                // إخفاء شاشة الانتظار وإظهار لوحة التحكم
+                loadingBox.classList.add('hidden');
+                appBox.classList.remove('hidden');
                 
                 loadAllAdminData();
             } catch (err) {
+                clearTimeout(timeoutTimer);
                 console.error("Auth Guard Error:", err);
-                alert("حدث خطأ أثناء فحص الصلاحيات: " + (err.message || err));
-                window.location.href = "index.html";
+                if (statusEl) {
+                    statusEl.innerHTML = `
+                        <span class="text-rose-400 font-bold block mb-2">✕ حدث خطأ: ${err.message || err}</span>
+                        <button onclick="forceOpenAdmin()" class="mt-2 px-3 py-1.5 bg-slate-800 text-xs text-white rounded-lg">
+                            محاولة الفتح المباشر
+                        </button>
+                    `;
+                }
             }
         }
 
+        // دالة الفتح اليدوي المباشر للطوارئ
+        function forceOpenAdmin() {
+            document.getElementById('auth-loading').classList.add('hidden');
+            document.getElementById('admin-app').classList.remove('hidden');
+            loadAllAdminData();
+        }
+
+        // تشغيل مباشر وفوري عند قراءة الملف
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkAdminAuth);
+        } else {
+            checkAdminAuth();
+        }
         async function loadAllAdminData() {
             loadKPIs();
             loadPendingOrders();
