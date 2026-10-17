@@ -907,10 +907,10 @@
                         </div>
                     </td>
                     <td class="py-3">
-                        <span class="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold ${p.product_type === 'CODE' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-amber-500/10 text-amber-500'}">
-                            ${p.product_type === 'CODE' ? 'كود رقمي' : 'شحن ID'}
-                        </span>
-                    </td>
+    <span class="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold ${p.product_type === 'CODE' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-amber-500/10 text-amber-500'}">
+        ${p.product_type === 'CODE' ? 'كود رقمي' : 'شحن ID'}
+    </span>
+</td>
                     <td class="py-3 text-center">
                         <button onclick="toggleProduct('${p.id}', '${p.status}')" class="px-2.5 py-1 rounded-lg text-[10px] font-black transition ${p.status === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20' : 'bg-slate-500/10 text-slate-400 hover:bg-slate-500/20'}">
                             ${p.status === 'active' ? 'نشط ✓' : 'معطل ✕'}
