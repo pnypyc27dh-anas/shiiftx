@@ -1570,6 +1570,7 @@
 // دوال إدارة الشركاء التسويقيين والكوبونات (Affiliates)
 // =========================================================================
 
+// 2. جلب وعرض الشركاء مع دمج الاسمين تلقائياً
 async function loadAffiliatesData() {
     const tbody = document.getElementById('affiliates-tbody');
     if (!tbody) return;
@@ -1579,7 +1580,7 @@ async function loadAffiliatesData() {
             .from('coupons')
             .select(`
                 id, code, discount_percent, affiliate_commission_percent, usage_count, is_active,
-                profiles:affiliate_id ( id, full_name, email, balance )
+                profiles:affiliate_id ( id, first_name, last_name, email, balance )
             `)
             .order('created_at', { ascending: false });
 
@@ -1590,31 +1591,39 @@ async function loadAffiliatesData() {
             return;
         }
 
-        tbody.innerHTML = coupons.map(c => `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                <td class="py-3 font-bold text-slate-800 dark:text-slate-100">
-                    ${c.profiles ? (c.profiles.full_name || c.profiles.email) : 'غير مرتبط'}
-                </td>
-                <td class="py-3">
-                    <span class="px-2.5 py-1 rounded font-mono font-black text-purple-600 bg-purple-500/10">${c.code}</span>
-                </td>
-                <td class="py-3 font-mono font-bold text-slate-600 dark:text-slate-300">${c.discount_percent}%</td>
-                <td class="py-3 font-mono font-bold text-emerald-600">${c.affiliate_commission_percent}%</td>
-                <td class="py-3 font-mono text-slate-500">${c.usage_count || 0} طلب</td>
-                <td class="py-3 font-mono font-black text-slate-900 dark:text-white">$${Number(c.profiles?.balance || 0).toFixed(2)}</td>
-                <td class="py-3 text-center">
-                    <button onclick="editAffiliate('${c.profiles?.id}', '${c.code}', ${c.discount_percent}, ${c.affiliate_commission_percent})" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل نسب الكود">
-                        <i class="ph-bold ph-pencil-simple text-sm"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = coupons.map(c => {
+            const p = c.profiles;
+            let partnerName = 'غير مرتبط';
+            if (p) {
+                const fn = [p.first_name, p.last_name].filter(Boolean).join(' ').trim();
+                partnerName = fn !== '' ? fn : (p.email || 'مستخدم');
+            }
+
+            return `
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">
+                        ${partnerName}
+                    </td>
+                    <td class="py-3">
+                        <span class="px-2.5 py-1 rounded font-mono font-black text-purple-600 bg-purple-500/10">${c.code}</span>
+                    </td>
+                    <td class="py-3 font-mono font-bold text-slate-600 dark:text-slate-300">${c.discount_percent}%</td>
+                    <td class="py-3 font-mono font-bold text-emerald-600">${c.affiliate_commission_percent}%</td>
+                    <td class="py-3 font-mono text-slate-500">${c.usage_count || 0} طلب</td>
+                    <td class="py-3 font-mono font-black text-slate-900 dark:text-white">$${Number(p?.balance || 0).toFixed(2)}</td>
+                    <td class="py-3 text-center">
+                        <button onclick="editAffiliate('${p?.id}', '${c.code}', ${c.discount_percent}, ${c.affiliate_commission_percent})" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل نسب الكود">
+                            <i class="ph-bold ph-pencil-simple text-sm"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     } catch (err) {
         console.error("Affiliates load error:", err);
         tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-500">فشل تحميل الشركاء: ${err.message}</td></tr>`;
     }
 }
-
 async function openAffiliateModal() {
     await populateUserDropdown('affiliate-user-select');
     document.getElementById('affiliate-code-input').value = '';
@@ -1679,6 +1688,7 @@ async function handleAffiliateSubmit(e) {
 // دوال إدارة الوكلاء الماليين (Cash Agents)
 // =========================================================================
 
+// 3. جلب وعرض الوكلاء الماليين مع دمج الاسمين
 async function loadAgentsData() {
     const tbody = document.getElementById('agents-tbody');
     if (!tbody) return;
@@ -1686,7 +1696,7 @@ async function loadAgentsData() {
     try {
         const { data: agents, error } = await db
             .from('profiles')
-            .select('id, full_name, email, balance, role')
+            .select('id, first_name, last_name, email, balance, role')
             .eq('role', 'agent')
             .order('created_at', { ascending: false });
 
@@ -1697,21 +1707,26 @@ async function loadAgentsData() {
             return;
         }
 
-        tbody.innerHTML = agents.map(a => `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${a.full_name || 'بدون اسم'}</td>
-                <td class="py-3 font-mono text-slate-500">${a.email || '—'}</td>
-                <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400">$${Number(a.balance || 0).toFixed(2)}</td>
-                <td class="py-3 text-center">
-                    <span class="px-2.5 py-1 rounded-md text-[10px] font-black bg-emerald-500/10 text-emerald-600">وكيل معتمد ✓</span>
-                </td>
-                <td class="py-3 text-center">
-                    <button onclick="demoteAgent('${a.id}', '${a.full_name || a.email}')" class="px-2.5 py-1 text-rose-500 hover:bg-rose-500/10 rounded-lg font-bold transition text-[11px]">
-                        إلغاء صفة الوكيل
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = agents.map(a => {
+            const fn = [a.first_name, a.last_name].filter(Boolean).join(' ').trim();
+            const agentName = fn !== '' ? fn : (a.email || 'بدون اسم');
+
+            return `
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${agentName}</td>
+                    <td class="py-3 font-mono text-slate-500">${a.email || '—'}</td>
+                    <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400">$${Number(a.balance || 0).toFixed(2)}</td>
+                    <td class="py-3 text-center">
+                        <span class="px-2.5 py-1 rounded-md text-[10px] font-black bg-emerald-500/10 text-emerald-600">وكيل معتمد ✓</span>
+                    </td>
+                    <td class="py-3 text-center">
+                        <button onclick="demoteAgent('${a.id}', '${agentName}')" class="px-2.5 py-1 text-rose-500 hover:bg-rose-500/10 rounded-lg font-bold transition text-[11px]">
+                            إلغاء صفة الوكيل
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     } catch (err) {
         console.error("Agents load error:", err);
         tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-rose-500">فشل تحميل الوكلاء: ${err.message}</td></tr>`;
@@ -1776,31 +1791,39 @@ async function demoteAgent(userId, name) {
 }
 
 // دالة مساعدة لتعبئة قائمة اختيار المستخدمين
+// 1. تعبئة القائمة المنسدلة مع دمج الاسمين برمجياً في المتصفح فقط
 async function populateUserDropdown(selectElementId) {
     const select = document.getElementById(selectElementId);
     if (!select) return;
 
     select.innerHTML = `<option value="">جاري جلب الحسابات...</option>`;
     try {
+        // نطلب الحقول الفعلية الموجودة في الجدول: first_name و last_name
         const { data: users, error } = await db
             .from('profiles')
-            .select('id, full_name, email, role')
+            .select('id, first_name, last_name, email, role')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
 
         if (users && users.length > 0) {
-            select.innerHTML = users.map(u => `
-                <option value="${u.id}">
-                    ${u.full_name ? u.full_name : 'بدون اسم'} (${u.email || u.id.slice(0, 8)}) [${u.role || 'customer'}]
-                </option>
-            `).join('');
+            select.innerHTML = `
+                <option value="">-- اختر الحساب من القائمة --</option>
+                ${users.map(u => {
+                    const firstName = u.first_name ? u.first_name.trim() : '';
+                    const lastName = u.last_name ? u.last_name.trim() : '';
+                    const fullName = `${firstName}${lastName}`.trim();
+                    const displayName = fullName !== '' ? fullName : (u.email ? u.email.split('@')[0] : 'مستخدم');
+
+                    return `<option value="${u.id}">${displayName} (${u.email \vert{}\vert{} 'بدون إيميل'}) [${u.role || 'customer'}]</option>`;
+                }).join('')}
+            `;
         } else {
             select.innerHTML = `<option value="">لا يوجد مستخدمين مسجلين</option>`;
         }
     } catch (err) {
         console.error("Dropdown error:", err);
-        select.innerHTML = `<option value="">فشل تحميل الحسابات</option>`;
+        select.innerHTML = `<option value="">فشل تحميل الحسابات (${err.message || 'خطأ'})</option>`;
     }
 }
     </script>
