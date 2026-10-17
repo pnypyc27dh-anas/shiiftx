@@ -29,14 +29,14 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen">
 
-    <!-- شاشة التحقق من الصلاحيات (Auth Guard Screen) -->
-    <div id="auth-loading" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center text-white space-y-4">
-        <div class="w-10 h-10 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-sm font-bold tracking-wide">جاري التحقق من صلاحيات الدخول الإدارية...</p>
+    <!-- شريط تنبيه الصلاحيات (يظهر فقط في حال عدم تسجيل الدخول) -->
+    <div id="auth-alert-bar" class="hidden bg-rose-600 text-white text-xs font-bold py-2.5 px-4 text-center sticky top-0 z-50 flex items-center justify-center gap-3 shadow-md">
+        <span id="auth-alert-text">⚠️ تنبيه: لم يتم التحقق من الصلاحيات الإدارية!</span>
+        <a href="index.html" class="px-3 py-1 bg-white text-rose-600 rounded-lg hover:bg-slate-100 transition">تسجيل الدخول من المتجر</a>
     </div>
 
-    <!-- التطبيق الإداري الرئيسي -->
-    <div id="admin-app" class="hidden">
+    <!-- التطبيق الإداري الرئيسي (مرئي ومباشر فوراً دون شاشات حجب) -->
+    <div id="admin-app">
         
         <!-- الشريط العلوي -->
         <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
@@ -105,9 +105,9 @@
                     <i class="ph-bold ph-barcode text-sm"></i>
                     <span>مخزون الأكواد الرقمية 📦</span>
                 </button>
-                <!-- التبويبة المستقلة الجديدة -->
-                <button onclick="switchTab('new-product')" id="tab-new-product" class="tab-btn px-4 py-2.5 rounded-xl bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-2 whitespace-nowrap">
-                    <i class="ph-bold ph-plus-circle text-sm"></i>
+                <!-- التبويبة المطلوبة واضحة ومميزة في الشريط -->
+                <button onclick="switchTab('new-product')" id="tab-new-product" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
+                    <i class="ph-bold ph-plus-circle text-emerald-500 text-sm"></i>
                     <span>إضافة باقة أو منصة ➕</span>
                 </button>
                 <button onclick="switchTab('products')" id="tab-products" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
@@ -246,7 +246,7 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 4 (الجديد المستقل): إضافة باقة أو منصة جديدة ================= -->
+            <!-- ================= تبويب 4: إضافة باقة أو منصة جديدة ================= -->
             <section id="sec-new-product" class="tab-content hidden bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-5 max-w-2xl mx-auto shadow-sm">
                 <div class="border-b border-slate-100 dark:border-slate-800 pb-3">
                     <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -262,7 +262,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">المنصة (اختر أو اكتب منصة جديدة):</label>
-                            <input list="platform-suggestions" id="modal-product-platform" required placeholder="مثال: Steam, PUBG, Netflix" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                            <input list="platform-suggestions" id="modal-product-platform" required placeholder="مثال: Steam, PUBG, PlayStation" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
                             <datalist id="platform-suggestions"></datalist>
                         </div>
 
@@ -397,45 +397,12 @@
         let currentAdminUser = null;
         let allProductsCache = [];
 
-        // 2. فحص أمان تسجيل الدخول والصلاحية الإدارية مع مؤقت أمان
+        // فحص تسجيل الدخول في الخلفية دون حجب الشاشة
         async function checkAdminAuth() {
-            const statusEl = document.querySelector('#auth-loading p');
-            const loadingBox = document.getElementById('auth-loading');
-            const appBox = document.getElementById('admin-app');
-
-            // مؤقت أمان: لو تأخر الرد 3 ثوانٍ يظهر زر تخطي فوري
-            const timeoutTimer = setTimeout(() => {
-                if (statusEl && !loadingBox.classList.contains('hidden')) {
-                    statusEl.innerHTML = `
-                        <span class="text-amber-400 font-bold block mb-2">⚠️ استغرق الاتصال وقتاً أطول من المتوقع</span>
-                        <div class="flex gap-2 justify-center mt-3">
-                            <button onclick="forceOpenAdmin()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-lg">
-                                فتح لوحة التحكم مباشرة 🔓
-                            </button>
-                            <a href="index.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition">
-                                العودة للمتجر
-                            </a>
-                        </div>
-                    `;
-                }
-            }, 3000);
-
             try {
-                if (statusEl) statusEl.innerText = "جاري الاتصال بقاعدة البيانات...";
-
                 const { data: { session }, error: sessionErr } = await db.auth.getSession();
-                if (sessionErr) throw sessionErr;
-
-                if (!session) {
-                    clearTimeout(timeoutTimer);
-                    if (statusEl) {
-                        statusEl.innerHTML = `
-                            <span class="text-rose-400 font-bold block mb-2">⚠️ يجب تسجيل الدخول بالحساب الإداري أولاً</span>
-                            <a href="index.html" class="mt-2 inline-block px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold">
-                                الانتقال للمتجر لتسجيل الدخول
-                            </a>
-                        `;
-                    }
+                if (sessionErr || !session) {
+                    showAuthAlert("⚠️ يجب تسجيل الدخول بالحساب الإداري من المتجر أولاً لتفعيل العمليات.");
                     return;
                 }
 
@@ -445,62 +412,36 @@
                     .eq('id', session.user.id)
                     .single();
 
-                if (profileErr) throw profileErr;
-
-                if (!profile || profile.role !== 'admin') {
-                    clearTimeout(timeoutTimer);
-                    if (statusEl) {
-                        statusEl.innerHTML = `
-                            <span class="text-rose-400 font-bold block mb-2">⛔ هذا الحساب ليس مسؤولاً (${profile?.role || 'مستخدم عادي'})</span>
-                            <a href="index.html" class="mt-2 inline-block px-4 py-2 bg-slate-800 text-slate-200 rounded-xl text-xs font-bold">
-                                العودة للمتجر
-                            </a>
-                        `;
-                    }
+                if (profileErr || !profile || profile.role !== 'admin') {
+                    showAuthAlert(`⛔ هذا الحساب (${profile?.role || 'مستخدم عادي'}) لا يملك صلاحيات المشرف.`);
                     return;
                 }
 
-                clearTimeout(timeoutTimer);
                 currentAdminUser = session.user;
-                
-                // إخفاء شاشة الانتظار وإظهار لوحة التحكم
-                loadingBox.classList.add('hidden');
-                appBox.classList.remove('hidden');
-                
+                // إذا تم التحقق بنجاح يتم إخفاء شريط التنبيه إن كان ظاهراً
+                document.getElementById('auth-alert-bar').classList.add('hidden');
                 loadAllAdminData();
             } catch (err) {
-                clearTimeout(timeoutTimer);
                 console.error("Auth Guard Error:", err);
-                if (statusEl) {
-                    statusEl.innerHTML = `
-                        <span class="text-rose-400 font-bold block mb-2">✕ حدث خطأ: ${err.message || err}</span>
-                        <button onclick="forceOpenAdmin()" class="mt-2 px-3 py-1.5 bg-slate-800 text-xs text-white rounded-lg">
-                            محاولة الفتح المباشر
-                        </button>
-                    `;
-                }
+                showAuthAlert("حدث خطأ في الاتصال بالخادم: " + (err.message || err));
             }
         }
 
-        // دالة الفتح اليدوي المباشر للطوارئ
-        function forceOpenAdmin() {
-            document.getElementById('auth-loading').classList.add('hidden');
-            document.getElementById('admin-app').classList.remove('hidden');
-            loadAllAdminData();
+        function showAuthAlert(msg) {
+            const bar = document.getElementById('auth-alert-bar');
+            const txt = document.getElementById('auth-alert-text');
+            if (bar && txt) {
+                txt.innerText = msg;
+                bar.classList.remove('hidden');
+            }
         }
 
-        // تشغيل مباشر وفوري عند قراءة الملف
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', checkAdminAuth);
-        } else {
-            checkAdminAuth();
-        }
         async function loadAllAdminData() {
-            loadKPIs();
-            loadPendingOrders();
-            loadPendingDeposits();
-            loadProducts();
-            loadInventoryData();
+            try { loadKPIs(); } catch (e) {}
+            try { loadPendingOrders(); } catch (e) {}
+            try { loadPendingDeposits(); } catch (e) {}
+            try { loadProducts(); } catch (e) {}
+            try { loadInventoryData(); } catch (e) {}
         }
 
         async function loadKPIs() {
@@ -767,6 +708,7 @@
         }
 
         function quickSelectProduct(productId) {
+            switchTab('inventory');
             const selectElem = document.getElementById('restock-product-select');
             if (selectElem) {
                 selectElem.value = productId;
@@ -963,7 +905,7 @@
             }
         }
 
-        // إرسال نموذج إضافة باقة جديدة
+        // حفظ باقة أو منصة جديدة
         async function handleProductFormSubmit(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-save-product');
@@ -994,7 +936,118 @@
                     document.getElementById('standalone-product-form').reset();
                     await loadProducts();
                     await loadInventoryData();
-                    // الانتقال تلقائياً لجدول المنتجات لمشاهدتها
                     switchTab('products');
                 } else {
-                    alert
+                    alert("فشل الحفظ: " + (data ? data.message : "خطأ غير متوقع"));
+                }
+            } catch (err) {
+                console.error("Save Product Error:", err);
+                alert("حدث خطأ: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-check text-sm"></i> <span>حفظ وإضافة الباقة للمتجر فوراً</span>`;
+            }
+        }
+
+        // ترقية وكيل
+        async function handlePromoteAgent() {
+            const email = document.getElementById('agent-email').value.trim();
+            const code = document.getElementById('agent-code').value.trim();
+            const discount = parseFloat(document.getElementById('agent-discount').value);
+            const comm = parseFloat(document.getElementById('agent-comm').value);
+
+            if (!email || !code || isNaN(discount) || isNaN(comm)) {
+                return alert("يرجى إدخال جميع بيانات الوكيل بشكل صحيح.");
+            }
+
+            const { data, error } = await db.rpc('admin_promote_agent', {
+                p_email: email,
+                p_code: code,
+                p_discount_percent: discount,
+                p_commission_percent: comm
+            });
+
+            if (error || data.status === 'error') {
+                alert(error ? error.message : data.message);
+            } else {
+                alert("✓ " + data.message);
+                document.getElementById('agent-email').value = '';
+                document.getElementById('agent-code').value = '';
+            }
+        }
+
+        // تسليم أرباح كاش
+        async function handlePayoutCash() {
+            const email = document.getElementById('payout-email').value.trim();
+            const amount = parseFloat(document.getElementById('payout-amount').value);
+            const note = document.getElementById('payout-note').value.trim() || 'تسليم كاش يداً بيد';
+
+            if (!email || isNaN(amount) || amount <= 0) {
+                return alert("يرجى إدخال بريد الوكيل ومبلغ صحيح.");
+            }
+
+            const { data, error } = await db.rpc('payout_agent_cash', {
+                p_agent_email: email,
+                p_payout_amount: amount,
+                p_note: note
+            });
+
+            if (error || data.status === 'error') {
+                alert(error ? error.message : data.message);
+            } else {
+                alert(`✓ تم توثيق التسليم وخصم $${amount.toFixed(2)} بنجاح! المتبقي: $${Number(data.remaining_balance).toFixed(2)}`);
+                document.getElementById('payout-email').value = '';
+                document.getElementById('payout-amount').value = '';
+                loadKPIs();
+            }
+        }
+
+        // إيداع يدوي لمحفظة زبون
+        async function handleManualTopup() {
+            const email = document.getElementById('topup-email').value.trim();
+            const amount = parseFloat(document.getElementById('topup-amount').value);
+            const note = document.getElementById('topup-note').value.trim() || 'إيداع يدوي';
+
+            if (!email || isNaN(amount) || amount <= 0) {
+                return alert("يرجى إدخال بريد ومبلغ صحيح.");
+            }
+
+            const { data, error } = await db.rpc('admin_manual_topup', {
+                p_email: email,
+                p_amount: amount,
+                p_note: note
+            });
+
+            if (error || data.status === 'error') {
+                alert(error ? error.message : data.message);
+            } else {
+                alert(`✓ تم شحن $${amount.toFixed(2)} بنجاح! رصيد العميل الجديد: $${Number(data.new_balance).toFixed(2)}`);
+                document.getElementById('topup-email').value = '';
+                document.getElementById('topup-amount').value = '';
+                loadKPIs();
+            }
+        }
+
+        // التبديل بين التبويبات
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.className = "tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap";
+            });
+
+            const activeSec = document.getElementById(`sec-${tabId}`);
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if (activeSec) activeSec.classList.remove('hidden');
+            if (activeTab) activeTab.className = "tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap";
+        }
+
+        async function handleLogout() {
+            await db.auth.signOut();
+            window.location.href = "index.html";
+        }
+
+        // تشغيل فحص الصلاحيات مباشرة
+        checkAdminAuth();
+    </script>
+</body>
+</html>
