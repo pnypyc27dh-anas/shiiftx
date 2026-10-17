@@ -106,13 +106,10 @@
                     <span>مخزون الأكواد الرقمية 📦</span>
                 </button>
                 <!-- التبويبة المطلوبة واضحة ومميزة في الشريط -->
-                <button onclick="switchTab('new-product')" id="tab-new-product" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
-                    <i class="ph-bold ph-plus-circle text-emerald-500 text-sm"></i>
-                    <span>إضافة باقة أو منصة ➕</span>
-                </button>
+                
                 <button onclick="switchTab('products')" id="tab-products" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-package text-sm"></i>
-                    <span>المنتجات والأسعار</span>
+                    <span>المنصات والباقات </span>
                 </button>
                 <button onclick="switchTab('agents')" id="tab-agents" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-users-three text-sm"></i>
@@ -304,26 +301,35 @@
                 </form>
             </section>
 
-            <!-- ================= تبويب 5: المنتجات والأسعار ================= -->
+            <!-- ================ تبويب 5:المنصات والباقات ================= -->
             <section id="sec-products" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                        <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                            <i class="ph-bold ph-package text-brand-500 text-lg"></i>
-                            <span>قائمة المنتجات والأسعار</span>
-                        </h3>
-                        <p class="text-[11px] text-slate-400">التحكم المباشر في الأسعار والحالات وحذف الباقات</p>
-                    </div>
-                    
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <select id="products-platform-filter" onchange="filterProductsByPlatform()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold outline-none">
-                            <option value="ALL">جميع المنصات</option>
-                        </select>
-                        <button onclick="loadProducts()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800" title="تحديث">
-                            <i class="ph-bold ph-arrows-clockwise"></i>
-                        </button>
-                    </div>
-                </div>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+        <div>
+            <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <i class="ph-bold ph-package text-brand-500 text-lg"></i>
+                <span>قائمة المنتجات المعروضة</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">استعراض الباقات والأسعار الحالية (التعديل يتم عبر أيقونة القلم ✏️)</p>
+        </div>
+        
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <!-- الزر الجديد: يستدعي نافذة الإضافة الموحدة فور النقر -->
+            <button onclick="openAddModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
+                <i class="ph-bold ph-plus-circle text-sm"></i>
+                <span>إضافة باقة جديدة ➕</span>
+            </button>
+
+            <!-- فلتر تصفية المنصات -->
+            <select id="products-platform-filter" onchange="filterProductsByPlatform()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold outline-none">
+                <option value="ALL">جميع المنصات</option>
+            </select>
+
+            <!-- زر إعادة جلب المنتجات -->
+            <button onclick="loadProducts()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800" title="تحديث">
+                <i class="ph-bold ph-arrows-clockwise"></i>
+            </button>
+        </div>
+    </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-right text-xs">
@@ -460,6 +466,93 @@
                     <span>حفظ التعديلات</span>
                 </button>
                 <button type="button" onclick="closeEditModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
+                    إلغاء
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+            <!-- نافذة منبثقة موحدة: إضافة أو تعديل باقة -->
+<div id="product-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+        <!-- رأس النافذة المنبثقة -->
+        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+            <h4 id="product-modal-title" class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <i id="product-modal-icon" class="ph-bold ph-pencil-simple text-blue-500 text-base"></i>
+                <span id="product-modal-heading">تعديل بيانات الباقة</span>
+            </h4>
+            <button type="button" onclick="closeProductModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
+                <i class="ph-bold ph-x"></i>
+            </button>
+        </div>
+
+        <!-- نموذج البيانات -->
+        <form onsubmit="handleProductModalSubmit(event)" class="space-y-3 text-xs">
+            <!-- حقل الـ ID المخفي: فارغ في الإضافة وممتلئ في التعديل -->
+            <input type="hidden" id="modal-prod-id">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- المنصة: تكون مقفلة ومحمية عند التعديل، ومتاحة عند الإضافة -->
+                <div>
+                    <label id="modal-platform-label" class="block font-bold text-slate-600 dark:text-slate-300 mb-1">
+                        المنصة:
+                    </label>
+                    <input list="platform-suggestions" id="modal-prod-platform" required placeholder="مثال: Steam, PUBG" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                    <datalist id="platform-suggestions"></datalist>
+                </div>
+
+                <!-- نوع التسليم: يعتمد CODE أو ID فقط -->
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نوع التسليم:</label>
+                    <select id="modal-prod-type" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                        <option value="CODE">كود رقمي فوري (CODE)</option>
+                        <option value="ID">شحن مباشر بالـ Player ID (ID)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- اسم الباقة -->
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اسم الباقة المعروضة:</label>
+                <input id="modal-prod-name" required placeholder="مثال: بطاقة 50 يورو أو 660 شدة" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- السعر -->
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">السعر ($):</label>
+                    <input type="number" step="0.01" min="0.01" id="modal-prod-price" required placeholder="0.00" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
+                </div>
+
+                <!-- التصنيف -->
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">التصنيف:</label>
+                    <input id="modal-prod-category" placeholder="Games" value="Games" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                </div>
+            </div>
+
+            <!-- رابط الصورة -->
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">رابط صورة الباقة (اختياري):</label>
+                <input type="url" id="modal-prod-image" placeholder="https://..." class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-[11px] outline-none" dir="ltr">
+            </div>
+
+            <!-- حالة التفعيل -->
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">حالة العرض في المتجر:</label>
+                <select id="modal-prod-status" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                    <option value="active">نشط ✓ (معروض للزبائن)</option>
+                    <option value="inactive">معطل ✕ (مخفي مؤقتاً)</option>
+                </select>
+            </div>
+
+            <div class="pt-3 flex gap-2">
+                <button type="submit" id="btn-modal-submit" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5">
+                    <i class="ph-bold ph-floppy-disk text-sm"></i>
+                    <span id="modal-submit-text">حفظ التعديلات</span>
+                </button>
+                <button type="button" onclick="closeProductModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
                     إلغاء
                 </button>
             </div>
@@ -897,32 +990,29 @@
             tbody.innerHTML = products.map(p => `
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                     <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.platform}</td>
-                    <td class="py-3 font-bold">${p.package_name}</td>
-                    <td class="py-3">
-                        <div class="flex items-center gap-1">
-                            <span class="text-slate-400 font-mono">$</span>
-                            <input type="number" step="0.01" value="${Number(p.price).toFixed(2)}" 
-                                   onchange="inlineUpdateProductPrice('${p.id}', this.value)" 
-                                   class="w-20 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 font-mono text-xs font-bold dark:bg-slate-800 outline-none focus:border-brand-500">
-                        </div>
+                    <td class="py-3 font-bold text-slate-700 dark:text-slate-200">${p.package_name}</td>
+                    <!-- السعر: نص عادي غير قابل للتعديل المباشر -->
+                    <td class="py-3 font-mono font-black text-slate-900 dark:text-white">
+                        $${Number(p.price).toFixed(2)}
                     </td>
+                    <!-- نوع التسليم: شارة توضيحية -->
                     <td class="py-3">
-    <span class="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold ${p.product_type === 'CODE' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-amber-500/10 text-amber-500'}">
-        ${p.product_type === 'CODE' ? 'كود رقمي' : 'شحن ID'}
-    </span>
-</td>
+                        <span class="px-2.5 py-1 rounded-md font-mono text-[10px] font-bold ${p.product_type === 'CODE' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-amber-500/10 text-amber-500'}">
+                            ${p.product_type === 'CODE' ? 'كود رقمي' : 'شحن ID'}
+                        </span>
+                    </td>
+                    <!-- الحالة: شارة عرض فقط -->
                     <td class="py-3 text-center">
-                        <button onclick="toggleProduct('${p.id}', '${p.status}')" class="px-2.5 py-1 rounded-lg text-[10px] font-black transition ${p.status === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20' : 'bg-slate-500/10 text-slate-400 hover:bg-slate-500/20'}">
+                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-black ${p.status === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-slate-500/10 text-slate-400'}">
                             ${p.status === 'active' ? 'نشط ✓' : 'معطل ✕'}
-                        </button>
+                        </span>
                     </td>
+                    <!-- الإجراءات المعتمدة: التعديل والحذف فقط -->
                     <td class="py-3 text-center">
                         <div class="flex items-center justify-center gap-1.5">
-                            <!-- زر التعديل الشامل -->
                             <button onclick="openEditModal('${p.id}')" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل بيانات الباقة">
                                 <i class="ph-bold ph-pencil-simple text-sm"></i>
                             </button>
-                            <!-- زر الحذف -->
                             <button onclick="deleteProduct('${p.id}', '${p.package_name}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="حذف الباقة">
                                 <i class="ph-bold ph-trash text-sm"></i>
                             </button>
@@ -1049,6 +1139,120 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `<i class="ph-bold ph-floppy-disk text-sm"></i> <span>حفظ التعديلات</span>`;
+            }
+        }
+
+        // 1. فتح النافذة لإضافة باقة جديدة
+        function openAddModal() {
+            // تفريغ معرّف المنتج ليعرف الخادم أنها إضافة وليست تعديل
+            document.getElementById('modal-prod-id').value = '';
+            document.getElementById('product-modal-heading').innerText = 'إضافة باقة أو منصة جديدة';
+            document.getElementById('product-modal-icon').className = 'ph-bold ph-plus-circle text-emerald-500 text-base';
+            document.getElementById('modal-submit-text').innerText = 'حفظ وإضافة للمتجر';
+            document.getElementById('btn-modal-submit').className = 'flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5';
+
+            // تفعيل حقل المنصة للكتابة
+            const platformInput = document.getElementById('modal-prod-platform');
+            platformInput.disabled = false;
+            platformInput.value = '';
+            platformInput.className = 'w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none';
+            document.getElementById('modal-platform-label').innerHTML = 'المنصة:';
+
+            // تصفير بقية الحقول
+            document.getElementById('modal-prod-name').value = '';
+            document.getElementById('modal-prod-price').value = '';
+            document.getElementById('modal-prod-type').value = 'CODE';
+            document.getElementById('modal-prod-category').value = 'Games';
+            document.getElementById('modal-prod-image').value = '';
+            document.getElementById('modal-prod-status').value = 'active';
+
+            // إظهار النافذة
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        // 2. فتح النافذة لتعديل باقة موجودة (مع قفل اسم المنصة 🔒)
+        function openEditModal(prodId) {
+            const prod = allProductsCache.find(p => p.id === prodId);
+            if (!prod) return;
+
+            document.getElementById('modal-prod-id').value = prod.id;
+            document.getElementById('product-modal-heading').innerText = 'تعديل بيانات الباقة';
+            document.getElementById('product-modal-icon').className = 'ph-bold ph-pencil-simple text-blue-500 text-base';
+            document.getElementById('modal-submit-text').innerText = 'حفظ التعديلات';
+            document.getElementById('btn-modal-submit').className = 'flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5';
+
+            // قفل حقل المنصة تماماً لمنع تغييرها
+            const platformInput = document.getElementById('modal-prod-platform');
+            platformInput.disabled = true;
+            platformInput.value = prod.platform;
+            platformInput.className = 'w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-bold outline-none cursor-not-allowed';
+            document.getElementById('modal-platform-label').innerHTML = 'المنصة (ثابتة 🔒):';
+
+            document.getElementById('modal-prod-name').value = prod.package_name;
+            document.getElementById('modal-prod-price').value = prod.price;
+
+            // تحديد CODE أو ID بدقة
+            const currentType = (prod.product_type || 'CODE').toUpperCase();
+            document.getElementById('modal-prod-type').value = currentType.includes('ID') ? 'ID' : 'CODE';
+
+            document.getElementById('modal-prod-category').value = prod.category || 'Games';
+            document.getElementById('modal-prod-image').value = prod.image_url || '';
+            document.getElementById('modal-prod-status').value = prod.status || 'active';
+
+            // إظهار النافذة
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        // 3. إغلاق النافذة
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        // 4. حفظ النموذج وإرساله إلى Supabase
+        async function handleProductModalSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-modal-submit');
+            const idVal = document.getElementById('modal-prod-id').value;
+            const id = idVal ? idVal : null; // إذا كان فارغاً يعني عملية INSERT
+            const platform = document.getElementById('modal-prod-platform').value.trim();
+            const name = document.getElementById('modal-prod-name').value.trim();
+            const price = parseFloat(document.getElementById('modal-prod-price').value);
+            const type = document.getElementById('modal-prod-type').value; // إما CODE أو ID حرفياً
+            const category = document.getElementById('modal-prod-category').value.trim();
+            const imageUrl = document.getElementById('modal-prod-image').value.trim();
+            const status = document.getElementById('modal-prod-status').value;
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الحفظ...`;
+
+            try {
+                const { data, error } = await db.rpc('admin_save_product', {
+                    p_id: id,
+                    p_platform: platform,
+                    p_package_name: name,
+                    p_price: price,
+                    p_product_type: type,
+                    p_category: category,
+                    p_image_url: imageUrl || null,
+                    p_status: status
+                });
+
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    alert("✓ " + data.message);
+                    closeProductModal();
+                    await loadProducts(); // إعادة جلب المنتجات المحدثة
+                    if (typeof loadInventoryData === 'function') await loadInventoryData();
+                } else {
+                    alert("فشل الحفظ: " + (data ? data.message : "خطأ غير متوقع"));
+                }
+            } catch (err) {
+                console.error("Product Modal Error:", err);
+                alert("حدث خطأ أثناء المعالجة: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-floppy-disk text-sm"></i> <span>${id ? 'حفظ التعديلات' : 'حفظ وإضافة للمتجر'}</span>`;
             }
         }
 
