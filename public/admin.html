@@ -29,13 +29,13 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen">
 
-    <!-- شريط تنبيه الصلاحيات -->
+    <!-- شريط تنبيه الصلاحيات (يظهر فقط في حال عدم تسجيل الدخول) -->
     <div id="auth-alert-bar" class="hidden bg-rose-600 text-white text-xs font-bold py-2.5 px-4 text-center sticky top-0 z-50 flex items-center justify-center gap-3 shadow-md">
         <span id="auth-alert-text">⚠️ تنبيه: لم يتم التحقق من الصلاحيات الإدارية!</span>
         <a href="index.html" class="px-3 py-1 bg-white text-rose-600 rounded-lg hover:bg-slate-100 transition">تسجيل الدخول من المتجر</a>
     </div>
 
-    <!-- التطبيق الإداري الرئيسي -->
+    <!-- التطبيق الإداري الرئيسي (مرئي ومباشر فوراً دون شاشات حجب) -->
     <div id="admin-app">
         
         <!-- الشريط العلوي -->
@@ -105,18 +105,22 @@
                     <i class="ph-bold ph-barcode text-sm"></i>
                     <span>مخزون الأكواد الرقمية 📦</span>
                 </button>
+                <!-- التبويبة المطلوبة واضحة ومميزة في الشريط -->
+                
                 <button onclick="switchTab('products')" id="tab-products" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-package text-sm"></i>
-                    <span>المنصات والباقات</span>
+                    <span>المنصات والباقات </span>
                 </button>
-                <button onclick="switchTab('affiliates')" id="tab-affiliates" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
-                    <i class="ph-bold ph-megaphone text-sm"></i>
-                    <span>الشركاء التسويقيين</span>
-                </button>
-                <button onclick="switchTab('agents')" id="tab-agents" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
-                    <i class="ph-bold ph-wallet text-sm"></i>
-                    <span>الوكلاء الماليين (الكاش)</span>
-                </button>
+                <!-- الكود الجديد: تبويبان منفصلان -->
+<button onclick="switchTab('affiliates')" id="tab-affiliates" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
+    <i class="ph-bold ph-megaphone text-sm"></i>
+    <span>الشركاء التسويقيين</span>
+</button>
+
+<button onclick="switchTab('agents')" id="tab-agents" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
+    <i class="ph-bold ph-wallet text-sm"></i>
+    <span>الوكلاء الماليين (الكاش)</span>
+</button>
                 <button onclick="switchTab('wallet')" id="tab-wallet" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-hand-coins text-sm"></i>
                     <span>إيداع يدوي</span>
@@ -245,32 +249,93 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 4: المنصات والباقات ================= -->
-            <section id="sec-products" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
-                    <div>
-                        <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                            <i class="ph-bold ph-package text-brand-500 text-lg"></i>
-                            <span>قائمة المنتجات المعروضة</span>
-                        </h3>
-                        <p class="text-[11px] text-slate-400">استعراض الباقات والأسعار الحالية (التعديل يتم عبر أيقونة القلم ✏️)</p>
-                    </div>
-                    
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <button onclick="openAddModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
-                            <i class="ph-bold ph-plus-circle text-sm"></i>
-                            <span>إضافة باقة جديدة ➕</span>
-                        </button>
-
-                        <select id="products-platform-filter" onchange="filterProductsByPlatform()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold outline-none">
-                            <option value="ALL">جميع المنصات</option>
-                        </select>
-
-                        <button onclick="loadProducts()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800" title="تحديث">
-                            <i class="ph-bold ph-arrows-clockwise"></i>
-                        </button>
-                    </div>
+            <!-- ================= تبويب 4: إضافة باقة أو منصة جديدة ================= -->
+            <section id="sec-new-product" class="tab-content hidden bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-5 max-w-2xl mx-auto shadow-sm">
+                <div class="border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <i class="ph-bold ph-plus-circle text-emerald-500 text-lg"></i>
+                        <span>إضافة باقة جديدة أو منصة جديدة للمتجر</span>
+                    </h3>
+                    <p class="text-[11px] text-slate-400">إذا كتبت اسم منصة جديد سيتم إنشاؤها فوراً وإضافتها لتصنيفات المتجر ولوحة الإدارة</p>
                 </div>
+
+                <form id="standalone-product-form" onsubmit="handleProductFormSubmit(event)" class="space-y-4 text-xs">
+                    <input type="hidden" id="modal-product-id">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">المنصة (اختر أو اكتب منصة جديدة):</label>
+                            <input list="platform-suggestions" id="modal-product-platform" required placeholder="مثال: Steam, PUBG, PlayStation" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                            <datalist id="platform-suggestions"></datalist>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نوع التسليم:</label>
+                            <select id="modal-product-type" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                                <option value="CODE">كود رقمي فوري (CODE)</option>
+                                <option value="ID">شحن مباشر بالـ Player ID</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اسم الباقة المعروضة:</label>
+                        <input id="modal-product-name" required placeholder="مثال: بطاقة 50 يورو أو 660 شدة" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">السعر ($):</label>
+                            <input type="number" step="0.01" min="0.01" id="modal-product-price" required placeholder="0.00" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">التصنيف:</label>
+                            <input id="modal-product-category" placeholder="Games" value="Games" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">رابط صورة الباقة (اختياري):</label>
+                        <input type="url" id="modal-product-image" placeholder="https://example.com/logo.png" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-[11px] outline-none" dir="ltr">
+                    </div>
+
+                    <button type="submit" id="btn-save-product" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs transition shadow-sm flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-check text-sm"></i>
+                        <span>حفظ وإضافة الباقة للمتجر فوراً</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- ================ تبويب 5:المنصات والباقات ================= -->
+            <section id="sec-products" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+        <div>
+            <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <i class="ph-bold ph-package text-brand-500 text-lg"></i>
+                <span>قائمة المنتجات المعروضة</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">استعراض الباقات والأسعار الحالية (التعديل يتم عبر أيقونة القلم ✏️)</p>
+        </div>
+        
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <!-- الزر الجديد: يستدعي نافذة الإضافة الموحدة فور النقر -->
+            <button onclick="openAddModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
+                <i class="ph-bold ph-plus-circle text-sm"></i>
+                <span>إضافة باقة جديدة ➕</span>
+            </button>
+
+            <!-- فلتر تصفية المنصات -->
+            <select id="products-platform-filter" onchange="filterProductsByPlatform()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold outline-none">
+                <option value="ALL">جميع المنصات</option>
+            </select>
+
+            <!-- زر إعادة جلب المنتجات -->
+            <button onclick="loadProducts()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800" title="تحديث">
+                <i class="ph-bold ph-arrows-clockwise"></i>
+            </button>
+        </div>
+    </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-right text-xs">
@@ -281,7 +346,7 @@
                                 <th class="pb-2">السعر الحالي ($)</th>
                                 <th class="pb-2">نوع التسليم</th>
                                 <th class="pb-2 text-center">الحالة</th>
-                                <th class="pb-2 text-center">إجراءات</th>
+                                <th class="pb-2 text-center">حذف</th>
                             </tr>
                         </thead>
                         <tbody id="products-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
@@ -291,85 +356,91 @@
                 </div>
             </section>
 
-            <!-- ================= تبويب 5: الشركاء التسويقيين ================= -->
-            <section id="sec-affiliates" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
-                    <div>
-                        <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                            <i class="ph-bold ph-megaphone text-purple-500 text-lg"></i>
-                            <span>إدارة الشركاء التسويقيين وأكواد الخصم</span>
-                        </h3>
-                        <p class="text-[11px] text-slate-400">تخصيص الكوبونات، نسب الخصم للزبائن، ونسب العمولات لكل مروج</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="openAffiliateModal()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
-                            <i class="ph-bold ph-user-plus text-sm"></i>
-                            <span>تعيين شريك تسويقي جديد ➕</span>
-                        </button>
-                        <button onclick="loadAffiliatesData()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800" title="تحديث">
-                            <i class="ph-bold ph-arrows-clockwise"></i>
-                        </button>
-                    </div>
-                </div>
+            <!-- ============================================================== -->
+<!-- 1. تبويب الشركاء التسويقيين (Affiliates) -->
+<!-- ============================================================== -->
+<section id="sec-affiliates" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+        <div>
+            <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <i class="ph-bold ph-megaphone text-purple-500 text-lg"></i>
+                <span>إدارة الشركاء التسويقيين وأكواد الخصم</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">تخصيص الكوبونات، نسب الخصم للزبائن، ونسب العمولات لكل مروج</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="openAffiliateModal()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
+                <i class="ph-bold ph-user-plus text-sm"></i>
+                <span>تعيين شريك تسويقي جديد ➕</span>
+            </button>
+            <button onclick="loadAffiliatesData()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800" title="تحديث">
+                <i class="ph-bold ph-arrows-clockwise"></i>
+            </button>
+        </div>
+    </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right text-xs">
-                        <thead>
-                            <tr class="text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                <th class="py-2.5">الشريك</th>
-                                <th class="py-2.5">كود الخصم</th>
-                                <th class="py-2.5">خصم الزبون</th>
-                                <th class="py-2.5">عمولة الشريك</th>
-                                <th class="py-2.5">مرات الاستخدام</th>
-                                <th class="py-2.5">رصيد الأرباح الحالي</th>
-                                <th class="py-2.5 text-center">إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="affiliates-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
-                            <tr><td colspan="7" class="py-6 text-center text-slate-400">جاري تحميل بيانات الشركاء...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+    <!-- جدول الشركاء التسويقيين -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-right text-xs">
+            <thead>
+                <tr class="text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
+                    <th class="py-2.5">الشريك</th>
+                    <th class="py-2.5">كود الخصم</th>
+                    <th class="py-2.5">خصم الزبون</th>
+                    <th class="py-2.5">عمولة الشريك</th>
+                    <th class="py-2.5">مرات الاستخدام</th>
+                    <th class="py-2.5">رصيد الأرباح الحالي</th>
+                    <th class="py-2.5 text-center">إجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="affiliates-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                <tr><td colspan="7" class="py-6 text-center text-slate-400">جاري تحميل بيانات الشركاء...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
 
-            <!-- ================= تبويب 6: الوكلاء الماليين ================= -->
-            <section id="sec-agents" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
-                    <div>
-                        <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                            <i class="ph-bold ph-wallet text-emerald-500 text-lg"></i>
-                            <span>شبكة الوكلاء الماليين المعتمدين (نقاط الكاش)</span>
-                        </h3>
-                        <p class="text-[11px] text-slate-400">إدارة الوكلاء المخولين باستقبال إيداعات الزبائن وصرف أرباح الشركاء يداً بيد</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="openAgentModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
-                            <i class="ph-bold ph-shield-plus text-sm"></i>
-                            <span>تعيين وكيل معتمد جديد ➕</span>
-                        </button>
-                        <button onclick="loadAgentsData()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800" title="تحديث">
-                            <i class="ph-bold ph-arrows-clockwise"></i>
-                        </button>
-                    </div>
-                </div>
+<!-- ============================================================== -->
+<!-- 2. تبويب الوكلاء الماليين (Cash Agents) -->
+<!-- ============================================================== -->
+<section id="sec-agents" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+        <div>
+            <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <i class="ph-bold ph-wallet text-emerald-500 text-lg"></i>
+                <span>شبكة الوكلاء الماليين المعتمدين (نقاط الكاش)</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">إدارة الوكلاء المخولين باستقبال إيداعات الزبائن وصرف أرباح الشركاء يداً بيد</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="openAgentModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
+                <i class="ph-bold ph-shield-plus text-sm"></i>
+                <span>تعيين وكيل معتمد جديد ➕</span>
+            </button>
+            <button onclick="loadAgentsData()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800" title="تحديث">
+                <i class="ph-bold ph-arrows-clockwise"></i>
+            </button>
+        </div>
+    </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right text-xs">
-                        <thead>
-                            <tr class="text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                <th class="py-2.5">الوكيل المالي</th>
-                                <th class="py-2.5">البريد الإلكتروني</th>
-                                <th class="py-2.5">الرصيد المالي في الموقع</th>
-                                <th class="py-2.5 text-center">الحالة</th>
-                                <th class="py-2.5 text-center">إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="agents-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
-                            <tr><td colspan="5" class="py-6 text-center text-slate-400">جاري تحميل قائمة الوكلاء...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+    <!-- جدول الوكلاء الماليين -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-right text-xs">
+            <thead>
+                <tr class="text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
+                    <th class="py-2.5">الوكيل المالي</th>
+                    <th class="py-2.5">البريد الإلكتروني</th>
+                    <th class="py-2.5">الرصيد المالي في الموقع</th>
+                    <th class="py-2.5 text-center">الحالة</th>
+                    <th class="py-2.5 text-center">إجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="agents-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                <tr><td colspan="5" class="py-6 text-center text-slate-400">جاري تحميل قائمة الوكلاء...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
 
             <!-- ================= تبويب 7: الإيداع اليدوي ================= -->
             <section id="sec-wallet" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
@@ -383,167 +454,261 @@
                     إيداع الرصيد في المحفظة فوراً
                 </button>
             </section>
+            <!-- نافذة منبثقة: تعديل بيانات الباقة -->
+<div id="edit-product-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+            <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="ph-bold ph-pencil-simple text-blue-500 text-base"></i>
+                <span>تعديل بيانات الباقة</span>
+            </h4>
+            <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
+                <i class="ph-bold ph-x"></i>
+            </button>
+        </div>
 
-        </main>
-    </div>
+        <form onsubmit="handleEditProductSubmit(event)" class="space-y-3 text-xs">
+            <input type="hidden" id="edit-prod-id">
 
-    <!-- نافذة منبثقة موحدة: إضافة أو تعديل باقة -->
-    <div id="product-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <i id="product-modal-icon" class="ph-bold ph-pencil-simple text-blue-500 text-base"></i>
-                    <span id="product-modal-heading">تعديل بيانات الباقة</span>
-                </h4>
-                <button type="button" onclick="closeProductModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
-                    <i class="ph-bold ph-x"></i>
-                </button>
-            </div>
-
-            <form onsubmit="handleProductModalSubmit(event)" class="space-y-3 text-xs">
-                <input type="hidden" id="modal-prod-id">
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label id="modal-platform-label" class="block font-bold text-slate-600 dark:text-slate-300 mb-1">المنصة:</label>
-                        <input list="platform-suggestions" id="modal-prod-platform" required placeholder="مثال: Steam, PUBG" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
-                        <datalist id="platform-suggestions"></datalist>
-                    </div>
-
-                    <div>
-                        <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نوع التسليم:</label>
-                        <select id="modal-prod-type" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
-                            <option value="CODE">كود رقمي فوري (CODE)</option>
-                            <option value="ID">شحن مباشر بالـ Player ID (ID)</option>
-                        </select>
-                    </div>
-                </div>
-
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- المنصة: حقل مقفل للقراءة فقط لمنع تشوه تصنيفات المتجر -->
                 <div>
-                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اسم الباقة المعروضة:</label>
-                    <input id="modal-prod-name" required placeholder="مثال: بطاقة 50 يورو أو 660 شدة" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                    <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">
+                        المنصة (ثابتة 🔒):
+                    </label>
+                    <input id="edit-prod-platform" disabled class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-bold outline-none cursor-not-allowed">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">السعر ($):</label>
-                        <input type="number" step="0.01" min="0.01" id="modal-prod-price" required placeholder="0.00" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">التصنيف:</label>
-                        <input id="modal-prod-category" placeholder="Games" value="Games" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
-                    </div>
-                </div>
-
+                <!-- نوع التسليم -->
                 <div>
-                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">رابط صورة الباقة (اختياري):</label>
-                    <input type="url" id="modal-prod-image" placeholder="https://..." class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-[11px] outline-none" dir="ltr">
-                </div>
-
-                <div>
-                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">حالة العرض في المتجر:</label>
-                    <select id="modal-prod-status" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
-                        <option value="active">نشط ✓ (معروض للزبائن)</option>
-                        <option value="inactive">معطل ✕ (مخفي مؤقتاً)</option>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نوع التسليم:</label>
+                    <select id="edit-prod-type" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                        <option value="CODE">كود رقمي فوري (CODE)</option>
+                        <option value="ID">شحن مباشر بالـ Player ID</option>
                     </select>
                 </div>
-
-                <div class="pt-3 flex gap-2">
-                    <button type="submit" id="btn-modal-submit" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5">
-                        <i class="ph-bold ph-floppy-disk text-sm"></i>
-                        <span id="modal-submit-text">حفظ التعديلات</span>
-                    </button>
-                    <button type="button" onclick="closeProductModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
-                        إلغاء
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- نافذة تعيين / تعديل شريك تسويقي -->
-    <div id="affiliate-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <i class="ph-bold ph-tag text-purple-500 text-base"></i>
-                    <span id="affiliate-modal-title">إعداد الشريك التسويقي والكود</span>
-                </h4>
-                <button type="button" onclick="closeAffiliateModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
-                    <i class="ph-bold ph-x"></i>
-                </button>
             </div>
 
-            <form onsubmit="handleAffiliateSubmit(event)" class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اختر المستخدم المراد ترقيته:</label>
-                    <select id="affiliate-user-select" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none"></select>
-                </div>
-
-                <div>
-                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">كود الخصم المخصص (Coupon Code):</label>
-                    <input id="affiliate-code-input" required placeholder="مثال: ANAS10" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold uppercase outline-none" dir="ltr">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نسبة خصم الزبون (%):</label>
-                        <input type="number" step="0.5" min="0" max="50" id="affiliate-discount-input" required placeholder="مثال: 5" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نسبة عمولة الشريك (%):</label>
-                        <input type="number" step="0.5" min="0" max="50" id="affiliate-comm-input" required placeholder="مثال: 10" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
-                    </div>
-                </div>
-
-                <div class="pt-3 flex gap-2">
-                    <button type="submit" id="btn-save-affiliate" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition shadow-sm">
-                        حفظ واعتماد الكود
-                    </button>
-                    <button type="button" onclick="closeAffiliateModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
-                        إلغاء
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- نافذة تعيين وكيل مالي معتمد -->
-    <div id="agent-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <i class="ph-bold ph-shield-check text-emerald-500 text-base"></i>
-                    <span>ترقية حساب إلى وكيل كاش معتمد</span>
-                </h4>
-                <button type="button" onclick="closeAgentModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
-                    <i class="ph-bold ph-x"></i>
-                </button>
+            <!-- اسم الباقة -->
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اسم الباقة:</label>
+                <input id="edit-prod-name" required placeholder="مثال: 60 شدة ببجي" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
             </div>
 
-            <form onsubmit="handleAgentSubmit(event)" class="space-y-3 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- السعر -->
                 <div>
-                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اختر الحساب المراد ترقيته لوكيل:</label>
-                    <select id="agent-user-select" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none"></select>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">السعر ($):</label>
+                    <input type="number" step="0.01" min="0.01" id="edit-prod-price" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
                 </div>
 
-                <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400 leading-relaxed text-[11px]">
-                    <p class="font-bold flex items-center gap-1.5 mb-0.5">
-                        <i class="ph-bold ph-warning-circle"></i> تنبيه أمني وإداري:
-                    </p>
-                    تعيين المستخدم كـ "وكيل" يمنحه صلاحية استقبال كاش الزبائن لشحن محافظهم، وصرف عمولات الشركاء كاش، ويتم استبعاده تلقائياً من استخدام أكواد الخصم.
+                <!-- التصنيف -->
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">التصنيف:</label>
+                    <input id="edit-prod-category" placeholder="Games" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
                 </div>
+            </div>
 
-                <div class="pt-3 flex gap-2">
-                    <button type="submit" id="btn-save-agent" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition shadow-sm">
-                        اعتماد كوكيل مالي
-                    </button>
-                    <button type="button" onclick="closeAgentModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
-                        إلغاء
-                    </button>
-                </div>
-            </form>
+            <!-- رابط الصورة -->
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">رابط صورة الباقة (اختياري):</label>
+                <input type="url" id="edit-prod-image" placeholder="https://..." class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-[11px] outline-none" dir="ltr">
+            </div>
+
+            <!-- حالة التفعيل -->
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">حالة العرض في المتجر:</label>
+                <select id="edit-prod-status" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                    <option value="active">نشط ✓ (معروض للزبائن)</option>
+                    <option value="inactive">معطل ✕ (مخفي مؤقتاً)</option>
+                </select>
+            </div>
+
+            <div class="pt-3 flex gap-2">
+                <button type="submit" id="btn-save-edit-prod" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5">
+                    <i class="ph-bold ph-floppy-disk text-sm"></i>
+                    <span>حفظ التعديلات</span>
+                </button>
+                <button type="button" onclick="closeEditModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
+                    إلغاء
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+            <!-- نافذة منبثقة موحدة: إضافة أو تعديل باقة -->
+<div id="product-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+        <!-- رأس النافذة المنبثقة -->
+        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+            <h4 id="product-modal-title" class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <i id="product-modal-icon" class="ph-bold ph-pencil-simple text-blue-500 text-base"></i>
+                <span id="product-modal-heading">تعديل بيانات الباقة</span>
+            </h4>
+            <button type="button" onclick="closeProductModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
+                <i class="ph-bold ph-x"></i>
+            </button>
         </div>
+
+        <!-- نموذج البيانات -->
+        <form onsubmit="handleProductModalSubmit(event)" class="space-y-3 text-xs">
+            <!-- حقل الـ ID المخفي: فارغ في الإضافة وممتلئ في التعديل -->
+            <input type="hidden" id="modal-prod-id">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- المنصة: تكون مقفلة ومحمية عند التعديل، ومتاحة عند الإضافة -->
+                <div>
+                    <label id="modal-platform-label" class="block font-bold text-slate-600 dark:text-slate-300 mb-1">
+                        المنصة:
+                    </label>
+                    <input list="platform-suggestions" id="modal-prod-platform" required placeholder="مثال: Steam, PUBG" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                    <datalist id="platform-suggestions"></datalist>
+                </div>
+
+                <!-- نوع التسليم: يعتمد CODE أو ID فقط -->
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نوع التسليم:</label>
+                    <select id="modal-prod-type" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                        <option value="CODE">كود رقمي فوري (CODE)</option>
+                        <option value="ID">شحن مباشر بالـ Player ID (ID)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- اسم الباقة -->
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اسم الباقة المعروضة:</label>
+                <input id="modal-prod-name" required placeholder="مثال: بطاقة 50 يورو أو 660 شدة" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- السعر -->
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">السعر ($):</label>
+                    <input type="number" step="0.01" min="0.01" id="modal-prod-price" required placeholder="0.00" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
+                </div>
+
+                <!-- التصنيف -->
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">التصنيف:</label>
+                    <input id="modal-prod-category" placeholder="Games" value="Games" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                </div>
+            </div>
+
+            <!-- رابط الصورة -->
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">رابط صورة الباقة (اختياري):</label>
+                <input type="url" id="modal-prod-image" placeholder="https://..." class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-[11px] outline-none" dir="ltr">
+            </div>
+
+            <!-- حالة التفعيل -->
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">حالة العرض في المتجر:</label>
+                <select id="modal-prod-status" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                    <option value="active">نشط ✓ (معروض للزبائن)</option>
+                    <option value="inactive">معطل ✕ (مخفي مؤقتاً)</option>
+                </select>
+            </div>
+
+            <div class="pt-3 flex gap-2">
+                <button type="submit" id="btn-modal-submit" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5">
+                    <i class="ph-bold ph-floppy-disk text-sm"></i>
+                    <span id="modal-submit-text">حفظ التعديلات</span>
+                </button>
+                <button type="button" onclick="closeProductModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
+                    إلغاء
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+            <!-- نافذة تعيين / تعديل شريك تسويقي -->
+<div id="affiliate-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+            <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="ph-bold ph-tag text-purple-500 text-base"></i>
+                <span id="affiliate-modal-title">إعداد الشريك التسويقي والكود</span>
+            </h4>
+            <button type="button" onclick="closeAffiliateModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
+                <i class="ph-bold ph-x"></i>
+            </button>
+        </div>
+
+        <form onsubmit="handleAffiliateSubmit(event)" class="space-y-3 text-xs">
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اختر المستخدم المراد ترقيته:</label>
+                <select id="affiliate-user-select" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none"></select>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">كود الخصم المخصص (Coupon Code):</label>
+                <input id="affiliate-code-input" required placeholder="مثال: ANAS10" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold uppercase outline-none" dir="ltr">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نسبة خصم الزبون (%):</label>
+                    <input type="number" step="0.5" min="0" max="50" id="affiliate-discount-input" required placeholder="مثال: 5" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نسبة عمولة الشريك (%):</label>
+                    <input type="number" step="0.5" min="0" max="50" id="affiliate-comm-input" required placeholder="مثال: 10" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
+                </div>
+            </div>
+
+            <div class="pt-3 flex gap-2">
+                <button type="submit" id="btn-save-affiliate" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition shadow-sm">
+                    حفظ واعتماد الكود
+                </button>
+                <button type="button" onclick="closeAffiliateModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
+                    إلغاء
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- نافذة تعيين وكيل مالي معتمد -->
+<div id="agent-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+            <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="ph-bold ph-shield-check text-emerald-500 text-base"></i>
+                <span>ترقية حساب إلى وكيل كاش معتمد</span>
+            </h4>
+            <button type="button" onclick="closeAgentModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
+                <i class="ph-bold ph-x"></i>
+            </button>
+        </div>
+
+        <form onsubmit="handleAgentSubmit(event)" class="space-y-3 text-xs">
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اختر الحساب المراد ترقيته لوكيل:</label>
+                <select id="agent-user-select" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none"></select>
+            </div>
+
+            <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400 leading-relaxed text-[11px]">
+                <p class="font-bold flex items-center gap-1.5 mb-0.5">
+                    <i class="ph-bold ph-warning-circle"></i> تنبيه أمني وإداري:
+                </p>
+                تعيين المستخدم كـ "وكيل" يمنحه صلاحية استقبال كاش الزبائن لشحن محافظهم، وصرف عمولات الشركاء كاش، ويتم استبعاده تلقائياً من استخدام أكواد الخصم.
+            </div>
+
+            <div class="pt-3 flex gap-2">
+                <button type="submit" id="btn-save-agent" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition shadow-sm">
+                    اعتماد كوكيل مالي
+                </button>
+                <button type="button" onclick="closeAgentModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
+                    إلغاء
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+        </main>
     </div>
 
     <!-- كود المنطق البرمجي (JavaScript) -->
@@ -576,6 +741,7 @@
                 }
 
                 currentAdminUser = session.user;
+                // إذا تم التحقق بنجاح يتم إخفاء شريط التنبيه إن كان ظاهراً
                 document.getElementById('auth-alert-bar').classList.add('hidden');
                 loadAllAdminData();
             } catch (err) {
@@ -973,19 +1139,23 @@
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                     <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.platform}</td>
                     <td class="py-3 font-bold text-slate-700 dark:text-slate-200">${p.package_name}</td>
+                    <!-- السعر: نص عادي غير قابل للتعديل المباشر -->
                     <td class="py-3 font-mono font-black text-slate-900 dark:text-white">
                         $${Number(p.price).toFixed(2)}
                     </td>
+                    <!-- نوع التسليم: شارة توضيحية -->
                     <td class="py-3">
                         <span class="px-2.5 py-1 rounded-md font-mono text-[10px] font-bold ${p.product_type === 'CODE' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-amber-500/10 text-amber-500'}">
                             ${p.product_type === 'CODE' ? 'كود رقمي' : 'شحن ID'}
                         </span>
                     </td>
+                    <!-- الحالة: شارة عرض فقط -->
                     <td class="py-3 text-center">
                         <span class="px-2.5 py-1 rounded-lg text-[10px] font-black ${p.status === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-slate-500/10 text-slate-400'}">
                             ${p.status === 'active' ? 'نشط ✓' : 'معطل ✕'}
                         </span>
                     </td>
+                    <!-- الإجراءات المعتمدة: التعديل والحذف فقط -->
                     <td class="py-3 text-center">
                         <div class="flex items-center justify-center gap-1.5">
                             <button onclick="openEditModal('${p.id}')" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل بيانات الباقة">
@@ -1000,19 +1170,143 @@
             `).join('');
         }
 
+        async function inlineUpdateProductPrice(id, newPrice) {
+            const price = parseFloat(newPrice);
+            if (isNaN(price) || price <= 0) return alert("يرجى إدخال سعر صالح.");
+
+            const prod = allProductsCache.find(x => x.id === id);
+            if (!prod) return;
+
+            const { data, error } = await db.rpc('admin_save_product', {
+                p_id: id,
+                p_platform: prod.platform,
+                p_package_name: prod.package_name,
+                p_price: price,
+                p_product_type: prod.product_type,
+                p_category: prod.category || 'Games',
+                p_image_url: prod.image_url || null,
+                p_status: prod.status || 'active'
+            });
+
+            if (error || data.status === 'error') {
+                alert(error ? error.message : data.message);
+                loadProducts();
+            } else {
+                loadProducts();
+            }
+        }
+
+        async function toggleProduct(id, currentStatus) {
+            const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            const prod = allProductsCache.find(x => x.id === id);
+            if (!prod) return;
+
+            const { data, error } = await db.rpc('admin_save_product', {
+                p_id: id,
+                p_platform: prod.platform,
+                p_package_name: prod.package_name,
+                p_price: prod.price,
+                p_product_type: prod.product_type,
+                p_category: prod.category || 'Games',
+                p_image_url: prod.image_url || null,
+                p_status: nextStatus
+            });
+
+            if (error || data.status === 'error') {
+                alert(error ? error.message : data.message);
+            } else {
+                loadProducts();
+            }
+        }
+        // فتح نافذة التعديل وتعبئة بيانات الباقة المختارة
+        function openEditModal(prodId) {
+    const prod = allProductsCache.find(p => p.id === prodId);
+    if (!prod) return;
+
+    document.getElementById('edit-prod-id').value = prod.id;
+    document.getElementById('edit-prod-platform').value = prod.platform;
+    document.getElementById('edit-prod-name').value = prod.package_name;
+    document.getElementById('edit-prod-price').value = prod.price;
+
+    // مطابقة القيمة الحرفية: إذا كانت تحتوي على ID تُحدد ID، وغير ذلك تُحدد CODE
+    const currentType = (prod.product_type || 'CODE').toUpperCase();
+    document.getElementById('edit-prod-type').value = currentType.includes('ID') ? 'ID' : 'CODE';
+
+    document.getElementById('edit-prod-category').value = prod.category || 'Games';
+    document.getElementById('edit-prod-image').value = prod.image_url || '';
+    document.getElementById('edit-prod-status').value = prod.status || 'active';
+
+    document.getElementById('edit-product-modal').classList.remove('hidden');
+}
+        // إغلاق نافذة التعديل
+        function closeEditModal() {
+            document.getElementById('edit-product-modal').classList.add('hidden');
+        }
+
+        // إرسال التعديلات إلى Supabase
+        async function handleEditProductSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-edit-prod');
+            const id = document.getElementById('edit-prod-id').value;
+            const platform = document.getElementById('edit-prod-platform').value;
+            const name = document.getElementById('edit-prod-name').value.trim();
+            const price = parseFloat(document.getElementById('edit-prod-price').value);
+            const type = document.getElementById('edit-prod-type').value;
+            const category = document.getElementById('edit-prod-category').value.trim();
+            const imageUrl = document.getElementById('edit-prod-image').value.trim();
+            const status = document.getElementById('edit-prod-status').value;
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الحفظ...`;
+
+            try {
+                const { data, error } = await db.rpc('admin_save_product', {
+                    p_id: id,
+                    p_platform: platform,
+                    p_package_name: name,
+                    p_price: price,
+                    p_product_type: type,
+                    p_category: category,
+                    p_image_url: imageUrl || null,
+                    p_status: status
+                });
+
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    alert("✓ " + data.message);
+                    closeEditModal();
+                    await loadProducts();
+                    if (typeof loadInventoryData === 'function') await loadInventoryData();
+                } else {
+                    alert("فشل التعديل: " + (data ? data.message : "خطأ غير متوقع"));
+                }
+            } catch (err) {
+                console.error("Edit Product Error:", err);
+                alert("حدث خطأ أثناء تعديل الباقة: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-floppy-disk text-sm"></i> <span>حفظ التعديلات</span>`;
+            }
+        }
+
+        // 1. فتح النافذة لإضافة باقة جديدة
         function openAddModal() {
+            // تفريغ معرّف المنتج ليعرف الخادم أنها إضافة وليست تعديل
             document.getElementById('modal-prod-id').value = '';
             document.getElementById('product-modal-heading').innerText = 'إضافة باقة أو منصة جديدة';
             document.getElementById('product-modal-icon').className = 'ph-bold ph-plus-circle text-emerald-500 text-base';
             document.getElementById('modal-submit-text').innerText = 'حفظ وإضافة للمتجر';
             document.getElementById('btn-modal-submit').className = 'flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5';
 
+            // تفعيل حقل المنصة للكتابة
             const platformInput = document.getElementById('modal-prod-platform');
             platformInput.disabled = false;
             platformInput.value = '';
             platformInput.className = 'w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none';
             document.getElementById('modal-platform-label').innerHTML = 'المنصة:';
 
+            // تصفير بقية الحقول
             document.getElementById('modal-prod-name').value = '';
             document.getElementById('modal-prod-price').value = '';
             document.getElementById('modal-prod-type').value = 'CODE';
@@ -1020,9 +1314,11 @@
             document.getElementById('modal-prod-image').value = '';
             document.getElementById('modal-prod-status').value = 'active';
 
+            // إظهار النافذة
             document.getElementById('product-modal').classList.remove('hidden');
         }
 
+        // 2. فتح النافذة لتعديل باقة موجودة (مع قفل اسم المنصة 🔒)
         function openEditModal(prodId) {
             const prod = allProductsCache.find(p => p.id === prodId);
             if (!prod) return;
@@ -1033,6 +1329,7 @@
             document.getElementById('modal-submit-text').innerText = 'حفظ التعديلات';
             document.getElementById('btn-modal-submit').className = 'flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5';
 
+            // قفل حقل المنصة تماماً لمنع تغييرها
             const platformInput = document.getElementById('modal-prod-platform');
             platformInput.disabled = true;
             platformInput.value = prod.platform;
@@ -1042,6 +1339,7 @@
             document.getElementById('modal-prod-name').value = prod.package_name;
             document.getElementById('modal-prod-price').value = prod.price;
 
+            // تحديد CODE أو ID بدقة
             const currentType = (prod.product_type || 'CODE').toUpperCase();
             document.getElementById('modal-prod-type').value = currentType.includes('ID') ? 'ID' : 'CODE';
 
@@ -1049,22 +1347,25 @@
             document.getElementById('modal-prod-image').value = prod.image_url || '';
             document.getElementById('modal-prod-status').value = prod.status || 'active';
 
+            // إظهار النافذة
             document.getElementById('product-modal').classList.remove('hidden');
         }
 
+        // 3. إغلاق النافذة
         function closeProductModal() {
             document.getElementById('product-modal').classList.add('hidden');
         }
 
+        // 4. حفظ النموذج وإرساله إلى Supabase
         async function handleProductModalSubmit(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-modal-submit');
             const idVal = document.getElementById('modal-prod-id').value;
-            const id = idVal ? idVal : null;
+            const id = idVal ? idVal : null; // إذا كان فارغاً يعني عملية INSERT
             const platform = document.getElementById('modal-prod-platform').value.trim();
             const name = document.getElementById('modal-prod-name').value.trim();
             const price = parseFloat(document.getElementById('modal-prod-price').value);
-            const type = document.getElementById('modal-prod-type').value;
+            const type = document.getElementById('modal-prod-type').value; // إما CODE أو ID حرفياً
             const category = document.getElementById('modal-prod-category').value.trim();
             const imageUrl = document.getElementById('modal-prod-image').value.trim();
             const status = document.getElementById('modal-prod-status').value;
@@ -1089,7 +1390,7 @@
                 if (data && data.status === 'success') {
                     alert("✓ " + data.message);
                     closeProductModal();
-                    await loadProducts();
+                    await loadProducts(); // إعادة جلب المنتجات المحدثة
                     if (typeof loadInventoryData === 'function') await loadInventoryData();
                 } else {
                     alert("فشل الحفظ: " + (data ? data.message : "خطأ غير متوقع"));
@@ -1116,7 +1417,104 @@
             }
         }
 
-        // ================= الإيداع اليدوي =================
+        // حفظ باقة أو منصة جديدة
+        async function handleProductFormSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-product');
+            const platform = document.getElementById('modal-product-platform').value.trim();
+            const name = document.getElementById('modal-product-name').value.trim();
+            const price = parseFloat(document.getElementById('modal-product-price').value);
+            const type = document.getElementById('modal-product-type').value;
+            const category = document.getElementById('modal-product-category').value.trim();
+            const imageUrl = document.getElementById('modal-product-image').value.trim();
+
+            btn.disabled = true;
+            btn.innerText = "جاري الحفظ...";
+
+            try {
+                const { data, error } = await db.rpc('admin_save_product', {
+                    p_id: null,
+                    p_platform: platform,
+                    p_package_name: name,
+                    p_price: price,
+                    p_product_type: type,
+                    p_category: category,
+                    p_image_url: imageUrl || null
+                });
+
+                if (error) throw error;
+                if (data && data.status === 'success') {
+                    alert("✓ " + data.message);
+                    document.getElementById('standalone-product-form').reset();
+                    await loadProducts();
+                    await loadInventoryData();
+                    switchTab('products');
+                } else {
+                    alert("فشل الحفظ: " + (data ? data.message : "خطأ غير متوقع"));
+                }
+            } catch (err) {
+                console.error("Save Product Error:", err);
+                alert("حدث خطأ: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-check text-sm"></i> <span>حفظ وإضافة الباقة للمتجر فوراً</span>`;
+            }
+        }
+
+        // ترقية وكيل
+        async function handlePromoteAgent() {
+            const email = document.getElementById('agent-email').value.trim();
+            const code = document.getElementById('agent-code').value.trim();
+            const discount = parseFloat(document.getElementById('agent-discount').value);
+            const comm = parseFloat(document.getElementById('agent-comm').value);
+
+            if (!email || !code || isNaN(discount) || isNaN(comm)) {
+                return alert("يرجى إدخال جميع بيانات الوكيل بشكل صحيح.");
+            }
+
+            const { data, error } = await db.rpc('admin_promote_agent', {
+                p_email: email,
+                p_code: code,
+                p_discount_percent: discount,
+                p_commission_percent: comm
+            });
+
+            if (error || data.status === 'error') {
+                alert(error ? error.message : data.message);
+            } else {
+                alert("✓ " + data.message);
+                document.getElementById('agent-email').value = '';
+                document.getElementById('agent-code').value = '';
+            }
+        }
+
+        // تسليم أرباح كاش
+        async function handlePayoutCash() {
+            const email = document.getElementById('payout-email').value.trim();
+            const amount = parseFloat(document.getElementById('payout-amount').value);
+            const note = document.getElementById('payout-note').value.trim() || 'تسليم كاش يداً بيد';
+
+            if (!email || isNaN(amount) || amount <= 0) {
+                return alert("يرجى إدخال بريد الوكيل ومبلغ صحيح.");
+            }
+
+            const { data, error } = await db.rpc('payout_agent_cash', {
+                p_agent_email: email,
+                p_payout_amount: amount,
+                p_note: note
+            });
+
+            if (error || data.status === 'error') {
+                alert(error ? error.message : data.message);
+            } else {
+                alert(`✓ تم توثيق التسليم وخصم $${amount.toFixed(2)} بنجاح! المتبقي: $${Number(data.remaining_balance).toFixed(2)}`);
+                document.getElementById('payout-email').value = '';
+                document.getElementById('payout-amount').value = '';
+                loadKPIs();
+            }
+        }
+
+        // إيداع يدوي لمحفظة زبون
         async function handleManualTopup() {
             const email = document.getElementById('topup-email').value.trim();
             const amount = parseFloat(document.getElementById('topup-amount').value);
@@ -1142,7 +1540,7 @@
             }
         }
 
-        // ================= التبديل بين التبويبات =================
+        // التبديل بين التبويبات
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(b => {
@@ -1153,21 +1551,11 @@
             const activeTab = document.getElementById(`tab-${tabId}`);
             if (activeSec) activeSec.classList.remove('hidden');
             if (activeTab) activeTab.className = "tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap";
-            
-            // تحميل البيانات تلقائياً عند الدخول للتبويب
-            if (tabId === 'affiliates') {
-                loadAffiliatesData();
-            } else if (tabId === 'agents') {
-                loadAgentsData();
-            } else if (tabId === 'products') {
-                loadProducts();
-            } else if (tabId === 'inventory') {
-                loadInventoryData();
-            } else if (tabId === 'orders') {
-                loadPendingOrders();
-            } else if (tabId === 'deposits') {
-                loadPendingDeposits();
-            }
+            if (tabName === 'affiliates') {
+    loadAffiliatesData();
+} else if (tabName === 'agents') {
+    loadAgentsData();
+}
         }
 
         async function handleLogout() {
@@ -1175,257 +1563,246 @@
             window.location.href = "index.html";
         }
 
-        // ================= إدارة الشركاء التسويقيين (Affiliates) =================
-        async function loadAffiliatesData() {
-            const tbody = document.getElementById('affiliates-tbody');
-            if (!tbody) return;
-
-            try {
-                const { data: coupons, error } = await db
-                    .from('coupons')
-                    .select(`
-                        id, code, discount_percent, affiliate_commission_percent, usage_count, is_active,
-                        profiles:affiliate_id ( id, first_name, last_name, email, balance )
-                    `)
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                if (!coupons || coupons.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400">لا يوجد شركاء تسويقيين حالياً</td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = coupons.map(c => {
-                    const p = c.profiles;
-                    let partnerName = 'غير مرتبط';
-                    if (p) {
-                        const fn = [p.first_name, p.last_name].filter(Boolean).join(' ').trim();
-                        partnerName = fn !== '' ? fn : (p.email || 'مستخدم');
-                    }
-
-                    return `
-                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${partnerName}</td>
-                            <td class="py-3">
-                                <span class="px-2.5 py-1 rounded font-mono font-black text-purple-600 bg-purple-500/10">${c.code}</span>
-                            </td>
-                            <td class="py-3 font-mono font-bold text-slate-600 dark:text-slate-300">${c.discount_percent}%</td>
-                            <td class="py-3 font-mono font-bold text-emerald-600">${c.affiliate_commission_percent}%</td>
-                            <td class="py-3 font-mono text-slate-500">${c.usage_count || 0} طلب</td>
-                            <td class="py-3 font-mono font-black text-slate-900 dark:text-white">$${Number(p?.balance || 0).toFixed(2)}</td>
-                            <td class="py-3 text-center">
-                                <button onclick="editAffiliate('${p?.id}', '${c.code}', ${c.discount_percent}, ${c.affiliate_commission_percent})" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل نسب الكود">
-                                    <i class="ph-bold ph-pencil-simple text-sm"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            } catch (err) {
-                console.error("Affiliates load error:", err);
-                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-500">فشل تحميل الشركاء: ${err.message}</td></tr>`;
-            }
-        }
-
-        async function openAffiliateModal() {
-            await populateUserDropdown('affiliate-user-select');
-            document.getElementById('affiliate-code-input').value = '';
-            document.getElementById('affiliate-discount-input').value = '5';
-            document.getElementById('affiliate-comm-input').value = '10';
-            document.getElementById('affiliate-modal-title').innerText = 'إعداد شريك تسويقي جديد';
-            document.getElementById('affiliate-modal').classList.remove('hidden');
-        }
-
-        function closeAffiliateModal() {
-            document.getElementById('affiliate-modal').classList.add('hidden');
-        }
-
-        async function editAffiliate(userId, code, disc, comm) {
-            await populateUserDropdown('affiliate-user-select');
-            document.getElementById('affiliate-user-select').value = userId;
-            document.getElementById('affiliate-code-input').value = code;
-            document.getElementById('affiliate-discount-input').value = disc;
-            document.getElementById('affiliate-comm-input').value = comm;
-            document.getElementById('affiliate-modal-title').innerText = 'تعديل بيانات الشريك والكود';
-            document.getElementById('affiliate-modal').classList.remove('hidden');
-        }
-
-        async function handleAffiliateSubmit(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-save-affiliate');
-            btn.disabled = true;
-            btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الحفظ...`;
-
-            const userId = document.getElementById('affiliate-user-select').value;
-            const code = document.getElementById('affiliate-code-input').value.trim();
-            const discount = parseFloat(document.getElementById('affiliate-discount-input').value);
-            const comm = parseFloat(document.getElementById('affiliate-comm-input').value);
-
-            try {
-                const { data, error } = await db.rpc('admin_manage_affiliate', {
-                    p_user_id: userId,
-                    p_coupon_code: code,
-                    p_discount_percent: discount,
-                    p_commission_percent: comm
-                });
-
-                if (error) throw error;
-
-                if (data && data.status === 'success') {
-                    alert(data.message);
-                    closeAffiliateModal();
-                    await loadAffiliatesData();
-                } else {
-                    alert("خطأ: " + (data ? data.message : "فشلت العملية"));
-                }
-            } catch (err) {
-                alert("خطأ أثناء الحفظ: " + (err.message || err));
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = "حفظ واعتماد الكود";
-            }
-        }
-
-        // ================= إدارة الوكلاء الماليين (Cash Agents) =================
-        async function loadAgentsData() {
-            const tbody = document.getElementById('agents-tbody');
-            if (!tbody) return;
-
-            try {
-                const { data: agents, error } = await db
-                    .from('profiles')
-                    .select('id, first_name, last_name, email, balance, role')
-                    .eq('role', 'agent')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                if (!agents || agents.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">لا يوجد وكلاء ماليين معتمدين حالياً</td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = agents.map(a => {
-                    const fn = [a.first_name, a.last_name].filter(Boolean).join(' ').trim();
-                    const agentName = fn !== '' ? fn : (a.email || 'بدون اسم');
-
-                    return `
-                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${agentName}</td>
-                            <td class="py-3 font-mono text-slate-500">${a.email || '—'}</td>
-                            <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400">$${Number(a.balance || 0).toFixed(2)}</td>
-                            <td class="py-3 text-center">
-                                <span class="px-2.5 py-1 rounded-md text-[10px] font-black bg-emerald-500/10 text-emerald-600">وكيل معتمد ✓</span>
-                            </td>
-                            <td class="py-3 text-center">
-                                <button onclick="demoteAgent('${a.id}', '${agentName}')" class="px-2.5 py-1 text-rose-500 hover:bg-rose-500/10 rounded-lg font-bold transition text-[11px]">
-                                    إلغاء صفة الوكيل
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            } catch (err) {
-                console.error("Agents load error:", err);
-                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-rose-500">فشل تحميل الوكلاء: ${err.message}</td></tr>`;
-            }
-        }
-
-        async function openAgentModal() {
-            await populateUserDropdown('agent-user-select');
-            document.getElementById('agent-modal').classList.remove('hidden');
-        }
-
-        function closeAgentModal() {
-            document.getElementById('agent-modal').classList.add('hidden');
-        }
-
-        async function handleAgentSubmit(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-save-agent');
-            btn.disabled = true;
-            btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الاعتماد...`;
-
-            const userId = document.getElementById('agent-user-select').value;
-            try {
-                const { data, error } = await db.rpc('admin_manage_agent', {
-                    p_user_id: userId,
-                    p_action: 'promote'
-                });
-
-                if (error) throw error;
-
-                if (data && data.status === 'success') {
-                    alert(data.message);
-                    closeAgentModal();
-                    await loadAgentsData();
-                } else {
-                    alert("خطأ: " + (data ? data.message : "فشلت العملية"));
-                }
-            } catch (err) {
-                alert("خطأ أثناء ترقية الوكيل: " + (err.message || err));
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = "اعتماد كوكيل مالي";
-            }
-        }
-
-        async function demoteAgent(userId, name) {
-            if (!confirm(`هل أنت متأكد من إلغاء رتبة الوكيل للمستخدم (${name}) وإعادته لعميل عادي؟`)) return;
-
-            try {
-                const { data, error } = await db.rpc('admin_manage_agent', {
-                    p_user_id: userId,
-                    p_action: 'demote'
-                });
-
-                if (error) throw error;
-
-                alert(data.message);
-                await loadAgentsData();
-            } catch (err) {
-                alert("خطأ: " + (err.message || err));
-            }
-        }
-
-        // تعبئة القائمة المنسدلة مع دمج الاسمين برمجياً في المتصفح فقط
-        async function populateUserDropdown(selectElementId) {
-            const select = document.getElementById(selectElementId);
-            if (!select) return;
-
-            select.innerHTML = `<option value="">جاري جلب الحسابات...</option>`;
-            try {
-                const { data: users, error } = await db
-                    .from('profiles')
-                    .select('id, first_name, last_name, email, role')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                if (users && users.length > 0) {
-                    select.innerHTML = `
-                        <option value="">-- اختر الحساب من القائمة --</option>
-                        ${users.map(u => {
-                            const firstName = u.first_name ? u.first_name.trim() : '';
-                            const lastName = u.last_name ? u.last_name.trim() : '';
-                            const fullName = `${firstName}${lastName}`.trim();
-                            const displayName = fullName !== '' ? fullName : (u.email ? u.email.split('@')[0] : 'مستخدم');
-
-                            return `<option value="${u.id}">${displayName} (${u.email \vert{}\vert{} 'بدون إيميل'}) [${u.role || 'customer'}]</option>`;
-                        }).join('')}
-                    `;
-                } else {
-                    select.innerHTML = `<option value="">لا يوجد مستخدمين مسجلين</option>`;
-                }
-            } catch (err) {
-                console.error("Dropdown error:", err);
-                select.innerHTML = `<option value="">فشل تحميل الحسابات (${err.message || 'خطأ'})</option>`;
-            }
-        }
-
-        // تشغيل فحص الصلاحيات عند بدء تشغيل الصفحة
+        // تشغيل فحص الصلاحيات مباشرة
         checkAdminAuth();
+
+        // =========================================================================
+// دوال إدارة الشركاء التسويقيين والكوبونات (Affiliates)
+// =========================================================================
+
+async function loadAffiliatesData() {
+    const tbody = document.getElementById('affiliates-tbody');
+    if (!tbody) return;
+
+    try {
+        const { data: coupons, error } = await db
+            .from('coupons')
+            .select(`
+                id, code, discount_percent, affiliate_commission_percent, usage_count, is_active,
+                profiles:affiliate_id ( id, full_name, email, balance )
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!coupons || coupons.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400">لا يوجد شركاء تسويقيين حالياً</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = coupons.map(c => `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                <td class="py-3 font-bold text-slate-800 dark:text-slate-100">
+                    ${c.profiles ? (c.profiles.full_name || c.profiles.email) : 'غير مرتبط'}
+                </td>
+                <td class="py-3">
+                    <span class="px-2.5 py-1 rounded font-mono font-black text-purple-600 bg-purple-500/10">${c.code}</span>
+                </td>
+                <td class="py-3 font-mono font-bold text-slate-600 dark:text-slate-300">${c.discount_percent}%</td>
+                <td class="py-3 font-mono font-bold text-emerald-600">${c.affiliate_commission_percent}%</td>
+                <td class="py-3 font-mono text-slate-500">${c.usage_count || 0} طلب</td>
+                <td class="py-3 font-mono font-black text-slate-900 dark:text-white">$${Number(c.profiles?.balance || 0).toFixed(2)}</td>
+                <td class="py-3 text-center">
+                    <button onclick="editAffiliate('${c.profiles?.id}', '${c.code}', ${c.discount_percent}, ${c.affiliate_commission_percent})" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل نسب الكود">
+                        <i class="ph-bold ph-pencil-simple text-sm"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error("Affiliates load error:", err);
+        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-500">فشل تحميل الشركاء: ${err.message}</td></tr>`;
+    }
+}
+
+async function openAffiliateModal() {
+    await populateUserDropdown('affiliate-user-select');
+    document.getElementById('affiliate-code-input').value = '';
+    document.getElementById('affiliate-discount-input').value = '5';
+    document.getElementById('affiliate-comm-input').value = '10';
+    document.getElementById('affiliate-modal-title').innerText = 'إعداد شريك تسويقي جديد';
+    document.getElementById('affiliate-modal').classList.remove('hidden');
+}
+
+function closeAffiliateModal() {
+    document.getElementById('affiliate-modal').classList.add('hidden');
+}
+
+async function editAffiliate(userId, code, disc, comm) {
+    await populateUserDropdown('affiliate-user-select');
+    document.getElementById('affiliate-user-select').value = userId;
+    document.getElementById('affiliate-code-input').value = code;
+    document.getElementById('affiliate-discount-input').value = disc;
+    document.getElementById('affiliate-comm-input').value = comm;
+    document.getElementById('affiliate-modal-title').innerText = 'تعديل بيانات الشريك والكود';
+    document.getElementById('affiliate-modal').classList.remove('hidden');
+}
+
+async function handleAffiliateSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-save-affiliate');
+    btn.disabled = true;
+    btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الحفظ...`;
+
+    const userId = document.getElementById('affiliate-user-select').value;
+    const code = document.getElementById('affiliate-code-input').value.trim();
+    const discount = parseFloat(document.getElementById('affiliate-discount-input').value);
+    const comm = parseFloat(document.getElementById('affiliate-comm-input').value);
+
+    try {
+        const { data, error } = await db.rpc('admin_manage_affiliate', {
+            p_user_id: userId,
+            p_coupon_code: code,
+            p_discount_percent: discount,
+            p_commission_percent: comm
+        });
+
+        if (error) throw error;
+
+        if (data && data.status === 'success') {
+            alert(data.message);
+            closeAffiliateModal();
+            await loadAffiliatesData();
+        } else {
+            alert("خطأ: " + (data ? data.message : "فشلت العملية"));
+        }
+    } catch (err) {
+        alert("خطأ أثناء الحفظ: " + (err.message || err));
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "حفظ واعتماد الكود";
+    }
+}
+
+
+// =========================================================================
+// دوال إدارة الوكلاء الماليين (Cash Agents)
+// =========================================================================
+
+async function loadAgentsData() {
+    const tbody = document.getElementById('agents-tbody');
+    if (!tbody) return;
+
+    try {
+        const { data: agents, error } = await db
+            .from('profiles')
+            .select('id, full_name, email, balance, role')
+            .eq('role', 'agent')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!agents || agents.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">لا يوجد وكلاء ماليين معتمدين حالياً</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = agents.map(a => `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${a.full_name || 'بدون اسم'}</td>
+                <td class="py-3 font-mono text-slate-500">${a.email || '—'}</td>
+                <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400">$${Number(a.balance || 0).toFixed(2)}</td>
+                <td class="py-3 text-center">
+                    <span class="px-2.5 py-1 rounded-md text-[10px] font-black bg-emerald-500/10 text-emerald-600">وكيل معتمد ✓</span>
+                </td>
+                <td class="py-3 text-center">
+                    <button onclick="demoteAgent('${a.id}', '${a.full_name || a.email}')" class="px-2.5 py-1 text-rose-500 hover:bg-rose-500/10 rounded-lg font-bold transition text-[11px]">
+                        إلغاء صفة الوكيل
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error("Agents load error:", err);
+        tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-rose-500">فشل تحميل الوكلاء: ${err.message}</td></tr>`;
+    }
+}
+
+async function openAgentModal() {
+    await populateUserDropdown('agent-user-select');
+    document.getElementById('agent-modal').classList.remove('hidden');
+}
+
+function closeAgentModal() {
+    document.getElementById('agent-modal').classList.add('hidden');
+}
+
+async function handleAgentSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-save-agent');
+    btn.disabled = true;
+    btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الاعتماد...`;
+
+    const userId = document.getElementById('agent-user-select').value;
+    try {
+        const { data, error } = await db.rpc('admin_manage_agent', {
+            p_user_id: userId,
+            p_action: 'promote'
+        });
+
+        if (error) throw error;
+
+        if (data && data.status === 'success') {
+            alert(data.message);
+            closeAgentModal();
+            await loadAgentsData();
+        } else {
+            alert("خطأ: " + (data ? data.message : "فشلت العملية"));
+        }
+    } catch (err) {
+        alert("خطأ أثناء ترقية الوكيل: " + (err.message || err));
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "اعتماد كوكيل مالي";
+    }
+}
+
+async function demoteAgent(userId, name) {
+    if (!confirm(`هل أنت متأكد من إلغاء رتبة الوكيل للمستخدم (${name}) وإعادته لعميل عادي؟`)) return;
+
+    try {
+        const { data, error } = await db.rpc('admin_manage_agent', {
+            p_user_id: userId,
+            p_action: 'demote'
+        });
+
+        if (error) throw error;
+
+        alert(data.message);
+        await loadAgentsData();
+    } catch (err) {
+        alert("خطأ: " + (err.message || err));
+    }
+}
+
+// دالة مساعدة لتعبئة قائمة اختيار المستخدمين
+async function populateUserDropdown(selectElementId) {
+    const select = document.getElementById(selectElementId);
+    if (!select) return;
+
+    select.innerHTML = `<option value="">جاري جلب الحسابات...</option>`;
+    try {
+        const { data: users, error } = await db
+            .from('profiles')
+            .select('id, full_name, email, role')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (users && users.length > 0) {
+            select.innerHTML = users.map(u => `
+                <option value="${u.id}">
+                    ${u.full_name ? u.full_name : 'بدون اسم'} (${u.email || u.id.slice(0, 8)}) [${u.role || 'customer'}]
+                </option>
+            `).join('');
+        } else {
+            select.innerHTML = `<option value="">لا يوجد مستخدمين مسجلين</option>`;
+        }
+    } catch (err) {
+        console.error("Dropdown error:", err);
+        select.innerHTML = `<option value="">فشل تحميل الحسابات</option>`;
+    }
+}
     </script>
 </body>
 </html>
