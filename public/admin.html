@@ -384,6 +384,88 @@
                     إيداع الرصيد في المحفظة فوراً
                 </button>
             </section>
+            <!-- نافذة منبثقة: تعديل بيانات الباقة -->
+<div id="edit-product-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+            <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="ph-bold ph-pencil-simple text-blue-500 text-base"></i>
+                <span>تعديل بيانات الباقة</span>
+            </h4>
+            <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
+                <i class="ph-bold ph-x"></i>
+            </button>
+        </div>
+
+        <form onsubmit="handleEditProductSubmit(event)" class="space-y-3 text-xs">
+            <input type="hidden" id="edit-prod-id">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- المنصة: حقل مقفل للقراءة فقط لمنع تشوه تصنيفات المتجر -->
+                <div>
+                    <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">
+                        المنصة (ثابتة 🔒):
+                    </label>
+                    <input id="edit-prod-platform" disabled class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-bold outline-none cursor-not-allowed">
+                </div>
+
+                <!-- نوع التسليم -->
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نوع التسليم:</label>
+                    <select id="edit-prod-type" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                        <option value="CODE">كود رقمي فوري (CODE)</option>
+                        <option value="DIRECT_ID">شحن مباشر بالـ Player ID</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- اسم الباقة -->
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اسم الباقة:</label>
+                <input id="edit-prod-name" required placeholder="مثال: 60 شدة ببجي" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- السعر -->
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">السعر ($):</label>
+                    <input type="number" step="0.01" min="0.01" id="edit-prod-price" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
+                </div>
+
+                <!-- التصنيف -->
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">التصنيف:</label>
+                    <input id="edit-prod-category" placeholder="Games" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                </div>
+            </div>
+
+            <!-- رابط الصورة -->
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">رابط صورة الباقة (اختياري):</label>
+                <input type="url" id="edit-prod-image" placeholder="https://..." class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-[11px] outline-none" dir="ltr">
+            </div>
+
+            <!-- حالة التفعيل -->
+            <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">حالة العرض في المتجر:</label>
+                <select id="edit-prod-status" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                    <option value="active">نشط ✓ (معروض للزبائن)</option>
+                    <option value="inactive">معطل ✕ (مخفي مؤقتاً)</option>
+                </select>
+            </div>
+
+            <div class="pt-3 flex gap-2">
+                <button type="submit" id="btn-save-edit-prod" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5">
+                    <i class="ph-bold ph-floppy-disk text-sm"></i>
+                    <span>حفظ التعديلات</span>
+                </button>
+                <button type="button" onclick="closeEditModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
+                    إلغاء
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
         </main>
     </div>
