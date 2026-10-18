@@ -2297,42 +2297,35 @@ async function verifyRegistrationOtp() {
             toggleSideMenu(false);
             toggleView('partner-modal', true);
 
-            try {
-                // 1. جلب بيانات الكود والإحصائيات من جدول coupons
-                const { data: couponData, error: couponErr } = await supabase
-                    .from('coupons')
-                    .select('code, discount_percent, affiliate_commission_percent, usage_count')
-                    .eq('affiliate_id', currentUser.id)
-                    .maybeSingle();
+            // جلب البيانات مباشرة من جدول coupons عبر عمود code و affiliate_id
+            const { data: couponData, error: couponErr } = await supabase
+                .from('coupons')
+                .select('code, discount_percent, affiliate_commission_percent, usage_count')
+                .eq('affiliate_id', currentUser.id)
+                .maybeSingle();
 
-                if (couponErr) console.error("Coupon fetch error:", couponErr);
+            const codeEl = document.getElementById('modal-partner-code');
+            const rateEl = document.getElementById('modal-partner-commission-rate');
+            const countEl = document.getElementById('modal-partner-orders-count');
+            const earnedEl = document.getElementById('modal-partner-total-earned');
 
-                // 2. جلب الرصيد المالي الحالي من جدول profiles
-                const { data: profileData, error: profileErr } = await supabase
-                    .from('profiles')
-                    .select('balance')
-                    .eq('id', currentUser.id)
-                    .single();
+            if (couponErr) {
+                console.error("Error fetching partner coupon:", couponErr);
+            }
 
-                if (profileErr) console.error("Profile fetch error:", profileErr);
-
-                // ربط العناصر بأمان مع التحقق من وجودها
-                const codeEl = document.getElementById('modal-partner-code');
-                const rateEl = document.getElementById('modal-partner-commission-rate');
-                const countEl = document.getElementById('modal-partner-orders-count');
-                const totalEarnedEl = document.getElementById('modal-partner-total-earnings');
-                const balanceEl = document.getElementById('modal-partner-current-balance');
-
-                if (codeEl) codeEl.innerText = couponData?.code || 'لا يوجد كود';
-                if (rateEl) rateEl.innerText = (couponData?.affiliate_commission_percent || 0) + '%';
-                if (countEl) countEl.innerText = couponData?.usage_count || 0;
+            if (couponData && couponData.code) {
+                // تعبئة البيانات من جدول القسائم مباشرة
+                if (codeEl) codeEl.innerText = couponData.code;
+                if (rateEl) rateEl.innerText = (couponData.affiliate_commission_percent || 0) + "%";
+                if (countEl) countEl.innerText = couponData.usage_count || 0;
                 
-                const currentBalance = profileData?.balance || 0;
-                if (totalEarnedEl) totalEarnedEl.innerText = '$' + Number(currentBalance).toFixed(2);
-                if (balanceEl) balanceEl.innerText = '$' + Number(currentBalance).toFixed(2);
-
-            } catch (err) {
-                console.error("Error opening partner modal:", err);
+                const earned = (couponData.usage_count || 0) * 0;
+                if (earnedEl) earnedEl.innerText = "$" + Number(earned).toFixed(2);
+            } else {
+                if (codeEl) codeEl.innerText = 'لا يوجد كود';
+                if (rateEl) codeEl.innerText = '0%';
+                if (countEl) codeEl.innerText = '0';
+                if (earnedEl) earnedEl.innerText = '$0.00';
             }
         }
         
