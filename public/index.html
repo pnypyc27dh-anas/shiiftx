@@ -1035,59 +1035,41 @@
 
     <!-- ==================== النوافذ المنبثقة ==================== -->
 
-   <!-- نافذة لوحة الشريك التسويقي -->
-    <div id="partner-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
-            
-            <!-- ترويسة النافذة -->
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600">
-                        <i class="ph-bold ph-megaphone text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-black text-slate-800 dark:text-white text-lg">لوحة الشريك التسويقي</h3>
-                        <p class="text-xs text-slate-500">إحصائيات الأداء وكود الخصم الخاص بك</p>
-                    </div>
-                </div>
-                <button onclick="toggleView('partner-modal', false)" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl transition">
-                    <i class="ph-bold ph-x text-lg"></i>
-                </button>
-            </div>
-
-            <!-- محتوى الإحصائيات والأرقام المالية -->
+   <!-- نافذة لوحة الشريك التسويقي) -->
             <div class="grid grid-cols-2 gap-4 my-6">
-                <!-- كود الخصم -->
+                <!-- تبويب كود الخصم -->
                 <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <span class="text-xs text-slate-400 block mb-1">كود الخصم الخاص بك</span>
+                    <span class="text-xs text-slate-400 block mb-1 font-bold">كود الخصم الخاص بك</span>
                     <span id="modal-partner-code" class="font-mono font-black text-purple-600 dark:text-purple-400 text-lg">---</span>
                 </div>
 
-                <!-- نسبة العمولة -->
+                <!-- تبويب نسبة العمولة -->
                 <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <span class="text-xs text-slate-400 block mb-1">نسبة العمولة</span>
+                    <span class="text-xs text-slate-400 block mb-1 font-bold">نسبة العمولة</span>
                     <span id="modal-partner-commission-rate" class="font-mono font-black text-slate-800 dark:text-white text-lg">0%</span>
                 </div>
 
-                <!-- عدد الطلبات المنفذة -->
+                <!-- تبويب عدد الطلبات المنفذة -->
                 <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <span class="text-xs text-slate-400 block mb-1">الطلبات بالكود</span>
+                    <span class="text-xs text-slate-400 block mb-1 font-bold">الطلبات بالكود</span>
                     <span id="modal-partner-orders-count" class="font-mono font-black text-slate-800 dark:text-white text-lg">0</span>
                 </div>
 
-                <!-- الرصيد الحالي القابل للسحب -->
-                <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                    <span class="text-xs text-emerald-600 dark:text-emerald-400 block mb-1 font-bold">الرصيد الحالي للسحب</span>
-                    <span id="modal-partner-current-balance" class="font-mono font-black text-emerald-600 dark:text-emerald-400 text-lg">$0.00</span>
+                <!-- تبويب إجمالي الأرباح التراكمية (التي لا تنقص أبداً) -->
+                <div class="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
+                    <span class="text-xs text-blue-600 dark:text-blue-400 block mb-1 font-bold">إجمالي الأرباح التراكمية</span>
+                    <span id="modal-partner-total-earnings" class="font-mono font-black text-blue-600 dark:text-blue-400 text-lg">$0.00</span>
+                </div>
+
+                <!-- تبويب الرصيد الحالي القابل للسحب (ينقص عند السحب) -->
+                <div class="col-span-2 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-emerald-600 dark:text-emerald-400 block mb-0.5 font-bold">الرصيد الحالي (القابل للسحب)</span>
+                        <span class="text-[10px] text-slate-400">الرصيد الصافي المتاح لديك الآن لاستلامه</span>
+                    </div>
+                    <span id="modal-partner-current-balance" class="font-mono font-black text-emerald-600 dark:text-emerald-400 text-xl">$0.00</span>
                 </div>
             </div>
-
-            <!-- زر الإغلاق -->
-            <button onclick="toggleView('partner-modal', false)" class="w-full py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold text-slate-700 dark:text-slate-200 rounded-xl transition">
-                إغلاق
-            </button>
-        </div>
-    </div>
 
     <!-- 2. نافذة لوحة الوكيل المعتمد المستقلة -->
     <div id="agent-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
@@ -2316,16 +2298,16 @@ async function verifyRegistrationOtp() {
             toggleView('partner-modal', true);
 
             try {
-                // 1. جلب كود الخصم والإحصائيات الخاصة بالشريك من جدول coupons
+                // 1. جلب بيانات الكود والإحصائيات من جدول coupons
                 const { data: couponData, error: couponErr } = await supabase
                     .from('coupons')
-                    .select('code, discount_percent, affiliate_commission_percent, usage_count')
+                    .select('code, discount_percent, affiliate_commission_percent, usage_count, total_earned')
                     .eq('affiliate_id', currentUser.id)
                     .maybeSingle();
 
                 if (couponErr) console.error("Coupon fetch error:", couponErr);
 
-                // 2. جلب الرصيد المالي الحالي من جدول profiles
+                // 2. جلب الرصيد المالي الحالي القابل للسحب من جدول profiles
                 const { data: profileData, error: profileErr } = await supabase
                     .from('profiles')
                     .select('balance')
@@ -2338,13 +2320,19 @@ async function verifyRegistrationOtp() {
                 const codeEl = document.getElementById('modal-partner-code');
                 const rateEl = document.getElementById('modal-partner-commission-rate');
                 const countEl = document.getElementById('modal-partner-orders-count');
-                const balanceEl = document.getElementById('modal-partner-current-balance');
+                const totalEarnedEl = document.getElementById('modal-partner-total-earnings'); // التراكمي
+                const balanceEl = document.getElementById('modal-partner-current-balance'); // القابل للسحب
 
-                // تعبئة البيانات إن وجدت
+                // تعبئة البيانات
                 if (codeEl) codeEl.innerText = couponData?.code || 'لا يوجد كود';
                 if (rateEl) rateEl.innerText = (couponData?.affiliate_commission_percent || 0) + '%';
                 if (countEl) countEl.innerText = couponData?.usage_count || 0;
                 
+                // إجمالي الأرباح التراكمية (إذا لم يوجد عمود يمكنك جعله يعتمد على حساب أو حقل total_earned)
+                const totalEarned = couponData?.total_earned || profileData?.balance || 0;
+                if (totalEarnedEl) totalEarnedEl.innerText = '$' + Number(totalEarned).toFixed(2);
+
+                // الرصيد الحالي القابل للسحب
                 if (balanceEl) {
                     const balance = profileData?.balance || 0;
                     balanceEl.innerText = '$' + Number(balance).toFixed(2);
