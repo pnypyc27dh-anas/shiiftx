@@ -1693,6 +1693,33 @@ async function handleAffiliateSubmit(e) {
             }
         }
 
+        // دالة إلغاء صفة الشريك التسويقي وإعادة تعيينه إلى عميل عادي
+        async function demoteAffiliate(userId, name) {
+            if (!confirm(`هل أنت متأكد من إلغاء رتبة الشريك وإزالة الكوبون للمستخدم (${name}) وإعادته لعميل عادي؟`)) return;
+
+            try {
+                const { data, error } = await db.rpc('admin_manage_affiliate', {
+                    p_user_id: userId,
+                    p_coupon_code: '', // أو إرسال طلب إلغاء حسب إعدادات الدالة المخزنة لديك
+                    p_discount_percent: 0,
+                    p_commission_percent: 0
+                });
+
+                // بدلاً من ذلك، إذا كنت تريد حذف الكوبون وتعديل الرتبة مباشرة عبر الجداول:
+                // 1. إلغاء تفعيل الكوبون وإفك ارتباطه
+                await db.from('coupons').update({ is_active: false, affiliate_id: null }).eq('affiliate_id', userId);
+                
+                // 2. إرجاع رتبة المستخدم إلى customer
+                await db.from('profiles').update({ role: 'customer' }).eq('id', userId);
+
+                alert("✓ تم إلغاء صفة الشريك بنجاح.");
+                await loadAffiliatesData();
+            } catch (err) {
+                console.error("Demote Affiliate Error:", err);
+                alert("حدث خطأ أثناء إلغاء الشريك: " + (err.message || err));
+            }
+        }
+
         // =========================================================================
         // دوال إدارة الوكلاء الماليين (Cash Agents) - بتصميم موحد تماماً
         // =========================================================================
