@@ -1695,35 +1695,34 @@ async function handleAffiliateSubmit(e) {
 
         // دالة إلغاء صفة الشريك التسويقي وإعادة تعيينه إلى عميل عادي
         async function demoteAffiliate(userId, name) {
-            if (!confirm(`هل أنت متأكد من إلغاء رتبة الشريك وحذف كود الخصم للمستخدم (${name})؟`)) return;
+            if (!confirm(`هل أنت متأكد من إلغاء رتبة الشريك وحذف الكود للمستخدم (${name}) وإعادته لعميل عادي؟`)) return;
 
             try {
-                // 1. حذف الكوبون المرتبط بالشريك نهائياً من جدول coupons ليختفي السطر من الجدول
-                const { error: couponErr } = await db
-                    .from('coupons')
-                    .delete()
-                    .eq('affiliate_id', userId);
+                // استدعاء دالة قاعدة البيانات المخزنة لإدارة أو إزالة الشريك والكوبون بأمان
+                const { data, error } = await db.rpc('admin_manage_affiliate', {
+                    p_user_id: userId,
+                    p_coupon_code: '', // تمرير قيمة فارغة لحذف أو إلغاء الكود
+                    p_discount_percent: 0,
+                    p_commission_percent: 0
+                });
 
-                if (couponErr) throw couponErr;
+                if (error) throw error;
 
-                // 2. إرجاع رتبة المستخدم في profiles إلى عميل عادي (customer)
-                if (userId && userId !== 'undefined') {
-                    const { error: profileErr } = await db
-                        .from('profiles')
-                        .update({ role: 'customer' })
-                        .eq('id', userId);
-
-                    if (profileErr) throw profileErr;
+                if (data && data.status === 'success') {
+                    alert("✓ " + data.message);
+                    await loadAffiliatesData(); // تحديث الجدول فوراً واختفاء السطر
+                } else {
+                    // كخيار احتياطي مباشر إذا كانت الدالة تتطلب معالجة خاصة
+                    await db.from('coupons').delete().eq('affiliate_id', userId);
+                    await db.from('profiles').update({ role: 'customer' }).eq('id', userId);
+                    
+                    alert("✓ تم إلغاء صفة الشريك بنجاح.");
+                    await loadAffiliatesData();
                 }
-
-                alert("✓ تم إلغاء صفة الشريك وحذف الكود بنجاح.");
-                
-                // 3. إعادة تحميل جدول الشركاء لتحديث الواجهة وإخفاء السطر فوراً
-                await loadAffiliatesData();
 
             } catch (err) {
                 console.error("Demote Affiliate Error:", err);
-                alert("حدث خطأ أثناء الحذف: " + (err.message || err));
+                alert("خطأ أثناء إلغاء الشريك: " + (err.message || err));
             }
         }
 
