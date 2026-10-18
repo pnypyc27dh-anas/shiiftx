@@ -1035,41 +1035,59 @@
 
     <!-- ==================== النوافذ المنبثقة ==================== -->
 
-   <!-- نافذة لوحة الشريك التسويقي) -->
+   <!-- نافذة لوحة الشريك التسويقي -->
+    <div id="partner-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
+            
+            <!-- ترويسة النافذة -->
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600">
+                        <i class="ph-bold ph-megaphone text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-slate-800 dark:text-white text-lg">لوحة الشريك التسويقي</h3>
+                        <p class="text-xs text-slate-500">إحصائيات الأداء وكود الخصم الخاص بك</p>
+                    </div>
+                </div>
+                <button onclick="toggleView('partner-modal', false)" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl transition">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <!-- محتوى الإحصائيات والأرقام المالية -->
             <div class="grid grid-cols-2 gap-4 my-6">
-                <!-- تبويب كود الخصم -->
+                <!-- كود الخصم -->
                 <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <span class="text-xs text-slate-400 block mb-1 font-bold">كود الخصم الخاص بك</span>
+                    <span class="text-xs text-slate-400 block mb-1">كود الخصم الخاص بك</span>
                     <span id="modal-partner-code" class="font-mono font-black text-purple-600 dark:text-purple-400 text-lg">---</span>
                 </div>
 
-                <!-- تبويب نسبة العمولة -->
+                <!-- نسبة العمولة -->
                 <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <span class="text-xs text-slate-400 block mb-1 font-bold">نسبة العمولة</span>
+                    <span class="text-xs text-slate-400 block mb-1">نسبة العمولة</span>
                     <span id="modal-partner-commission-rate" class="font-mono font-black text-slate-800 dark:text-white text-lg">0%</span>
                 </div>
 
-                <!-- تبويب عدد الطلبات المنفذة -->
+                <!-- عدد الطلبات المنفذة -->
                 <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <span class="text-xs text-slate-400 block mb-1 font-bold">الطلبات بالكود</span>
+                    <span class="text-xs text-slate-400 block mb-1">الطلبات بالكود</span>
                     <span id="modal-partner-orders-count" class="font-mono font-black text-slate-800 dark:text-white text-lg">0</span>
                 </div>
 
-                <!-- تبويب إجمالي الأرباح التراكمية (التي لا تنقص أبداً) -->
-                <div class="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-                    <span class="text-xs text-blue-600 dark:text-blue-400 block mb-1 font-bold">إجمالي الأرباح التراكمية</span>
-                    <span id="modal-partner-total-earnings" class="font-mono font-black text-blue-600 dark:text-blue-400 text-lg">$0.00</span>
-                </div>
-
-                <!-- تبويب الرصيد الحالي القابل للسحب (ينقص عند السحب) -->
-                <div class="col-span-2 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs text-emerald-600 dark:text-emerald-400 block mb-0.5 font-bold">الرصيد الحالي (القابل للسحب)</span>
-                        <span class="text-[10px] text-slate-400">الرصيد الصافي المتاح لديك الآن لاستلامه</span>
-                    </div>
-                    <span id="modal-partner-current-balance" class="font-mono font-black text-emerald-600 dark:text-emerald-400 text-xl">$0.00</span>
+                <!-- الرصيد الحالي القابل للسحب -->
+                <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                    <span class="text-xs text-emerald-600 dark:text-emerald-400 block mb-1 font-bold">الرصيد الحالي للسحب</span>
+                    <span id="modal-partner-current-balance" class="font-mono font-black text-emerald-600 dark:text-emerald-400 text-lg">$0.00</span>
                 </div>
             </div>
+
+            <!-- زر الإغلاق -->
+            <button onclick="toggleView('partner-modal', false)" class="w-full py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold text-slate-700 dark:text-slate-200 rounded-xl transition">
+                إغلاق
+            </button>
+        </div>
+    </div>
 
     <!-- 2. نافذة لوحة الوكيل المعتمد المستقلة -->
     <div id="agent-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
@@ -2297,35 +2315,43 @@ async function verifyRegistrationOtp() {
             toggleSideMenu(false);
             toggleView('partner-modal', true);
 
-            // جلب البيانات مباشرة من جدول coupons عبر عمود code و affiliate_id
-            const { data: couponData, error: couponErr } = await supabase
-                .from('coupons')
-                .select('code, discount_percent, affiliate_commission_percent, usage_count')
-                .eq('affiliate_id', currentUser.id)
-                .maybeSingle();
+            try {
+                // 1. جلب كود الخصم والإحصائيات الخاصة بالشريك من جدول coupons
+                const { data: couponData, error: couponErr } = await supabase
+                    .from('coupons')
+                    .select('code, discount_percent, affiliate_commission_percent, usage_count')
+                    .eq('affiliate_id', currentUser.id)
+                    .maybeSingle();
 
-            const codeEl = document.getElementById('modal-partner-code');
-            const rateEl = document.getElementById('modal-partner-commission-rate');
-            const countEl = document.getElementById('modal-partner-orders-count');
-            const earnedEl = document.getElementById('modal-partner-total-earned');
+                if (couponErr) console.error("Coupon fetch error:", couponErr);
 
-            if (couponErr) {
-                console.error("Error fetching partner coupon:", couponErr);
-            }
+                // 2. جلب الرصيد المالي الحالي من جدول profiles
+                const { data: profileData, error: profileErr } = await supabase
+                    .from('profiles')
+                    .select('balance')
+                    .eq('id', currentUser.id)
+                    .single();
 
-            if (couponData && couponData.code) {
-                // تعبئة البيانات من جدول القسائم مباشرة
-                if (codeEl) codeEl.innerText = couponData.code;
-                if (rateEl) rateEl.innerText = (couponData.affiliate_commission_percent || 0) + "%";
-                if (countEl) countEl.innerText = couponData.usage_count || 0;
+                if (profileErr) console.error("Profile fetch error:", profileErr);
+
+                // ربط العناصر في واجهة نافذة الشريك
+                const codeEl = document.getElementById('modal-partner-code');
+                const rateEl = document.getElementById('modal-partner-commission-rate');
+                const countEl = document.getElementById('modal-partner-orders-count');
+                const balanceEl = document.getElementById('modal-partner-current-balance');
+
+                // تعبئة البيانات إن وجدت
+                if (codeEl) codeEl.innerText = couponData?.code || 'لا يوجد كود';
+                if (rateEl) rateEl.innerText = (couponData?.affiliate_commission_percent || 0) + '%';
+                if (countEl) countEl.innerText = couponData?.usage_count || 0;
                 
-                const earned = (couponData.usage_count || 0) * 0;
-                if (earnedEl) earnedEl.innerText = "$" + Number(earned).toFixed(2);
-            } else {
-                if (codeEl) codeEl.innerText = 'لا يوجد كود';
-                if (rateEl) codeEl.innerText = '0%';
-                if (countEl) codeEl.innerText = '0';
-                if (earnedEl) earnedEl.innerText = '$0.00';
+                if (balanceEl) {
+                    const balance = profileData?.balance || 0;
+                    balanceEl.innerText = '$' + Number(balance).toFixed(2);
+                }
+
+            } catch (err) {
+                console.error("Error loading partner modal data:", err);
             }
         }
         
