@@ -1695,31 +1695,25 @@ async function handleAffiliateSubmit(e) {
         // دالة إلغاء صفة الشريك التسويقي وإعادة تعيينه إلى عميل عادي
         // تعريف الدالة بشكل عالمي ومباشر لضمان استجابتها للزر
         window.demoteAffiliate = async function(userId, name) {
-            if (!confirm(`هل أنت متأكد من إلغاء رتبة الشريك وإزالة الكود للمستخدم (${name}) وإعادته لعميل عادي؟`)) return;
+            if (!confirm(`هل أنت متأكد من إلغاء رتبة الشريك وحذف الكود للمستخدم (${name})؟`)) return;
 
             try {
-                // استدعاء دالة قاعدة البيانات المخزنة (RPC) تماماً مثل نظام الوكلاء
                 const { data, error } = await db.rpc('admin_manage_affiliate', {
                     p_user_id: userId,
-                    p_coupon_code: null,         // تمرير قيمة فارغة أو null لإلغاء الكوبون
+                    p_coupon_code: '',
                     p_discount_percent: 0,
-                    p_commission_percent: 0
+                    p_commission_percent: 0,
+                    p_action: 'demote' // تمرير بارامتر الإلغاء بوضوح
                 });
 
                 if (error) throw error;
 
-                if (data && data.status === 'success') {
-                    alert("✓ " + data.message);
-                } else {
-                    alert("✓ تم إلغاء صفة الشريك بنجاح.");
-                }
-
-                // إعادة تحميل الجدول فوراً لتحديث الواجهة واختفاء السطر
-                await loadAffiliatesData();
+                alert("✓ " + (data?.message || "تم إلغاء الشريك بنجاح"));
+                await loadAffiliatesData(); // اختفاء السطر فوراً
 
             } catch (err) {
-                console.error("Demote Affiliate Error:", err);
-                alert("حدث خطأ أثناء تنفيذ العملية: " + (err.message || err));
+                console.error("Demote Error:", err);
+                alert("حدث خطأ: " + (err.message || err));
             }
         };
         // =========================================================================
