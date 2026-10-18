@@ -2315,37 +2315,34 @@ async function verifyRegistrationOtp() {
             toggleSideMenu(false);
             toggleView('partner-modal', true);
 
-            // جلب البيانات مباشرة من جدول coupons عبر عمود code و affiliate_id
+            // 1. جلب بيانات الكود والإحصائيات من جدول coupons
             const { data: couponData, error: couponErr } = await supabase
                 .from('coupons')
                 .select('code, discount_percent, affiliate_commission_percent, usage_count')
                 .eq('affiliate_id', currentUser.id)
                 .maybeSingle();
 
+            // 2. جلب الرصيد الحالي المحدث من جدول profiles
+            const { data: profileData, error: profileErr } = await supabase
+                .from('profiles')
+                .select('balance')
+                .eq('id', currentUser.id)
+                .single();
+
             const codeEl = document.getElementById('modal-partner-code');
             const rateEl = document.getElementById('modal-partner-commission-rate');
             const countEl = document.getElementById('modal-partner-orders-count');
-            const earnedEl = document.getElementById('modal-partner-total-earned');
+            const balanceEl = document.getElementById('modal-partner-current-balance'); // الرصيد الحالي القابل للسحب
 
-            if (couponErr) {
-                console.error("Error fetching partner coupon:", couponErr);
-            }
-
-            if (couponData && couponData.code) {
-                // تعبئة البيانات من جدول القسائم مباشرة
-                if (codeEl) codeEl.innerText = couponData.code;
+            if (couponData) {
+                if (codeEl) codeEl.innerText = couponData.code || 'لا يوجد';
                 if (rateEl) rateEl.innerText = (couponData.affiliate_commission_percent || 0) + "%";
                 if (countEl) countEl.innerText = couponData.usage_count || 0;
-                
-                // حساب أو تقدير الأرباح الإجمالية إن وجدت
-                const earned = (couponData.usage_count || 0) * 0; // يتم تحديثها حسب منطق أرباحك
-                if (earnedEl) earnedEl.innerText = "$" + Number(earned).toFixed(2);
-            } else {
-                // إذا لم يكن حسابك مرتبطاً بكود خصم في جدول القسائم
-                if (codeEl) codeEl.innerText = 'لا يوجد كود';
-                if (rateEl) rateEl.innerText = '0%';
-                if (countEl) countEl.innerText = '0';
-                if (earnedEl) earnedEl.innerText = '$0.00';
+            }
+
+            if (profileData) {
+                // عرض الرصيد الحالي المتحرك (يزيد وينقص)
+                if (balanceEl) balanceEl.innerText = "$" + Number(profileData.balance || 0).toFixed(2);
             }
         }
 
