@@ -1576,45 +1576,6 @@
         }
 
         // =========================================================================
-async function demoteAffiliate(userId, name) {
-            if (!confirm(`هل أنت متأكد من إلغاء رتبة الشريك وحذف الكوبون للمستخدم (${name})؟`)) return;
-
-            try {
-                console.log("محاولة حذف كوبون المستخدم ID:", userId);
-
-                // 1. محاولة حذف الكوبون المرتبط بالشريك مباشرة
-                const { error: couponErr, count } = await db
-                    .from('coupons')
-                    .delete({ count: 'exact' })
-                    .eq('affiliate_id', userId);
-
-                if (couponErr) {
-                    console.error("خطأ حذف الكوبون:", couponErr);
-                    alert("خطأ في حذف الكوبون: " + couponErr.message);
-                    return;
-                }
-                console.log("تم حذف الكوبون بنجاح، عدد الصفوف المحذوفة:", count);
-
-                // 2. محاولة تحديث الرتبة في جدول profiles مباشرة
-                const { error: profileErr } = await db
-                    .from('profiles')
-                    .update({ role: 'customer' })
-                    .eq('id', userId);
-
-                if (profileErr) {
-                    console.error("خطأ تحديث الرتبة:", profileErr);
-                    alert("خطأ في تحديث الرتبة: " + profileErr.message);
-                    return;
-                }
-
-                alert("✓ تم إلغاء صفة الشريك وإزالة الكوبون بنجاح.");
-                await loadAffiliatesData(); // تحديث الجدول واختفاء السطر
-
-            } catch (err) {
-                console.error("Critical error:", err);
-                alert("حدث خطأ غير متوقع: " + err.message);
-            }
-        }
 
 async function openAffiliateModal() {
     await populateUserDropdown('affiliate-user-select');
@@ -1718,8 +1679,8 @@ async function handleAffiliateSubmit(e) {
                                         <i class="ph-bold ph-pencil-simple text-sm"></i>
                                     </button>
                                     <button onclick="demoteAffiliate('${profile?.id}', '${partnerName}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="إلغاء صفة الشريك وحذف الكود">
-                                        <i class="ph-bold ph-trash text-sm"></i>
-                                    </button>
+    <i class="ph-bold ph-trash text-sm"></i>
+</button>
                                 </div>
                             </td>
                         </tr>
@@ -1732,38 +1693,49 @@ async function handleAffiliateSubmit(e) {
         }
 
         // دالة إلغاء صفة الشريك التسويقي وإعادة تعيينه إلى عميل عادي
-        async function demoteAffiliate(userId, name) {
-            if (!confirm(`هل أنت متأكد من إلغاء رتبة الشريك وحذف الكود للمستخدم (${name}) وإعادته لعميل عادي؟`)) return;
+        // تعريف الدالة بشكل عالمي ومباشر لضمان استجابتها للزر
+        window.demoteAffiliate = async function(userId, name) {
+            console.log("=== تم الضغط على زر حذف الشريك ===");
+            console.log("User ID:", userId);
+            console.log("Name:", name);
+
+            if (!confirm(`هل أنت متأكد من إلغاء رتبة الشريك وحذف الكوبون للمستخدم (${name})؟`)) return;
 
             try {
-                // استدعاء دالة قاعدة البيانات المخزنة لإدارة أو إزالة الشريك والكوبون بأمان
-                const { data, error } = await db.rpc('admin_manage_affiliate', {
-                    p_user_id: userId,
-                    p_coupon_code: '', // تمرير قيمة فارغة لحذف أو إلغاء الكود
-                    p_discount_percent: 0,
-                    p_commission_percent: 0
-                });
+                // 1. حذف الكوبون المرتبط بالشريك من جدول coupons
+                const { error: couponErr } = await db
+                    .from('coupons')
+                    .delete()
+                    .eq('affiliate_id', userId);
 
-                if (error) throw error;
-
-                if (data && data.status === 'success') {
-                    alert("✓ " + data.message);
-                    await loadAffiliatesData(); // تحديث الجدول فوراً واختفاء السطر
-                } else {
-                    // كخيار احتياطي مباشر إذا كانت الدالة تتطلب معالجة خاصة
-                    await db.from('coupons').delete().eq('affiliate_id', userId);
-                    await db.from('profiles').update({ role: 'customer' }).eq('id', userId);
-                    
-                    alert("✓ تم إلغاء صفة الشريك بنجاح.");
-                    await loadAffiliatesData();
+                if (couponErr) {
+                    console.error("خطأ في حذف الكوبون:", couponErr);
+                    alert("خطأ في حذف الكوبون: " + couponErr.message);
+                    return;
                 }
 
-            } catch (err) {
-                console.error("Demote Affiliate Error:", err);
-                alert("خطأ أثناء إلغاء الشريك: " + (err.message || err));
-            }
-        }
+                // 2. تحديث رتبة المستخدم في جدول profiles إلى customer
+                if (userId && userId !== 'undefined' && userId !== 'null') {
+                    const { error: profileErr } = await db
+                        .from('profiles')
+                        .update({ role: 'customer' })
+                        .eq('id', userId);
 
+                    if (profileErr) {
+                        console.error("خطأ في تحديث الرتبة:", profileErr);
+                        alert("خطأ في تحديث الرتبة: " + profileErr.message);
+                        return;
+                    }
+                }
+
+                alert("✓ تم إلغاء صفة الشريك وإزالة الكوبون بنجاح.");
+                await loadAffiliatesData(); // تحديث الجدول فوراً واختفاء السطر
+
+            } catch (err) {
+                console.error("خطأ غير متوقع:", err);
+                alert("حدث خطأ غير متوقع: " + err.message);
+            }
+        };
         // =========================================================================
         // دوال إدارة الوكلاء الماليين (Cash Agents) - بتصميم موحد تماماً
         // =========================================================================
