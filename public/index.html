@@ -2289,24 +2289,56 @@ async function verifyRegistrationOtp() {
     resetResendButtonState();
     ['register-modal', 'plans-modal', 'account-inputs-modal', 'purchase-modal', 'code-delivery-modal', 'all-orders-modal', 'support-modal', 'info-modal', 'reactivate-modal', 'agent-modal', 'partner-modal'].forEach(id => toggleView(id, false)); 
 }
-        // دالة فتح لوحة إحصائيات الوكيل المستقلة
-        async function openAgentModal() {
+        // دالة فتح لوحة الوكيل وإظهار النافذة المنبثقة
+        function openAgentModal() {
             if (!currentUser) return;
             toggleSideMenu(false);
             toggleView('agent-modal', true);
+        }
 
-            // جلب أحدث إحصائيات للوكيل وتعبئة البيانات في النافذة
-            const { data: stats } = await supabase.rpc('get_my_agent_stats', { p_user_id: currentUser.id });
-            if (stats && stats.is_agent) {
-                const codeEl = document.getElementById('modal-agent-code');
-                const rateEl = document.getElementById('modal-agent-commission-rate');
-                const countEl = document.getElementById('modal-agent-orders-count');
-                const earnedEl = document.getElementById('modal-agent-total-earned');
+        // دالة تنفيذ تحويل الرصيد من الوكيل إلى العميل
+        async function handleAgentTransferToCustomer(event) {
+            event.preventDefault();
+            const targetEmail = document.getElementById('agent-target-email').value.trim();
+            const amount = parseFloat(document.getElementById('agent-transfer-amount').value);
+            const btn = document.getElementById('btn-agent-transfer');
 
-                if (codeEl) codeEl.innerText = stats.code;
-                if (rateEl) rateEl.innerText = stats.commission_percent + "%";
-                if (countEl) countEl.innerText = stats.usage_count;
-                if (earnedEl) earnedEl.innerText = "$" + Number(stats.total_earned).toFixed(2);
+            if (!targetEmail || isNaN(amount) || amount <= 0) {
+                return showCustomAlert("يرجى إدخال بريد الكتروني صحيح ومبلغ أكبر من الصفر.");
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> جاري تنفيذ التحويل...`;
+
+            try {
+                // استدعاء دالة قاعدة البيانات الآمنة التي أنشأناها للتو
+                const { data, error } = await supabase.rpc('agent_process_deposit', {
+                    p_target_user_email: targetEmail,
+                    p_amount: amount,
+                    p_commission_rate: 0.02, // 2% عمولة الوكيل
+                    p_notes: 'تحويل نقدي مباشر من لوحة الوكيل'
+                });
+
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    showCustomAlert(`✓ ${data.message}`, false);
+                    document.getElementById('agent-target-email').value = '';
+                    document.getElementById('agent-transfer-amount').value = '';
+                    toggleView('agent-modal', false);
+                    
+                    // تحديث رصيد الوكيل في الواجهة الرئيسية فوراً
+                    await silentSyncData();
+                } else {
+                    showCustomAlert(data?.message || "فشلت عملية التحويل.");
+                }
+
+            } catch (err) {
+                console.error("Agent Transfer Error:", err);
+                showCustomAlert("خطأ في تنفيذ المعاملة: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "تنفيذ التحويل الفوري للعميل";
             }
         }
         // دالة فتح لوحة الشريك التسويقي (تستعلم مباشرة وآمنة من جدول القسائم)
