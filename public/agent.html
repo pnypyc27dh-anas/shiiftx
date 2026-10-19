@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHIIFT X — لوحة الوكيل المالي (Agents)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
+    <!-- Google Fonts & Phosphor Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f4f7f9; color: #0f172a; }
+        html.dark body { background-color: #0b1120; color: #f8fafc; }
+        .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 1); box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05); border-radius: 24px; }
+        html.dark .glass-panel { background: rgba(15, 23, 42, 0.85) !important; border-color: rgba(255, 255, 255, 0.08) !important; }
+        .input-field { background: rgba(255, 255, 255, 0.9) !important; border: 1.5px solid #e2e8f0 !important; border-radius: 14px !important; }
+        html.dark .input-field { background: rgba(15, 23, 42, 0.8) !important; border-color: #334155 !important; color: #ffffff !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased p-4 md:p-8">
+
+    <!-- التنبيهات -->
+    <div id="custom-toast" class="hidden fixed top-5 left-1/2 -translate-x-1/2 z-[130] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold transition-all"></div>
+
+    <!-- ترويسة اللوحة -->
+    <header class="max-w-2xl w-full mx-auto flex justify-between items-center mb-6 glass-panel px-6 py-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl border border-amber-500/20">
+                <i class="ph-fill ph-shield-check"></i>
+            </div>
+            <div>
+                <h1 class="text-sm font-black text-slate-800 dark:text-slate-100">لوحة الوكيل المالي (Agents)</h1>
+                <p id="agent-email-display" class="text-[10px] text-slate-400 font-mono">جاري التحقق من الحساب...</p>
+            </div>
+        </div>
+        <a href="index.html" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xs font-bold transition">
+            العودة للمتجر
+        </a>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="max-w-2xl mx-auto w-full space-y-6 flex-grow">
+        
+        <!-- كرت الرصيد المتاح (Float) -->
+        <div class="glass-panel p-6 text-center space-y-1">
+            <p class="text-xs font-bold text-slate-500 uppercase">رصيد السيولة المتاح (Float Balance)</p>
+            <h2 id="agent-float-balance" class="text-4xl font-black text-amber-600 dark:text-amber-400 font-mono">$0.00</h2>
+        </div>
+
+        <!-- نموذج شحن رصيد للعميل -->
+        <div class="glass-panel p-6 space-y-4">
+            <h3 class="font-black text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <i class="ph-bold ph-paper-plane-tilt text-amber-500 text-lg"></i>
+                <span>شحن رصيد نقدي لعميل</span>
+            </h3>
+            
+            <form onsubmit="handleAgentTransfer(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-500 mb-1">البريد الإلكتروني للعميل</label>
+                    <input type="email" id="target-email" required placeholder="client@example.com" class="input-field w-full px-4 py-3 text-xs font-mono text-left" dir="ltr">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-500 mb-1">المبلغ المراد تحويله ($)</label>
+                    <input type="number" step="0.01" min="0.5" id="transfer-amount" required placeholder="0.00" class="input-field w-full px-4 py-3 text-xs font-mono font-bold text-left" dir="ltr">
+                </div>
+                <button type="submit" id="submit-btn" class="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-black transition shadow-md cursor-pointer">
+                    تنفيذ التحويل الفوري للعميل
+                </button>
+            </form>
+        </div>
+
+        <!-- سجل الحركات والعمولات الخاصة بالوكيل -->
+        <div class="glass-panel p-6 space-y-3">
+            <h3 class="font-black text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <i class="ph-bold ph-clock-counter-clockwise text-amber-500 text-lg"></i>
+                <span>سجل التحويلات والعمولات المكتسبة</span>
+            </h3>
+            <div id="agent-tx-container" class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+                <div class="p-4 text-center text-xs text-slate-400">جاري تحميل السجلات...</div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center text-[10px] text-slate-400 py-6">
+        SHIIFT X Agents Infrastructure &copy; 2026
+    </footer>
+
+    <script>
+        const SUPABASE_URL = 'https://baytojjldklocifridcm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJheXRvampsZGtsb2NpZnJpZGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MTU3MzMsImV4cCI6MjEwNTM5MTczM30.tAN7Qah-3VNwatn2CwgqsyphnkQQjagnKf4pR4WiSwQ';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            currentUser = session.user;
+            
+            const { data: prof } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
+            if (!prof || (prof.role !== 'agent' && prof.role !== 'admin')) {
+                alert("غير مصرح بالدخول: هذه اللوحة مخصصة للوكلاء الماليين (Agents) حصراً.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.getElementById('agent-email-display').innerText = currentUser.email;
+            document.getElementById('agent-float-balance').innerText = '$' + Number(prof.balance || 0).toFixed(2);
+            
+            loadAgentTransactions();
+        });
+
+        async function handleAgentTransfer(e) {
+            e.preventDefault();
+            const email = document.getElementById('target-email').value.trim();
+            const amount = parseFloat(document.getElementById('transfer-amount').value);
+            const btn = document.getElementById('submit-btn');
+
+            if (!email || isNaN(amount) || amount <= 0) return showToast("يرجى إدخال بيانات صحيحة.");
+
+            btn.disabled = true;
+            btn.innerText = "جاري التنفيذ...";
+
+            try {
+                const { data, error } = await supabase.rpc('agent_process_deposit', {
+                    p_target_user_email: email,
+                    p_amount: amount,
+                    p_commission_rate: 0.02,
+                    p_notes: 'تحويل نقدي مباشر من لوحة الوكيل'
+                });
+
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    showToast(data.message, false);
+                    document.getElementById('target-email').value = '';
+                    document.getElementById('transfer-amount').value = '';
+                    
+                    const { data: prof } = await supabase.from('profiles').select('balance').eq('id', currentUser.id).single();
+                    if (prof) document.getElementById('agent-float-balance').innerText = '$' + Number(prof.balance).toFixed(2);
+                    loadAgentTransactions();
+                } else {
+                    showToast(data?.message || "فشلت عملية التحويل.");
+                }
+            } catch (err) {
+                showToast("خطأ: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "تنفيذ التحويل الفوري للعميل";
+            }
+        }
+
+        async function loadAgentTransactions() {
+            const container = document.getElementById('agent-tx-container');
+            const { data: txs, error } = await supabase
+                .from('agent_transactions')
+                .select('*')
+                .eq('agent_id', currentUser.id)
+                .order('created_at', { ascending: false });
+
+            if (error || !txs || txs.length === 0) {
+                container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">لا توجد تحويلات مسجلة حتى الآن.</div>`;
+                return;
+            }
+
+            container.innerHTML = "";
+            for (const tx of txs) {
+                let targetEmail = 'مستخدم مجهول';
+                if (tx.target_user_id) {
+                    const { data: u } = await supabase.from('profiles').select('email').eq('id', tx.target_user_id).maybeSingle();
+                    if (u) targetEmail = u.email;
+                }
+
+                const dateStr = new Date(tx.created_at).toLocaleString('en-US', { hour12: false });
+                const item = document.createElement('div');
+                item.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-xs";
+                item.innerHTML = `
+                    <div class="space-y-1">
+                        <span class="font-bold text-slate-800 dark:text-slate-200 block">${targetEmail}</span>
+                        <span class="text-[10px] text-slate-400 block font-mono">${dateStr}</span>
+                    </div>
+                    <div class="text-left font-mono">
+                        <span class="font-black text-amber-600 dark:text-amber-400 block">-$${Number(tx.amount).toFixed(2)}</span>
+                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">+ عمولة $${Number(tx.commission_earned || 0).toFixed(2)}</span>
+                    </div>
+                `;
+                container.appendChild(item);
+            }
+        }
+
+        function showToast(msg, isError = true) {
+            const toast = document.getElementById('custom-toast');
+            toast.className = `fixed top-5 left-1/2 -translate-x-1/2 z-[130] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold transition-all ${isError ? 'bg-rose-500 text-white' : 'bg-emerald-600 text-white'}`;
+            toast.innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 4000);
+        }
+    </script>
+</body>
+</html>
