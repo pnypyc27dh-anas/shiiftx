@@ -1919,9 +1919,11 @@ async function verifyRegistrationOtp() {
                 }
 
                 // 2. فحص زر لوحة الوكيل المالي (agent)
-                <a id="nav-agents-link" href="agent.html" class="hidden ...">
-    <span>لوحة الوكيل</span>
-</a>
+                
+const agentsLink = document.getElementById('nav-agents-link');
+if (agentsLink) {
+    agentsLink.classList.toggle('hidden', profile.role !== 'agent' && profile.role !== 'admin');
+}
 
                 // 3. فحص زر لوحة الشريك التسويقي (marketing_partner)
                 const partnerLink = document.getElementById('nav-partner-link');
