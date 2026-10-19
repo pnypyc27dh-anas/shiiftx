@@ -101,13 +101,13 @@
         const SUPABASE_URL = 'https://baytojjldklocifridcm.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJheXRvampsZGtsb2NpZnJpZGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MTU3MzMsImV4cCI6MjEwNTM5MTczM30.tAN7Qah-3VNwatn2CwgqsyphnkQQjagnKf4pR4WiSwQ';
         
-        // تعريف واحد فقط لعميل Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // استخدام اسم متغير فريد كلياً لعدم حدوث أي تداخل مع أي ملف آخر
+        const supabaseAgent = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            const { data: { session }, error: sessionError } = await supabaseAgent.auth.getSession();
             
             if (sessionError || !session || !session.user) {
                 window.location.href = 'index.html';
@@ -121,7 +121,7 @@
                 emailDisplay.innerText = currentUser.email || 'حساب وكيل معتمد';
             }
 
-            const { data: prof, error: profError } = await supabase
+            const { data: prof, error: profError } = await supabaseAgent
                 .from('profiles')
                 .select('*')
                 .eq('id', currentUser.id)
@@ -154,7 +154,7 @@
             btn.innerText = "جاري التنفيذ...";
 
             try {
-                const { data, error } = await supabase.rpc('agent_process_deposit', {
+                const { data, error } = await supabaseAgent.rpc('agent_process_deposit', {
                     p_target_user_email: email,
                     p_amount: amount,
                     p_commission_rate: 0.02,
@@ -168,7 +168,7 @@
                     document.getElementById('target-email').value = '';
                     document.getElementById('transfer-amount').value = '';
                     
-                    const { data: prof } = await supabase.from('profiles').select('balance').eq('id', currentUser.id).single();
+                    const { data: prof } = await supabaseAgent.from('profiles').select('balance').eq('id', currentUser.id).single();
                     if (prof) document.getElementById('agent-float-balance').innerText = '$' + Number(prof.balance).toFixed(2);
                     loadAgentTransactions();
                 } else {
@@ -184,7 +184,7 @@
 
         async function loadAgentTransactions() {
             const container = document.getElementById('agent-tx-container');
-            const { data: txs, error } = await supabase
+            const { data: txs, error } = await supabaseAgent
                 .from('agent_transactions')
                 .select('*')
                 .eq('agent_id', currentUser.id)
@@ -199,7 +199,7 @@
             for (const tx of txs) {
                 let targetEmail = 'مستخدم مجهول';
                 if (tx.target_user_id) {
-                    const { data: u } = await supabase.from('profiles').select('email').eq('id', tx.target_user_id).maybeSingle();
+                    const { data: u } = await supabaseAgent.from('profiles').select('email').eq('id', tx.target_user_id).maybeSingle();
                     if (u) targetEmail = u.email;
                 }
 
