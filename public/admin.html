@@ -769,7 +769,7 @@
 
             const userId = document.getElementById('agent-user-select').value;
             const rawCommission = parseFloat(document.getElementById('agent-commission-input').value);
-            const commissionRate = isNaN(rawCommission) ? null : rawCommission;
+const commissionRate = isNaN(rawCommission) ? null : rawCommission;
 
             try {
                 const { data, error } = await db.rpc('admin_manage_agent', {
