@@ -762,38 +762,47 @@
         }
 
         async function handleAgentSubmit(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-save-agent');
-            btn.disabled = true;
-            btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الاعتماد...`;
+    e.preventDefault();
+    const btn = document.getElementById('btn-save-agent');
+    btn.disabled = true;
+    btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الاعتماد...`;
 
-            const userId = document.getElementById('agent-user-select').value;
-            const rawCommission = parseFloat(document.getElementById('agent-commission-input').value);
-const commissionRate = isNaN(rawCommission) ? null : rawCommission;
+    const userId = document.getElementById('agent-user-select').value;
+    const rawCommission = parseFloat(document.getElementById('agent-commission-input').value);
 
-            try {
-                const { data, error } = await db.rpc('admin_manage_agent', {
-    p_user_id: userId,
-    p_action: 'promote',
-    p_commission_rate: commissionRate
-});
+    // التحقق من صحة القيمة المدخلة
+    if (isNaN(rawCommission) || rawCommission <= 0 || rawCommission > 100) {
+        alert("يرجى إدخال نسبة عمولة صالحة أكبر من الصفر (مثال: 5 أو 10).");
+        btn.disabled = false;
+        btn.innerHTML = "اعتماد كوكيل مالي";
+        return;
+    }
 
-                if (error) throw error;
+    try {
+        // إرسال الرقم المباشر (مثل 5 أو 10) دون أي قسمة
+        const { data, error } = await db.rpc('admin_manage_agent', {
+            p_user_id: userId,
+            p_action: 'promote',
+            p_commission_rate: rawCommission
+        });
 
-                if (data && data.status === 'success') {
-                    alert(data.message);
-                    closeAgentModal();
-                    await loadAgentsData();
-                } else {
-                    alert("خطأ: " + (data ? data.message : "فشلت العملية"));
-                }
-            } catch (err) {
-                alert("خطأ أثناء ترقية الوكيل: " + (err.message || err));
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = "اعتماد كوكيل مالي";
-            }
+        if (error) throw error;
+
+        if (data && data.status === 'success') {
+            alert(data.message);
+            closeAgentModal();
+            await loadAgentsData();
+        } else {
+            alert("خطأ: " + (data ? data.message : "فشلت العملية"));
         }
+    } catch (err) {
+        console.error("Agent Submit Error:", err);
+        alert("خطأ أثناء ترقية الوكيل: " + (err.message || err));
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "اعتماد كوكيل مالي";
+    }
+}
 
         async function updateAgentCommissionPrompt(userId, agentName, currentRate) {
     const newPercentInput = prompt(`أدخل نسبة العمولة الجديدة (%) للوكيل (${agentName}):`, currentRate || 0);
