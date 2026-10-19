@@ -105,22 +105,40 @@
         let currentUser = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError || !session || !session.user) {
                 window.location.href = 'index.html';
                 return;
             }
+            
             currentUser = session.user;
             
-            const { data: prof } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
-            if (!prof || (prof.role !== 'agent' && prof.role !== 'admin')) {
+            // 1. عرض البريد الإلكتروني فوراً من الجلسة لضمان عدم ظهور "جاري التحقق"
+            const emailDisplay = document.getElementById('agent-email-display');
+            if (emailDisplay) {
+                emailDisplay.innerText = currentUser.email || 'حساب وكيل معتمد';
+            }
+
+            // 2. جلب ملف الوكيل والتحقق من رتبته ورصيده المالي
+            const { data: prof, error: profError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+            
+            if (profError || !prof || (prof.role !== 'agent' && prof.role !== 'admin')) {
                 alert("غير مصرح بالدخول: هذه اللوحة مخصصة للوكلاء الماليين (Agents) حصراً.");
                 window.location.href = 'index.html';
                 return;
             }
 
-            document.getElementById('agent-email-display').innerText = currentUser.email;
-            document.getElementById('agent-float-balance').innerText = '$' + Number(prof.balance || 0).toFixed(2);
+            // 3. عرض رصيد الـ Float المتاح
+            const availableFloat = parseFloat(prof.balance || 0);
+            const balanceEl = document.getElementById('agent-float-balance');
+            if (balanceEl) {
+                balanceEl.innerText = '$' + availableFloat.toFixed(2);
+            }
             
             loadAgentTransactions();
         });
