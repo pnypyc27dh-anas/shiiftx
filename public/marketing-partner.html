@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHIIFT X — لوحة الشريك التسويقي (Marketing Partner)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
+    <!-- Google Fonts & Phosphor Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f4f7f9; color: #0f172a; }
+        html.dark body { background-color: #0b1120; color: #f8fafc; }
+        .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 1); box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05); border-radius: 24px; }
+        html.dark .glass-panel { background: rgba(15, 23, 42, 0.85) !important; border-color: rgba(255, 255, 255, 0.08) !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased p-4 md:p-8">
+
+    <!-- ترويسة اللوحة -->
+    <header class="max-w-2xl w-full mx-auto flex justify-between items-center mb-6 glass-panel px-6 py-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl border border-purple-500/20">
+                <i class="ph-fill ph-megaphone"></i>
+            </div>
+            <div>
+                <h1 class="text-sm font-black text-slate-800 dark:text-slate-100">لوحة الشريك التسويقي (Marketing Partner)</h1>
+                <p id="partner-email-display" class="text-[10px] text-slate-400 font-mono">جاري التحقق من الحساب...</p>
+            </div>
+        </div>
+        <a href="index.html" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xs font-bold transition">
+            العودة للمتجر
+        </a>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="max-w-2xl mx-auto w-full space-y-6 flex-grow">
+        
+        <!-- إحصائيات الرصيد وإجمالي الاستخدام -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="glass-panel p-6 text-center space-y-1">
+                <p class="text-xs font-bold text-slate-500 uppercase">الرصيد الحالي القابل للسحب / الشراء</p>
+                <h2 id="partner-balance" class="text-3xl font-black text-purple-600 dark:text-purple-400 font-mono">$0.00</h2>
+            </div>
+            <div class="glass-panel p-6 text-center space-y-1">
+                <p class="text-xs font-bold text-slate-500 uppercase">إجمالي استخدامات أكوادك</p>
+                <h2 id="total-uses" class="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">0</h2>
+            </div>
+        </div>
+
+        <!-- قسم أكواد الخصم الخاصة بالشريك -->
+        <div class="glass-panel p-6 space-y-4">
+            <h3 class="font-black text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <i class="ph-bold ph-ticket text-purple-500 text-lg"></i>
+                <span>أكواد الخصم الترويجية الخاصة بك</span>
+            </h3>
+            <div id="coupons-container" class="space-y-2.5">
+                <div class="p-4 text-center text-xs text-slate-400">جاري جلب الأكواد...</div>
+            </div>
+        </div>
+
+        <!-- سجل الأرباح التسويقية -->
+        <div class="glass-panel p-6 space-y-3">
+            <h3 class="font-black text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <i class="ph-bold ph-coins text-purple-500 text-lg"></i>
+                <span>سجل أرباح العمولات التسويقية</span>
+            </h3>
+            <div id="commissions-container" class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+                <div class="p-4 text-center text-xs text-slate-400">جاري تحميل سجل الأرباح...</div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center text-[10px] text-slate-400 py-6">
+        SHIIFT X Marketing Partners Program &copy; 2026
+    </footer>
+
+    <script>
+        const SUPABASE_URL = 'https://baytojjldklocifridcm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJheXRvampsZGtsb2NpZnJpZGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MTU3MzMsImV4cCI6MjEwNTM5MTczM30.tAN7Qah-3VNwatn2CwgqsyphnkQQjagnKf4pR4WiSwQ';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            document.getElementById('partner-email-display').innerText = session.user.email;
+            loadDashboardData();
+        });
+
+        async function loadDashboardData() {
+            const { data, error } = await supabase.rpc('get_marketing_partner_dashboard');
+
+            if (error || !data || data.status === 'error') {
+                alert(data?.message || "غير مصرح بالدخول: هذه اللوحة مخصصة للشركاء التسويقيين حصراً.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // عرض الرصيد
+            document.getElementById('partner-balance').innerText = '$' + Number(data.balance || 0).toFixed(2);
+
+            // عرض الأكواد وحساب إجمالي الاستخدامات
+            const couponsContainer = document.getElementById('coupons-container');
+            const coupons = data.coupons || [];
+            let totalUses = 0;
+
+            if (coupons.length === 0) {
+                couponsContainer.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">لا توجد أكواد خصم مربوطة بحسابك حالياً.</div>`;
+            } else {
+                couponsContainer.innerHTML = "";
+                coupons.forEach(c => {
+                    totalUses += Number(c.usage_count || 0);
+                    const badge = c.is_active 
+                        ? `<span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md text-[10px] font-bold">نشط</span>`
+                        : `<span class="px-2 py-0.5 bg-rose-500/10 text-rose-500 rounded-md text-[10px] font-bold">متوقف</span>`;
+
+                    const div = document.createElement('div');
+                    div.className = "p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-xs";
+                    div.innerHTML = `
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono font-black text-base text-purple-600 dark:text-purple-400 tracking-wider">${c.code}</span>
+                                ${badge}
+                            </div>
+                            <span class="text-[11px] text-slate-500 block">خصم العميل: <b>${c.discount_percent}%</b> | عمولتك: <b>${c.commission_percent}%</b></span>
+                        </div>
+                        <div class="text-left">
+                            <span class="text-[10px] text-slate-400 block">مرات الاستخدام</span>
+                            <span class="font-mono font-black text-sm text-slate-800 dark:text-slate-200">${c.usage_count || 0} مرة</span>
+                        </div>
+                    `;
+                    couponsContainer.appendChild(div);
+                });
+            }
+            document.getElementById('total-uses').innerText = totalUses;
+
+            // عرض سجل الأرباح
+            const commContainer = document.getElementById('commissions-container');
+            const commissions = data.commissions || [];
+
+            if (commissions.length === 0) {
+                commContainer.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">لا توجد أرباح تسويقية مسجلة حتى الآن.</div>`;
+            } else {
+                commContainer.innerHTML = "";
+                commissions.forEach(tx => {
+                    const dateStr = new Date(tx.created_at).toLocaleString('en-US', { hour12: false });
+                    const item = document.createElement('div');
+                    item.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-xs";
+                    item.innerHTML = `
+                        <div class="space-y-1">
+                            <span class="font-bold text-slate-800 dark:text-slate-200 block">${tx.details || 'عمولة كود تسويقي'}</span>
+                            <span class="text-[10px] text-slate-400 block font-mono">${dateStr} • ${tx.transaction_ref || ''}</span>
+                        </div>
+                        <div class="text-left font-mono">
+                            <span class="font-black text-emerald-600 dark:text-emerald-400 block">+$${Number(tx.amount).toFixed(2)}</span>
+                        </div>
+                    `;
+                    commContainer.appendChild(item);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
