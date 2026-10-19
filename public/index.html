@@ -1089,17 +1089,19 @@
         </div>
     </div>
 
-    <!-- 2. نافذة لوحة الوكيل المعتمد المستقلة -->
+   <!-- 2. نافذة لوحة الوكيل المعتمد المستقلة -->
     <div id="agent-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
-        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative text-right space-y-5 slide-up-modal border border-slate-100 dark:border-slate-800">
-            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative text-right space-y-4 slide-up-modal border border-slate-100 dark:border-slate-800 max-h-[85vh] flex flex-col">
+            
+            <!-- ترويسة النافذة -->
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 shrink-0">
                 <div class="flex items-center gap-2.5">
                     <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl border border-amber-500/20">
                         <i class="ph-fill ph-shield-check"></i>
                     </div>
                     <div>
                         <h4 class="text-sm font-black text-slate-800 dark:text-slate-100">لوحة الوكيل المالي المعتمد</h4>
-                        <p class="text-[10px] text-slate-400">نقطة كاش معتمدة لاستقبال الإيداعات</p>
+                        <p class="text-[10px] text-slate-400">نقطة كاش معتمدة لاستقبال الإيداعات والتحويلات</p>
                     </div>
                 </div>
                 <button onclick="toggleView('agent-modal', false)" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm">
@@ -1107,12 +1109,13 @@
                 </button>
             </div>
 
-            <form onsubmit="handleAgentTransferToCustomer(event)" class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-amber-500/20 space-y-3 text-xs">
+            <!-- نموذج التحويل المباشر للعميل -->
+            <form onsubmit="handleAgentTransferToCustomer(event)" class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-amber-500/20 space-y-3 text-xs shrink-0">
                 <h4 class="font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
                     <i class="ph-bold ph-paper-plane-tilt text-amber-500"></i>
                     <span>شحن رصيد لعميل (خصماً من رصيدك كوكيل)</span>
                 </h4>
-                <div class="space-y-2.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 mb-1">البريد الإلكتروني للعميل</label>
                         <input type="email" id="agent-target-email" required placeholder="client@example.com" class="input-field w-full px-3.5 py-2.5 text-xs font-mono text-left" dir="ltr">
@@ -1122,12 +1125,24 @@
                         <input type="number" step="0.01" min="0.5" id="agent-transfer-amount" required placeholder="0.00" class="input-field w-full px-3.5 py-2.5 text-xs font-mono font-bold text-left" dir="ltr">
                     </div>
                 </div>
-                <button type="submit" id="btn-agent-transfer" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-black transition shadow-sm">
+                <button type="submit" id="btn-agent-transfer" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-black transition shadow-sm cursor-pointer">
                     تنفيذ التحويل الفوري للعميل
                 </button>
             </form>
 
-            <button onclick="toggleView('agent-modal', false)" class="btn-spring w-full py-3 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition">
+            <!-- الحاوي المسؤول عن عرض سجل التحويلات والعمولات -->
+            <div class="space-y-2 flex-grow overflow-y-auto pr-1">
+                <h5 class="font-black text-xs text-slate-700 dark:text-slate-300 flex items-center gap-1.5 sticky top-0 bg-white dark:bg-slate-900 py-1">
+                    <i class="ph-bold ph-clock-counter-clockwise text-amber-500"></i>
+                    <span>سجل تحويلاتك وعمولاتك المكتسبة</span>
+                </h5>
+                <div id="agent-transactions-list" class="space-y-2">
+                    <div class="p-3 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">جاري جلب السجلات...</div>
+                </div>
+            </div>
+
+            <!-- زر الإغلاق السفلي -->
+            <button onclick="toggleView('agent-modal', false)" class="btn-spring w-full py-3 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition shrink-0 cursor-pointer">
                 إغلاق النافذة
             </button>
         </div>
@@ -2289,13 +2304,58 @@ async function verifyRegistrationOtp() {
     resetResendButtonState();
     ['register-modal', 'plans-modal', 'account-inputs-modal', 'purchase-modal', 'code-delivery-modal', 'all-orders-modal', 'support-modal', 'info-modal', 'reactivate-modal', 'agent-modal', 'partner-modal'].forEach(id => toggleView(id, false)); 
 }
-        // دالة فتح لوحة الوكيل وإظهار النافذة المنبثقة
-        function openAgentModal() {
+        async function openAgentModal() {
             if (!currentUser) return;
             toggleSideMenu(false);
             toggleView('agent-modal', true);
-        }
 
+            // جلب وعرض سجل الحركات والعمولات للوكيل مباشرة
+            const container = document.getElementById('agent-transactions-list');
+            if (container) {
+                container.innerHTML = `<div class="p-3 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">جاري جلب السجلات...</div>`;
+
+                const { data: txs, error } = await supabase
+                    .from('agent_transactions')
+                    .select('*')
+                    .eq('agent_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (error || !txs || txs.length === 0) {
+                    container.innerHTML = `<div class="p-3 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">لا توجد تحويلات مسجلة حتى الآن.</div>`;
+                    return;
+                }
+
+                container.innerHTML = "";
+
+                for (const tx of txs) {
+                    let targetEmail = 'عميل (معرف مجهول)';
+                    if (tx.target_user_id) {
+                        const { data: userProf } = await supabase
+                            .from('profiles')
+                            .select('email')
+                            .eq('id', tx.target_user_id)
+                            .maybeSingle();
+                        if (userProf) targetEmail = userProf.email;
+                    }
+
+                    const dateStr = new Date(tx.created_at).toLocaleString('en-US', { hour12: false });
+                    
+                    const item = document.createElement('div');
+                    item.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-xs mb-2";
+                    item.innerHTML = `
+                        <div class="space-y-1">
+                            <span class="font-bold text-slate-800 dark:text-slate-200 block">${targetEmail}</span>
+                            <span class="text-[10px] text-slate-400 block font-mono">${dateStr}</span>
+                        </div>
+                        <div class="text-left font-mono">
+                            <span class="font-black text-amber-600 dark:text-amber-400 block">-$${Number(tx.amount).toFixed(2)}</span>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">+ عمولة $${Number(tx.commission_earned || 0).toFixed(2)}</span>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                }
+            }
+        }
         // دالة تنفيذ تحويل الرصيد من الوكيل إلى العميل
         async function handleAgentTransferToCustomer(event) {
             event.preventDefault();
