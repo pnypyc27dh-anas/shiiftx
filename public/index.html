@@ -704,17 +704,17 @@
                         <span class="hidden sm:inline">لوحة الإدارة</span>
                     </a>
 
-                    <!-- زر لوحة الشريك التسويقي -->
-                    <button id="nav-partner-link" onclick="openPartnerModal()" class="hidden h-8 px-3 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
+                    <!-- زر لوحة الشريك التسويقي (Marketing Partner) -->
+                    <a id="nav-marketing-partner-link" href="marketing-partner.html" class="hidden h-8 px-3 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
                         <i class="ph-bold ph-megaphone text-sm text-purple-500"></i>
-                        <span class="hidden sm:inline">لوحة الشريك</span>
-                    </button>
+                        <span class="hidden sm:inline">لوحة الشريك التسويقي</span>
+                    </a>
 
-                    <!-- زر لوحة الوكيل المعتمد -->
-                    <button id="nav-agent-link" onclick="openAgentModal()" class="hidden h-8 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
+                    <!-- زر لوحة الوكيل المعتمد (Agents) -->
+                    <a id="nav-agents-link" href="agent.html" class="hidden h-8 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
                         <i class="ph-bold ph-shield-check text-sm text-amber-500"></i>
                         <span class="hidden sm:inline">لوحة الوكيل</span>
-                    </button>
+                    </a>
 
                     <!-- زر تبديل المظهر (الليلي والنهاري) -->
                     <button onclick="toggleTheme()" class="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-700 dark:text-amber-400 transition active:scale-90 cursor-pointer" title="تبديل المظهر">
@@ -1034,119 +1034,6 @@
     </div>
 
     <!-- ==================== النوافذ المنبثقة ==================== -->
-
-   <!-- نافذة لوحة الشريك التسويقي -->
-    <div id="partner-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
-            
-            <!-- ترويسة النافذة -->
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600">
-                        <i class="ph-bold ph-megaphone text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-black text-slate-800 dark:text-white text-lg">لوحة الشريك التسويقي</h3>
-                        <p class="text-xs text-slate-500">إحصائيات الأداء وكود الخصم الخاص بك</p>
-                    </div>
-                </div>
-                <button onclick="toggleView('partner-modal', false)" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl transition">
-                    <i class="ph-bold ph-x text-lg"></i>
-                </button>
-            </div>
-
-            <!-- محتوى الإحصائيات والأرقام المالية -->
-            <div class="grid grid-cols-2 gap-4 my-6">
-                <!-- كود الخصم -->
-                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <span class="text-xs text-slate-400 block mb-1">كود الخصم الخاص بك</span>
-                    <span id="modal-partner-code" class="font-mono font-black text-purple-600 dark:text-purple-400 text-lg">---</span>
-                </div>
-
-                <!-- نسبة العمولة -->
-                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <span class="text-xs text-slate-400 block mb-1">نسبة العمولة</span>
-                    <span id="modal-partner-commission-rate" class="font-mono font-black text-slate-800 dark:text-white text-lg">0%</span>
-                </div>
-
-                <!-- عدد الطلبات المنفذة -->
-                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <span class="text-xs text-slate-400 block mb-1">الطلبات بالكود</span>
-                    <span id="modal-partner-orders-count" class="font-mono font-black text-slate-800 dark:text-white text-lg">0</span>
-                </div>
-
-                <!-- الرصيد الحالي القابل للسحب -->
-                <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                    <span class="text-xs text-emerald-600 dark:text-emerald-400 block mb-1 font-bold">الرصيد الحالي للسحب</span>
-                    <span id="modal-partner-current-balance" class="font-mono font-black text-emerald-600 dark:text-emerald-400 text-lg">$0.00</span>
-                </div>
-            </div>
-
-            <!-- زر الإغلاق -->
-            <button onclick="toggleView('partner-modal', false)" class="w-full py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold text-slate-700 dark:text-slate-200 rounded-xl transition">
-                إغلاق
-            </button>
-        </div>
-    </div>
-
-   <!-- 2. نافذة لوحة الوكيل المعتمد المستقلة -->
-    <div id="agent-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-[95]">
-        <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-t-[32px] sm:rounded-[28px] p-6 shadow-2xl relative text-right space-y-4 slide-up-modal border border-slate-100 dark:border-slate-800 max-h-[85vh] flex flex-col">
-            
-            <!-- ترويسة النافذة -->
-            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 shrink-0">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl border border-amber-500/20">
-                        <i class="ph-fill ph-shield-check"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black text-slate-800 dark:text-slate-100">لوحة الوكيل المالي المعتمد</h4>
-                        <p class="text-[10px] text-slate-400">نقطة كاش معتمدة لاستقبال الإيداعات والتحويلات</p>
-                    </div>
-                </div>
-                <button onclick="toggleView('agent-modal', false)" class="modal-btn-close btn-spring w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shadow-sm">
-                    <i class="ph ph-x font-bold text-base"></i>
-                </button>
-            </div>
-
-            <!-- نموذج التحويل المباشر للعميل -->
-            <form onsubmit="handleAgentTransferToCustomer(event)" class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-amber-500/20 space-y-3 text-xs shrink-0">
-                <h4 class="font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                    <i class="ph-bold ph-paper-plane-tilt text-amber-500"></i>
-                    <span>شحن رصيد لعميل (خصماً من رصيدك كوكيل)</span>
-                </h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">البريد الإلكتروني للعميل</label>
-                        <input type="email" id="agent-target-email" required placeholder="client@example.com" class="input-field w-full px-3.5 py-2.5 text-xs font-mono text-left" dir="ltr">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">المبلغ المراد تحويله ($)</label>
-                        <input type="number" step="0.01" min="0.5" id="agent-transfer-amount" required placeholder="0.00" class="input-field w-full px-3.5 py-2.5 text-xs font-mono font-bold text-left" dir="ltr">
-                    </div>
-                </div>
-                <button type="submit" id="btn-agent-transfer" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-black transition shadow-sm cursor-pointer">
-                    تنفيذ التحويل الفوري للعميل
-                </button>
-            </form>
-
-            <!-- الحاوي المسؤول عن عرض سجل التحويلات والعمولات -->
-            <div class="space-y-2 flex-grow overflow-y-auto pr-1">
-                <h5 class="font-black text-xs text-slate-700 dark:text-slate-300 flex items-center gap-1.5 sticky top-0 bg-white dark:bg-slate-900 py-1">
-                    <i class="ph-bold ph-clock-counter-clockwise text-amber-500"></i>
-                    <span>سجل تحويلاتك وعمولاتك المكتسبة</span>
-                </h5>
-                <div id="agent-transactions-list" class="space-y-2">
-                    <div class="p-3 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">جاري جلب السجلات...</div>
-                </div>
-            </div>
-
-            <!-- زر الإغلاق السفلي -->
-            <button onclick="toggleView('agent-modal', false)" class="btn-spring w-full py-3 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition shrink-0 cursor-pointer">
-                إغلاق النافذة
-            </button>
-        </div>
-    </div>
     
     <!-- نافذة إعادة تفعيل الحساب المؤتمتة -->
     <div id="reactivate-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[115]">
@@ -1744,9 +1631,13 @@ let activeCoupon = null, discountedPrice = 0.00, currentUserRole = "customer";
             toggleView('dashboard-screen', false); 
             toggleView('login-screen', true); 
          const adminLink = document.getElementById('nav-admin-link');
-if (adminLink) adminLink.classList.add('hidden');
-           const agentLink = document.getElementById('nav-agent-link');
-        if (agentLink) agentLink.classList.add('hidden');
+           if (adminLink) adminLink.classList.add('hidden');
+           
+           const agentsLink = document.getElementById('nav-agents-link');
+           if (agentsLink) agentsLink.classList.add('hidden');
+           
+           const marketingPartnerLink = document.getElementById('nav-marketing-partner-link');
+           if (marketingPartnerLink) marketingPartnerLink.classList.add('hidden');
         }
 
         function togglePasswordVisibility(fieldId, btnEl) {
@@ -2021,22 +1912,22 @@ async function verifyRegistrationOtp() {
             if (!currentUser) return;
             const { data: profile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
             if (profile) {
-                // 1. فحص زر لوحة الإدارة (يظهر فقط لمن رتبته admin)
+                // 1. فحص زر لوحة الإدارة (admin)
                 const adminLink = document.getElementById('nav-admin-link');
                 if (adminLink) {
                     adminLink.classList.toggle('hidden', profile.role !== 'admin');
                 }
 
-                // 2. فحص زر لوحة الوكيل (يظهر فقط لمن رتبته agent)
+                // 2. فحص زر لوحة الوكيل المالي (agent)
                 const agentLink = document.getElementById('nav-agent-link');
                 if (agentLink) {
-                    agentLink.classList.toggle('hidden', profile.role !== 'agent');
+                    agentLink.classList.toggle('hidden', profile.role !== 'agent' && profile.role !== 'admin');
                 }
 
-                // 3. فحص زر لوحة الشريك التسويقي (يظهر فقط لمن رتبته affiliate)
+                // 3. فحص زر لوحة الشريك التسويقي (marketing_partner)
                 const partnerLink = document.getElementById('nav-partner-link');
                 if (partnerLink) {
-                    partnerLink.classList.toggle('hidden', profile.role !== 'affiliate');
+                    partnerLink.classList.toggle('hidden', profile.role !== 'marketing_partner' && profile.role !== 'admin');
                 }
 
 
@@ -2301,151 +2192,10 @@ async function verifyRegistrationOtp() {
         function toggleView(id, show) { const el = document.getElementById(id); if(el) el.classList.toggle('hidden', !show); }
         
         function closeAllModals() { 
-    resetResendButtonState();
-    ['register-modal', 'plans-modal', 'account-inputs-modal', 'purchase-modal', 'code-delivery-modal', 'all-orders-modal', 'support-modal', 'info-modal', 'reactivate-modal', 'agent-modal', 'partner-modal'].forEach(id => toggleView(id, false)); 
-}
-        async function openAgentModal() {
-            if (!currentUser) return;
-            toggleSideMenu(false);
-            toggleView('agent-modal', true);
-
-            // جلب وعرض سجل الحركات والعمولات للوكيل مباشرة
-            const container = document.getElementById('agent-transactions-list');
-            if (container) {
-                container.innerHTML = `<div class="p-3 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">جاري جلب السجلات...</div>`;
-
-                const { data: txs, error } = await supabase
-                    .from('agent_transactions')
-                    .select('*')
-                    .eq('agent_id', currentUser.id)
-                    .order('created_at', { ascending: false });
-
-                if (error || !txs || txs.length === 0) {
-                    container.innerHTML = `<div class="p-3 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">لا توجد تحويلات مسجلة حتى الآن.</div>`;
-                    return;
-                }
-
-                container.innerHTML = "";
-
-                for (const tx of txs) {
-                    let targetEmail = 'عميل (معرف مجهول)';
-                    if (tx.target_user_id) {
-                        const { data: userProf } = await supabase
-                            .from('profiles')
-                            .select('email')
-                            .eq('id', tx.target_user_id)
-                            .maybeSingle();
-                        if (userProf) targetEmail = userProf.email;
-                    }
-
-                    const dateStr = new Date(tx.created_at).toLocaleString('en-US', { hour12: false });
-                    
-                    const item = document.createElement('div');
-                    item.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-xs mb-2";
-                    item.innerHTML = `
-                        <div class="space-y-1">
-                            <span class="font-bold text-slate-800 dark:text-slate-200 block">${targetEmail}</span>
-                            <span class="text-[10px] text-slate-400 block font-mono">${dateStr}</span>
-                        </div>
-                        <div class="text-left font-mono">
-                            <span class="font-black text-amber-600 dark:text-amber-400 block">-$${Number(tx.amount).toFixed(2)}</span>
-                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">+ عمولة $${Number(tx.commission_earned || 0).toFixed(2)}</span>
-                        </div>
-                    `;
-                    container.appendChild(item);
-                }
-            }
+            resetResendButtonState();
+            ['register-modal', 'plans-modal', 'account-inputs-modal', 'purchase-modal', 'code-delivery-modal', 'all-orders-modal', 'support-modal', 'info-modal', 'reactivate-modal'].forEach(id => toggleView(id, false)); 
         }
-        // دالة تنفيذ تحويل الرصيد من الوكيل إلى العميل
-        async function handleAgentTransferToCustomer(event) {
-            event.preventDefault();
-            const targetEmail = document.getElementById('agent-target-email').value.trim();
-            const amount = parseFloat(document.getElementById('agent-transfer-amount').value);
-            const btn = document.getElementById('btn-agent-transfer');
-
-            if (!targetEmail || isNaN(amount) || amount <= 0) {
-                return showCustomAlert("يرجى إدخال بريد الكتروني صحيح ومبلغ أكبر من الصفر.");
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> جاري تنفيذ التحويل...`;
-
-            try {
-                // استدعاء دالة قاعدة البيانات الآمنة التي أنشأناها للتو
-                const { data, error } = await supabase.rpc('agent_process_deposit', {
-                    p_target_user_email: targetEmail,
-                    p_amount: amount,
-                    p_commission_rate: 0.02, // 2% عمولة الوكيل
-                    p_notes: 'تحويل نقدي مباشر من لوحة الوكيل'
-                });
-
-                if (error) throw error;
-
-                if (data && data.status === 'success') {
-                    showCustomAlert(`✓ ${data.message}`, false);
-                    document.getElementById('agent-target-email').value = '';
-                    document.getElementById('agent-transfer-amount').value = '';
-                    toggleView('agent-modal', false);
-                    
-                    // تحديث رصيد الوكيل في الواجهة الرئيسية فوراً
-                    await silentSyncData();
-                } else {
-                    showCustomAlert(data?.message || "فشلت عملية التحويل.");
-                }
-
-            } catch (err) {
-                console.error("Agent Transfer Error:", err);
-                showCustomAlert("خطأ في تنفيذ المعاملة: " + (err.message || err));
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = "تنفيذ التحويل الفوري للعميل";
-            }
-        }
-        // دالة فتح لوحة الشريك التسويقي (تستعلم مباشرة وآمنة من جدول القسائم)
-        async function openPartnerModal() {
-            if (!currentUser) return;
-            toggleSideMenu(false);
-            toggleView('partner-modal', true);
-
-            try {
-                // 1. جلب كود الخصم والإحصائيات الخاصة بالشريك من جدول coupons
-                const { data: couponData, error: couponErr } = await supabase
-                    .from('coupons')
-                    .select('code, discount_percent, affiliate_commission_percent, usage_count')
-                    .eq('affiliate_id', currentUser.id)
-                    .maybeSingle();
-
-                if (couponErr) console.error("Coupon fetch error:", couponErr);
-
-                // 2. جلب الرصيد المالي الحالي من جدول profiles
-                const { data: profileData, error: profileErr } = await supabase
-                    .from('profiles')
-                    .select('balance')
-                    .eq('id', currentUser.id)
-                    .single();
-
-                if (profileErr) console.error("Profile fetch error:", profileErr);
-
-                // ربط العناصر في واجهة نافذة الشريك
-                const codeEl = document.getElementById('modal-partner-code');
-                const rateEl = document.getElementById('modal-partner-commission-rate');
-                const countEl = document.getElementById('modal-partner-orders-count');
-                const balanceEl = document.getElementById('modal-partner-current-balance');
-
-                // تعبئة البيانات إن وجدت
-                if (codeEl) codeEl.innerText = couponData?.code || 'لا يوجد كود';
-                if (rateEl) rateEl.innerText = (couponData?.affiliate_commission_percent || 0) + '%';
-                if (countEl) countEl.innerText = couponData?.usage_count || 0;
-                
-                if (balanceEl) {
-                    const balance = profileData?.balance || 0;
-                    balanceEl.innerText = '$' + Number(balance).toFixed(2);
-                }
-
-            } catch (err) {
-                console.error("Error loading partner modal data:", err);
-            }
-        }
+        
         
         function toggleSideMenu(open) {
             const overlay = document.getElementById('side-menu-overlay');
@@ -2590,7 +2340,6 @@ async function verifyRegistrationOtp() {
         }
 
     // ========================================================================
-        // ========================================================================
         // 7. محرك عرض المعاملات الفاخر (Fintech Platform & Package Ledger)
         // ========================================================================
 
@@ -2605,7 +2354,7 @@ async function verifyRegistrationOtp() {
             'استرجاع رصيد': { label: 'استرجاع رصيد', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-900/50', icon: 'ph-bold ph-arrow-u-up-left' },
             'Agent Wallet Transfer': { label: 'تحويل وكيل صادر', color: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-900/50', icon: 'ph-bold ph-paper-plane-tilt' },
             'Agent Financial Commission': { label: 'عمولة وكيل مالي', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900/50', icon: 'ph-bold ph-seal-percent' },
-            'Affiliate Commission': { label: 'أرباح شريك تسويقي', color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 border-purple-200 dark:border-purple-900/50', icon: 'ph-bold ph-megaphone' },
+            'Marketing Partner Commission': { label: 'أرباح شريك تسويقي', color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 border-purple-200 dark:border-purple-900/50', icon: 'ph-bold ph-megaphone' },
             'Commission Payout': { label: 'صرف أرباح كاش', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900/50', icon: 'ph-bold ph-money' }
         };
 
@@ -2638,7 +2387,11 @@ async function verifyRegistrationOtp() {
 
             const isRefund = tx.type === 'Refund' || tx.type === 'استرجاع رصيد';
             const isDeposit = tx.type === 'Deposit' || tx.type === 'شحن رصيد';
-            const isCommission = tx.type === 'Affiliate Commission';
+            const isAgentTransferOut = tx.type === 'Agent Wallet Transfer';
+            const isAgentCommission = tx.type === 'Agent Financial Commission';
+            const isPartnerCommission = tx.type === 'Marketing Partner Commission' || tx.type === 'Affiliate Commission';
+            const isCommission = isAgentCommission || isPartnerCommission;
+
             const isRefundedOrder = statusKey === 'refunded' || statusKey === 'مسترجع';
             const isPending = statusKey === 'pending' || statusKey === 'معلق';
             const isRejected = statusKey === 'rejected' || statusKey === 'cancelled' || statusKey === 'مرفوض' || statusKey === 'ملغي';
@@ -2659,7 +2412,6 @@ async function verifyRegistrationOtp() {
             const idMatch = rawDetails.match(/ID:\s*([^\s)]+)/i);
             if (!playerId && idMatch) playerId = idMatch[1];
 
-            // تنظيف اسم الباقة الصافي للبحث عن المنصة
             let cleanPackageName = rawDetails
                 .replace(/\[مسترجع:\s*[^\]]+\]/g, '')
                 .replace(/\[إشعار:\s*[^\]]+\]/g, '')
@@ -2668,12 +2420,21 @@ async function verifyRegistrationOtp() {
                 .replace(/استرجاع رصيد طلب مرفوض:\s*/g, '')
                 .trim();
 
-            // 2. تحديد المنصة والشعار
+            // 2. تحديد المنصة والوصف بدقة لكل نوع معاملة
             let platformName = '';
             let packageName = cleanPackageName;
             let platformImageUrl = '';
 
-            if (typeof globalProductsRaw !== 'undefined' && globalProductsRaw.length > 0) {
+            if (isAgentTransferOut) {
+                platformName = 'نظام الوكيل المالي (Agents)';
+                packageName = rawDetails || 'تحويل رصيد نقدي صادر لعميل';
+            } else if (isAgentCommission) {
+                platformName = 'مكافآت الوكيل المالي (Agents)';
+                packageName = rawDetails || 'عمولة تحويل رصيد نقدي لعميل';
+            } else if (isPartnerCommission) {
+                platformName = 'برنامج الشريك التسويقي (Partner)';
+                packageName = rawDetails || 'أرباح عمولة من كود الخصم التسويقي';
+            } else if (typeof globalProductsRaw !== 'undefined' && globalProductsRaw.length > 0) {
                 const matched = globalProductsRaw.find(p => 
                     p.package_name.trim().toLowerCase() === cleanPackageName.toLowerCase() ||
                     cleanPackageName.toLowerCase().includes(p.package_name.trim().toLowerCase()) ||
@@ -2693,13 +2454,10 @@ async function verifyRegistrationOtp() {
                     packageName = 'شحن رصيد المحفظة';
                 } else if (isDeposit) {
                     platformName = 'قنوات الدفع المعتمدة';
-                    packageName = 'تمويل رصيد الحساب';
+                    packageName = rawDetails || 'تمويل رصيد الحساب';
                 } else if (isRefund) {
                     platformName = 'محفظة SHIIFTX';
                     packageName = cleanPackageName || 'استرداد نقدي لطلب ملغي';
-                } else if (isCommission) {
-                    platformName = 'برنامج التسويق (وكيل)';
-                    packageName = 'أرباح عمولة من كود الخصم';
                 } else {
                     const parts = cleanPackageName.split(' ');
                     if (parts.length > 1) {
@@ -2720,7 +2478,7 @@ async function verifyRegistrationOtp() {
             };
             const opLabel = isRefundedOrder ? 'طلب شحن مسترد' : opConfig.label;
 
-            // 4. ضبط شارة الحالة (Status Badge) بدقة حسب الحالة الفعلية
+            // 4. ضبط شارة الحالة
             let statusPill = '';
             if (isPending) {
                 statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200/70 dark:border-amber-900/50 animate-pulse">
@@ -2734,7 +2492,7 @@ async function verifyRegistrationOtp() {
                 statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-900/50">مكتمل</span>`;
             }
 
-            // 5. ضبط المبلغ المالي وإشارته بحسب نوع الحركة وحالتها
+            // 5. ضبط المبلغ المالي وإشارته
             let amountHtml = '';
             if (isDeposit || isRefund || isCommission) {
                 if (isPending) {
@@ -2754,7 +2512,7 @@ async function verifyRegistrationOtp() {
                 if (isRefundedOrder || isRejected) {
                     amountHtml = `<span class="font-mono text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 line-through">-$${numAmount.toFixed(2)}</span>`;
                 } else {
-                    amountHtml = `<span class="font-mono text-base font-black text-slate-900 dark:text-slate-100">-$${numAmount.toFixed(2)}</span>`;
+                    amountHtml = `<span class="font-mono text-base font-black text-rose-600 dark:text-rose-400">-$${numAmount.toFixed(2)}</span>`;
                 }
             }
 
@@ -2766,14 +2524,10 @@ async function verifyRegistrationOtp() {
                         <img src="${platformImageUrl}" alt="${platformName}" referrerpolicy="no-referrer" class="w-full h-full object-contain">
                     </div>`;
             } else {
-                let fallbackIcon = isPending ? 'ph-bold ph-hourglass' : (isRefund ? 'ph-bold ph-arrow-u-up-left' : (isDeposit ? 'ph-bold ph-wallet' : (isRefundedOrder ? 'ph-bold ph-prohibit' : opConfig.icon)));
+                let fallbackIcon = isPending ? 'ph-bold ph-hourglass' : opConfig.icon;
                 let fallbackColor = isPending 
                     ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border-amber-200 dark:border-amber-900/50' 
-                    : (isRefund || (isDeposit && isCompleted) 
-                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50' 
-                        : (isRefundedOrder || isRejected 
-                            ? 'bg-rose-50 text-rose-500 dark:bg-rose-950/50 dark:text-rose-400 border-rose-200 dark:border-rose-900/50' 
-                            : 'bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 border-blue-200 dark:border-blue-900/50'));
+                    : opConfig.color;
 
                 logoMarkup = `
                     <div class="w-12 h-12 rounded-2xl ${fallbackColor} border shrink-0 flex items-center justify-center text-xl shadow-sm">
@@ -2781,7 +2535,7 @@ async function verifyRegistrationOtp() {
                     </div>`;
             }
 
-            // 7. الرقائق الذكية (المرجع • التاريخ • معرف اللاعب • الخصم)
+            // 7. الرقائق الذكية
             const txRef = tx.tx_id || rawTx.transaction_ref || '---';
             let chipsHtml = `
                 <div class="flex items-center gap-1.5 flex-wrap text-[10px] text-slate-400 pt-0.5 font-sans">
@@ -2826,7 +2580,6 @@ async function verifyRegistrationOtp() {
                 `;
             }
 
-            // الهيكل النهائي للبطاقة
             card.innerHTML = `
                 <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/60 pb-2">
                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border ${opConfig.color}">
@@ -2861,14 +2614,14 @@ async function verifyRegistrationOtp() {
             return card;
         }
         
-      function openTransactionReceiptModal(tx, opLabel, platformName, packageName, amount, statusKey, playerId, cancelReason, platformImageUrl) {
+        function openTransactionReceiptModal(tx, opLabel, platformName, packageName, amount, statusKey, playerId, cancelReason, platformImageUrl) {
             const oldReceipt = document.getElementById('transaction-receipt-modal');
             if (oldReceipt) oldReceipt.remove();
 
             const rawTx = tx.raw || {};
             const ref = tx.tx_id || rawTx.transaction_ref || 'TX-UNKNOWN';
             const dateStr = tx.date || new Date().toLocaleString();
-            const isCredit = tx.type === 'Refund' || tx.type === 'Deposit' || tx.type === 'Affiliate Commission';
+            const isCredit = tx.type === 'Refund' || tx.type === 'استرجاع رصيد' || tx.type === 'Deposit' || tx.type === 'شحن رصيد' || tx.type === 'Agent Financial Commission' || tx.type === 'Marketing Partner Commission' || tx.type === 'Affiliate Commission';
 
             let statusLabel = 'مؤكدة ومكتملة ✓';
             let statusClass = 'text-emerald-600 dark:text-emerald-400';
@@ -2895,7 +2648,7 @@ async function verifyRegistrationOtp() {
                         <h3 class="text-base font-black text-slate-900 dark:text-slate-100 pt-1">${platformName}</h3>
                         <p class="text-xs font-bold text-slate-500 dark:text-slate-400">${packageName}</p>
                         <div class="pt-2">
-                            <span class="text-3xl font-black font-mono ${isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100'}">
+                            <span class="text-3xl font-black font-mono ${isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">
                                 ${isCredit ? '+' : '-'}$${amount.toFixed(2)}
                             </span>
                         </div>
@@ -2906,7 +2659,7 @@ async function verifyRegistrationOtp() {
                         <div class="flex justify-between"><span>الحالة:</span><span class="font-bold ${statusClass}">${statusLabel}</span></div>
                     </div>
                     <div class="flex gap-2 pt-1">
-                        <button onclick="printOfficialInvoice('${ref}', '${platformName}', '${packageName}', '${amount.toFixed(2)}', '${dateStr}', '${statusLabel}')" class="btn-spring flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-blue-600 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <button onclick="printOfficialInvoice('${ref}', '${platformName}', '${packageName}', '${amount.toFixed(2)}', '${dateStr}', '${playerId || ''}', '${statusLabel}')" class="btn-spring flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-blue-600 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
                             <i class="ph-bold ph-printer"></i>
                             <span>طباعة الفاتورة</span>
                         </button>
@@ -2921,7 +2674,8 @@ async function verifyRegistrationOtp() {
             </div>`;
             document.body.insertAdjacentHTML('beforeend', receiptHtml);
         }
-
+        
+      
 // دالة توليد وطباعة الفاتورة الفاخرة للجيل الجديد (Executive Fintech Architecture)
         function printOfficialInvoice(ref, platform, pkg, amount, date, playerId, status) {
             const printWindow = window.open('', '_blank');
@@ -3630,9 +3384,8 @@ async function verifyRegistrationOtp() {
             // -------------------------------------------------------------
             // 1. التحقق الحاسم: منع حساب الوكيل من استخدام أي كود نهائياً
             // -------------------------------------------------------------
-            if (currentUserRole === 'agent') {
-                activeCoupon = null;
-                discountedPrice = selectedItemPrice;
+            // 1. التحقق الحاسم: منع حساب الوكيل والشريك التسويقي من استخدام أي كود نهائياً
+            if (currentUserRole === 'agent' || currentUserRole === 'marketing_partner') {
                 
                 // إخفاء سطر التخفيض من الفاتورة وإعادة السعر الأصلي
                 const discountRow = document.getElementById('discount-breakdown-row');
