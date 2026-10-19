@@ -773,10 +773,10 @@ const commissionRate = isNaN(rawCommission) ? null : rawCommission;
 
             try {
                 const { data, error } = await db.rpc('admin_manage_agent', {
-                    p_user_id: userId,
-                    p_action: 'promote',
-                    p_commission_rate: commissionRate
-                });
+    p_user_id: userId,
+    p_action: 'promote',
+    p_commission_rate: commissionRate
+});
 
                 if (error) throw error;
 
