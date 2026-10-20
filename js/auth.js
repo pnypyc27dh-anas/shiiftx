@@ -2,9 +2,64 @@
 // SHIIFT X — وحدة المصادقة وإدارة الحسابات (Auth Controller)
 // ========================================================================
 
+// ========================================================================
+// نظام الأمان والحماية: إنهاء الجلسة التلقائي عند الخمول (Inactivity Timeout)
+// ========================================================================
+// ضبط المؤقت على 30 ثانية لأغراض الاختبار (يُعدل لاحقاً إلى 5 * 60 * 1000)
+const INACTIVITY_LIMIT_MS = 30 * 1000; 
+let inactivityTimer = null;
+let isAutoLoggingOut = false;
+const userActivityEvents = ['click', 'keydown', 'scroll', 'touchstart', 'mousemove'];
+
+function handleUserActivity() {
+    if (isAutoLoggingOut) return;
+
+    if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+    }
+
+    inactivityTimer = setTimeout(async () => {
+        isAutoLoggingOut = true;
+        console.warn("[Security] تم إنهاء الجلسة تلقائياً لعدم وجود نشاط.");
+
+        try {
+            await handleLogout();
+        } catch (err) {
+            console.error("[Security] خطأ أثناء تسجيل الخروج التلقائي:", err);
+            await supabase.auth.signOut();
+            currentUser = null;
+            toggleView('dashboard-screen', false);
+            toggleView('login-screen', true);
+        } finally {
+            showCustomAlert("تم تسجيل الخروج تلقائياً لعدم وجود نشاط حفاظاً على أمان حسابك.");
+            isAutoLoggingOut = false;
+        }
+    }, INACTIVITY_LIMIT_MS);
+}
+
+function startInactivityTracking() {
+    stopInactivityTracking();
+    isAutoLoggingOut = false;
+    userActivityEvents.forEach(evt => {
+        window.addEventListener(evt, handleUserActivity, { passive: true });
+    });
+    handleUserActivity();
+}
+
+function stopInactivityTracking() {
+    if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = null;
+    }
+    userActivityEvents.forEach(evt => {
+        window.removeEventListener(evt, handleUserActivity);
+    });
+}
+
 // 1. الاستماع لتغير حالات جلسة الدخول
 supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
+        stopInactivityTracking();
         currentFlowType = "reset";
         currentUser = session ? session.user : null;
         if (currentUser) {
@@ -30,11 +85,13 @@ supabase.auth.onAuthStateChange(async (event, session) => {
                 .single();
 
             if (prof && (prof.status === 'inactive' || prof.status === 'محذوف' || prof.status === 'معطل')) {
+                stopInactivityTracking();
                 currentUser = session.user;
                 toggleView('dashboard-screen', false);
                 toggleView('login-screen', true);
                 toggleView('reactivate-modal', true);
             } else if (prof && prof.status === 'banned') {
+                stopInactivityTracking();
                 await supabase.auth.signOut();
                 currentUser = null;
                 showCustomAlert("هذا الحساب محظور إدارياً. يرجى التواصل مع الإدارة.");
@@ -44,6 +101,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
             }
         }
     } else if (event === 'SIGNED_OUT') {
+        stopInactivityTracking();
         currentUser = null;
     }
 });
@@ -160,10 +218,13 @@ function postLoginSetup() {
     if (!syncInterval && typeof silentSyncData === 'function') {
         syncInterval = setInterval(silentSyncData, 30000);
     }
+    // بدء مراقبة الخمول التلقائي فور الدخول للوحة التحكم
+    startInactivityTracking();
 }
 
 // 6. تسجيل الخروج
 async function handleLogout() { 
+    stopInactivityTracking();
     toggleSideMenu(false);
     if (syncInterval) { clearInterval(syncInterval); syncInterval = null; } 
     await supabase.auth.signOut(); 
@@ -469,7 +530,7 @@ async function triggerDeleteAccountFlow() {
         });
         if (authError) return showCustomAlert("كلمة المرور غير صحيحة."); 
         
-        const { data, error } = await supabase.rpc('deactivate_my_account');
+        const { data, error } = await supabase.rpc('deactivate_my_account'); 
         
         if (error || (data && data.status === 'error')) {
             return showCustomAlert("فشل تعطيل الحساب: " + (error?.message || data?.message));
