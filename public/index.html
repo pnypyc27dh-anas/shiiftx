@@ -48,42 +48,42 @@
     <!-- كود تبديل الوضع الليلي والنهاري -->
     <script>
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- كود تبديل الوضع الليلي والنهاري -->
-    <script>
-        function toggleTheme() {
-            const html = document.documentElement;
-            const icon = document.getElementById('theme-toggle-icon');
-            
-            if (icon) icon.classList.add('theme-rotating');
+<!-- كود تبديل الوضع الليلي والنهاري -->
+<script>
+    function toggleTheme() {
+        const html = document.documentElement;
+        const icon = document.getElementById('theme-toggle-icon');
+
+        if (icon) icon.classList.add('theme-rotating');
+
+        setTimeout(() => {
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcon(isDark);
 
             setTimeout(() => {
-                const isDark = html.classList.toggle('dark');
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-                updateThemeIcon(isDark);
-                
-                setTimeout(() => {
-                    if (icon) icon.classList.remove('theme-rotating');
-                }, 200);
-            }, 150);
-        }
+                if (icon) icon.classList.remove('theme-rotating');
+            }, 200);
+        }, 150);
+    }
 
-        function updateThemeIcon(isDark) {
-            const icon = document.getElementById('theme-toggle-icon');
-            if (!icon) return;
-            if (isDark) {
-                icon.className = "ph-fill ph-sun text-xl text-amber-400";
-            } else {
-                icon.className = "ph-fill ph-moon text-xl text-slate-700";
-            }
+    function updateThemeIcon(isDark) {
+        const icon = document.getElementById('theme-toggle-icon');
+        if (!icon) return;
+        if (isDark) {
+            icon.className = "ph-fill ph-sun text-xl text-amber-400";
+        } else {
+            icon.className = "ph-fill ph-moon text-xl text-slate-700";
         }
+    }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const isDark = document.documentElement.classList.contains('dark');
-            updateThemeIcon(isDark);
-        });
-    </script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const isDark = document.documentElement.classList.contains('dark');
+        updateThemeIcon(isDark);
+    });
+</script>
 
     <!-- تفعيل الوضع الليلي في Tailwind -->
     <script>
@@ -2416,21 +2416,6 @@ if (agentsLink) {
 
             const refMatch = rawDetails.match(/\[مسترجع:\s*([^\]]+)\]/);
             if (refMatch) cancelReason = refMatch[1].trim();
-
-            const discMatch = rawDetails.match(/\(خصم كود\s*([^)]+)\)/);
-            if (discMatch) discountInfo = discMatch[1].trim();
-
-            let playerId = tx.player_id || rawTx.player_id;
-            const idMatch = rawDetails.match(/ID:\s*([^\s)]+)/i);
-            if (!playerId && idMatch) playerId = idMatch[1];
-
-            let cleanPackageName = rawDetails
-                .replace(/\[مسترجع:\s*[^\]]+\]/g, '')
-                .replace(/\[إشعار:\s*[^\]]+\]/g, '')
-                .replace(/\(ID:\s*[^)]+\)/gi, '')
-                .replace(/\(خصم كود\s*[^)]+\)/gi, '')
-                .replace(/استرجاع رصيد طلب مرفوض:\s*/g, '')
-                .trim();
 
             // 2. تحديد المنصة والوصف بدقة لكل نوع معاملة
             let platformName = '';
