@@ -5,8 +5,7 @@
 // ========================================================================
 // نظام الأمان والحماية: إنهاء الجلسة التلقائي عند الخمول (Inactivity Timeout)
 // ========================================================================
-// ضبط المؤقت على 30 ثانية لأغراض الاختبار (يُعدل لاحقاً إلى 5 * 60 * 1000)
-const INACTIVITY_LIMIT_MS = 30 * 1000; 
+const INACTIVITY_LIMIT_MS = 5 * 60 * 1000; 
 let inactivityTimer = null;
 let isAutoLoggingOut = false;
 const userActivityEvents = ['click', 'keydown', 'scroll', 'touchstart', 'mousemove'];
