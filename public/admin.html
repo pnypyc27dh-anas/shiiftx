@@ -281,7 +281,7 @@
                                 <th class="pb-2">السعر الحالي ($)</th>
                                 <th class="pb-2">نوع التسليم</th>
                                 <th class="pb-2 text-center">الحالة</th>
-                                <th class="pb-2 text-center">حذف</th>
+                                <th class="pb-2 text-center">إجراءات</th>
                             </tr>
                         </thead>
                         <tbody id="products-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
@@ -332,7 +332,7 @@
                 </div>
             </section>
 
-            <!-- تبويب 6: الوكلاء الماليين (Cash Agents) مع حقل النسبة اليدوية -->
+            <!-- تبويب 6: الوكلاء الماليين (Cash Agents) -->
             <section id="sec-agents" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
                     <div>
@@ -340,7 +340,7 @@
                             <i class="ph-bold ph-wallet text-emerald-500 text-lg"></i>
                             <span>شبكة الوكلاء الماليين المعتمدين (نقاط الكاش)</span>
                         </h3>
-                        <p class="text-[11px] text-slate-400">إدارة الوكلاء المخولين باستقبال إيداعات الزبائن وتحديد نسب العمولات اليدوية</p>
+                        <p class="text-[11px] text-slate-400">إدارة الوكلاء المخولين باستقبال إيداعات الزبائن وتحديد نسب العمولات</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <button onclick="openAgentModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
@@ -435,7 +435,7 @@
         </div>
     </div>
     
-    <!-- نافذة تعيين وكيل مالي معتمد مع حقل نسبة العمولة -->
+    <!-- نافذة تعيين وكيل مالي معتمد -->
     <div id="agent-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -457,7 +457,7 @@
                 <div>
                     <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نسبة عمولة الوكيل (%):</label>
                     <input type="number" step="0.1" min="0.1" max="50" id="agent-commission-input" required placeholder="مثال: 2 (تعني 2%)" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
-                    <p class="text-[10px] text-slate-400 mt-1">أدخل النسبة المئوية المخصصة للوكيل (إلزامي ولا يوجد نسبة افتراضية).</p>
+                    <p class="text-[10px] text-slate-400 mt-1">أدخل النسبة المئوية المخصصة للوكيل.</p>
                 </div>
 
                 <div class="pt-3 flex gap-2">
@@ -490,8 +490,8 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">المنصة (ثابتة 🔒):</label>
-                        <input id="edit-prod-platform" disabled class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-bold outline-none cursor-not-allowed">
+                        <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">المنصة:</label>
+                        <input id="edit-prod-platform" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
                     </div>
                     <div>
                         <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">نوع التسليم:</label>
@@ -552,6 +552,8 @@
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let currentAdminUser = null;
         let allProductsCache = [];
+        let inventoryProductsCache = [];
+        let editingAffiliateUserId = null;
 
         async function checkAdminAuth() {
             try {
@@ -638,8 +640,7 @@
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                     <td class="py-3 font-mono text-[11px] text-slate-400">${o.transaction_ref}</td>
                     <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${o.details}</td>
-                    <td class="py-3 font-mono font-black text-amber-600 dark:text-amber-400 select-all">${o.player_id || '---'}</td>
-                    <td class="py-3 font-mono font-bold">$${Number(o.amount).toFixed(2)}</td>
+                    <td class="py-3 font-mono font-black text-amber-600 dark:text-amber-400 select-all">${o.player_id \vert{}\vert{} '---'}</td> <td class="py-3 font-mono font-bold">$${Number(o.amount).toFixed(2)}</td>
                     <td class="py-3 text-center flex justify-center gap-2">
                         <button onclick="handleProcessOrder('${o.id}', 'complete')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold">
                             تم الشحن ✓
@@ -663,7 +664,7 @@
             const { data, error } = await db.rpc('admin_process_order', {
                 p_tx_id: id,
                 p_action: action,
-                p_reason: reason
+                p_reason: reason || ''
             });
 
             if (error || data.status === 'error') {
@@ -694,8 +695,7 @@
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                     <td class="py-3 font-mono text-[11px] text-slate-400">${d.transaction_ref}</td>
                     <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${d.details}</td>
-                    <td class="py-3 text-center font-mono font-bold">${d.player_id || '---'}</td>
-                    <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400">+$${Number(d.amount).toFixed(2)}</td>
+                    <td class="py-3 text-center font-mono font-bold">${d.player_id \vert{}\vert{} '---'}</td> <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400">+$${Number(d.amount).toFixed(2)}</td>
                     <td class="py-3 text-[10px] text-slate-400">${new Date(d.created_at).toLocaleString('ar-EG')}</td>
                     <td class="py-3 text-center flex justify-center gap-2">
                         <button onclick="handleProcessDeposit('${d.id}', 'approve')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold transition">تأكيد ✓</button>
@@ -737,14 +737,11 @@
         // =========================================================================
         // مخزون الأكواد الرقمية (code_inventory)
         // =========================================================================
-        let inventoryProductsCache = [];
-
         async function loadInventoryData() {
             const tbody = document.getElementById('inventory-tbody');
             const select = document.getElementById('restock-product-select');
 
             try {
-                // 1. جلب باقات الأكواد فقط
                 const { data: prods, error: prodErr } = await db
                     .from('products')
                     .select('*')
@@ -754,7 +751,6 @@
                 if (prodErr) throw prodErr;
                 inventoryProductsCache = prods || [];
 
-                // 2. تحديث قائمة اختيار الباقة للتزويد
                 if (select) {
                     if (inventoryProductsCache.length === 0) {
                         select.innerHTML = `<option value="" disabled selected>لا توجد منتجات رقمية (CODE)</option>`;
@@ -772,15 +768,11 @@
                     return;
                 }
 
-                // 3. جلب المخزون من جدول code_inventory الصحيح
                 const { data: codes, error: codesErr } = await db
                     .from('code_inventory')
                     .select('product_id, status');
 
-                if (codesErr) {
-                    console.error("Error fetching code_inventory:", codesErr);
-                    throw codesErr;
-                }
+                if (codesErr) console.error("Error fetching code_inventory:", codesErr);
 
                 const allCodes = codes || [];
 
@@ -792,8 +784,7 @@
                     return `
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                             <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.platform}</td>
-                            <td class="py-3 font-medium text-slate-700 dark:text-slate-200">${p.package_name}</td>
-                            <td class="py-3 font-mono font-bold">$${Number(p.price).toFixed(2)}</td>
+                            <td class="py-3 font-medium text-slate-700 dark:text-slate-200">${p.package_name}</td> <td class="py-3 font-mono font-bold">$${Number(p.price).toFixed(2)}</td>
                             <td class="py-3 text-center">
                                 <span class="px-2.5 py-1 rounded-full text-xs font-mono font-black ${available > 0 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500'}">
                                     ${available} متوفر
@@ -831,7 +822,7 @@
             if (!select || !badge) return;
             const prod = inventoryProductsCache.find(p => p.id === select.value);
             if (prod) {
-                badge.innerHTML = `<span class="text-emerald-600 font-bold">تم اختيار: ${prod.platform} — ${prod.package_name}</span>`;
+                badge.innerHTML = `<span class="text-emerald-600 font-bold">تم اختيار: ${prod.platform} —${prod.package_name}</span>`;
             } else {
                 badge.innerHTML = '';
             }
@@ -858,7 +849,8 @@
             btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-sm"></i> جاري الإضافة...`;
 
             try {
-                const { data, error } = await db.rpc('admin_add_code_inventory', {
+                // استدعاء دالة قاعدة البيانات الصحيحة admin_add_inventory_codes
+                const { data, error } = await db.rpc('admin_add_inventory_codes', {
                     p_product_id: prodId,
                     p_codes_text: codesText
                 });
@@ -881,13 +873,346 @@
                 btn.innerHTML = `<i class="ph-bold ph-plus-circle text-sm"></i> إضافة الأكواد إلى المخزون فوراً`;
             }
         }
+
+        // =========================================================================
+        // المنصات والباقات (عرض، فلترة، تعديل، حذف، إضافة)
+        // =========================================================================
         async function loadProducts() {
-            const { data, error } = await db.from('products').select('*');
-            if (!error) allProductsCache = data || [];
+            const tbody = document.getElementById('products-tbody');
+            const filterSelect = document.getElementById('products-platform-filter');
+
+            try {
+                const { data: prods, error } = await db
+                    .from('products')
+                    .select('*')
+                    .order('platform', { ascending: true });
+
+                if (error) throw error;
+                allProductsCache = prods || [];
+
+                if (filterSelect) {
+                    const currentFilter = filterSelect.value || 'ALL';
+                    const platforms = [...new Set(allProductsCache.map(p => p.platform).filter(Boolean))];
+                    filterSelect.innerHTML = `<option value="ALL">جميع المنصات</option>` +
+                        platforms.map(p => `<option value="${p}">${p}</option>`).join('');
+                    filterSelect.value = currentFilter;
+                }
+
+                renderProductsTable(allProductsCache);
+            } catch (err) {
+                console.error("Products load error:", err);
+                if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-rose-500">فشل تحميل المنتجات: ${err.message}</td></tr>`;
+            }
+        }
+
+        function renderProductsTable(productsList) {
+            const tbody = document.getElementById('products-tbody');
+            if (!tbody) return;
+
+            if (!productsList || productsList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">لا توجد باقات معروضة حالياً</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = productsList.map(p => {
+                const isCode = p.product_type === 'CODE';
+                const isActive = p.status === 'active' || p.status === 'نشط';
+
+                const typeBadge = isCode
+                    ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-600">كود فوري (CODE)</span>`
+                    : `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/10 text-blue-600">شحن ID مباشر</span>`;
+
+                const statusBadge = isActive
+                    ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-600">معروض ✓</span>`
+                    : `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-500/10 text-slate-400">مخفي ✕</span>`;
+
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                        <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.platform}</td>
+                        <td class="py-3 font-medium text-slate-700 dark:text-slate-200">${p.package_name}</td> <td class="py-3 font-mono font-bold text-slate-900 dark:text-slate-100">$${Number(p.price).toFixed(2)}</td>
+                        <td class="py-3">${typeBadge}</td>
+                        <td class="py-3 text-center">${statusBadge}</td>
+                        <td class="py-3 text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button onclick="openEditProductModal('${p.id}')" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل الباقة">
+                                    <i class="ph-bold ph-pencil-simple text-sm"></i>
+                                </button>
+                                <button onclick="handleDeleteProduct('${p.id}', '${p.package_name}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="حذف الباقة">
+                                    <i class="ph-bold ph-trash text-sm"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterProductsByPlatform() {
+            const filterVal = document.getElementById('products-platform-filter').value;
+            if (filterVal === 'ALL') {
+                renderProductsTable(allProductsCache);
+            } else {
+                const filtered = allProductsCache.filter(p => p.platform === filterVal);
+                renderProductsTable(filtered);
+            }
+        }
+
+        function openAddModal() {
+            document.getElementById('edit-prod-id').value = '';
+            
+            const platformInput = document.getElementById('edit-prod-platform');
+            platformInput.disabled = false;
+            platformInput.value = '';
+            platformInput.placeholder = 'مثال: PUBG, Netflix, Steam';
+
+            document.getElementById('edit-prod-name').value = '';
+            document.getElementById('edit-prod-price').value = '';
+            document.getElementById('edit-prod-type').value = 'CODE';
+            document.getElementById('edit-prod-category').value = 'Games';
+            document.getElementById('edit-prod-image').value = '';
+            document.getElementById('edit-prod-status').value = 'active';
+
+            const modalTitle = document.querySelector('#edit-product-modal h4 span');
+            if (modalTitle) modalTitle.innerText = 'إضافة باقة جديدة ➕';
+            
+            const saveBtn = document.getElementById('btn-save-edit-prod');
+            if (saveBtn) saveBtn.innerHTML = `<i class="ph-bold ph-plus-circle text-sm"></i> <span>إضافة الباقة للمتجر</span>`;
+
+            document.getElementById('edit-product-modal').classList.remove('hidden');
+        }
+
+        function openEditProductModal(productId) {
+            const prod = allProductsCache.find(p => p.id === productId);
+            if (!prod) return;
+
+            document.getElementById('edit-prod-id').value = prod.id;
+            document.getElementById('edit-prod-platform').value = prod.platform || '';
+            document.getElementById('edit-prod-type').value = prod.product_type || 'CODE';
+            document.getElementById('edit-prod-name').value = prod.package_name || '';
+            document.getElementById('edit-prod-price').value = prod.price || '';
+            document.getElementById('edit-prod-category').value = prod.category || '';
+            document.getElementById('edit-prod-image').value = prod.image_url || '';
+            document.getElementById('edit-prod-status').value = prod.status || 'active';
+
+            const modalTitle = document.querySelector('#edit-product-modal h4 span');
+            if (modalTitle) modalTitle.innerText = 'تعديل بيانات الباقة';
+
+            const saveBtn = document.getElementById('btn-save-edit-prod');
+            if (saveBtn) saveBtn.innerHTML = `<i class="ph-bold ph-floppy-disk text-sm"></i> <span>حفظ التعديلات</span>`;
+
+            document.getElementById('edit-product-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-product-modal').classList.add('hidden');
+        }
+
+        async function handleEditProductSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-edit-prod');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الحفظ...`;
+
+            const prodId = document.getElementById('edit-prod-id').value || null;
+            const platform = document.getElementById('edit-prod-platform').value.trim();
+            const pkgName = document.getElementById('edit-prod-name').value.trim();
+            const price = parseFloat(document.getElementById('edit-prod-price').value);
+            const pType = document.getElementById('edit-prod-type').value;
+            const category = document.getElementById('edit-prod-category').value.trim();
+            const img = document.getElementById('edit-prod-image').value.trim();
+            const status = document.getElementById('edit-prod-status').value;
+
+            try {
+                const { data, error } = await db.rpc('admin_save_product', {
+                    p_id: prodId,
+                    p_platform: platform,
+                    p_package_name: pkgName,
+                    p_price: price,
+                    p_product_type: pType,
+                    p_category: category,
+                    p_image_url: img || null,
+                    p_status: status
+                });
+
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    alert(data.message || "تم حفظ الباقة بنجاح ✓");
+                    closeEditModal();
+                    await loadProducts();
+                    await loadInventoryData();
+                } else {
+                    alert("خطأ: " + (data ? data.message : "فشل حفظ الباقة"));
+                }
+            } catch (err) {
+                alert("خطأ أثناء الحفظ: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-floppy-disk text-sm"></i> <span>حفظ التعديلات</span>`;
+            }
+        }
+
+        async function handleDeleteProduct(id, name) {
+            if (!confirm(`هل أنت متأكد من حذف الباقة (${name}) نهائياً من المتجر؟`)) return;
+
+            try {
+                const { data, error } = await db.rpc('admin_delete_product', { p_id: id });
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    alert(data.message || "تم حذف الباقة بنجاح");
+                    await loadProducts();
+                    await loadInventoryData();
+                } else {
+                    alert("خطأ: " + (data ? data.message : "فشل الحذف"));
+                }
+            } catch (err) {
+                alert("خطأ: " + (err.message || err));
+            }
         }
 
         // =========================================================================
-        // دوال إدارة الوكلاء الماليين مع النسبة اليدوية الدقيقة
+        // دوال الشركاء التسويقيين (مع ترقية رتبة الحساب وزر التعديل)
+        // =========================================================================
+        function openAffiliateModal() {
+            editingAffiliateUserId = null;
+            populateUserDropdown('affiliate-user-select');
+            document.getElementById('affiliate-user-select').disabled = false;
+            document.getElementById('affiliate-code-input').value = '';
+            document.getElementById('affiliate-discount-input').value = '5';
+            document.getElementById('affiliate-comm-input').value = '5';
+            document.getElementById('btn-save-affiliate').innerText = "حفظ واعتماد الشريك";
+            document.getElementById('affiliate-modal').classList.remove('hidden');
+        }
+
+        function closeAffiliateModal() {
+            editingAffiliateUserId = null;
+            document.getElementById('affiliate-modal').classList.add('hidden');
+        }
+
+        async function handleAffiliateSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-affiliate');
+            btn.disabled = true;
+            btn.innerText = "جاري الحفظ...";
+
+            const userId = editingAffiliateUserId || document.getElementById('affiliate-user-select').value;
+            const code = document.getElementById('affiliate-code-input').value.trim().toUpperCase();
+            const discount = parseFloat(document.getElementById('affiliate-discount-input').value);
+            const commission = parseFloat(document.getElementById('affiliate-comm-input').value);
+
+            try {
+                const { data, error } = await db.rpc('admin_manage_affiliate', {
+                    p_user_id: userId,
+                    p_coupon_code: code,
+                    p_discount_percent: discount,
+                    p_commission_percent: commission,
+                    p_action: 'save'
+                });
+
+                if (error) throw error;
+
+                // تحديث رتبة المستخدم ليصبح marketing_partner
+                await db.from('profiles').update({ role: 'marketing_partner' }).eq('id', userId).neq('role', 'admin');
+
+                if (data && data.status === 'success') {
+                    alert("تم اعتماد الشريك التسويقي وتفعيل لوحة التحكم في حسابه بنجاح ✓");
+                    closeAffiliateModal();
+                    loadAffiliatesData();
+                } else {
+                    alert("خطأ: " + (data ? data.message : "فشلت العملية"));
+                }
+            } catch (err) {
+                alert("خطأ أثناء حفظ الشريك: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "حفظ واعتماد الشريك";
+            }
+        }
+
+        async function loadAffiliatesData() {
+            const tbody = document.getElementById('affiliates-tbody');
+            if (!tbody) return;
+
+            try {
+                const { data: coupons, error } = await db
+                    .from('coupons')
+                    .select('*, profiles:affiliate_id(id, first_name, last_name, email, balance, role)')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!coupons || coupons.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400">لا يوجد شركاء تسويقيين مسجلين حالياً</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = coupons.map(c => {
+                    const prof = c.profiles || {};
+                    const partnerName = getFullName(prof);
+                    return `
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">
+                                <div>${partnerName}</div>
+                                <div class="text-[10px] text-slate-400 font-mono">${prof.email || '—'}</div>
+                            </td>
+                            <td class="py-3 font-mono font-black text-purple-600 dark:text-purple-400 select-all">${c.code}</td>
+                            <td class="py-3 font-mono font-bold">${c.discount_percent}%</td>
+                            <td class="py-3 font-mono font-bold text-emerald-600">${c.affiliate_commission_percent}%</td>
+                            <td class="py-3 font-mono font-bold text-slate-600 dark:text-slate-300">${c.usage_count \vert{}\vert{} 0}</td> <td class="py-3 font-mono font-black text-emerald-600">$${Number(prof.balance || 0).toFixed(2)}</td>
+                            <td class="py-3 text-center">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <button onclick="editAffiliatePartner('${prof.id}', '${c.code}', ${c.discount_percent},${c.affiliate_commission_percent})" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل الشريك والكود">
+                                        <i class="ph-bold ph-pencil-simple text-sm"></i>
+                                    </button>
+                                    <button onclick="deleteAffiliateCoupon('${prof.id}', '${partnerName}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="إلغاء الشراكة">
+                                        <i class="ph-bold ph-trash text-sm"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error("Affiliates load error:", err);
+                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-500">فشل تحميل الشركاء: ${err.message}</td></tr>`;
+            }
+        }
+
+        function editAffiliatePartner(userId, code, discount, comm) {
+            editingAffiliateUserId = userId;
+            const select = document.getElementById('affiliate-user-select');
+            select.innerHTML = `<option value="${userId}" selected>تعديل الشريك الحالي</
+            option>`;
+            select.disabled = true;
+
+            document.getElementById('affiliate-code-input').value = code;
+            document.getElementById('affiliate-discount-input').value = discount;
+            document.getElementById('affiliate-comm-input').value = comm;
+            document.getElementById('btn-save-affiliate').innerText = "تحديث بيانات الشريك";
+            document.getElementById('affiliate-modal').classList.remove('hidden');
+        }
+
+        async function deleteAffiliateCoupon(userId, name) {
+            if (!confirm(`هل أنت متأكد من إلغاء الشريك (${name}) وحذف الكوبون المرتبط به؟`)) return;
+            try {
+                const { data, error } = await db.rpc('admin_manage_affiliate', {
+                    p_user_id: userId,
+                    p_action: 'delete'
+                });
+                if (error) throw error;
+
+                await db.from('profiles').update({ role: 'customer' }).eq('id', userId).neq('role', 'admin');
+
+                alert(data.message || "تم إلغاء الشراكة بنجاح");
+                loadAffiliatesData();
+            } catch (err) {
+                alert("خطأ: " + (err.message || err));
+            }
+        }
+
+        // =========================================================================
+        // دوال إدارة الوكلاء الماليين
         // =========================================================================
         async function loadAgentsData() {
             const tbody = document.getElementById('agents-tbody');
@@ -909,7 +1234,6 @@
 
                 tbody.innerHTML = agents.map(a => {
                     const agentName = getFullName(a);
-                    // تصحيح: ضرب الكسر العشري في 100 لعرض النسبة المئوية بشكل صحيح
                     const commPercent = (a.agent_commission_rate !== null && a.agent_commission_rate !== undefined && a.agent_commission_rate !== '')
                         ? (Number(a.agent_commission_rate) * 100).toFixed(1) + '%' 
                         : 'غير محدد ⚠️';
@@ -1050,67 +1374,8 @@
             }
         }
 
-        async function populateUserDropdown(selectElementId) {
-            const select = document.getElementById(selectElementId);
-            if (!select) return;
-
-            select.innerHTML = `<option value="">جاري جلب الحسابات...</option>`;
-            try {
-                const { data: users, error } = await db
-                    .from('profiles')
-                    .select('id, first_name, last_name, email, role')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                if (users && users.length > 0) {
-                    select.innerHTML = users.map(u => `
-                        <option value="${u.id}">
-                            ${getFullName(u)} (${u.email || u.id.slice(0, 8)}) [${u.role || 'customer'}]
-                        </option>
-                    `).join('');
-                } else {
-                    select.innerHTML = `<option value="">لا يوجد مستخدمين مسجلين</option>`;
-                }
-            } catch (err) {
-                console.error("Dropdown error:", err);
-                select.innerHTML = `<option value="">فشل تحميل الحسابات</option>`;
-            }
-        }
-
-        function getFullName(userObj) {
-            if (!userObj) return 'بدون اسم';
-            const full = [userObj.first_name, userObj.last_name].filter(Boolean).join(' ').trim();
-            return full || 'بدون اسم';
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.className = "tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap";
-            });
-
-            const activeSec = document.getElementById(`sec-${tabId}`);
-            const activeTab = document.getElementById(`tab-${tabId}`);
-            if (activeSec) activeSec.classList.remove('hidden');
-            if (activeTab) activeTab.className = "tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap";
-            
-            if (tabId === 'affiliates') {
-                loadAffiliatesData();
-            } else if (tabId === 'agents') {
-                loadAgentsData();
-            }
-        }
-
-        async function handleLogout() {
-            await db.auth.signOut();
-            window.location.href = "index.html";
-        }
-
-        checkAdminAuth();
-
         // =========================================================================
-        // 1. دالة الإيداع اليدوي
+        // الإيداع اليدوي
         // =========================================================================
         async function handleManualTopup() {
             const emailInput = document.getElementById('topup-email');
@@ -1151,246 +1416,68 @@
             }
         }
 
-        // =========================================================================
-        // 2. دوال الشركاء التسويقيين (Affiliates)
-        // =========================================================================
-        function openAffiliateModal() {
-            populateUserDropdown('affiliate-user-select');
-            document.getElementById('affiliate-code-input').value = '';
-            document.getElementById('affiliate-discount-input').value = '5';
-            document.getElementById('affiliate-comm-input').value = '5';
-            document.getElementById('affiliate-modal').classList.remove('hidden');
-        }
+        async function populateUserDropdown(selectElementId) {
+            const select = document.getElementById(selectElementId);
+            if (!select) return;
 
-        function closeAffiliateModal() {
-            document.getElementById('affiliate-modal').classList.add('hidden');
-        }
-
-        async function handleAffiliateSubmit(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-save-affiliate');
-            btn.disabled = true;
-            btn.innerText = "جاري الحفظ...";
-
-            const userId = document.getElementById('affiliate-user-select').value;
-            const code = document.getElementById('affiliate-code-input').value.trim().toUpperCase();
-            const discount = parseFloat(document.getElementById('affiliate-discount-input').value);
-            const commission = parseFloat(document.getElementById('affiliate-comm-input').value);
-
+            select.innerHTML = `<option value="">جاري جلب الحسابات...</option>`;
             try {
-                const { data, error } = await db.rpc('admin_manage_affiliate', {
-                    p_user_id: userId,
-                    p_coupon_code: code,
-                    p_discount_percent: discount,
-                    p_commission_percent: commission,
-                    p_action: 'save'
-                });
-
-                if (error) throw error;
-
-                if (data && data.status === 'success') {
-                    alert(data.message || "تم اعتماد الشريك التسويقي بنجاح ✓");
-                    closeAffiliateModal();
-                    loadAffiliatesData();
-                } else {
-                    alert("خطأ: " + (data ? data.message : "فشلت العملية"));
-                }
-            } catch (err) {
-                alert("خطأ أثناء حفظ الشريك: " + (err.message || err));
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "حفظ واعتماد الشريك";
-            }
-        }
-
-        async function loadAffiliatesData() {
-            const tbody = document.getElementById('affiliates-tbody');
-            if (!tbody) return;
-
-            try {
-                const { data: coupons, error } = await db
-                    .from('coupons')
-                    .select('*, profiles:affiliate_id(id, first_name, last_name, email, balance)')
+                const { data: users, error } = await db
+                    .from('profiles')
+                    .select('id, first_name, last_name, email, role')
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
 
-                if (!coupons || coupons.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400">لا يوجد شركاء تسويقيين مسجلين حالياً</td></tr>`;
-                    return;
+                if (users && users.length > 0) {
+                    select.innerHTML = users.map(u => `
+                        <option value="${u.id}">
+                            ${getFullName(u)} (${u.email || u.id.slice(0, 8)}) [${u.role || 'customer'}]
+                        </option>
+                    `).join('');
+                } else {
+                    select.innerHTML = `<option value="">لا يوجد مستخدمين مسجلين</option>`;
                 }
-
-                tbody.innerHTML = coupons.map(c => {
-                    const prof = c.profiles || {};
-                    const partnerName = getFullName(prof);
-                    return `
-                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">
-                                <div>${partnerName}</div>
-                                <div class="text-[10px] text-slate-400 font-mono">${prof.email || '—'}</div>
-                            </td>
-                            <td class="py-3 font-mono font-black text-purple-600 dark:text-purple-400 select-all">${c.code}</td>
-                            <td class="py-3 font-mono font-bold">${c.discount_percent}%</td>
-                            <td class="py-3 font-mono font-bold text-emerald-600">${c.affiliate_commission_percent}%</td>
-                            <td class="py-3 font-mono font-bold text-slate-600 dark:text-slate-300">${c.usage_count || 0}</td>
-                            <td class="py-3 font-mono font-black text-emerald-600">$${Number(prof.balance || 0).toFixed(2)}</td>
-                            <td class="py-3 text-center">
-                                <button onclick="deleteAffiliateCoupon('${prof.id}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="إلغاء الشراكة">
-                                    <i class="ph-bold ph-trash text-sm"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
             } catch (err) {
-                console.error("Affiliates load error:", err);
-                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-500">فشل تحميل الشركاء: ${err.message}</td></tr>`;
+                console.error("Dropdown error:", err);
+                select.innerHTML = `<option value="">فشل تحميل الحسابات</option>`;
             }
         }
 
-        async function deleteAffiliateCoupon(userId) {
-            if (!confirm("هل أنت متأكد من إلغاء الشريك التسويقي وحذف الكوبون المرتبط به؟")) return;
-            try {
-                const { data, error } = await db.rpc('admin_manage_affiliate', {
-                    p_user_id: userId,
-                    p_action: 'delete'
-                });
-                if (error) throw error;
-                alert(data.message || "تم الحذف بنجاح");
-                loadAffiliatesData();
-            } catch (err) {
-                alert("خطأ: " + (err.message || err));
-            }
+        function getFullName(userObj) {
+            if (!userObj) return 'بدون اسم';
+            const full = [userObj.first_name, userObj.last_name].filter(Boolean).join(' ').trim();
+            return full || 'بدون اسم';
         }
 
         // =========================================================================
-        // 3. دوال مخزون الأكواد الرقمية (Inventory Stock)
+        // التحكم بالتبويبات
         // =========================================================================
-        let inventoryProductsCache = [];
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.className = "tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap";
+            });
 
-        async function loadInventoryData() {
-            const tbody = document.getElementById('inventory-tbody');
-            const select = document.getElementById('restock-product-select');
-
-            try {
-                // جلب المنتجات الرقمية التي تدعم الأكواد
-                const { data: prods, error: prodErr } = await db
-                    .from('products')
-                    .select('*')
-                    .eq('product_type', 'CODE')
-                    .order('platform', { ascending: true });
-
-                if (prodErr) throw prodErr;
-                inventoryProductsCache = prods || [];
-
-                // تعبئة القائمة المنسدلة
-                if (select) {
-                    if (inventoryProductsCache.length === 0) {
-                        select.innerHTML = `<option value="" disabled selected>لا توجد منتجات رقمية (CODE)</option>`;
-                    } else {
-                        select.innerHTML = `<option value="" disabled selected>-- اختر الباقة للتزويد --</option>` +
-                            inventoryProductsCache.map(p => `<option value="${p.id}">${p.platform} - ${p.package_name} ($${Number(p.price).toFixed(2)})</option>`).join('');
-                    }
-                }
-
-                // جلب تفاصيل المخزون المتوفر لكل باقة
-                if (tbody) {
-                    if (inventoryProductsCache.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">لا توجد منتجات رقمية من نوع كود</td></tr>`;
-                        return;
-                    }
-
-                    // فحص كمية الأكواد من جدول code_inventory إن وُجد
-                    const { data: codes } = await db
-                        .from('code_inventory')
-                        .select('product_id, is_sold');
-
-                    tbody.innerHTML = inventoryProductsCache.map(p => {
-                        const prodCodes = (codes || []).filter(c => c.product_id === p.id);
-                        const available = prodCodes.filter(c => !c.is_sold).length;
-                        const sold = prodCodes.filter(c => c.is_sold).length;
-
-                        return `
-                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                                <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.platform}</td>
-                                <td class="py-3 font-medium">${p.package_name}</td>
-                                <td class="py-3 font-mono font-bold">$${Number(p.price).toFixed(2)}</td>
-                                <td class="py-3 text-center">
-                                    <span class="px-2.5 py-1 rounded-full text-xs font-mono font-black ${available > 0 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-500'}">
-                                        ${available} متوفر
-                                    </span>
-                                </td>
-                                <td class="py-3 text-center font-mono text-slate-400">${sold}</td>
-                                <td class="py-3 text-center">
-                                    <button onclick="quickSelectRestock('${p.id}')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-bold transition">
-                                        شحن أكواد +
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('');
-                }
-            } catch (err) {
-                console.error("Inventory Load Error:", err);
-                if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-rose-500">فشل تحميل المخزون: ${err.message}</td></tr>`;
-            }
+            const activeSec = document.getElementById(`sec-${tabId}`);
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if (activeSec) activeSec.classList.remove('hidden');
+            if (activeTab) activeTab.className = "tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap";
+            
+            if (tabId === 'orders') loadPendingOrders();
+            else if (tabId === 'deposits') loadPendingDeposits();
+            else if (tabId === 'inventory') loadInventoryData();
+            else if (tabId === 'products') loadProducts();
+            else if (tabId === 'affiliates') loadAffiliatesData();
+            else if (tabId === 'agents') loadAgentsData();
         }
 
-        function quickSelectRestock(productId) {
-            const select = document.getElementById('restock-product-select');
-            if (select) {
-                select.value = productId;
-                updateSelectedStockBadge();
-                document.getElementById('restock-codes').focus();
-            }
+        async function handleLogout() {
+            await db.auth.signOut();
+            window.location.href = "index.html";
         }
 
-        function updateSelectedStockBadge() {
-            const select = document.getElementById('restock-product-select');
-            const badge = document.getElementById('selected-stock-badge');
-            if (!select || !badge) return;
-            const prod = inventoryProductsCache.find(p => p.id === select.value);
-            if (prod) {
-                badge.innerHTML = `<span class="text-emerald-600 font-bold">تم اختيار: ${prod.platform} — ${prod.package_name}</span>`;
-            } else {
-                badge.innerHTML = '';
-            }
-        }
-
-        function updateCodesCountLive() {
-            const text = document.getElementById('restock-codes').value;
-            const badge = document.getElementById('codes-count-badge');
-            if (!badge) return;
-            const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-            badge.innerText = `${lines.length} كود`;
-        }
-
-        
-        function openAddModal() {
-    document.getElementById('edit-prod-id').value = '';
-    
-    const platformInput = document.getElementById('edit-prod-platform');
-    platformInput.disabled = false;
-    platformInput.value = '';
-    platformInput.placeholder = 'مثال: PUBG, Netflix, Steam';
-    platformInput.classList.remove('cursor-not-allowed', 'bg-slate-100', 'dark:bg-slate-800/60');
-
-    document.getElementById('edit-prod-name').value = '';
-    document.getElementById('edit-prod-price').value = '';
-    document.getElementById('edit-prod-type').value = 'CODE';
-    document.getElementById('edit-prod-category').value = 'Games';
-    document.getElementById('edit-prod-image').value = '';
-    document.getElementById('edit-prod-status').value = 'active';
-
-    const modalTitle = document.querySelector('#edit-product-modal h4 span');
-    if (modalTitle) modalTitle.innerText = 'إضافة باقة جديدة ➕';
-    
-    const saveBtn = document.getElementById('btn-save-edit-prod');
-    if (saveBtn) saveBtn.innerHTML = `<i class="ph-bold ph-plus-circle text-sm"></i> <span>إضافة الباقة للمتجر</span>`;
-
-    document.getElementById('edit-product-modal').classList.remove('hidden');
-}
-        
+        checkAdminAuth();
     </script>
 </body>
 </html>
