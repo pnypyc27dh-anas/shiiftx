@@ -735,9 +735,78 @@
         }
 
         async function loadInventoryData() {
-            // تنفيذ جلب المخزون
-        }
+            const tbody = document.getElementById('inventory-tbody');
+            const select = document.getElementById('restock-product-select');
 
+            try {
+                // 1. جلب المنتجات الرقمية من نوع CODE
+                const { data: prods, error: prodErr } = await db
+                    .from('products')
+                    .select('*')
+                    .eq('product_type', 'CODE')
+                    .order('platform', { ascending: true });
+
+                if (prodErr) throw prodErr;
+                inventoryProductsCache = prods || [];
+
+                // 2. تعبئة القائمة المنسدلة لاختيار الباقة للتزويد
+                if (select) {
+                    if (inventoryProductsCache.length === 0) {
+                        select.innerHTML = `<option value="" disabled selected>لا توجد منتجات رقمية (CODE)</option>`;
+                    } else {
+                        const currentVal = select.value;
+                        select.innerHTML = `<option value="" disabled ${!currentVal ? 'selected' : ''}>-- اختر الباقة لتزويدها بالأكواد --</option>` +
+                            inventoryProductsCache.map(p => `<option value="${p.id}" ${currentVal === p.id ? 'selected' : ''}>${p.platform} - ${p.package_name} ($${Number(p.price).toFixed(2)})</option>`).join('');
+                    }
+                }
+
+                // 3. جلب المخزون من الجدول الصحيح code_inventory
+                if (tbody) {
+                    if (inventoryProductsCache.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">لا توجد منتجات رقمية من نوع كود</td></tr>`;
+                        return;
+                    }
+
+                    const { data: codes, error: codesErr } = await db
+                        .from('code_inventory')
+                        .select('product_id, is_sold');
+
+                    if (codesErr) {
+                        console.error("Error fetching code_inventory:", codesErr);
+                    }
+
+                    const allCodes = codes || [];
+
+                    tbody.innerHTML = inventoryProductsCache.map(p => {
+                        const prodCodes = allCodes.filter(c => c.product_id === p.id);
+                        const available = prodCodes.filter(c => !c.is_sold).length;
+                        const sold = prodCodes.filter(c => c.is_sold).length;
+
+                        return `
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                                <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.platform}</td>
+                                <td class="py-3 font-medium text-slate-700 dark:text-slate-200">${p.package_name}</td>
+                                <td class="py-3 font-mono font-bold">$${Number(p.price).toFixed(2)}</td>
+                                <td class="py-3 text-center">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-mono font-black ${available > 0 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500'}">
+                                        ${available} متوفر
+                                    </span>
+                                </td>
+                                <td class="py-3 text-center font-mono text-slate-400">${sold}</td>
+                                <td class="py-3 text-center">
+                                    <button onclick="quickSelectRestock('${p.id}')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-bold transition">
+                                        شحن أكواد +
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error("Inventory Load Error:", err);
+                if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-rose-500">فشل تحميل المخزون: ${err.message}</td></tr>`;
+            }
+        }
         async function loadProducts() {
             const { data, error } = await db.from('products').select('*');
             if (!error) allProductsCache = data || [];
@@ -1258,6 +1327,31 @@
                 btn.innerHTML = `<i class="ph-bold ph-plus-circle text-sm"></i> إضافة الأكواد إلى المخزون فوراً`;
             }
         }
+
+        function openAddModal() {
+    document.getElementById('edit-prod-id').value = '';
+    
+    const platformInput = document.getElementById('edit-prod-platform');
+    platformInput.disabled = false;
+    platformInput.value = '';
+    platformInput.placeholder = 'مثال: PUBG, Netflix, Steam';
+    platformInput.classList.remove('cursor-not-allowed', 'bg-slate-100', 'dark:bg-slate-800/60');
+
+    document.getElementById('edit-prod-name').value = '';
+    document.getElementById('edit-prod-price').value = '';
+    document.getElementById('edit-prod-type').value = 'CODE';
+    document.getElementById('edit-prod-category').value = 'Games';
+    document.getElementById('edit-prod-image').value = '';
+    document.getElementById('edit-prod-status').value = 'active';
+
+    const modalTitle = document.querySelector('#edit-product-modal h4 span');
+    if (modalTitle) modalTitle.innerText = 'إضافة باقة جديدة ➕';
+    
+    const saveBtn = document.getElementById('btn-save-edit-prod');
+    if (saveBtn) saveBtn.innerHTML = `<i class="ph-bold ph-plus-circle text-sm"></i> <span>إضافة الباقة للمتجر</span>`;
+
+    document.getElementById('edit-product-modal').classList.remove('hidden');
+}
         
     </script>
 </body>
