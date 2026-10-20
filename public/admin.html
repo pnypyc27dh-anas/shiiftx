@@ -719,9 +719,10 @@
 
                 tbody.innerHTML = agents.map(a => {
                     const agentName = getFullName(a);
+                    // تصحيح: ضرب الكسر العشري في 100 لعرض النسبة المئوية بشكل صحيح
                     const commPercent = (a.agent_commission_rate !== null && a.agent_commission_rate !== undefined && a.agent_commission_rate !== '')
-    ? Number(a.agent_commission_rate).toFixed(1) + '%' 
-    : 'غير محدد ⚠️';
+                        ? (Number(a.agent_commission_rate) * 100).toFixed(1) + '%' 
+                        : 'غير محدد ⚠️';
 
                     return `
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
@@ -762,87 +763,83 @@
         }
 
         async function handleAgentSubmit(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btn-save-agent');
-    btn.disabled = true;
-    btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الاعتماد...`;
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-agent');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الاعتماد...`;
 
-    const userId = document.getElementById('agent-user-select').value;
-    const rawCommission = parseFloat(document.getElementById('agent-commission-input').value);
+            const userId = document.getElementById('agent-user-select').value;
+            const rawCommission = parseFloat(document.getElementById('agent-commission-input').value);
 
-    // التحقق من صحة القيمة المدخلة
-    if (isNaN(rawCommission) || rawCommission <= 0 || rawCommission > 100) {
-        alert("يرجى إدخال نسبة عمولة صالحة كنسبة مئوية (مثال: 10 لـ 10% أو 5 لـ 5%).");
-        btn.disabled = false;
-        btn.innerHTML = "اعتماد كوكيل مالي";
-        return;
-    }
+            if (isNaN(rawCommission) || rawCommission <= 0 || rawCommission > 100) {
+                alert("يرجى إدخال نسبة عمولة صالحة كنسبة مئوية (مثال: 10 لـ 10% أو 5 لـ 5%).");
+                btn.disabled = false;
+                btn.innerHTML = "اعتماد كوكيل مالي";
+                return;
+            }
 
-    // تحويل القيمة المدخلة إلى كسر عشري (مثال: 10 تصبح 0.10)
-    const decimalRate = rawCommission / 100.0;
+            const decimalRate = rawCommission / 100.0;
 
-    try {
-        const { data, error } = await db.rpc('admin_manage_agent', {
-            p_user_id: userId,
-            p_action: 'promote',
-            p_commission_rate: decimalRate
-        });
+            try {
+                const { data, error } = await db.rpc('admin_manage_agent', {
+                    p_user_id: userId,
+                    p_action: 'promote',
+                    p_commission_rate: decimalRate
+                });
 
-        if (error) throw error;
+                if (error) throw error;
 
-        if (data && data.status === 'success') {
-            alert(data.message);
-            closeAgentModal();
-            await loadAgentsData();
-        } else {
-            alert("خطأ: " + (data ? data.message : "فشلت العملية"));
+                if (data && data.status === 'success') {
+                    alert(data.message);
+                    closeAgentModal();
+                    await loadAgentsData();
+                } else {
+                    alert("خطأ: " + (data ? data.message : "فشلت العملية"));
+                }
+            } catch (err) {
+                console.error("Agent Submit Error:", err);
+                alert("خطأ أثناء ترقية الوكيل: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "اعتماد كوكيل مالي";
+            }
         }
-    } catch (err) {
-        console.error("Agent Submit Error:", err);
-        alert("خطأ أثناء ترقية الوكيل: " + (err.message || err));
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = "اعتماد كوكيل مالي";
-    }
-}
 
         async function updateAgentCommissionPrompt(userId, agentName, currentDecimalRate) {
-    // تحويل الكسر العشري المخزن (مثل 0.10) إلى نسبة مئوية واضحة للعرض في prompt (تظهر 10)
-    const currentPercent = currentDecimalRate !== null && currentDecimalRate !== undefined
-        ? (Number(currentDecimalRate) * 100).toFixed(1)
-        : '0';
+            const currentPercent = currentDecimalRate !== null && currentDecimalRate !== undefined
+                ? (Number(currentDecimalRate) * 100).toFixed(1)
+                : '0';
 
-    const newPercentInput = prompt(`أدخل نسبة العمولة الجديدة (%) للوكيل (${agentName}):`, currentPercent);
-    if (newPercentInput === null) return; // تم الضغط على Cancel
+            const newPercentInput = prompt(`أدخل نسبة العمولة الجديدة (%) للوكيل (${agentName}):`, currentPercent);
+            if (newPercentInput === null) return;
 
-    const newPercent = parseFloat(newPercentInput);
-    if (isNaN(newPercent) || newPercent <= 0 || newPercent > 100) {
-        return alert("يرجى إدخال نسبة مئوية صالحة بين 0.1 و 100.");
-    }
+            const newPercent = parseFloat(newPercentInput);
+            if (isNaN(newPercent) || newPercent <= 0 || newPercent > 100) {
+                return alert("يرجى إدخال نسبة مئوية صالحة بين 0.1 و 100.");
+            }
 
-    // تحويل النسبة المدخلة مجدداً إلى كسر عشري (مثال: 5 تصبح 0.05)
-    const decimalRate = newPercent / 100.0;
+            const decimalRate = newPercent / 100.0;
 
-    try {
-        const { data, error } = await db.rpc('admin_manage_agent', {
-            p_user_id: userId,
-            p_action: 'update_commission',
-            p_commission_rate: decimalRate
-        });
+            try {
+                const { data, error } = await db.rpc('admin_manage_agent', {
+                    p_user_id: userId,
+                    p_action: 'update_commission',
+                    p_commission_rate: decimalRate
+                });
 
-        if (error) throw error;
+                if (error) throw error;
 
-        if (data && data.status === 'success') {
-            alert(data.message || "✓ تم تحديث نسبة العمولة بنجاح");
-            await loadAgentsData();
-        } else {
-            alert("خطأ: " + (data ? data.message : "فشلت العملية"));
+                if (data && data.status === 'success') {
+                    alert(data.message || "✓ تم تحديث نسبة العمولة بنجاح");
+                    await loadAgentsData();
+                } else {
+                    alert("خطأ: " + (data ? data.message : "فشلت العملية"));
+                }
+            } catch (err) {
+                console.error("Update Commission Error:", err);
+                alert("خطأ أثناء التحديث: " + (err.message || err));
+            }
         }
-    } catch (err) {
-        console.error("Update Commission Error:", err);
-        alert("خطأ أثناء التحديث: " + (err.message || err));
-    }
-}
 
         async function demoteAgent(userId, name) {
             if (!confirm(`هل أنت متأكد من إلغاء رتبة الوكيل للمستخدم (${name}) وإعادته لعميل عادي؟`)) return;
