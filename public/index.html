@@ -2135,13 +2135,13 @@ if (agentsLink) {
         // إرسال طلب الشحن المباشر للإدارة عبر دالة RPC الموحدة
         async function submitSubFinalDeposit() { 
             const amtInput = document.getElementById('sub-form-amount-select');
-            const rawAmt = amtInput ? amtInput.value.trim().replace(/[^0-9.]/g, '') : "";
+            // استبدال الفواصل العربية والإنجليزية بنقطة عشرية نظامية قبل الفلترة
+            const rawAmt = amtInput ? amtInput.value.trim().replace(/[،,]/g, '.').replace(/[^0-9.]/g, '') : "";
             const finalAmt = parseFloat(rawAmt);
             const txNum = document.getElementById('sub-form-tx-number').value.trim();
             const method = document.getElementById('sub-payment-method').value;
             const btn = document.getElementById('sub-deposit-final-btn'); 
 
-            // 1. التحقق من المدخلات في الواجهة
             if (!rawAmt || isNaN(finalAmt) || finalAmt <= 0) {
                 return showCustomAlert("يرجى إدخال مبلغ صحيح للشحن.");
             }
@@ -2149,12 +2149,10 @@ if (agentsLink) {
                 return showCustomAlert("يرجى إدخال رقم إشعار الحوالة لتأكيد العملية."); 
             }
             
-            // 2. تفعيل حالة التحميل للزر
             btn.disabled = true; 
             btn.innerHTML = `<span class="flex items-center justify-center gap-2">${BRAND_LOADER_SVG} <span>جاري رفع الإشعار...</span></span>`;
 
             try {
-                // 3. استدعاء دالة الخادم الموحدة (حزمة واحدة آمنة)
                 const { data: res, error } = await supabase.rpc('submit_deposit_request', {
                     p_amount: finalAmt,
                     p_payment_method: method,
@@ -2163,27 +2161,20 @@ if (agentsLink) {
 
                 if (error) throw error;
 
-                // 4. معالجة نتيجة الدالة
                 if (res && res.status === 'success') {
                     showCustomAlert("تم رفع طلب الشحن بنجاح وهو قيد المراجعة لدى الإدارة.", false); 
-                    
-                    // تصفير الحقول وإعادة ضبط الواجهة
                     if (amtInput) amtInput.value = "";
                     document.getElementById('sub-form-tx-number').value = "";
                     onCustomAmountTyped();
-                    
-                    // الانتقال للرئيسية وتحديث البيانات فوراً
                     switchTab('home'); 
                     silentSyncData(); 
                 } else {
                     showCustomAlert(res ? res.message : "فشل رفع الطلب، يرجى المحاولة لاحقاً.");
                 }
-
             } catch (err) {
                 console.error("Supabase Deposit RPC Error:", err);
                 showCustomAlert("فشل رفع الطلب: " + (err.message || "خطأ في الاتصال بالخادم"));
             } finally {
-                // 5. استعادة حالة الزر الطبيعية
                 btn.disabled = false; 
                 btn.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> تأكيد وإرسال طلب الشحن`;
             }
@@ -2398,10 +2389,30 @@ if (agentsLink) {
             const isRejected = statusKey === 'rejected' || statusKey === 'cancelled' || statusKey === 'مرفوض' || statusKey === 'ملغي';
             const isCompleted = statusKey === 'completed' || statusKey === 'approved' || statusKey === 'مكتمل' || statusKey === 'مقبول';
 
-            // 1. استخراج النصوص وتنقيتها
+            // 1. استخراج النصوص وتنقيتها وقراءة سبب الرفض بجميع صيغه
             let rawDetails = tx.details || '';
-            let cancelReason = '';
+            let cancelReason = rawTx.rejection_reason || rawTx.reason || '';
             let discountInfo = '';
+
+            if (!cancelReason) {
+                const refMatch = rawDetails.match(/\[(?:مسترجع|مرفوض|سبب الرفض|سبب):\s*([^\]]+)\]/);
+                if (refMatch) cancelReason = refMatch[1].trim();
+            }
+
+            const discMatch = rawDetails.match(/\(خصم كود\s*([^)]+)\)/);
+            if (discMatch) discountInfo = discMatch[1].trim();
+
+            let playerId = tx.player_id || rawTx.player_id;
+            const idMatch = rawDetails.match(/ID:\s*([^\s)]+)/i);
+            if (!playerId && idMatch) playerId = idMatch[1];
+
+            let cleanPackageName = rawDetails
+                .replace(/\[(?:مسترجع|مرفوض|سبب الرفض|سبب):\s*[^\]]+\]/g, '')
+                .replace(/\[إشعار:\s*[^\]]+\]/g, '')
+                .replace(/\(ID:\s*[^)]+\)/gi, '')
+                .replace(/\(خصم كود\s*[^)]+\)/gi, '')
+                .replace(/استرجاع رصيد طلب مرفوض:\s*/g, '')
+                .trim();
 
             const refMatch = rawDetails.match(/\[مسترجع:\s*([^\]]+)\]/);
             if (refMatch) cancelReason = refMatch[1].trim();
@@ -2570,13 +2581,15 @@ if (agentsLink) {
                 `;
             }
 
-            // 9. شريط سبب الرفض إن وُجد
+            // 9. شريط سبب الرفض إن وُجد (سواء كان إيداعاً أو شحن ID)
             let cancelAlertHtml = '';
-            if (cancelReason) {
+            if (cancelReason || isRejected || isRefundedOrder) {
+                const displayReason = cancelReason || 'تم رفض العملية من قبل الإدارة';
+                const noteText = isDeposit ? '' : ' (أعيد المبلغ لمحفظتك)';
                 cancelAlertHtml = `
                     <div class="mt-2 p-2 rounded-xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 flex items-center gap-1.5 text-[10px] text-rose-600 dark:text-rose-400 font-bold">
                         <i class="ph-fill ph-warning-circle text-xs shrink-0"></i>
-                        <span>سبب الرفض: ${cancelReason} (أعيد المبلغ لمحفظتك فوراً)</span>
+                        <span>سبب الرفض: ${displayReason}${noteText}</span>
                     </div>
                 `;
             }
