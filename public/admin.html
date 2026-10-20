@@ -760,7 +760,7 @@
                     }
                 }
 
-                // 3. جلب المخزون من الجدول الصحيح code_inventory
+                // 3. جلب المخزون من الجدول ومطابقة الأعمدة الفعلية (product_id, status)
                 if (tbody) {
                     if (inventoryProductsCache.length === 0) {
                         tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">لا توجد منتجات رقمية من نوع كود</td></tr>`;
@@ -769,7 +769,7 @@
 
                     const { data: codes, error: codesErr } = await db
                         .from('code_inventory')
-                        .select('product_id, is_sold');
+                        .select('product_id, status');
 
                     if (codesErr) {
                         console.error("Error fetching code_inventory:", codesErr);
@@ -779,8 +779,10 @@
 
                     tbody.innerHTML = inventoryProductsCache.map(p => {
                         const prodCodes = allCodes.filter(c => c.product_id === p.id);
-                        const available = prodCodes.filter(c => !c.is_sold).length;
-                        const sold = prodCodes.filter(c => c.is_sold).length;
+                        // الكود المتاح هو الذي حالته 'available'
+                        const available = prodCodes.filter(c => c.status === 'available').length;
+                        // الكود المباع هو الذي حالته ليست 'available'
+                        const sold = prodCodes.filter(c => c.status && c.status !== 'available').length;
 
                         return `
                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
