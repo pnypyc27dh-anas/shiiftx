@@ -101,7 +101,6 @@
         const SUPABASE_URL = 'https://baytojjldklocifridcm.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJheXRvampsZGtsb2NpZnJpZGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MTU3MzMsImV4cCI6MjEwNTM5MTczM30.tAN7Qah-3VNwatn2CwgqsyphnkQQjagnKf4pR4WiSwQ';
         
-        // استخدام اسم متغير فريد كلياً لعدم حدوث أي تداخل مع أي ملف آخر
         const supabaseAgent = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
@@ -154,10 +153,10 @@
             btn.innerText = "جاري التنفيذ...";
 
             try {
+                // استدعاء دالة agent_process_deposit الموحدة والآمنة دون تمرير نسبة العمولة
                 const { data, error } = await supabaseAgent.rpc('agent_process_deposit', {
                     p_target_user_email: email,
                     p_amount: amount,
-                    p_commission_rate: 0.02,
                     p_notes: 'تحويل نقدي مباشر من لوحة الوكيل'
                 });
 
