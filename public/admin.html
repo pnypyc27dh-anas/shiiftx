@@ -388,6 +388,53 @@
         </main>
     </div>
 
+    <!-- نافذة تعيين شريك تسويقي جديد -->
+    <div id="affiliate-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="ph-bold ph-megaphone text-purple-500 text-base"></i>
+                    <span>تعيين شريك تسويقي وكود خصم</span>
+                </h4>
+                <button type="button" onclick="closeAffiliateModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleAffiliateSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اختر حساب الشريك:</label>
+                    <select id="affiliate-user-select" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none"></select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">كود الخصم (Coupon Code):</label>
+                    <input type="text" id="affiliate-code-input" required placeholder="مثال: SHIIFT10" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold uppercase outline-none" dir="ltr">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">خصم الزبون (%):</label>
+                        <input type="number" step="0.5" min="0" max="100" id="affiliate-discount-input" required placeholder="5" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">عمولة الشريك (%):</label>
+                        <input type="number" step="0.5" min="0" max="100" id="affiliate-comm-input" required placeholder="5" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
+                    </div>
+                </div>
+
+                <div class="pt-3 flex gap-2">
+                    <button type="submit" id="btn-save-affiliate" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition shadow-sm">
+                        حفظ واعتماد الشريك
+                    </button>
+                    <button type="button" onclick="closeAffiliateModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <!-- نافذة تعيين وكيل مالي معتمد مع حقل نسبة العمولة -->
     <div id="agent-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
@@ -918,6 +965,300 @@
         }
 
         checkAdminAuth();
+
+        // =========================================================================
+        // 1. دالة الإيداع اليدوي
+        // =========================================================================
+        async function handleManualTopup() {
+            const emailInput = document.getElementById('topup-email');
+            const amtInput = document.getElementById('topup-amount');
+            const noteInput = document.getElementById('topup-note');
+
+            const email = emailInput ? emailInput.value.trim() : '';
+            const amount = parseFloat(amtInput ? amtInput.value : 0);
+            const note = noteInput ? noteInput.value.trim() : '';
+
+            if (!email || isNaN(amount) || amount <= 0) {
+                return alert("يرجى إدخال بريد إلكتروني صالح ومبلغ أكبر من الصفر.");
+            }
+
+            if (!confirm(`هل أنت متأكد من شحن مبلغ $${amount.toFixed(2)} يدوياً إلى حساب (${email})؟`)) return;
+
+            try {
+                const { data, error } = await db.rpc('admin_manual_topup', {
+                    p_email: email,
+                    p_amount: amount,
+                    p_note: note || 'إيداع يدوي عبر الإدارة'
+                });
+
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    alert(data.message || "✓ تم إيداع الرصيد بنجاح!");
+                    emailInput.value = '';
+                    amtInput.value = '';
+                    noteInput.value = '';
+                    loadAllAdminData();
+                } else {
+                    alert("خطأ: " + (data ? data.message : "فشلت عملية الإيداع"));
+                }
+            } catch (err) {
+                console.error("Manual Topup Error:", err);
+                alert("حدث خطأ أثناء الإيداع: " + (err.message || err));
+            }
+        }
+
+        // =========================================================================
+        // 2. دوال الشركاء التسويقيين (Affiliates)
+        // =========================================================================
+        function openAffiliateModal() {
+            populateUserDropdown('affiliate-user-select');
+            document.getElementById('affiliate-code-input').value = '';
+            document.getElementById('affiliate-discount-input').value = '5';
+            document.getElementById('affiliate-comm-input').value = '5';
+            document.getElementById('affiliate-modal').classList.remove('hidden');
+        }
+
+        function closeAffiliateModal() {
+            document.getElementById('affiliate-modal').classList.add('hidden');
+        }
+
+        async function handleAffiliateSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-affiliate');
+            btn.disabled = true;
+            btn.innerText = "جاري الحفظ...";
+
+            const userId = document.getElementById('affiliate-user-select').value;
+            const code = document.getElementById('affiliate-code-input').value.trim().toUpperCase();
+            const discount = parseFloat(document.getElementById('affiliate-discount-input').value);
+            const commission = parseFloat(document.getElementById('affiliate-comm-input').value);
+
+            try {
+                const { data, error } = await db.rpc('admin_manage_affiliate', {
+                    p_user_id: userId,
+                    p_coupon_code: code,
+                    p_discount_percent: discount,
+                    p_commission_percent: commission,
+                    p_action: 'save'
+                });
+
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    alert(data.message || "تم اعتماد الشريك التسويقي بنجاح ✓");
+                    closeAffiliateModal();
+                    loadAffiliatesData();
+                } else {
+                    alert("خطأ: " + (data ? data.message : "فشلت العملية"));
+                }
+            } catch (err) {
+                alert("خطأ أثناء حفظ الشريك: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "حفظ واعتماد الشريك";
+            }
+        }
+
+        async function loadAffiliatesData() {
+            const tbody = document.getElementById('affiliates-tbody');
+            if (!tbody) return;
+
+            try {
+                const { data: coupons, error } = await db
+                    .from('coupons')
+                    .select('*, profiles:affiliate_id(id, first_name, last_name, email, balance)')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!coupons || coupons.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400">لا يوجد شركاء تسويقيين مسجلين حالياً</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = coupons.map(c => {
+                    const prof = c.profiles || {};
+                    const partnerName = getFullName(prof);
+                    return `
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">
+                                <div>${partnerName}</div>
+                                <div class="text-[10px] text-slate-400 font-mono">${prof.email || '—'}</div>
+                            </td>
+                            <td class="py-3 font-mono font-black text-purple-600 dark:text-purple-400 select-all">${c.code}</td>
+                            <td class="py-3 font-mono font-bold">${c.discount_percent}%</td>
+                            <td class="py-3 font-mono font-bold text-emerald-600">${c.affiliate_commission_percent}%</td>
+                            <td class="py-3 font-mono font-bold text-slate-600 dark:text-slate-300">${c.usage_count || 0}</td>
+                            <td class="py-3 font-mono font-black text-emerald-600">$${Number(prof.balance || 0).toFixed(2)}</td>
+                            <td class="py-3 text-center">
+                                <button onclick="deleteAffiliateCoupon('${prof.id}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="إلغاء الشراكة">
+                                    <i class="ph-bold ph-trash text-sm"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error("Affiliates load error:", err);
+                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-500">فشل تحميل الشركاء: ${err.message}</td></tr>`;
+            }
+        }
+
+        async function deleteAffiliateCoupon(userId) {
+            if (!confirm("هل أنت متأكد من إلغاء الشريك التسويقي وحذف الكوبون المرتبط به؟")) return;
+            try {
+                const { data, error } = await db.rpc('admin_manage_affiliate', {
+                    p_user_id: userId,
+                    p_action: 'delete'
+                });
+                if (error) throw error;
+                alert(data.message || "تم الحذف بنجاح");
+                loadAffiliatesData();
+            } catch (err) {
+                alert("خطأ: " + (err.message || err));
+            }
+        }
+
+        // =========================================================================
+        // 3. دوال مخزون الأكواد الرقمية (Inventory Stock)
+        // =========================================================================
+        let inventoryProductsCache = [];
+
+        async function loadInventoryData() {
+            const tbody = document.getElementById('inventory-tbody');
+            const select = document.getElementById('restock-product-select');
+
+            try {
+                // جلب المنتجات الرقمية التي تدعم الأكواد
+                const { data: prods, error: prodErr } = await db
+                    .from('products')
+                    .select('*')
+                    .eq('product_type', 'CODE')
+                    .order('platform', { ascending: true });
+
+                if (prodErr) throw prodErr;
+                inventoryProductsCache = prods || [];
+
+                // تعبئة القائمة المنسدلة
+                if (select) {
+                    if (inventoryProductsCache.length === 0) {
+                        select.innerHTML = `<option value="" disabled selected>لا توجد منتجات رقمية (CODE)</option>`;
+                    } else {
+                        select.innerHTML = `<option value="" disabled selected>-- اختر الباقة للتزويد --</option>` +
+                            inventoryProductsCache.map(p => `<option value="${p.id}">${p.platform} - ${p.package_name} ($${Number(p.price).toFixed(2)})</option>`).join('');
+                    }
+                }
+
+                // جلب تفاصيل المخزون المتوفر لكل باقة
+                if (tbody) {
+                    if (inventoryProductsCache.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">لا توجد منتجات رقمية من نوع كود</td></tr>`;
+                        return;
+                    }
+
+                    // فحص كمية الأكواد من جدول inventory_codes إن وُجد
+                    const { data: codes } = await db
+                        .from('inventory_codes')
+                        .select('product_id, is_sold');
+
+                    tbody.innerHTML = inventoryProductsCache.map(p => {
+                        const prodCodes = (codes || []).filter(c => c.product_id === p.id);
+                        const available = prodCodes.filter(c => !c.is_sold).length;
+                        const sold = prodCodes.filter(c => c.is_sold).length;
+
+                        return `
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                                <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.platform}</td>
+                                <td class="py-3 font-medium">${p.package_name}</td>
+                                <td class="py-3 font-mono font-bold">$${Number(p.price).toFixed(2)}</td>
+                                <td class="py-3 text-center">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-mono font-black ${available > 0 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-500'}">
+                                        ${available} متوفر
+                                    </span>
+                                </td>
+                                <td class="py-3 text-center font-mono text-slate-400">${sold}</td>
+                                <td class="py-3 text-center">
+                                    <button onclick="quickSelectRestock('${p.id}')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-bold transition">
+                                        شحن أكواد +
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error("Inventory Load Error:", err);
+                if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-rose-500">فشل تحميل المخزون: ${err.message}</td></tr>`;
+            }
+        }
+
+        function quickSelectRestock(productId) {
+            const select = document.getElementById('restock-product-select');
+            if (select) {
+                select.value = productId;
+                updateSelectedStockBadge();
+                document.getElementById('restock-codes').focus();
+            }
+        }
+
+        function updateSelectedStockBadge() {
+            const select = document.getElementById('restock-product-select');
+            const badge = document.getElementById('selected-stock-badge');
+            if (!select || !badge) return;
+            const prod = inventoryProductsCache.find(p => p.id === select.value);
+            if (prod) {
+                badge.innerHTML = `<span class="text-emerald-600 font-bold">تم اختيار: ${prod.platform} — ${prod.package_name}</span>`;
+            } else {
+                badge.innerHTML = '';
+            }
+        }
+
+        function updateCodesCountLive() {
+            const text = document.getElementById('restock-codes').value;
+            const badge = document.getElementById('codes-count-badge');
+            if (!badge) return;
+            const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+            badge.innerText = `${lines.length} كود`;
+        }
+
+        async function handleRestockSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-restock-submit');
+            const prodId = document.getElementById('restock-product-select').value;
+            const codesText = document.getElementById('restock-codes').value.trim();
+
+            if (!prodId) return alert("يرجى اختيار باقة أولاً.");
+            if (!codesText) return alert("يرجى إدخال كود واحد على الأقل.");
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-sm"></i> جاري الإضافة...`;
+
+            try {
+                const { data, error } = await db.rpc('admin_add_inventory_codes', {
+                    p_product_id: prodId,
+                    p_codes_text: codesText
+                });
+
+                if (error) throw error;
+
+                if (data && data.status === 'success') {
+                    alert(data.message || "✓ تم شحن الأكواد إلى المخزون بنجاح!");
+                    document.getElementById('restock-codes').value = '';
+                    updateCodesCountLive();
+                    loadInventoryData();
+                } else {
+                    alert("خطأ: " + (data ? data.message : "فشلت إضافة الأكواد"));
+                }
+            } catch (err) {
+                console.error("Restock Error:", err);
+                alert("حدث خطأ أثناء إضافة الأكواد: " + (err.message || err));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-plus-circle text-sm"></i> إضافة الأكواد إلى المخزون فوراً`;
+            }
+        }
+        
     </script>
 </body>
 </html>
