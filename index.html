@@ -8,45 +8,30 @@
 
     <title>SHIIFTX - المحفظة الرقمية ومتجر الاشتراكات</title>
 
-    <!-- 1. الاتصال المسبق القياسي بالترتيب الموصى به لتقليل زمن الاستجابة -->
+    <!-- 1. الاتصال المسبق لمصادر الخطوط والمكتبات الخارجية -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="dns-prefetch" href="https://i.imgur.com">
 
-    <!-- 2. بطاقات المشاركة والتواصل الاجتماعي -->
+    <!-- 2. بيانات المشاركة ومنصات التواصل -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://shiiftx.com/">
     <meta property="og:title" content="SHIIFT X — المحفظة الرقمية ومتجر الاشتراكات">
     <meta property="og:description" content="البنية التحتية لشحن الرصيد الفوري، بطاقات الألعاب، والاشتراكات الرقمية بأعلى معايير الأمان.">
     <meta property="og:image" content="https://shiiftx.com/apple-touch-icon.png">
-    <meta property="og:image:secure_url" content="https://shiiftx.com/apple-touch-icon.png">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
-
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="SHIIFT X — المحفظة الرقمية ومتجر الاشتراكات">
-    <meta name="twitter:description" content="اشحن رصيدك واشترِ بطاقاتك واشتراكاتك الرقمية فوراً وبأمان.">
-    <meta name="twitter:image" content="https://shiiftx.com/apple-touch-icon.png">
 
-    <!-- 3. الأيقونات وإعدادات متصفحات الجوال وiOS -->
+    <!-- 3. أيقونات التطبيق وإعدادات متصفحات الهواتف -->
     <link rel="icon" type="image/png" href="/apple-touch-icon.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="./assets/app-icon-512.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SHIIFT X">
 
-    <!-- استدعاء Tailwind الحي المعتمد للمشروع فوراً لإعادة بناء الواجهة بالكامل -->
+    <!-- 4. محرك Tailwind الأساسي للمظهر مع فحص الوضع الليلي الفوري لمنع الوميض -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class'
-        };
+        window.tailwind = window.tailwind || {};
+        tailwind.config = { darkMode: 'class' };
         try {
             if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
@@ -56,461 +41,36 @@
         } catch (_) {}
     </script>
 
-    <!-- ربط نظام التصميم الموحد للأبعاد ومربعات الحوار -->
+    <!-- 5. نظام التصميم الموحد (يثبت قياسات الأزرار والمربعات والنوافذ) -->
     <link rel="stylesheet" href="css/theme-system.css">
 
-    <!-- 5. الخطوط والأيقونات -->
+    <!-- 6. الخطوط وأيقونات Phosphor الشاملة -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Tajawal:wght@400;500;700;800&display=swap">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
 
-    <!-- 6. ملف CSS الأساسي المجمع -->
-    <link rel="stylesheet" href="css/style.css">
-
-    <!-- 7. نظام التصميم الموحد (يأتي بعد ملف style ليفرض أبعاده القياسية) -->
-    <link rel="stylesheet" href="css/theme-system.css">
-
-    <!-- 8. مكتبة Supabase JS مؤجلة -->
+    <!-- 7. مكتبة Supabase JS (مؤجلة بـ defer لتعمل في الخلفية دون تعطيل الصفحة) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 
     <style>
-        :root {
-            --primary: #005ba3;
-            --primary-glow: rgba(0, 91, 163, 0.3);
-            --accent: #7c3aed;
-            --bg-glass: rgba(255, 255, 255, 0.85);
-        }
         body { 
             font-family: 'Tajawal', 'Plus Jakarta Sans', sans-serif; 
             background-color: #f4f7f9; 
-            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
-            background-size: 24px 24px;
             color: #0f172a; 
             overflow-x: hidden; 
             padding-bottom: 35px;
             -webkit-tap-highlight-color: transparent;
         }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .glass-panel { 
-            background: var(--bg-glass); 
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 1); 
-            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
-            border-radius: 28px;
-        }
-        .cyber-card {
-            background: linear-gradient(145deg, #0b1120 0%, #151e32 100%);
-            border-radius: 32px;
-            box-shadow: 0 20px 40px -15px var(--primary-glow);
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .cyber-card::before {
-            content: ""; position: absolute; inset: -50%;
-            background: radial-gradient(circle at 80% 20%, rgba(0, 91, 163, 0.25) 0%, transparent 40%),
-                        radial-gradient(circle at 20% 80%, rgba(124, 58, 237, 0.15) 0%, transparent 40%);
-            pointer-events: none;
-        }
-        .abstract-lines {
-            position: absolute; inset: 0; opacity: 0.1;
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #ffffff 10px, #ffffff 11px);
-            pointer-events: none;
-        }
-        .input-field {
-            background: rgba(255, 255, 255, 0.9) !important; border: 1.5px solid #e2e8f0 !important; border-radius: 16px !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .input-field:focus { border-color: var(--primary) !important; background: #ffffff !important; box-shadow: 0 0 0 4px rgba(0, 91, 163, 0.1) !important; outline: none; }
-        .btn-primary {
-            background: linear-gradient(135deg, #005ba3 0%, #004a85 100%);
-            box-shadow: 0 8px 20px -6px var(--primary-glow);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-            cursor: pointer;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px -8px var(--primary-glow);
-        }
-        .btn-primary:active {
-            transform: scale(0.97);
-        }
-        .btn-primary:disabled {
-            opacity: 0.65;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        .financial-amount { font-family: 'Plus Jakarta Sans', monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-        .card-number-style { font-family: 'Plus Jakarta Sans', monospace; font-variant-numeric: tabular-nums; letter-spacing: 0.15em; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        .slide-down { animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes slideDown { from { opacity: 0; transform: translate(-50%, -20px) scale(0.95); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
-        .slide-up-modal { animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes slideUpModal { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
-        .hidden { display: none !important; }  
-
-        @media (min-width: 768px) {
-            #floating-nav-bar nav {
-                width: 56px;
-                transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                overflow: hidden;
-            }
-            #floating-nav-bar nav:hover {
-                width: 165px;
-            }
-            #floating-nav-bar .dock-label {
-                max-width: 0;
-                opacity: 0;
-                overflow: hidden;
-                white-space: nowrap;
-                display: inline-block;
-                transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
-                margin: 0;
-            }
-            #floating-nav-bar nav:hover .dock-label {
-                max-width: 100px;
-                opacity: 1;
-                margin-right: 8px;
-            }
-        }   
-
-        /* تخصيصات الوضع الليلي لضمان التباين العالي */
         html.dark body {
             background-color: #0b1120;
-            background-image: radial-gradient(#1e293b 1px, transparent 1px);
             color: #f8fafc;
         }
-        html.dark .glass-panel {
-            background: rgba(15, 23, 42, 0.85) !important;
-            border-color: rgba(255, 255, 255, 0.08) !important;
-            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4) !important;
-        }
-        html.dark .bg-white {
-            background-color: #151e32 !important;
-            border-color: #1e293b !important;
-            color: #f1f5f9 !important;
-        }
-        html.dark .text-slate-900,
-        html.dark .text-slate-800,
-        html.dark .text-slate-700 { color: #f8fafc !important; }
-        html.dark .text-slate-600,
-        html.dark .text-slate-500 { color: #94a3b8 !important; }
-        html.dark .input-field {
-            background: rgba(15, 23, 42, 0.8) !important;
-            border-color: #334155 !important;
-            color: #ffffff !important;
-        }
-        html.dark .border-slate-100,
-        html.dark .border-slate-200,
-        html.dark .border-slate-200\/60 { border-color: rgba(255, 255, 255, 0.07) !important; }
-        html.dark #floating-nav-bar nav {
-            background-color: rgba(15, 23, 42, 0.92) !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
-            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.5) !important;
-        }
-        html.dark .dock-inactive { color: #94a3b8 !important; }
-        html.dark .dock-inactive:hover {
-            color: #ffffff !important;
-            background-color: rgba(255, 255, 255, 0.05) !important;
-        }
-        html.dark header {
-            background-color: rgba(11, 17, 32, 0.85) !important;
-            border-bottom-color: rgba(255, 255, 255, 0.08) !important;
-        }    
-        body, .glass-panel, .cyber-card, .bg-white, header, #floating-nav-bar nav, .input-field {
-            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease !important;
-        }
-        #theme-toggle-icon {
-            display: inline-block;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
-        }
-        .theme-rotating { transform: rotate(360deg) scale(0.75); }
-        html.dark .cyber-card {
-            box-shadow: 0 20px 50px -10px rgba(0, 91, 163, 0.35), 0 0 30px -5px rgba(124, 58, 237, 0.2) !important;
-            border-color: rgba(255, 255, 255, 0.15) !important;
-        }
-        .cyber-card {
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 20px 40px -15px var(--primary-glow);
-        }
-        .glyph-pulse { animation: glyphPulseGlow 1.2s ease-in-out infinite alternate; }
-        @keyframes glyphPulseGlow {
-            0% { transform: scale(0.92); opacity: 0.65; filter: drop-shadow(0 0 2px rgba(92, 225, 230, 0.4)); }
-            100% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 10px rgba(92, 225, 230, 0.95)); }
-        }
-        .code-shimmer-box { position: relative; overflow: hidden; }
-        .code-shimmer-box::after {
-            content: ""; position: absolute; top: 0; left: -150%; width: 60%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.18), rgba(255, 255, 255, 0.15), transparent);
-            transform: skewX(-20deg);
-            animation: voucherShimmer 3s infinite;
-            pointer-events: none;
-        }
-        @keyframes voucherShimmer { 0% { left: -150%; } 50%, 100% { left: 200%; } }
-        .card-lift { transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease; }
-        .card-lift:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 30px -8px rgba(0, 91, 163, 0.15);
-            border-color: rgba(0, 91, 163, 0.3) !important;
-        }
-        html.dark .card-lift:hover {
-            box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 91, 163, 0.25);
-            border-color: rgba(255, 255, 255, 0.2) !important;
-        }
-        html.dark .fixed.inset-0[class*="bg-slate-900"] {
-            background-color: rgba(3, 7, 18, 0.75) !important;
-            backdrop-filter: blur(8px) !important;
-        }
-        html.dark .slide-up-modal,
-        html.dark #reactivate-modal > div,
-        html.dark #custom-prompt > div {
-            background-color: #111827 !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 91, 163, 0.15) !important;
-        }
-        html.dark .bg-slate-50 {
-            background-color: rgba(255, 255, 255, 0.04) !important;
-            border-color: rgba(255, 255, 255, 0.08) !important;
-        }
-        html.dark .bg-slate-100 {
-            background-color: rgba(255, 255, 255, 0.08) !important;
-            border-color: rgba(255, 255, 255, 0.12) !important;
-            color: #e2e8f0 !important;
-        }
-        html.dark button.bg-slate-50,
-        html.dark button.bg-slate-100 { color: #94a3b8 !important; }
-        html.dark button.bg-slate-50:hover,
-        html.dark button.bg-slate-100:hover {
-            background-color: rgba(255, 255, 255, 0.15) !important;
-            color: #ffffff !important;
-        }
-        html.dark .bg-blue-50,
-        html.dark .bg-blue-50\/50,
-        html.dark .bg-blue-50\/60 {
-            background-color: rgba(0, 91, 163, 0.2) !important;
-            border-color: rgba(0, 91, 163, 0.35) !important;
-            color: #93c5fd !important;
-        }
-        html.dark .bg-emerald-50 {
-            background-color: rgba(16, 185, 129, 0.15) !important;
-            border-color: rgba(16, 185, 129, 0.3) !important;
-            color: #6ee7b7 !important;
-        }
-        html.dark .bg-amber-50 {
-            background-color: rgba(245, 158, 11, 0.15) !important;
-            border-color: rgba(245, 158, 11, 0.3) !important;
-            color: #fcd34d !important;
-        }
-        html.dark .bg-indigo-50 {
-            background-color: rgba(99, 102, 241, 0.15) !important;
-            border-color: rgba(99, 102, 241, 0.3) !important;
-            color: #a5b4fc !important;
-        }
-        html.dark .bg-red-50 {
-            background-color: rgba(239, 68, 68, 0.15) !important;
-            border-color: rgba(239, 68, 68, 0.3) !important;
-            color: #fca5a5 !important;
-        }
-        html.dark .text-slate-800,
-        html.dark .text-slate-900,
-        html.dark h3,
-        html.dark h4,
-        html.dark h5 { color: #f8fafc !important; }
-        html.dark .text-slate-500,
-        html.dark .text-slate-600 { color: #cbd5e1 !important; }
-        html.dark .text-slate-400 { color: #94a3b8 !important; }
-        html.dark select.input-field {
-            background-color: #1e293b !important;
-            color: #ffffff !important;
-        }
-        html.dark select.input-field option {
-            background-color: #0f172a;
-            color: #ffffff;
-        }
-        html.dark .border-b,
-        html.dark .border-t,
-        html.dark .divide-y > * { border-color: rgba(255, 255, 255, 0.08) !important; }
-
-        /* نافذة المحادثة الدائرية */
-        #chat-modal {
-            display: none;
-            position: fixed;
-            inset: auto 0 0 0;
-            width: 100%;
-            height: 85dvh;
-            max-height: 85dvh;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-bottom: none;
-            border-radius: 28px 28px 0 0;
-            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
-            flex-direction: column;
-            overflow: hidden;
-            z-index: 100;
-            direction: rtl;
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
-        }
-        @media (min-width: 640px) {
-            #chat-modal {
-                inset: auto 24px 24px auto;
-                width: 380px;
-                height: 560px;
-                max-height: calc(100vh - 48px);
-                border-radius: 24px;
-                border-bottom: 1px solid #e2e8f0;
-                box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.25);
-            }
-        }
-        html.dark #chat-modal {
-            background: #0f172a;
-            border-color: #1e293b;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 91, 163, 0.2);
-        }
-        .chat-header {
-            background: #ffffff;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 14px 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        html.dark .chat-header {
-            background: #151e32;
-            border-bottom-color: #1e293b;
-        }
-        .chat-header-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 800;
-            font-size: 14px;
-            color: #0f172a;
-        }
-        html.dark .chat-header-title { color: #f8fafc; }
-        .chat-status-dot {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #10b981;
-        }
-        .chat-header-close {
-            cursor: pointer;
-            font-size: 18px;
-            color: #94a3b8;
-            transition: color 0.2s;
-        }
-        .chat-header-close:hover { color: #0f172a; }
-        html.dark .chat-header-close:hover { color: #ffffff; }
-        .chat-messages {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            background: #f8fafc;
-        }
-        html.dark .chat-messages { background: #0b1120; }
-        .chat-bubble-msg {
-            max-width: 85%;
-            padding: 12px 16px;
-            border-radius: 16px;
-            font-size: 13px;
-            line-height: 1.6;
-            word-break: break-word;
-        }
-        .msg-bot {
-            background: #ffffff;
-            color: #1e293b;
-            align-self: flex-start;
-            border: 1px solid #e2e8f0;
-            border-bottom-right-radius: 4px;
-        }
-        html.dark .msg-bot {
-            background: #151e32;
-            color: #f1f5f9;
-            border-color: #1e293b;
-        }
-        .msg-user {
-            background: linear-gradient(135deg, #005ba3, #0284c7);
-            color: #ffffff;
-            align-self: flex-end;
-            border-bottom-left-radius: 4px;
-        }
-        .chat-input-area {
-            padding: 12px 14px;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            gap: 8px;
-            background: #ffffff;
-        }
-        html.dark .chat-input-area {
-            background: #0f172a;
-            border-top-color: #1e293b;
-        }
-        .chat-input-area input {
-            flex: 1;
-            padding: 10px 14px;
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            color: #0f172a;
-            outline: none;
-            font-size: 13px;
-        }
-        html.dark .chat-input-area input {
-            background: #1e293b;
-            border-color: #334155;
-            color: #f8fafc;
-        }
-        .chat-input-area input:focus { border-color: #005ba3; }
-        .chat-input-area button {
-            background: #005ba3;
-            color: white;
-            border: none;
-            padding: 0 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 700;
-            transition: all 0.2s;
-        }
-        .chat-input-area button:hover { background: #004a85; }
-
-        .btn-spring {
-            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                        box-shadow 0.25s ease, 
-                        background-color 0.2s ease, 
-                        border-color 0.2s ease !important;
-        }
-        .btn-spring:active { transform: scale(0.93) !important; }
-        .btn-glow-sheen { position: relative; overflow: hidden; }
-        .btn-glow-sheen::after {
-            content: ""; position: absolute; top: -50%; left: -150%; width: 50%; height: 200%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-            transform: rotate(25deg); transition: none;
-        }
-        .btn-glow-sheen:hover::after { left: 200%; transition: all 0.75s ease-in-out; }
-        .modal-btn-close { transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important; }
-        .modal-btn-close:hover { background-color: rgba(239, 68, 68, 0.12) !important; color: #ef4444 !important; }
-        .modal-btn-close:hover i { transform: rotate(90deg); }
-        .modal-btn-close i { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .modal-btn-back { transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important; }
-        .modal-btn-back:hover i { transform: translateX(4px); }
-        .modal-btn-back i { transition: transform 0.25s ease; }
-        .no-spin::-webkit-outer-spin-button,
-        .no-spin::-webkit-inner-spin-button { -webkit-appearance: none !important; margin: 0 !important; }
-        .no-spin { -moz-appearance: textfield !important; }
+        .financial-amount { font-family: 'Plus Jakarta Sans', monospace; font-variant-numeric: tabular-nums; }
+        .card-number-style { font-family: 'Plus Jakarta Sans', monospace; font-variant-numeric: tabular-nums; letter-spacing: 0.15em; }
+        .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 1); border-radius: 24px; }
+        html.dark .glass-panel { background: rgba(15, 23, 42, 0.85) !important; border-color: rgba(255, 255, 255, 0.08) !important; }
+        .cyber-card { background: linear-gradient(145deg, #0b1120 0%, #151e32 100%); border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased selection:bg-blue-200 selection:text-blue-900">
