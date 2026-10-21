@@ -7,8 +7,7 @@
     <meta name="referrer" content="no-referrer">
 
     <title>SHIIFTX - المحفظة الرقمية ومتجر الاشتراكات</title>
-<link rel="stylesheet" href="css/theme-system.css">
-    
+
     <!-- 1. الاتصال المسبق القياسي بالترتيب الموصى به لتقليل زمن الاستجابة -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,27 +41,30 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SHIIFT X">
 
-    <!-- 4. ربط ملف CSS الثابت والمجمّع -->
-<link rel="stylesheet" href="css/style.css">
-<script>
-    try {
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    } catch (_) {}
-</script>
+    <!-- 4. التحقق السريع من المظهر الليلي لمنع الوميض الأبيض FOUC -->
+    <script>
+        try {
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        } catch (_) {}
+    </script>
 
-    <!-- 5. استدعاء الخطوط مع display=swap لمنع تعليق النصوص -->
+    <!-- 5. الخطوط والأيقونات -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Tajawal:wght@400;500;700;800&display=swap">
-
-    <!-- 6. استدعاء Phosphor Icons بكافة أوزانها (Regular, Fill, Bold) بدون حظر للرسم الأولي -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
 
-    <!-- 7. مكتبة Supabase مع defer لتشغيلها بالخلفية دون إيقاف رسم الواجهة -->
+    <!-- 6. ملف CSS الأساسي المجمع -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- 7. نظام التصميم الموحد (يأتي بعد ملف style ليفرض أبعاده القياسية) -->
+    <link rel="stylesheet" href="css/theme-system.css">
+
+    <!-- 8. مكتبة Supabase JS مؤجلة -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 
     <style>
@@ -331,7 +333,7 @@
         html.dark .border-t,
         html.dark .divide-y > * { border-color: rgba(255, 255, 255, 0.08) !important; }
 
-        /* نافذة المحادثة */
+        /* نافذة المحادثة الدائرية */
         #chat-modal {
             display: none;
             position: fixed;
@@ -1286,8 +1288,9 @@
         </div>
     </div>
 
-    <!-- استدعاء وحدات النظام مع خاصية defer لضمان عدم حظر العرض -->
+    <!-- ملفات الجافاسكريبت بالترتيب المنطقي السليم للتنفيذ -->
     <script src="js/config.js" defer></script>
+    <script src="js/theme.js" defer></script>
     <script src="js/ui.js" defer></script>
     <script src="js/auth.js" defer></script>
     <script src="js/transactions.js" defer></script>
