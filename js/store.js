@@ -2,6 +2,51 @@
 // SHIIFT X — وحدة المتجر والشراء والتمويل (Store & Checkout Controller)
 // ========================================================================
 
+// متغيرات التحكم في الحالة (State Variables)
+let globalProductsRaw = [];
+let selectedProductId = null;
+let selectedItemName = "";
+let selectedItemPrice = 0;
+let selectedProductType = "CODE"; // CODE أو ID
+let inputPlayerId = "";
+let inputPlayerIdConfirm = "";
+let activeCoupon = null;
+let discountedPrice = 0;
+let currentUser = null;
+let currentUserRole = "customer";
+
+// 0. دالة مساعدة لضمان جلب المستخدم والملف الشخصي مهما كانت رتبته
+async function ensureAuthenticatedUser() {
+    if (currentUser && currentUser.id) {
+        return currentUser;
+    }
+
+    try {
+        const { data: { user }, error: authErr } = await supabase.auth.getUser();
+        if (authErr || !user) {
+            currentUser = null;
+            currentUserRole = "customer";
+            return null;
+        }
+
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role, balance, first_name, last_name')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        currentUser = {
+            ...user,
+            ...(profile || {})
+        };
+        currentUserRole = profile?.role || 'customer';
+        return currentUser;
+    } catch (e) {
+        console.error("Error ensuring auth user:", e);
+        return null;
+    }
+}
+
 // 1. جلب المنتجات النشطة من قاعدة البيانات مباشرة
 async function fetchStoreProductsDirectly() { 
     const { data: prods, error } = await supabase
@@ -102,7 +147,7 @@ function openPlansModal(platformName, categoryName) {
     const plans = globalProductsRaw.filter(p => p.category === categoryName && p.platform === platformName); 
     
     plans.forEach(plan => { 
-        const isCode = plan.type === 'CODE';
+        const isCode = (plan.type || '').trim().toUpperCase() === 'CODE';
         const card = document.createElement('div'); 
         card.className = "card-lift bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-4 rounded-[22px] flex justify-between items-center gap-3 text-right shadow-sm"; 
         
@@ -115,12 +160,8 @@ function openPlansModal(platformName, categoryName) {
                 ${plan.image_url ? `<img src="${plan.image_url}" alt="${plan.package_name}" referrerpolicy="no-referrer" class="w-12 h-12 rounded-xl object-contain bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-white/10 p-1 shrink-0 shadow-inner">` : ''}
                 <div class="flex flex-col gap-1">
                     <span class="text-xs font-black text-slate-800 dark:text-slate-100 leading-snug">${plan.package_name}</span>
-                    <div>${badgeHtml}</div>
-                </div>
-            </div>
-            <div class="flex flex-col items-end gap-1.5 shrink-0">
-                <span class="text-base font-black text-blue-600 dark:text-blue-400 tabular-numeric financial-amount">$${plan.price.toFixed(2)}</span>
-                <button onclick="openAccountInputsModal('${plan.id}', '${plan.package_name}', ${plan.price})" class="btn-primary text-white text-[11px] font-bold px-4 py-2 rounded-xl transition shadow-sm active:scale-95">شراء</button>
+                    <div>${badgeHtml}</div> </div> </div> <div class="flex flex-col items-end gap-1.5 shrink-0"> <span class="text-base font-black text-blue-600 dark:text-blue-400 tabular-numeric financial-amount">$${plan.price.toFixed(2)}</span>
+                <button onclick="openAccountInputsModal('${plan.id}', '${plan.package_name}', ${plan.price}, '${plan.type}')" class="btn-primary text-white text-[11px] font-bold px-4 py-2 rounded-xl transition shadow-sm active:scale-95">شراء</button>
             </div>
         `; 
         container.appendChild(card); 
@@ -129,16 +170,16 @@ function openPlansModal(platformName, categoryName) {
 }
 
 // 5. فتح نافذة إدخال المعرف (ID) أو إشعار الكود
-function openAccountInputsModal(productId, fullName, price) { 
+function openAccountInputsModal(productId, fullName, price, productType) { 
     selectedProductId = productId; 
     selectedItemName = fullName; 
     selectedItemPrice = price; 
+    selectedProductType = (productType || 'CODE').trim().toUpperCase();
     
     document.getElementById('target-player-id').value = "";
     document.getElementById('target-player-id-confirm').value = "";
     
-    const prod = globalProductsRaw.find(p => p.id === productId);
-    const isIdFlow = prod && (prod.type || '').trim().toUpperCase() === "ID"; 
+    const isIdFlow = selectedProductType === "ID"; 
     
     toggleView('id-fields-container', isIdFlow); 
     toggleView('code-fields-notice', !isIdFlow); 
@@ -147,8 +188,7 @@ function openAccountInputsModal(productId, fullName, price) {
 
 // 6. المتابعة إلى شاشة مراجعة الفاتورة النهائية
 function proceedToReview() { 
-    const prod = globalProductsRaw.find(p => p.id === selectedProductId);
-    const isIdFlow = prod && (prod.type || '').trim().toUpperCase() === "ID";
+    const isIdFlow = selectedProductType === "ID";
 
     if (isIdFlow) { 
         inputPlayerId = document.getElementById('target-player-id').value.trim(); 
@@ -183,6 +223,8 @@ function proceedToReview() {
 
 // 7. تطبيق وفحص كود الخصم الترويجي (مع منع الوكلاء والشركاء)
 async function applyCouponCode() {
+    await ensureAuthenticatedUser();
+
     const input = document.getElementById('coupon-code-input');
     const statusMsg = document.getElementById('coupon-status-msg');
     const btn = document.getElementById('apply-coupon-btn');
@@ -205,7 +247,6 @@ async function applyCouponCode() {
         return;
     }
 
-    // إذا مسح المستخدم الحقل وضغط تطبيق لإلغاء الكود
     if (!code) {
         activeCoupon = null;
         discountedPrice = selectedItemPrice;
@@ -274,55 +315,95 @@ async function applyCouponCode() {
     }
 }
 
-// 8. تنفيذ عملية الدفع والشراء الذرية
-async function executeSubscriptionPurchase() { 
-    const finalDuePrice = (activeCoupon && discountedPrice !== undefined) ? discountedPrice : selectedItemPrice;
-
-    if (currentWalletBalance < finalDuePrice) {
-        return showCustomAlert("الرصيد غير كافٍ لإتمام الشراء."); 
+// 8. تنفيذ عملية الدفع والشراء الذرية لكافة أنواع الباقات
+async function executeSubscriptionPurchase() {
+    const buyBtn = document.querySelector('#purchase-modal button[onclick*="executeSubscriptionPurchase"]');
+    if (buyBtn) {
+        buyBtn.disabled = true;
+        buyBtn.innerText = "جاري تنفيذ الطلب...";
     }
-    
-    const btn = document.getElementById('confirm-purchase-btn'); 
-    btn.disabled = true; 
-    btn.innerHTML = `<span class="flex items-center justify-center gap-2">${BRAND_LOADER_SVG} <span>جاري تنفيذ الشحن...</span></span>`; 
-    
-    try {
-        const { data: r, error } = await supabase.rpc('buy_product', {
-            p_user_id: currentUser.id, 
-            p_product_id: selectedProductId, 
-            p_player_id: inputPlayerId || null, 
-            p_player_id_confirm: inputPlayerIdConfirm || null,
-            p_coupon_code: activeCoupon ? activeCoupon.code : null
-        }); 
-        
-        if (error) throw error;
 
-        if (r && r.status === "success") { 
-            closeAllModals(); 
-            if (typeof silentSyncData === 'function') await silentSyncData(); 
-            
-            if (r.mode === "CODE") {
-                showCodeDeliveryModal(r.code, selectedItemName);
-            } else {
-                showDirectIdSuccessModal({
-                    itemName: selectedItemName,
-                    playerId: inputPlayerId,
-                    price: finalDuePrice,
-                    txRef: r.tx_ref || ''
-                });
-            }
-        } else { 
-            showCustomAlert("فشلت العملية: " + (r ? r.message : "حدث خطأ غير متوقع")); 
+    try {
+        // 1. التحقق الآمن والمباشر من المستخدم
+        const user = await ensureAuthenticatedUser();
+        if (!user || !user.id) {
+            showCustomAlert("يرجى تسجيل الدخول أولاً للمتابعة.");
+            return;
         }
+
+        // 2. التحقق من الباقة المختارة
+        if (!selectedProductId) {
+            showCustomAlert("يرجى اختيار باقة صالحة للشراء.");
+            return;
+        }
+
+        // 3. التحقق من متطلبات المعرف إذا كانت الباقة شحن ID
+        const isDirectId = selectedProductType === 'ID';
+        let finalPlayerId = null;
+        let finalPlayerIdConfirm = null;
+
+        if (isDirectId) {
+            finalPlayerId = inputPlayerId ? inputPlayerId.trim() : '';
+            finalPlayerIdConfirm = inputPlayerIdConfirm ? inputPlayerIdConfirm.trim() : '';
+
+            if (!finalPlayerId) {
+                showCustomAlert("يرجى إدخال معرف اللاعب (Player ID).");
+                return;
+            }
+
+            if (finalPlayerIdConfirm && finalPlayerId !== finalPlayerIdConfirm) {
+                showCustomAlert("معرف اللاعب غير متطابق مع التأكيد.");
+                return;
+            }
+        }
+
+        // 4. استدعاء الدالة الموثوقة buy_product
+        const { data: r, error } = await supabase.rpc('buy_product', {
+            p_user_id: user.id,
+            p_product_id: selectedProductId,
+            p_player_id: isDirectId ? finalPlayerId : null,
+            p_player_id_confirm: isDirectId ? finalPlayerIdConfirm : null,
+            p_coupon_code: activeCoupon ? activeCoupon.code.trim() : null
+        });
+
+        if (error) {
+            console.error("فشل تنفيذ الشراء:", error);
+            showCustomAlert(error.message || "حدث خطأ أثناء تنفيذ الطلب.");
+            return;
+        }
+
+        if (r?.status === 'error') {
+            showCustomAlert(r.message);
+            return;
+        }
+
+        // 5. إغلاق نوافذ الشراء والمراجعة
+        toggleView('purchase-modal', false);
+        toggleView('plans-modal', false);
+
+        // 6. عرض النوافذ المناسبة وفقاً لنوع الباقة
+        if (r?.mode === 'CODE' && r?.code) {
+            showCodeDeliveryModal(r.code, selectedItemName);
+        } else {
+            showDirectIdSuccessModal({
+                itemName: selectedItemName,
+                playerId: finalPlayerId || '---',
+                price: r?.final_price || selectedItemPrice
+            });
+        }
+
+        // 7. تحديث رصيد وبيانات المستخدم في الخلفية
+        if (typeof silentSyncData === 'function') silentSyncData();
+        if (typeof fetchUserProfile === 'function') await fetchUserProfile();
+
     } catch (err) {
-        console.error("Purchase Error:", err);
-        showCustomAlert(err.message || "فشلت معالجة الطلب");
+        console.error("خطأ عام في الشراء:", err);
+        showCustomAlert("تعذر إتمام العملية، يرجى المحاولة لاحقاً.");
     } finally {
-        btn.disabled = false; 
-        btn.innerHTML = `
-            <i class="ph-fill ph-check-circle text-xl"></i>
-            <span class="tracking-wide">تأكيد ودفع</span>
-        `; 
+        if (buyBtn) {
+            buyBtn.disabled = false;
+            buyBtn.innerText = "تأكيد الشراء";
+        }
     }
 }
 
@@ -334,157 +415,4 @@ function showDirectIdSuccessModal(data) {
     const modalHtml = `
     <div id="direct-id-success-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[99]">
         <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[28px] p-6 text-center space-y-4 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
-            <div class="w-16 h-16 bg-amber-50 dark:bg-amber-950/40 text-amber-500 rounded-full flex items-center justify-center mx-auto text-3xl">
-                <i class="ph-fill ph-hourglass-medium animate-pulse"></i>
-            </div>
-
-            <div class="space-y-1">
-                <h3 class="text-base font-black text-slate-800 dark:text-slate-100">تم استلام طلب الشحن بنجاح!</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400">طلبك قيد المراجعة والشحن المباشر لحسابك الآن.</p>
-            </div>
-
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 text-xs space-y-2.5 text-right border border-slate-200/60 dark:border-slate-700/60">
-                <div class="flex justify-between items-center">
-                    <span class="text-slate-400">المنتج:</span>
-                    <span class="font-bold text-slate-800 dark:text-slate-200">${data.itemName}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-slate-400">المعرف المستلم (ID):</span>
-                    <span class="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded" dir="ltr">${data.playerId}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-slate-400">المبلغ المدفوع:</span>
-                    <span class="font-black text-slate-800 dark:text-slate-200">$${Number(data.price).toFixed(2)}</span>
-                </div>
-                <div class="flex justify-between items-center border-t border-slate-200/60 dark:border-slate-700/60 pt-2 text-amber-600 dark:text-amber-400 font-bold">
-                    <span class="flex items-center gap-1"><i class="ph ph-clock"></i> وقت التنفيذ المتوقع:</span>
-                    <span>5 - 15 دقيقة</span>
-                </div>
-            </div>
-
-            <p class="text-[11px] text-slate-400">يمكنك متابعة حالة الطلب في أي وقت عبر <b>سجل المعاملات والطلبات</b>.</p>
-
-            <button onclick="document.getElementById('direct-id-success-modal').remove()" class="btn-spring w-full bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-md cursor-pointer">
-                فهمت، شكراً لك
-            </button>
-        </div>
-    </div>`;
-    
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
-
-// 10. نافذة تسليم الكود الرقمي ومشاركته
-let currentDeliveredCode = "";
-
-function showCodeDeliveryModal(code, itemName) {
-    currentDeliveredCode = code;
-    document.getElementById('delivered-code-text').innerText = code;
-    document.getElementById('delivery-item-name').innerText = itemName || "البطاقة الرقمية";
-    
-    const codeBox = document.getElementById('delivered-code-text').parentElement;
-    if (codeBox) {
-        codeBox.classList.add('code-shimmer-box');
-    }
-    
-    toggleView('code-delivery-modal', true);
-}
-
-function copyDeliveredCode() {
-    if (!currentDeliveredCode) return;
-    navigator.clipboard.writeText(currentDeliveredCode).then(() => {
-        showCustomAlert("تم نسخ كود البطاقة بنجاح!", false);
-    });
-}
-
-async function shareDeliveredCode() {
-    if (!currentDeliveredCode) return;
-    const shareData = {
-        title: 'كود البطاقة الرقمية - SHIIFTX',
-        text: `كود البطاقة الخاص بك: ${currentDeliveredCode}\nتم الشراء عبر تطبيق SHIIFTX.`
-    };
-    if (navigator.share) {
-        try { await navigator.share(shareData); } catch (err) {}
-    } else {
-        copyDeliveredCode();
-    }
-}
-
-// 11. دوال شحن الرصيد المباشر (Deposit)
-function updateDirectWalletInfo() {
-    const select = document.getElementById('sub-payment-method');
-    const walletBox = document.getElementById('direct-official-wallet-num');
-    const labelBox = document.getElementById('direct-gateway-name-label');
-    if (!select || !walletBox) return;
-
-    const selectedOpt = select.options[select.selectedIndex];
-    const walletNum = selectedOpt.getAttribute('data-wallet') || '---';
-    const gatewayName = selectedOpt.value;
-
-    walletBox.innerText = walletNum;
-    if (labelBox) labelBox.innerText = `رقم حساب ${gatewayName}:`;
-}
-
-function setPresetAmount(val, btnEl) {
-    const input = document.getElementById('sub-form-amount-select');
-    if (input) input.value = val;
-
-    document.querySelectorAll('.amount-preset-btn').forEach(btn => {
-        btn.className = "amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring";
-    });
-
-    if (btnEl) {
-        btnEl.className = "amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-blue-600 bg-blue-600 text-white shadow-sm transition btn-spring";
-    }
-}
-
-function onCustomAmountTyped() {
-    document.querySelectorAll('.amount-preset-btn').forEach(btn => {
-        btn.className = "amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring";
-    });
-}
-
-async function submitSubFinalDeposit() { 
-    const amtInput = document.getElementById('sub-form-amount-select');
-    const rawAmt = amtInput ? amtInput.value.trim().replace(/[،,]/g, '.').replace(/[^0-9.]/g, '') : "";
-    const finalAmt = parseFloat(rawAmt);
-    const txNum = document.getElementById('sub-form-tx-number').value.trim();
-    const method = document.getElementById('sub-payment-method').value;
-    const btn = document.getElementById('sub-deposit-final-btn'); 
-
-    if (!rawAmt || isNaN(finalAmt) || finalAmt <= 0) {
-        return showCustomAlert("يرجى إدخال مبلغ صحيح للشحن.");
-    }
-    if (!txNum) {
-        return showCustomAlert("يرجى إدخال رقم إشعار الحوالة لتأكيد العملية."); 
-    }
-    
-    btn.disabled = true; 
-    btn.innerHTML = `<span class="flex items-center justify-center gap-2">${BRAND_LOADER_SVG} <span>جاري رفع الإشعار...</span></span>`;
-
-    try {
-        const { data: res, error } = await supabase.rpc('submit_deposit_request', {
-            p_amount: finalAmt,
-            p_payment_method: method,
-            p_receipt_num: txNum
-        });
-
-        if (error) throw error;
-
-        if (res && res.status === 'success') {
-            showCustomAlert("تم رفع طلب الشحن بنجاح وهو قيد المراجعة لدى الإدارة.", false); 
-            if (amtInput) amtInput.value = "";
-            document.getElementById('sub-form-tx-number').value = "";
-            onCustomAmountTyped();
-            switchTab('home'); 
-            if (typeof silentSyncData === 'function') silentSyncData(); 
-        } else {
-            showCustomAlert(res ? res.message : "فشل رفع الطلب، يرجى المحاولة لاحقاً.");
-        }
-    } catch (err) {
-        console.error("Supabase Deposit RPC Error:", err);
-        showCustomAlert("فشل رفع الطلب: " + (err.message || "خطأ في الاتصال بالخادم"));
-    } finally {
-        btn.disabled = false; 
-        btn.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> تأكيد وإرسال طلب الشحن`;
-    }
-}
+            <div class="w-16 h-16 bg-
