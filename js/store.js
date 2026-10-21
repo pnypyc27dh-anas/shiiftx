@@ -18,7 +18,7 @@ let currentUser = null;
 let currentUserRole = "customer";
 let currentDeliveredCode = "";
 
-// أيقونة التحميل الافتراضية للعلامة التجارية في حال عدم وجودها بالنطاق العام
+// أيقونة التحميل الافتراضية
 const DEFAULT_SPINNER_SVG = `
 <svg class="animate-spin h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -26,6 +26,19 @@ const DEFAULT_SPINNER_SVG = `
 </svg>`;
 
 const LOADER_ICON = (typeof BRAND_LOADER_SVG !== 'undefined') ? BRAND_LOADER_SVG : DEFAULT_SPINNER_SVG;
+
+// ------------------------------------------------------------------------
+// دوال الحماية والأمان (Sanitization & Escaping)
+// ------------------------------------------------------------------------
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 // ------------------------------------------------------------------------
 // 0. التحقق من جلسة المستخدم والبيانات الشخصية
@@ -113,7 +126,11 @@ function renderMainCategoriesView() {
     categories.forEach(cat => {
         const div = document.createElement('div');
         div.className = "glass-panel flex flex-col items-center justify-center gap-3 h-32 cursor-pointer font-black text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800/80 hover:border-blue-500/50 transition rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm";
-        div.innerHTML = `<span>${cat}</span>`;
+        
+        const span = document.createElement('span');
+        span.textContent = cat;
+        div.appendChild(span);
+
         div.onclick = () => renderNestedPlatformsView(cat);
         container.appendChild(div);
     });
@@ -124,7 +141,7 @@ function renderMainCategoriesView() {
 // ------------------------------------------------------------------------
 function renderNestedPlatformsView(categoryName) {
     const titleText = document.getElementById('store-title-text');
-    if (titleText) titleText.innerHTML = `منصات: ${categoryName}`;
+    if (titleText) titleText.textContent = `منصات: ${categoryName}`;
 
     const backBtn = document.getElementById('store-nested-back-btn');
     if (backBtn) {
@@ -147,11 +164,12 @@ function renderNestedPlatformsView(categoryName) {
         div.className = "card-lift bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 flex justify-between items-center cursor-pointer shadow-sm hover:border-blue-500/40 transition";
         div.onclick = () => openPlansModal(pName, categoryName);
 
+        const safePName = escapeHtml(pName);
         div.innerHTML = `
             <div class="flex items-center gap-3.5">
-                ${iconUrl ? `<img src="${iconUrl}" alt="${pName}" referrerpolicy="no-referrer" class="w-12 h-12 rounded-xl object-contain bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-white/10 p-1.5 shadow-sm">` : `<div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-base">${pName[0]}</div>`}
+                ${iconUrl ? `<img src="${encodeURI(iconUrl)}" alt="${safePName}" referrerpolicy="no-referrer" class="w-12 h-12 rounded-xl object-contain bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-white/10 p-1.5 shadow-sm">` : `<div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-base">${safePName[0]}</div>`}
                 <div>
-                    <span class="font-black text-sm text-slate-800 dark:text-slate-100 block">${pName}</span>
+                    <span class="font-black text-sm text-slate-800 dark:text-slate-100 block">${safePName}</span>
                     <span class="text-[10px] text-slate-400 font-bold">باقات وشحن فوري</span>
                 </div>
             </div>
@@ -166,7 +184,7 @@ function renderNestedPlatformsView(categoryName) {
 // ------------------------------------------------------------------------
 function openPlansModal(platformName, categoryName) {
     const modalTitle = document.getElementById('plans-modal-title');
-    if (modalTitle) modalTitle.innerText = `باقات منصة ${platformName}`;
+    if (modalTitle) modalTitle.textContent = `باقات منصة ${platformName}`;
 
     const container = document.getElementById('plans-container');
     if (!container) return;
@@ -183,17 +201,19 @@ function openPlansModal(platformName, categoryName) {
             ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"><i class="ph-fill ph-lightning"></i> كود فوري</span>`
             : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20"><i class="ph-fill ph-user-circle"></i> شحن بالمعرف</span>`;
 
+        const safePackageName = escapeHtml(plan.package_name);
+
         card.innerHTML = `
             <div class="flex items-center gap-3.5">
-                ${plan.image_url ? `<img src="${plan.image_url}" alt="${plan.package_name}" referrerpolicy="no-referrer" class="w-12 h-12 rounded-xl object-contain bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-white/10 p-1 shrink-0 shadow-inner">` : ''}
+                ${plan.image_url ? `<img src="${encodeURI(plan.image_url)}" alt="${safePackageName}" referrerpolicy="no-referrer" class="w-12 h-12 rounded-xl object-contain bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-white/10 p-1 shrink-0 shadow-inner">` : ''}
                 <div class="flex flex-col gap-1">
-                    <span class="text-xs font-black text-slate-800 dark:text-slate-100 leading-snug">${plan.package_name}</span>
+                    <span class="text-xs font-black text-slate-800 dark:text-slate-100 leading-snug">${safePackageName}</span>
                     <div>${badgeHtml}</div>
                 </div>
             </div>
             <div class="flex flex-col items-end gap-1.5 shrink-0">
                 <span class="text-base font-black text-blue-600 dark:text-blue-400 tabular-numeric financial-amount">$${plan.price.toFixed(2)}</span>
-                <button onclick="openAccountInputsModal('${plan.id}', '${plan.package_name.replace(/'/g, "\\'")}', ${plan.price}, '${plan.type}')" class="btn-primary text-white text-[11px] font-bold px-4 py-2 rounded-xl transition shadow-sm active:scale-95 bg-blue-600 hover:bg-blue-700">شراء</button>
+                <button onclick="openAccountInputsModal('${plan.id}')" class="btn-primary text-white text-[11px] font-bold px-4 py-2 rounded-xl transition shadow-sm active:scale-95 bg-blue-600 hover:bg-blue-700">شراء</button>
             </div>
         `;
         container.appendChild(card);
@@ -204,11 +224,14 @@ function openPlansModal(platformName, categoryName) {
 // ------------------------------------------------------------------------
 // 5. نافذة إدخال المعرف (ID) أو تنبيه الكود المباشر
 // ------------------------------------------------------------------------
-function openAccountInputsModal(productId, fullName, price, productType) {
-    selectedProductId = productId;
-    selectedItemName = fullName;
-    selectedItemPrice = price;
-    selectedProductType = (productType || 'CODE').trim().toUpperCase();
+function openAccountInputsModal(productId) {
+    const plan = globalProductsRaw.find(p => p.id === productId);
+    if (!plan) return;
+
+    selectedProductId = plan.id;
+    selectedItemName = plan.package_name;
+    selectedItemPrice = plan.price;
+    selectedProductType = plan.type;
 
     const idInput = document.getElementById('target-player-id');
     const idConfirmInput = document.getElementById('target-player-id-confirm');
@@ -240,10 +263,10 @@ function proceedToReview() {
         }
 
         const reviewIdElem = document.getElementById('review-item-player-id');
-        if (reviewIdElem) reviewIdElem.innerText = inputPlayerId;
+        if (reviewIdElem) reviewIdElem.textContent = inputPlayerId;
 
         const deliveryTypeElem = document.getElementById('review-item-delivery-type');
-        if (deliveryTypeElem) deliveryTypeElem.innerText = `شحن مباشر بالمعرف`;
+        if (deliveryTypeElem) deliveryTypeElem.textContent = `شحن مباشر بالمعرف`;
 
         toggleView('review-id-row', true);
     } else {
@@ -252,10 +275,10 @@ function proceedToReview() {
         toggleView('review-id-row', false);
 
         const deliveryTypeElem = document.getElementById('review-item-delivery-type');
-        if (deliveryTypeElem) deliveryTypeElem.innerText = `تسليم الكود فوراً`;
+        if (deliveryTypeElem) deliveryTypeElem.textContent = `تسليم الكود فوراً`;
     }
 
-    // تصفير حالة الكوبون عند المراجعة
+    // تصفير حالة الكوبون عند كل فتح جديد
     activeCoupon = null;
     discountedPrice = selectedItemPrice;
 
@@ -265,7 +288,7 @@ function proceedToReview() {
     const cMsg = document.getElementById('coupon-status-msg');
     if (cMsg) {
         cMsg.className = "text-[10px] mt-1.5 hidden font-bold";
-        cMsg.innerText = "";
+        cMsg.textContent = "";
     }
 
     const dRow = document.getElementById('discount-breakdown-row');
@@ -277,10 +300,10 @@ function proceedToReview() {
     toggleView('account-inputs-modal', false);
 
     const nameElem = document.getElementById('review-item-name');
-    if (nameElem) nameElem.innerText = selectedItemName;
+    if (nameElem) nameElem.textContent = selectedItemName;
 
     const priceElem = document.getElementById('review-item-price');
-    if (priceElem) priceElem.innerText = "$" + selectedItemPrice.toFixed(2);
+    if (priceElem) priceElem.textContent = "$" + selectedItemPrice.toFixed(2);
 
     toggleView('purchase-modal', true);
 }
@@ -298,23 +321,22 @@ async function applyCouponCode() {
     const discountRow = document.getElementById('discount-breakdown-row');
     const priceDisplay = document.getElementById('review-item-price');
 
-    // استثناء حسابات الشركاء والوكلاء من تطبيق الكوبونات
+    // منع الحسابات التسويقية والوكلاء
     if (currentUserRole === 'agent' || currentUserRole === 'marketing_partner') {
         if (discountRow) {
             discountRow.classList.add('hidden');
             discountRow.classList.remove('flex');
         }
-        if (priceDisplay) priceDisplay.innerText = "$" + selectedItemPrice.toFixed(2);
+        if (priceDisplay) priceDisplay.textContent = "$" + selectedItemPrice.toFixed(2);
 
         if (statusMsg) {
             statusMsg.classList.remove('hidden');
             statusMsg.className = "text-[10px] mt-1.5 text-rose-500 font-bold block";
-            statusMsg.innerText = "✕ حسابات الشركاء والوكلاء غير مخولة باستخدام أي كود خصم.";
+            statusMsg.textContent = "✕ حسابات الشركاء والوكلاء غير مخولة باستخدام أي كود خصم.";
         }
         return;
     }
 
-    // إعادة التعيين في حال تفريغ الحقل
     if (!code) {
         activeCoupon = null;
         discountedPrice = selectedItemPrice;
@@ -322,14 +344,14 @@ async function applyCouponCode() {
             discountRow.classList.add('hidden');
             discountRow.classList.remove('flex');
         }
-        if (priceDisplay) priceDisplay.innerText = "$" + selectedItemPrice.toFixed(2);
+        if (priceDisplay) priceDisplay.textContent = "$" + selectedItemPrice.toFixed(2);
         if (statusMsg) statusMsg.classList.add('hidden');
         return;
     }
 
     if (btn) {
         btn.disabled = true;
-        btn.innerText = "...";
+        btn.textContent = "...";
     }
 
     try {
@@ -348,12 +370,12 @@ async function applyCouponCode() {
                 discountRow.classList.add('hidden');
                 discountRow.classList.remove('flex');
             }
-            if (priceDisplay) priceDisplay.innerText = "$" + selectedItemPrice.toFixed(2);
+            if (priceDisplay) priceDisplay.textContent = "$" + selectedItemPrice.toFixed(2);
 
             if (statusMsg) {
                 statusMsg.classList.remove('hidden');
                 statusMsg.className = "text-[10px] mt-1.5 text-rose-500 font-bold block";
-                statusMsg.innerText = "✕ رمز القسيمة غير صالح أو منتهي الصلاحية.";
+                statusMsg.textContent = "✕ رمز القسيمة غير صالح أو منتهي الصلاحية.";
             }
         } else {
             activeCoupon = coupon;
@@ -361,21 +383,21 @@ async function applyCouponCode() {
             discountedPrice = Math.max(0, selectedItemPrice - discountAmt);
 
             const labelElem = document.getElementById('discount-label-text');
-            if (labelElem) labelElem.innerText = `خصم القسيمة (${coupon.discount_percent}%):`;
+            if (labelElem) labelElem.textContent = `خصم القسيمة (${coupon.discount_percent}%):`;
 
             const valElem = document.getElementById('discount-val-text');
-            if (valElem) valElem.innerText = `-$${discountAmt.toFixed(2)}`;
+            if (valElem) valElem.textContent = `-$${discountAmt.toFixed(2)}`;
 
             if (discountRow) {
                 discountRow.classList.remove('hidden');
                 discountRow.classList.add('flex');
             }
-            if (priceDisplay) priceDisplay.innerText = "$" + discountedPrice.toFixed(2);
+            if (priceDisplay) priceDisplay.textContent = "$" + discountedPrice.toFixed(2);
 
             if (statusMsg) {
                 statusMsg.classList.remove('hidden');
                 statusMsg.className = "text-[10px] mt-1.5 text-emerald-600 dark:text-emerald-400 font-bold block";
-                statusMsg.innerText = `✓ تم تطبيق الخصم بنجاح! وفرت $${discountAmt.toFixed(2)}`;
+                statusMsg.textContent = `✓ تم تطبيق الخصم بنجاح! وفرت $${discountAmt.toFixed(2)}`;
             }
         }
     } catch (err) {
@@ -383,13 +405,13 @@ async function applyCouponCode() {
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerText = "تطبيق";
+            btn.textContent = "تطبيق";
         }
     }
 }
 
 // ------------------------------------------------------------------------
-// 8. تنفيذ عملية الدفع والشراء الذرية
+// 8. تنفيذ عملية الدفع والشراء الذرية (آمنة: بدون تمرير user_id)
 // ------------------------------------------------------------------------
 async function executeSubscriptionPurchase() {
     const buyBtn = document.querySelector('#purchase-modal button[onclick*="executeSubscriptionPurchase"]') ||
@@ -431,9 +453,8 @@ async function executeSubscriptionPurchase() {
             }
         }
 
-        // استدعاء دالة الشراء الذرية في Supabase
+        // استدعاء دالة الشراء الذرية (الخادم يستخرج الهوية عبر auth.uid())
         const { data: r, error } = await supabase.rpc('buy_product', {
-            p_user_id: user.id,
             p_product_id: selectedProductId,
             p_player_id: isDirectId ? finalPlayerId : null,
             p_player_id_confirm: isDirectId ? finalPlayerIdConfirm : null,
@@ -451,12 +472,10 @@ async function executeSubscriptionPurchase() {
             return;
         }
 
-        // إغلاق نوافذ المتجر
         toggleView('purchase-modal', false);
         toggleView('plans-modal', false);
         if (typeof closeAllModals === 'function') closeAllModals();
 
-        // عرض شاشة النتيجة الملائمة
         if (r?.mode === 'CODE' && r?.code) {
             showCodeDeliveryModal(r.code, selectedItemName);
         } else {
@@ -468,7 +487,6 @@ async function executeSubscriptionPurchase() {
             });
         }
 
-        // مزامنة الرصيد والبيانات
         if (typeof silentSyncData === 'function') await silentSyncData();
         if (typeof fetchUserProfile === 'function') await fetchUserProfile();
 
@@ -487,11 +505,15 @@ async function executeSubscriptionPurchase() {
 }
 
 // ------------------------------------------------------------------------
-// 9. نافذة تأكيد طلب شحن المعرف المباشر (Direct ID)
+// 9. نافذة تأكيد طلب شحن المعرف المباشر (مع حماية XSS)
 // ------------------------------------------------------------------------
 function showDirectIdSuccessModal(data) {
     const oldModal = document.getElementById('direct-id-success-modal');
     if (oldModal) oldModal.remove();
+
+    const safeItemName = escapeHtml(data.itemName);
+    const safePlayerId = escapeHtml(data.playerId);
+    const safeTxRef = escapeHtml(data.txRef);
 
     const modalHtml = `
     <div id="direct-id-success-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[99]">
@@ -508,20 +530,20 @@ function showDirectIdSuccessModal(data) {
             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 text-xs space-y-2.5 text-right border border-slate-200/60 dark:border-slate-700/60">
                 <div class="flex justify-between items-center">
                     <span class="text-slate-400">المنتج:</span>
-                    <span class="font-bold text-slate-800 dark:text-slate-200">${data.itemName}</span>
+                    <span class="font-bold text-slate-800 dark:text-slate-200">${safeItemName}</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-slate-400">المعرف المستلم (ID):</span>
-                    <span class="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded" dir="ltr">${data.playerId}</span>
+                    <span class="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded" dir="ltr">${safePlayerId}</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-slate-400">المبلغ المدفوع:</span>
                     <span class="font-black text-slate-800 dark:text-slate-200">$${Number(data.price).toFixed(2)}</span>
                 </div>
-                ${data.txRef ? `
+                ${safeTxRef ? `
                 <div class="flex justify-between items-center">
                     <span class="text-slate-400">رقم المرجع:</span>
-                    <span class="font-mono text-slate-500 text-[10px]">${data.txRef}</span>
+                    <span class="font-mono text-slate-500 text-[10px]">${safeTxRef}</span>
                 </div>` : ''}
                 <div class="flex justify-between items-center border-t border-slate-200/60 dark:border-slate-700/60 pt-2 text-amber-600 dark:text-amber-400 font-bold">
                     <span class="flex items-center gap-1"><i class="ph ph-clock"></i> وقت التنفيذ المتوقع:</span>
@@ -546,10 +568,10 @@ function showDirectIdSuccessModal(data) {
 function showCodeDeliveryModal(code, itemName) {
     currentDeliveredCode = code;
     const codeElem = document.getElementById('delivered-code-text');
-    if (codeElem) codeElem.innerText = code;
+    if (codeElem) codeElem.textContent = code;
 
     const itemElem = document.getElementById('delivery-item-name');
-    if (itemElem) itemElem.innerText = itemName || "البطاقة الرقمية";
+    if (itemElem) itemElem.textContent = itemName || "البطاقة الرقمية";
 
     const codeBox = codeElem ? codeElem.parentElement : null;
     if (codeBox) codeBox.classList.add('code-shimmer-box');
@@ -576,7 +598,7 @@ async function shareDeliveredCode() {
         try {
             await navigator.share(shareData);
         } catch (err) {
-            // إلغاء المشاركة بواسطة المستخدم
+            // تجاهل خطأ الإلغاء اليدوي من المستخدم
         }
     } else {
         copyDeliveredCode();
@@ -596,8 +618,8 @@ function updateDirectWalletInfo() {
     const walletNum = selectedOpt ? selectedOpt.getAttribute('data-wallet') : '---';
     const gatewayName = selectedOpt ? selectedOpt.value : '';
 
-    walletBox.innerText = walletNum || '---';
-    if (labelBox) labelBox.innerText = `رقم حساب ${gatewayName}:`;
+    walletBox.textContent = walletNum || '---';
+    if (labelBox) labelBox.textContent = `رقم حساب ${gatewayName}:`;
 }
 
 function setPresetAmount(val, btnEl) {
