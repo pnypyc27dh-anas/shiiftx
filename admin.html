@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم والإدارة | SHIIFT X</title>
-    <!-- Tailwind CSS -->
+
+    <!-- 1. الاتصال المسبق لمصادر الخطوط والأيقونات -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- 2. استدعاء Tailwind CDN مع ضبط darkMode: 'class' مباشرة لمنع تضارب التباين -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- استدعاء وحدة المظهر العام المشتركة -->
-    <script src="js/theme.js"></script>
-
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -21,19 +22,33 @@
                 }
             }
         };
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
+        try {
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        } catch (_) {}
     </script>
-    <!-- Phosphor Icons -->
+
+    <!-- 3. ربط ملف نظام التصميم الموحد للأزرار ومربعات الحوار -->
+    <link rel="stylesheet" href="css/theme-system.css">
+
+    <!-- 4. Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+    <!-- 5. مكتبة Supabase مع defer لتشغيلها بالخلفية -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+
+    <!-- 6. خط Cairo مع display=swap -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap">
+
     <style>
-        body { font-family: 'Cairo', sans-serif; }
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen">
