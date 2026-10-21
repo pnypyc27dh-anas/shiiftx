@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم والإدارة | SHIIFT X</title>
 
-    <!-- 1. الاتصال المسبق لمصادر الخطوط والأيقونات -->
+    <!-- 1. الاتصال المسبق بالخطوط -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- 2. استدعاء Tailwind CDN مع ضبط darkMode: 'class' مباشرة لمنع تضارب التباين -->
+    <!-- 2. محرك Tailwind الأساسي -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        window.tailwind = window.tailwind || {};
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -31,17 +32,15 @@
         } catch (_) {}
     </script>
 
-    <!-- 3. ربط ملف نظام التصميم الموحد للأزرار ومربعات الحوار -->
+    <!-- 3. نظام التصميم الموحد للأبعاد ومربعات الحوار -->
     <link rel="stylesheet" href="css/theme-system.css">
 
-    <!-- 4. Phosphor Icons -->
+    <!-- 4. الأيقونات والخطوط -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
-    <!-- 5. مكتبة Supabase مع defer لتشغيلها بالخلفية -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-
-    <!-- 6. خط Cairo مع display=swap -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap">
+
+    <!-- 5. مكتبة Supabase JS مؤجلة -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 
     <style>
         body { 
