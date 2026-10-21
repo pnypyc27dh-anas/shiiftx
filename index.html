@@ -584,31 +584,31 @@
                 
                 <!-- الأزرار في أقصى اليسار -->
                 <div class="flex items-center gap-2">
-    <!-- زر لوحة الإدارة -->
+    <!-- زر لوحة الإدارة الموحد -->
     <a id="nav-admin-link" href="admin.html" class="hidden badge-action-btn bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800">
         <i class="ph-bold ph-shield-check text-base"></i>
         <span class="hidden sm:inline">لوحة الإدارة</span>
     </a>
 
-    <!-- زر لوحة الشريك -->
+    <!-- زر لوحة الشريك الموحد -->
     <a id="nav-marketing-partner-link" href="marketing-partner.html" class="hidden badge-action-btn bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
         <i class="ph-bold ph-megaphone text-base"></i>
         <span class="hidden sm:inline">لوحة الشريك</span>
     </a>
 
-    <!-- زر لوحة الوكيل -->
+    <!-- زر لوحة الوكيل الموحد -->
     <a id="nav-agents-link" href="agent.html" class="hidden badge-action-btn bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800">
         <i class="ph-bold ph-shield-check text-base"></i>
         <span class="hidden sm:inline">لوحة الوكيل</span>
     </a>
 
-    <!-- زر تبديل المظهر المنضبط بمقاس 42x42px صريح -->
-    <button onclick="toggleTheme()" aria-label="تبديل المظهر" class="btn-icon" title="تبديل المظهر">
+    <!-- زر تبديل المظهر بمقاس 42x42px ثابت -->
+    <button type="button" onclick="toggleTheme()" aria-label="تبديل المظهر" class="btn-icon" title="تبديل المظهر">
         <i id="theme-toggle-icon" class="ph-fill ph-moon text-xl text-slate-900 dark:text-amber-400"></i>
     </button>
 
-    <!-- زر القائمة الجانبية المنضبط بمقاس 42x42px صريح -->
-    <button onclick="toggleSideMenu(true)" aria-label="فتح القائمة" class="btn-icon" title="القائمة">
+    <!-- زر فتح القائمة الجانبية بمقاس 42x42px ثابت -->
+    <button type="button" onclick="toggleSideMenu(true)" aria-label="فتح القائمة" class="btn-icon" title="القائمة">
         <i class="ph ph-list text-2xl font-bold"></i>
     </button>
 </div>
@@ -1250,23 +1250,40 @@
         </div>
     </div>
 
-    <!-- نافذة تأكيد الهوية المصغرة -->
-    <div id="custom-prompt" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[110]">
-        <div class="bg-white w-full max-w-sm rounded-[24px] p-6 shadow-2xl text-right space-y-5 slide-down">
-            <div class="flex items-center gap-2 mb-2">
-                <i class="ph-fill ph-lock-key text-red-500 text-xl"></i>
-                <h4 class="text-sm font-black text-slate-800">تأكيد الهوية الشخصية</h4>
-            </div>
-            <p id="custom-prompt-desc" class="text-[11px] text-slate-500 leading-relaxed font-medium"></p>
-            <div class="relative">
-                <input id="custom-prompt-input" type="password" class="input-field w-full pl-12 pr-4 py-3.5 text-sm text-left" dir="ltr">
-            </div>
-            <div class="flex gap-2 pt-2">
-                <button id="custom-prompt-confirm-btn" class="w-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-3.5 rounded-xl transition shadow-md cursor-pointer">تأكيد الإجراء</button>
-                <button onclick="closeCustomPrompt()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3.5 rounded-xl transition cursor-pointer">إلغاء</button>
+  
+    <!-- نافذة التأكيد والتنبيه الموحدة -->
+<div id="custom-prompt" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+    <div class="dialog-container">
+        <!-- ترويسة النافذة -->
+        <div class="dialog-header">
+            <h3 id="prompt-title" class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="ph-bold ph-info text-blue-600 dark:text-blue-400 text-lg"></i>
+                <span>تأكيد الإجراء</span>
+            </h3>
+            <button type="button" onclick="closeCustomPrompt()" class="btn-icon !w-8 !h-8 !min-w-8 !min-h-8 text-slate-400 hover:text-red-500" aria-label="إغلاق">
+                <i class="ph-bold ph-x text-base"></i>
+            </button>
+        </div>
+
+        <!-- جسم النافذة ومحتوى الرسالة -->
+        <div class="dialog-body space-y-3">
+            <p id="prompt-message" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed"></p>
+            <div id="prompt-input-container" class="hidden">
+                <input type="text" id="prompt-input" class="app-input" placeholder="...">
             </div>
         </div>
+
+        <!-- أزرار الإجراء السفلية المتساوية -->
+        <div class="dialog-footer">
+            <button type="button" onclick="closeCustomPrompt()" class="btn-action-secondary flex-1">
+                إلغاء
+            </button>
+            <button type="button" id="prompt-confirm-btn" class="btn-action-primary flex-1">
+                تأكيد
+            </button>
+        </div>
     </div>
+</div>
 
     <!-- نافذة بوت خدمة العملاء (المساعد الذكي) -->
     <div id="chat-modal">
