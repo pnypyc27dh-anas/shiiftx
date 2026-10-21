@@ -8,12 +8,16 @@
 
     <title>SHIIFTX - المحفظة الرقمية ومتجر الاشتراكات</title>
 
-    <!-- روابط الاتصال المسبق لتقليل زمن الاستجابة (Preconnect) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <!-- 1. الاتصال المسبق القياسي بالترتيب الموصى به من Google -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+<!-- 2. استدعاء الخطوط بالأوزان الفعلية فقط مع تفعيل swap لمنع تأخر ظهور النص -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Tajawal:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Tajawal:wght@400;500;700;800&display=swap" media="print" onload="this.media='all'">
+<noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Tajawal:wght@400;500;700;800&display=swap">
+</noscript>
     <!-- 1. بطاقة المشاركة لـ WhatsApp وتيليجرام وفيسبوك -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://shiiftx.com/">
@@ -51,20 +55,15 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- استدعاء وحدة المظهر العام المنفصلة -->
-    <script src="js/theme.js"></script>
-
-    <!-- تفعيل الوضع الليلي في Tailwind -->
     <script>
-        tailwind.config = {
-            darkMode: 'class'
-        };
+    try {
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
-    </script>  
+    } catch (_) {}
+</script>  
     
     <!-- Google Fonts مع خاصية display=swap لمنع تأخر ظهور النصوص -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
@@ -1373,5 +1372,6 @@
     <script src="js/transactions.js" defer></script>
     <script src="js/store.js" defer></script>
     <script src="js/chat.js" defer></script>
+    <script src="js/theme.js" defer></script>
 </body>
 </html>
