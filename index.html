@@ -52,10 +52,17 @@
     <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="192x192" href="./assets/app-icon-512.png">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 1. استدعاء Tailwind من CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
 
+<!-- 2. تهيئة الوضع الليلي ليعتمد على كلاس dark حصراً -->
 <script>
+    // تفعيل وضع الفئات (class strategy) لمنع Tailwind من الاعتماد على ثيم نظام التشغيل
+    tailwind.config = {
+        darkMode: 'class'
+    };
+
+    // تطبيق الثيم المحفوظ فوراً لمنع الوميض الأبيض
     try {
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
