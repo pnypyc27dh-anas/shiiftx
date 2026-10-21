@@ -1,0 +1,188 @@
+/* ========================================================================
+   SHIIFT X — نظام التصميم الموحد (Design System Tokens & Components)
+   ======================================================================== */
+
+:root {
+    /* لوحة الألوان الأساسية */
+    --primary: #005ba3;
+    --primary-hover: #004a85;
+    --primary-glow: rgba(0, 91, 163, 0.25);
+    
+    /* الأبعاد والارتفاعات الموحدة */
+    --btn-h-sm: 36px;       /* أزرار الإجراءات الثانوية والشارات */
+    --btn-h-md: 42px;       /* الأزرار القياسية وأزرار الرأس */
+    --btn-h-lg: 48px;       /* أزرار الدفع والنماذج الرئيسية */
+    
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    --radius-modal: 28px;
+    
+    /* خلفيات النهار والليل */
+    --bg-page: #f4f7f9;
+    --bg-surface: #ffffff;
+    --border-color: #e2e8f0;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+}
+
+html.dark {
+    --bg-page: #0b1120;
+    --bg-surface: #151e32;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+}
+
+/* ------------------------------------------------------------------------
+   1. نظام الأزرار الموحد (Buttons Specification)
+   ------------------------------------------------------------------------ */
+
+/* زر أيقونة مربع متناسق (تبديل المظهر، القائمة، الإغلاق، الرجوع) */
+.btn-icon {
+    width: var(--btn-h-md);
+    height: var(--btn-h-md);
+    min-width: var(--btn-h-md);
+    min-height: var(--btn-h-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    background-color: #f1f5f9;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    user-select: none;
+}
+html.dark .btn-icon {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+.btn-icon:hover {
+    background-color: #e2e8f0;
+    transform: translateY(-1px);
+}
+html.dark .btn-icon:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.btn-icon:active {
+    transform: scale(0.95);
+}
+
+/* الأزرار الإدارية وشارات اللوحات (الإدارة، الشريك، الوكيل) */
+.badge-action-btn {
+    height: var(--btn-h-sm);
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 800;
+    border-width: 1px;
+    border-style: solid;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* الزر التفاعلي الأساسي (Primary CTA) لجميع النماذج والمحفظة */
+.btn-action-primary {
+    height: var(--btn-h-lg);
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    color: #ffffff !important;
+    font-size: 14px;
+    font-weight: 800;
+    border: none;
+    box-shadow: 0 8px 20px -6px var(--primary-glow);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+.btn-action-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -6px var(--primary-glow);
+}
+.btn-action-primary:active {
+    transform: scale(0.98);
+}
+.btn-action-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ------------------------------------------------------------------------
+   2. حقول الإدخال والقوائم المنسدلة (Input Fields & Selects)
+   ------------------------------------------------------------------------ */
+.app-input {
+    height: var(--btn-h-lg);
+    width: 100%;
+    padding: 0 16px;
+    background-color: #ffffff;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-main);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+}
+html.dark .app-input {
+    background-color: rgba(15, 23, 42, 0.8);
+    border-color: #334155;
+    color: #ffffff;
+}
+.app-input:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(0, 91, 163, 0.15) !important;
+}
+
+/* ------------------------------------------------------------------------
+   3. النوافذ المنبثقة ومربعات الحوار (Modals & Dialogs)
+   ------------------------------------------------------------------------ */
+.dialog-container {
+    width: 100%;
+    max-width: 440px;
+    margin: 16px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-modal);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+html.dark .dialog-container {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 25px var(--primary-glow);
+}
+
+.dialog-header {
+    height: 60px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
+    background-color: rgba(0, 0, 0, 0.01);
+}
+.dialog-body {
+    padding: 20px;
+    max-height: calc(85vh - 120px);
+    overflow-y: auto;
+}
+.dialog-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+    background-color: rgba(0, 0, 0, 0.01);
+}
