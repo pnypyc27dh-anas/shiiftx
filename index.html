@@ -55,8 +55,15 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-<script src="js/theme.js"></script> 
-    
+<script>
+    try {
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    } catch (_) {}
+</script>
     <!-- Google Fonts مع خاصية display=swap لمنع تأخر ظهور النصوص -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     
@@ -648,39 +655,38 @@
                         <path class="fill-[#005ba3] dark:fill-[#5CE1E6] drop-shadow-[0_0_8px_rgba(92,225,230,0.5)] transition-colors" d="M234.632 132.734L234.737 132.895L270.402 187.555L270.537 187.763L270.388 187.961L234.723 235.284L234.616 235.425H212.435L212.827 234.867L246.018 187.733L212.815 133.272L212.487 132.734H234.632ZM332.739 132.734L332.41 133.272L299.206 187.733L332.398 234.867L332.79 235.425H310.609L310.502 235.284L274.837 187.961L274.688 187.763L274.823 187.555L310.489 132.895L310.593 132.734H332.739ZM225.717 104.646C229.012 104.647 231.91 105.552 234.396 107.37C237.099 109.098 238.429 111.887 238.429 115.655C238.429 119.302 237.094 122.079 234.406 123.931L234.406 123.932C231.918 125.755 229.017 126.664 225.717 126.664C222.102 126.664 219.037 125.76 216.542 123.932C214.011 122.077 212.763 119.296 212.763 115.655C212.763 111.893 214.007 109.103 216.552 107.371C219.045 105.548 222.107 104.646 225.717 104.646ZM319.508 104.646C323.118 104.646 326.181 105.548 328.673 107.371L328.907 107.537C331.294 109.279 332.462 112.011 332.462 115.655C332.462 119.296 331.214 122.077 328.683 123.932C326.189 125.76 323.123 126.664 319.508 126.664C316.208 126.664 313.307 125.755 310.819 123.932V123.931C308.13 122.079 306.796 119.301 306.796 115.655C306.796 111.888 308.126 109.098 310.828 107.37C313.314 105.552 316.213 104.647 319.508 104.646Z"/>
                     </svg>
                 </div>
-                
-                <!-- الأزرار في أقصى اليسار -->
-                <div class="flex items-center gap-2.5">
-                    <span id="nav-user-name" class="hidden"></span>
+                <!-- الأزرار في أقصى اليسار مع تباين عالي وواضح في الوضعين -->
+<div class="flex items-center gap-2.5">
+    <span id="nav-user-name" class="hidden"></span>
 
-                    <!-- زر لوحة الإدارة -->
-                    <a id="nav-admin-link" href="admin.html" class="hidden h-8 px-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
-                        <i class="ph-bold ph-shield-check text-sm text-rose-500"></i>
-                        <span class="hidden sm:inline">لوحة الإدارة</span>
-                    </a>
+    <!-- زر لوحة الإدارة (واضح بنص داكن وخلفية مميزة) -->
+    <a id="nav-admin-link" href="admin.html" class="hidden h-9 px-3 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer">
+        <i class="ph-bold ph-shield-check text-base text-rose-600 dark:text-rose-400"></i>
+        <span class="hidden sm:inline">لوحة الإدارة</span>
+    </a>
 
-                    <!-- زر لوحة الشريك التسويقي (Marketing Partner) -->
-                    <a id="nav-marketing-partner-link" href="marketing-partner.html" class="hidden h-8 px-3 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
-                        <i class="ph-bold ph-megaphone text-sm text-purple-500"></i>
-                        <span class="hidden sm:inline">لوحة الشريك التسويقي</span>
-                    </a>
+    <!-- زر لوحة الشريك التسويقي -->
+    <a id="nav-marketing-partner-link" href="marketing-partner.html" class="hidden h-9 px-3 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer">
+        <i class="ph-bold ph-megaphone text-base text-purple-600 dark:text-purple-400"></i>
+        <span class="hidden sm:inline">لوحة الشريك</span>
+    </a>
 
-                    <!-- زر لوحة الوكيل المعتمد (Agents) -->
-                    <a id="nav-agents-link" href="agent.html" class="hidden h-8 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 leading-none select-none cursor-pointer">
-                        <i class="ph-bold ph-shield-check text-sm text-amber-500"></i>
-                        <span class="hidden sm:inline">لوحة الوكيل</span>
-                    </a>
+    <!-- زر لوحة الوكيل المعتمد -->
+    <a id="nav-agents-link" href="agent.html" class="hidden h-9 px-3 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer">
+        <i class="ph-bold ph-shield-check text-base text-amber-600 dark:text-amber-400"></i>
+        <span class="hidden sm:inline">لوحة الوكيل</span>
+    </a>
 
-                    <!-- زر تبديل المظهر (الليلي والنهاري) -->
-                    <button onclick="toggleTheme()" aria-label="تبديل المظهر الليلي والنهاري" class="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-700 dark:text-amber-400 transition active:scale-90 cursor-pointer" title="تبديل المظهر">
-                        <i id="theme-toggle-icon" class="ph-fill ph-moon text-xl"></i>
-                    </button>
+    <!-- زر تبديل المظهر (تباين قوي: خلفية واضحة وحدود صريحة) -->
+    <button onclick="toggleTheme()" aria-label="تبديل المظهر" class="w-10 h-10 flex items-center justify-center bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-amber-400 transition active:scale-95 cursor-pointer" title="تبديل المظهر">
+        <i id="theme-toggle-icon" class="ph-fill ph-moon text-xl text-slate-900 dark:text-amber-400"></i>
+    </button>
 
-                    <!-- زر القائمة الجانبية -->
-                    <button onclick="toggleSideMenu(true)" aria-label="فتح القائمة الجانبية" class="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-700 dark:text-slate-200 transition cursor-pointer" title="القائمة">
-                        <i class="ph ph-list text-xl"></i>
-                    </button>
-                </div>
+    <!-- زر القائمة الجانبية -->
+    <button onclick="toggleSideMenu(true)" aria-label="فتح القائمة" class="w-10 h-10 flex items-center justify-center bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 transition active:scale-95 cursor-pointer" title="القائمة">
+        <i class="ph ph-list text-2xl font-bold text-slate-900 dark:text-slate-100"></i>
+    </button>
+</div>
             </div>
         </header>
 
@@ -1364,6 +1370,6 @@
     <script src="js/transactions.js" defer></script>
     <script src="js/store.js" defer></script>
     <script src="js/chat.js" defer></script>
-   
+    <script src="js/theme.js"></script>
 </body>
 </html>
