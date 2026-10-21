@@ -8,75 +8,66 @@
 
     <title>SHIIFTX - المحفظة الرقمية ومتجر الاشتراكات</title>
 
-    <!-- روابط الاتصال المسبق لتقليل زمن الاستجابة (Preconnect) -->
+    <!-- 1. الاتصال المسبق القياسي بالترتيب الموصى به لتقليل زمن الاستجابة -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://i.imgur.com">
 
-    <!-- 1. بطاقة المشاركة لـ WhatsApp وتيليجرام وفيسبوك -->
+    <!-- 2. بطاقات المشاركة والتواصل الاجتماعي -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://shiiftx.com/">
     <meta property="og:title" content="SHIIFT X — المحفظة الرقمية ومتجر الاشتراكات">
     <meta property="og:description" content="البنية التحتية لشحن الرصيد الفوري، بطاقات الألعاب، والاشتراكات الرقمية بأعلى معايير الأمان.">
-    
     <meta property="og:image" content="https://shiiftx.com/apple-touch-icon.png">
     <meta property="og:image:secure_url" content="https://shiiftx.com/apple-touch-icon.png">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="512">
     <meta property="og:image:height" content="512">
 
-    <!-- 2. بطاقة منصة X -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="SHIIFT X — المحفظة الرقمية ومتجر الاشتراكات">
     <meta name="twitter:description" content="اشحن رصيدك واشترِ بطاقاتك واشتراكاتك الرقمية فوراً وبأمان.">
     <meta name="twitter:image" content="https://shiiftx.com/apple-touch-icon.png">
 
-    <!-- 3. أيقونة المتصفح في شريط التبويب (Favicon) -->
+    <!-- 3. الأيقونات وإعدادات متصفحات الجوال وiOS -->
     <link rel="icon" type="image/png" href="/apple-touch-icon.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-
-    <!-- 4. إعدادات تطبيق هواتف الآيفون (iOS Apple Web App) -->
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="./assets/app-icon-512.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SHIIFT X">
-    <link rel="apple-touch-icon" sizes="180x180" href="./assets/app-icon-512.png">
 
-    <!-- 5. حزمة الأيقونات المعتمدة للمتصفحات ومحركات البحث -->
-    <link rel="icon" type="image/x-icon" href="./favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="./assets/app-icon-512.png">
-
-    <!-- Tailwind CSS -->
+    <!-- 4. محرك Tailwind مع ضبط فئة dark لمنع تضارب التباين مع نظام التشغيل -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- استدعاء وحدة المظهر العام المنفصلة -->
-    <script src="js/theme.js"></script>
-
-    <!-- تفعيل الوضع الليلي في Tailwind -->
     <script>
+        window.tailwind = window.tailwind || {};
         tailwind.config = {
             darkMode: 'class'
         };
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>  
-    
-    <!-- Google Fonts مع خاصية display=swap لمنع تأخر ظهور النصوص -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Phosphor Icons (Regular, Fill, Bold) تحميل مباشر وسريع لكافة الأوزان المستخدمة -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
+        try {
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        } catch (_) {}
+    </script>
 
-    <!-- Supabase JS Library (محملة مع defer) -->
+    <!-- 5. استدعاء الخطوط مع display=swap لمنع تعليق النصوص -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Tajawal:wght@400;500;700;800&display=swap">
+
+    <!-- 6. استدعاء Phosphor Icons بكافة أوزانها (Regular, Fill, Bold) بدون حظر للرسم الأولي -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
+
+    <!-- 7. مكتبة Supabase مع defer لتشغيلها بالخلفية دون إيقاف رسم الواجهة -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
- 
+
     <style>
         :root {
             --primary: #005ba3;
@@ -168,11 +159,9 @@
                 transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 overflow: hidden;
             }
-
             #floating-nav-bar nav:hover {
                 width: 165px;
             }
-
             #floating-nav-bar .dock-label {
                 max-width: 0;
                 opacity: 0;
@@ -182,7 +171,6 @@
                 transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
                 margin: 0;
             }
-
             #floating-nav-bar nav:hover .dock-label {
                 max-width: 100px;
                 opacity: 1;
@@ -190,7 +178,7 @@
             }
         }   
 
-        /* تخصيصات الوضع الليلي */
+        /* تخصيصات الوضع الليلي لضمان التباين العالي */
         html.dark body {
             background-color: #0b1120;
             background-image: radial-gradient(#1e293b 1px, transparent 1px);
@@ -248,20 +236,10 @@
         .cyber-card {
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 20px 40px -15px var(--primary-glow);
         }
-        .glyph-pulse {
-            animation: glyphPulseGlow 1.2s ease-in-out infinite alternate;
-        }
+        .glyph-pulse { animation: glyphPulseGlow 1.2s ease-in-out infinite alternate; }
         @keyframes glyphPulseGlow {
-            0% {
-                transform: scale(0.92);
-                opacity: 0.65;
-                filter: drop-shadow(0 0 2px rgba(92, 225, 230, 0.4));
-            }
-            100% {
-                transform: scale(1.08);
-                opacity: 1;
-                filter: drop-shadow(0 0 10px rgba(92, 225, 230, 0.95));
-            }
+            0% { transform: scale(0.92); opacity: 0.65; filter: drop-shadow(0 0 2px rgba(92, 225, 230, 0.4)); }
+            100% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 10px rgba(92, 225, 230, 0.95)); }
         }
         .code-shimmer-box { position: relative; overflow: hidden; }
         .code-shimmer-box::after {
@@ -356,7 +334,7 @@
         html.dark .border-t,
         html.dark .divide-y > * { border-color: rgba(255, 255, 255, 0.08) !important; }
 
-        /* ==================== نافذة خدمة العملاء المتجاوبة ==================== */
+        /* نافذة المحادثة */
         #chat-modal {
             display: none;
             position: fixed;
@@ -375,7 +353,6 @@
             direction: rtl;
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
         }
-
         @media (min-width: 640px) {
             #chat-modal {
                 inset: auto 24px 24px auto;
@@ -387,13 +364,11 @@
                 box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.25);
             }
         }
-
         html.dark #chat-modal {
             background: #0f172a;
             border-color: #1e293b;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 91, 163, 0.2);
         }
-
         .chat-header {
             background: #ffffff;
             border-bottom: 1px solid #e2e8f0;
@@ -430,7 +405,6 @@
         }
         .chat-header-close:hover { color: #0f172a; }
         html.dark .chat-header-close:hover { color: #ffffff; }
-
         .chat-messages {
             flex: 1;
             padding: 16px;
@@ -441,7 +415,6 @@
             background: #f8fafc;
         }
         html.dark .chat-messages { background: #0b1120; }
-
         .chat-bubble-msg {
             max-width: 85%;
             padding: 12px 16px;
@@ -468,7 +441,6 @@
             align-self: flex-end;
             border-bottom-left-radius: 4px;
         }
-
         .chat-input-area {
             padding: 12px 14px;
             border-top: 1px solid #e2e8f0;
@@ -509,74 +481,30 @@
         }
         .chat-input-area button:hover { background: #004a85; }
 
-        /* ==================== حركات تفاعلية حديثة للأزرار ==================== */
         .btn-spring {
             transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), 
                         box-shadow 0.25s ease, 
                         background-color 0.2s ease, 
                         border-color 0.2s ease !important;
         }
-        .btn-spring:active {
-            transform: scale(0.93) !important;
-        }
-
-        .btn-glow-sheen {
-            position: relative;
-            overflow: hidden;
-        }
+        .btn-spring:active { transform: scale(0.93) !important; }
+        .btn-glow-sheen { position: relative; overflow: hidden; }
         .btn-glow-sheen::after {
-            content: "";
-            position: absolute;
-            top: -50%;
-            left: -150%;
-            width: 50%;
-            height: 200%;
-            background: linear-gradient(
-                90deg, 
-                transparent, 
-                rgba(255, 255, 255, 0.25), 
-                transparent
-            );
-            transform: rotate(25deg);
-            transition: none;
+            content: ""; position: absolute; top: -50%; left: -150%; width: 50%; height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transform: rotate(25deg); transition: none;
         }
-        .btn-glow-sheen:hover::after {
-            left: 200%;
-            transition: all 0.75s ease-in-out;
-        }
-
-        .modal-btn-close {
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-        }
-        .modal-btn-close:hover {
-            background-color: rgba(239, 68, 68, 0.12) !important;
-            color: #ef4444 !important;
-        }
-        .modal-btn-close:hover i {
-            transform: rotate(90deg);
-        }
-        .modal-btn-close i {
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .modal-btn-back {
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-        }
-        .modal-btn-back:hover i {
-            transform: translateX(4px);
-        }
-        .modal-btn-back i {
-            transition: transform 0.25s ease;
-        }
-
+        .btn-glow-sheen:hover::after { left: 200%; transition: all 0.75s ease-in-out; }
+        .modal-btn-close { transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important; }
+        .modal-btn-close:hover { background-color: rgba(239, 68, 68, 0.12) !important; color: #ef4444 !important; }
+        .modal-btn-close:hover i { transform: rotate(90deg); }
+        .modal-btn-close i { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .modal-btn-back { transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important; }
+        .modal-btn-back:hover i { transform: translateX(4px); }
+        .modal-btn-back i { transition: transform 0.25s ease; }
         .no-spin::-webkit-outer-spin-button,
-        .no-spin::-webkit-inner-spin-button {
-            -webkit-appearance: none !important;
-            margin: 0 !important;
-        }
-        .no-spin {
-            -moz-appearance: textfield !important;
-        }
+        .no-spin::-webkit-inner-spin-button { -webkit-appearance: none !important; margin: 0 !important; }
+        .no-spin { -moz-appearance: textfield !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased selection:bg-blue-200 selection:text-blue-900">
