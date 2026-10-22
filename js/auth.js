@@ -727,13 +727,13 @@ async function triggerDeleteAccountFlow() {
 }
 
 // ========================================================================
-// وحدة إدارة تغيير كلمة المرور المستقلة للمستخدم المسجل
+// وحدة إدارة تغيير كلمة المرور للمستخدم المسجل
 // ========================================================================
 
 let cpCountdownTimer = null;
 let cpActiveEmail = '';
 
-// فتح النافذة وتهيئة المرحلة الأولى
+// 1. فتح النافذة وتهيئة المرحلة الأولى
 window.openChangePasswordModal = async function() {
     const modal = document.getElementById('change-password-modal');
     const emailInput = document.getElementById('change-pwd-email-input');
@@ -743,12 +743,10 @@ window.openChangePasswordModal = async function() {
 
     if (!modal) return;
 
-    // إعادة ضبط الحالات الافتراضية
     if (reqForm) reqForm.classList.remove('hidden');
     if (verifyForm) verifyForm.classList.add('hidden');
     if (subtitle) subtitle.innerText = "سيتم إرسال رمز أمان إلى بريدك المسجل";
 
-    // جلب البريد المسجل للجلسة الحالية
     let userEmail = (typeof currentUser !== 'undefined' && currentUser?.email) ? currentUser.email : '';
     if (!userEmail && typeof supabase !== 'undefined') {
         const { data: { session } } = await supabase.auth.getSession();
@@ -767,7 +765,7 @@ window.openChangePasswordModal = async function() {
     modal.classList.remove('hidden');
 };
 
-// إغلاق النافذة وتنظيف المؤقت
+// 2. إغلاق النافذة وتنظيف المؤقت
 window.closeChangePasswordModal = function() {
     const modal = document.getElementById('change-password-modal');
     if (modal) modal.classList.add('hidden');
@@ -777,7 +775,7 @@ window.closeChangePasswordModal = function() {
     }
 };
 
-// إرسال الرمز والتبديل السلس للمرحلة الثانية
+// 3. إرسال رمز التحقق
 window.handleSendChangePasswordOTP = async function(e) {
     if (e) e.preventDefault();
     const btn = document.getElementById('send-change-otp-btn');
@@ -800,10 +798,9 @@ window.handleSendChangePasswordOTP = async function(e) {
 
         showCustomAlert('تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح.', false);
 
-        // إخفاء المرحلة الأولى وإظهار المرحلة الثانية داخل نفس النافذة
         if (reqForm) reqForm.classList.add('hidden');
         if (verifyForm) verifyForm.classList.remove('hidden');
-        if (subtitle) subtitle.innerText = "أدخل الرمز المستلم وكلمة المرور الجديدة";
+        if (subtitle) subtitle.innerText = "أدخل رمز التحقق المكون من 6 أرقام";
 
         const otpInput = document.getElementById('cp-otp-code-input');
         if (otpInput) {
@@ -828,7 +825,7 @@ window.handleSendChangePasswordOTP = async function(e) {
     }
 };
 
-// مؤقت الـ 60 ثانية لزر إعادة الإرسال
+// 4. مؤقت إعادة الإرسال (60 ثانية)
 function startChangePasswordTimer(seconds = 60) {
     const btn = document.getElementById('cp-resend-btn');
     const timerDisplay = document.getElementById('cp-resend-timer');
@@ -861,7 +858,7 @@ function startChangePasswordTimer(seconds = 60) {
     }, 1000);
 }
 
-// إعادة إرسال الرمز
+// 5. إعادة إرسال الرمز
 window.handleResendChangePasswordOTP = async function() {
     const btn = document.getElementById('cp-resend-btn');
     const icon = document.getElementById('cp-resend-icon');
@@ -890,30 +887,26 @@ window.handleResendChangePasswordOTP = async function() {
     }
 };
 
-// التحقق من الرمز وتحديث كلمة المرور
-window.handleVerifyAndSaveNewPassword = async function(e) {
+// 6. التحقق من الرمز فقط وتسليم المتابعة لنافذة كلمة المرور
+window.handleVerifyChangePasswordOTP = async function(e) {
     if (e) e.preventDefault();
     const token = document.getElementById('cp-otp-code-input').value.trim();
-    const newPassword = document.getElementById('cp-new-password-input').value;
-    const confirmPassword = document.getElementById('cp-confirm-password-input').value;
-    const btn = document.getElementById('cp-submit-new-pass-btn');
+    const btn = document.getElementById('cp-submit-otp-btn');
 
     if (!token || token.length < 6) {
         return showCustomAlert('يرجى إدخال رمز التحقق كاملاً (6 أرقام).');
     }
-    if (newPassword.length < 8) {
-        return showCustomAlert('الحد الأدنى لكلمة المرور هو 8 خانات.');
-    }
-    if (newPassword !== confirmPassword) {
-        return showCustomAlert('كلمتا المرور غير متطابقتين.');
-    }
 
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> جاري الحفظ والتأكيد...`;
+        btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> جاري التحقق...`;
     }
 
     try {
+        // تهيئة المتغيرات العامة لضمان استلام نافذة كلمة المرور للبيانات بسلاسة
+        tempRegisterData = { email: cpActiveEmail };
+        currentFlowType = "reset";
+
         const { error: verifyError } = await supabase.auth.verifyOtp({
             email: cpActiveEmail,
             token: token,
@@ -921,24 +914,18 @@ window.handleVerifyAndSaveNewPassword = async function(e) {
         });
 
         if (verifyError) {
-            throw new Error('رمز التحقق غير صحيح أو منتهي الصلاحية.');
+            throw new Error('الرمز غير صحيح أو منتهي الصلاحية.');
         }
 
-        const { error: updateError } = await supabase.auth.updateUser({
-            password: newPassword
-        });
-
-        if (updateError) throw updateError;
-
-        showCustomAlert('تم تغيير كلمة المرور بنجاح تام!', false);
+        // إغلاق هذه النافذة فوراً؛ وسيتكفل حدث PASSWORD_RECOVERY بإظهار نافذة تعيين كلمة المرور
         window.closeChangePasswordModal();
 
     } catch (err) {
-        showCustomAlert(err.message || 'حدث خطأ أثناء حفظ كلمة المرور.');
+        showCustomAlert(err.message || 'حدث خطأ أثناء تأكيد الرمز.');
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = `<i class="ph-bold ph-check-circle text-base"></i> <span>تأكيد وتغيير كلمة المرور</span>`;
+            btn.innerHTML = `<span>تأكيد الرمز</span> <i class="ph-bold ph-arrow-left"></i>`;
         }
     }
 };
