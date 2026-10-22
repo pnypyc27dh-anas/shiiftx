@@ -214,7 +214,7 @@ function createTransactionCardElement(tx) {
         color: 'text-slate-600 bg-slate-100 border-slate-200 dark:bg-slate-800 dark:text-slate-300', 
         icon: 'ph-bold ph-receipt' 
     };
-    const opLabel = isRefundedOrder ? 'شحن مباشر(ID)' : opConfig.label;
+    const opLabel = isRefundedOrder ? 'شحن مباشر (ID)' : opConfig.label;
 
     let statusPill = '';
     if (isPending) {
