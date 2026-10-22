@@ -56,10 +56,18 @@ async function handleAgentTransfer(e) {
     btn.innerText = "جاري التنفيذ...";
 
     try {
+        // استخراج اسم الوكيل المعتمد (الاسم الأول والأخير)
+        const agentName = [currentAgentProfile?.first_name, currentAgentProfile?.last_name]
+            .filter(Boolean)
+            .join(' ')
+            .trim() || currentAgentProfile?.full_name || currentAgentUser?.email || 'الوكيل المالي';
+
+        const depositNote = `تحويل نقدي مباشر من الوكيل (${agentName})`;
+
         const { data, error } = await supabase.rpc('agent_process_deposit', {
             p_target_user_email: email,
             p_amount: amount,
-            p_notes: 'تحويل نقدي مباشر من لوحة الوكيل'
+            p_notes: depositNote
         });
 
         if (error) throw error;
@@ -70,7 +78,10 @@ async function handleAgentTransfer(e) {
             document.getElementById('transfer-amount').value = '';
             
             const { data: prof } = await supabase.from('profiles').select('balance').eq('id', currentAgentUser.id).single();
-            if (prof) document.getElementById('agent-float-balance').innerText = '$' + Number(prof.balance).toFixed(2);
+            if (prof) {
+                currentAgentProfile.balance = prof.balance;
+                document.getElementById('agent-float-balance').innerText = '$' + Number(prof.balance).toFixed(2);
+            }
             loadAgentTransactions();
         } else {
             showToast(data?.message || "فشلت عملية التحويل.");
