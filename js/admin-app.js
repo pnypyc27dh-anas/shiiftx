@@ -113,12 +113,17 @@ async function handleProcessOrder(id, action) {
         : 'هل أنت متأكد من رفض الطلب، إعادة المبلغ للعميل، وإلغاء العمولة المعلقة؟';
     if (!confirm(msg)) return;
 
-    const reason = action === 'refund' ? prompt('سبب الرفض:', 'معرف الحساب غير صحيح') : '';
+    let reason = '';
+    if (action === 'refund') {
+        const inputReason = prompt('سبب الرفض:', 'معرف الحساب غير صحيح');
+        if (inputReason === null) return; // تراجع المشرف
+        reason = inputReason.trim() || 'معرف الحساب غير صحيح';
+    }
 
     const { data, error } = await supabase.rpc('admin_process_order', {
         p_tx_id: id,
         p_action: action,
-        p_reason: reason || ''
+        p_reason: reason
     });
 
     if (error || (data && data.status === 'error')) {
@@ -167,13 +172,18 @@ async function handleProcessDeposit(txId, action) {
 
     if (!confirm(confirmMsg)) return;
 
-    const reason = action === 'reject' ? prompt('سبب الرفض (اختياري):', 'لم يتم استلام المبلغ في الحساب') : '';
+    let reason = '';
+    if (action === 'reject') {
+        const inputReason = prompt('سبب الرفض (اختياري):', 'لم يتم استلام المبلغ في الحساب');
+        if (inputReason === null) return; // تراجع المشرف
+        reason = inputReason.trim() || 'لم يتم استلام المبلغ في الحساب';
+    }
 
     try {
         const { data, error } = await supabase.rpc('admin_process_deposit', {
             p_tx_id: txId,
             p_action: action,
-            p_reason: reason || ''
+            p_reason: reason
         });
 
         if (error) throw error;
