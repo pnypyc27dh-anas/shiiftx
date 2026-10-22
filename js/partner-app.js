@@ -58,7 +58,8 @@ async function loadDashboardData() {
             } else {
                 couponsContainer.innerHTML = "";
                 coupons.forEach(c => {
-                    totalUses += Number(c.usage_count || 0);
+                    const validUses = Math.max(0, Number(c.usage_count || 0));
+                    totalUses += validUses;
                     const badge = c.is_active 
                         ? `<span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md text-[10px] font-bold">نشط</span>`
                         : `<span class="px-2 py-0.5 bg-rose-500/10 text-rose-500 rounded-md text-[10px] font-bold">متوقف</span>`;
@@ -75,7 +76,7 @@ async function loadDashboardData() {
                         </div>
                         <div class="text-left">
                             <span class="text-[10px] text-slate-400 block">مرات الاستخدام</span>
-                            <span class="font-mono font-black text-sm text-slate-800 dark:text-slate-200">${c.usage_count || 0} مرة</span>
+                            <span class="font-mono font-black text-sm text-slate-800 dark:text-slate-200">${validUses} مرة</span>
                         </div>
                     `;
                     couponsContainer.appendChild(div);
@@ -86,7 +87,7 @@ async function loadDashboardData() {
         const totalUsesEl = document.getElementById('total-uses');
         if (totalUsesEl) totalUsesEl.innerText = totalUses;
 
-        // عرض سجل الأرباح والعمولات
+        // عرض سجل الأرباح والعمولات مع فحص دقيق للحالة
         const commissions = data.commissions || [];
         if (commContainer) {
             if (commissions.length === 0) {
@@ -96,8 +97,17 @@ async function loadDashboardData() {
                 commissions.forEach(tx => {
                     const dateStr = new Date(tx.created_at).toLocaleString('ar-EG');
                     const statusKey = (tx.status || '').toLowerCase();
-                    const isCancelled = statusKey === 'cancelled' || statusKey === 'rejected' || statusKey === 'ملغي' || statusKey === 'ملغاة';
-                    const isPending = statusKey === 'pending' || statusKey === 'معلق';
+                    const rawDetails = tx.details || '';
+                    
+                    // التحقق الذكي من الإلغاء سواء من عمود status أو من نص المعاملة مباشرة
+                    const isCancelled = statusKey === 'cancelled' || 
+                                        statusKey === 'rejected' || 
+                                        statusKey === 'ملغي' || 
+                                        statusKey === 'ملغاة' || 
+                                        rawDetails.includes('ملغاة') || 
+                                        rawDetails.includes('ملغي');
+                    
+                    const isPending = !isCancelled && (statusKey === 'pending' || statusKey === 'معلق' || rawDetails.includes('معلقة'));
 
                     let amountMarkup = '';
                     let statusBadge = '';
@@ -117,9 +127,9 @@ async function loadDashboardData() {
                     } else {
                         amountMarkup = `
                             <span class="font-black text-emerald-600 dark:text-emerald-400 block">+$${Number(tx.amount).toFixed(2)}</span>
-                            <span class="text-[10px] text-emerald-500 font-bold block">مكتملة</span>
+                            <span class="text-[10px] text-emerald-500 font-bold block">محققة ✓</span>
                         `;
-                        statusBadge = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200/70">محققة ✓</span>`;
+                        statusBadge = `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-50 text-emerald-600 dark:text-emerald-400 border border-emerald-200/70">محققة ✓</span>`;
                     }
 
                     const item = document.createElement('div');
@@ -127,7 +137,7 @@ async function loadDashboardData() {
                     item.innerHTML = `
                         <div class="space-y-1">
                             <div class="flex items-center gap-2">
-                                <span class="font-bold text-slate-800 dark:text-slate-200 block">${tx.details || 'عمولة تسويقية'}</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-200 block">${rawDetails || 'عمولة تسويقية'}</span>
                                 ${statusBadge}
                             </div>
                             <span class="text-[10px] text-slate-400 block font-mono">${dateStr} • ${tx.transaction_ref || ''}</span>
