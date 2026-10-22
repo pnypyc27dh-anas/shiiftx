@@ -2,41 +2,61 @@ const fs = require('fs');
 const crypto = require('crypto');
 const path = require('path');
 
-// 1. قائمة الملفات المطلوب كسر الكاش لها مع مساراتها الدقيقة
-const filesToBust = [
+// 1. جميع ملفات الـ HTML في المشروع
+const htmlFiles = [
+    'index.html',
+    'marketing-partner.html',
+    'admin.html',
+    'agent.html'
+];
+
+// 2. جميع ملفات الجافاسكربت المطلوب كسر الكاش لها
+const jsFiles = [
     'js/config.js',
     'js/ui.js',
     'js/auth.js',
     'js/transactions.js',
     'js/store.js',
-    'js/chat.js'
+    'js/chat.js',
+    'js/partner-app.js',
+    'js/admin-app.js',
+    'js/agent-app.js',
+    'js/theme.js'
 ];
 
-// 2. تحديث index.html
-const htmlPath = path.join(__dirname, 'index.html');
+// حساب الهاش لكل ملف JS موجود
+const fileHashes = {};
+jsFiles.forEach(fileRel => {
+    const fullPath = path.join(__dirname, fileRel);
+    if (fs.existsSync(fullPath)) {
+        const content = fs.readFileSync(fullPath);
+        fileHashes[fileRel] = crypto.createHash('md5').update(content).digest('hex').substring(0, 8);
+    }
+});
 
-if (fs.existsSync(htmlPath)) {
-    let html = fs.readFileSync(htmlPath, 'utf8');
+// تحديث كافة صفحات HTML
+htmlFiles.forEach(htmlFile => {
+    const fullHtmlPath = path.join(__dirname, htmlFile);
+    if (!fs.existsSync(fullHtmlPath)) return;
 
-    filesToBust.forEach(filePath => {
-        const fullPath = path.join(__dirname, filePath);
-        if (fs.existsSync(fullPath)) {
-            // حساب بصمة محتوى الملف الفعلي
-            const content = fs.readFileSync(fullPath);
-            const hash = crypto.createHash('md5').update(content).digest('hex').substring(0, 8);
+    let html = fs.readFileSync(fullHtmlPath, 'utf8');
+    let modified = false;
 
-            // استبدال الرابط سواء كان بدون لاحقة أو يحتوي على ?v= قديمة
-            const escapedPath = filePath.replace(/[\/\\]/g, '[\\/\\\\]');
-            const regex = new RegExp(`${escapedPath}(\\?v=[a-zA-Z0-9_-]+)?`, 'g');
-            
-            html = html.replace(regex, `${filePath}?v=${hash}`);
-        } else {
-            console.warn(`⚠️ لم يتم العثور على الملف: ${filePath}`);
+    Object.keys(fileHashes).forEach(fileRel => {
+        const hash = fileHashes[fileRel];
+        const escapedPath = fileRel.replace(/[\/\]/g, '[\/\\]');
+        const regex = new RegExp(`${escapedPath}(\\?v=[a-zA-Z0-9_-]+)?`, 'g');
+        
+        if (regex.test(html)) {
+            html = html.replace(regex, `${fileRel}?v=${hash}`);
+            modified = true;
         }
     });
 
-    fs.writeFileSync(htmlPath, html, 'utf8');
-    console.log('✓ تم كسر الكاش وتحديث جميع مسارات js/ في index.html بنجاح.');
-} else {
-    console.error('❌ لم يتم العثور على ملف index.html في المجلد الرئيسي.');
-}
+    if (modified) {
+        fs.writeFileSync(fullHtmlPath, html, 'utf8');
+        console.log(`✓ تم تحديث كسر الكاش في: ${htmlFile}`);
+    }
+});
+
+console.log('✓ تم الانتهاء من معالجة جميع صفحات التطبيق بنجاح.');
