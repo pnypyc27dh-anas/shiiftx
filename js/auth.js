@@ -521,6 +521,20 @@ async function handleUpdateProfileView() {
     } 
 }
 
+// 14. تعديل الملف الشخصي وتعطيل الحساب
+async function handleUpdateProfileView() { 
+    const fName = document.getElementById('prof-first-name').value.trim();
+    const lName = document.getElementById('prof-last-name').value.trim();
+    const phone = document.getElementById('prof-phone').value.trim(); 
+    if (!fName || !lName || !phone) return showCustomAlert("يجب تعبئة كافة الحقول."); 
+    const { error } = await supabase.from('profiles').update({ first_name: fName, last_name: lName, phone: phone }).eq('id', currentUser.id);
+    if (!error) { 
+        showCustomAlert("تم تعديل البيانات بنجاح.", false); 
+        if (typeof silentSyncData === 'function') silentSyncData(); 
+        switchTab('home'); 
+    } 
+}
+
 async function triggerDeleteAccountFlow() { 
     showCustomPrompt("أدخل كلمة المرور لتأكيد تعطيل حسابك:", async function(pass) { 
         const { error: authError } = await supabase.auth.signInWithPassword({ 
@@ -536,153 +550,172 @@ async function triggerDeleteAccountFlow() {
         }
 
         showCustomAlert("تم تعطيل حسابك بنجاح. نراك قريباً!", false); 
+        handleLogout(); 
+    }); 
+}
 
-        // ========================================================================
-// وحدة إدارة تغيير كلمة المرور والتحقق عبر الرمز (OTP)
+// ========================================================================
+// 15. وحدة إدارة تغيير كلمة المرور والتحقق عبر الرمز (OTP) للمستخدم المسجل
 // ========================================================================
 
-let otpCountdownTimer = null;
-let currentOtpTargetEmail = ''; // متغير مركزي لحفظ البريد النشط
+window.otpCountdownTimer = window.otpCountdownTimer || null;
+window.currentOtpTargetEmail = window.currentOtpTargetEmail || '';
 
-// 1. فتح نافذة تغيير كلمة المرور وتعبئة بريد الجلسة
-async function openChangePasswordModal() {
+// فتح نافذة تغيير كلمة المرور وتعبئة بريد الجلسة
+window.openChangePasswordModal = async function() {
     const modal = document.getElementById('change-password-modal');
     const emailInput = document.getElementById('change-pwd-email-input');
 
-    // جلب بيانات المستخدم المعتمدة من الجلسة
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session || !session.user || !session.user.email) {
-        showToast('يجب تسجيل الدخول أولاً لتغيير كلمة المرور.');
+    if (!modal) {
+        console.error('لم يتم العثور على change-password-modal في كود الصفحة');
         return;
     }
 
-    // تثبيت البريد الموثق في الحقل
-    if (emailInput) {
-        emailInput.value = session.user.email;
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const userEmail = session?.user?.email || currentUser?.email;
+        
+        if (!userEmail) {
+            showCustomAlert('يجب تسجيل الدخول أولاً لتغيير كلمة المرور.');
+            return;
+        }
+
+        if (emailInput) {
+            emailInput.value = userEmail;
+        }
+    } catch (err) {
+        if (currentUser?.email && emailInput) {
+            emailInput.value = currentUser.email;
+        }
     }
 
-    if (modal) {
-        modal.classList.remove('hidden');
-    }
-}
+    modal.classList.remove('hidden');
+};
 
-// 2. إغلاق نافذة تغيير كلمة المرور
-function closeChangePasswordModal() {
+// إغلاق نافذة طلب تغيير كلمة المرور
+window.closeChangePasswordModal = function() {
     const modal = document.getElementById('change-password-modal');
     if (modal) modal.classList.add('hidden');
-}
+};
 
-// 3. إرسال رمز التحقق الأولي
-async function handleSendChangePasswordOTP(e) {
-    e.preventDefault();
+// إرسال رمز التحقق والانتقال لنافذة الرمز
+window.handleSendChangePasswordOTP = async function(e) {
+    if (e) e.preventDefault();
     const emailInput = document.getElementById('change-pwd-email-input');
-    const email = emailInput ? emailInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : (currentUser?.email || '');
     const btn = document.getElementById('send-change-otp-btn');
 
     if (!email) {
-        showToast('تعذر تحديد البريد الإلكتروني.');
-        return;
+        return showCustomAlert('تعذر تحديد البريد الإلكتروني.');
     }
 
-    // حفظ البريد في المتغير المركزي للاستخدام في إعادة الإرسال
-    currentOtpTargetEmail = email;
+    window.currentOtpTargetEmail = email;
 
-    btn.disabled = true;
-    btn.innerText = 'جاري إرسال الرمز...';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'جاري إرسال الرمز...';
+    }
 
     try {
         const { error } = await supabase.auth.resetPasswordForEmail(email);
         if (error) throw error;
 
-        showToast('تم إرسال رمز التحقق إلى بريدك بنجاح.', false);
+        showCustomAlert('تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح.', false);
         
-        // إغلاق النافذة الأولى
+        // 1. إغلاق نافذة إدخال البريد
         closeChangePasswordModal();
 
-        // فتح نافذة إدخال الرمز المعتمدة لديك
-        // ملاحظة: استبدل اسم الدالة التالية باسم الدالة التي تفتح نافذة الرمز لديك إذا كانت مختلفة
-        if (typeof openOtpModal === 'function') {
-            openOtpModal(email);
-        } else if (typeof triggerPasswordResetFlow === 'function') {
-            triggerPasswordResetFlow(email);
-        }
-
-        // إطلاق عداد الـ 60 ثانية فوراً
+        // 2. تفعيل مسار التحقق وفتح نافذة إدخال الرمز المعتمدة في نظامك
+        currentFlowType = "reset";
+        tempRegisterData = { email: email };
+        resetResendButtonState();
+        
+        toggleView('reg-extra-fields', false);
+        toggleView('register-step-form', false);
+        toggleView('register-step-password', false);
+        toggleView('register-step-otp', true);
+        
+        const regTitle = document.getElementById('register-modal-title');
+        if (regTitle) regTitle.innerText = "تأكيد الرمز";
+        
+        toggleView('register-modal', true);
+        
+        // 3. تشغيل العداد التنازلي المعتمد لديك
+        startResendCooldown();
         startOtpCountdown(60);
 
     } catch (err) {
-        showToast('فشل الإرسال: ' + (err.message || err));
+        showCustomAlert('فشل الإرسال: ' + (err.message || err));
     } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="ph-bold ph-paper-plane-tilt"></i> <span>إرسال رمز التحقق</span>';
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ph-bold ph-paper-plane-tilt"></i> <span>إرسال رمز التحقق</span>';
+        }
     }
-}
+};
 
-// 4. محرك العداد التنازلي لإعادة الإرسال
-function startOtpCountdown(seconds = 60) {
+// محرك العداد التنازلي (60 ثانية)
+window.startOtpCountdown = function(seconds = 60) {
     const btn = document.getElementById('resend-otp-btn');
     const timerDisplay = document.getElementById('resend-timer');
     const icon = document.getElementById('resend-icon');
 
-    if (!btn || !timerDisplay) return;
+    if (!btn) return;
 
-    // تنظيف أي مؤقت سابق لمنع تسريب الذاكرة أو تسارع الثواني
-    if (otpCountdownTimer) {
-        clearInterval(otpCountdownTimer);
-        otpCountdownTimer = null;
+    if (window.otpCountdownTimer) {
+        clearInterval(window.otpCountdownTimer);
+        window.otpCountdownTimer = null;
     }
 
     btn.disabled = true;
-    timerDisplay.classList.remove('hidden');
+    if (timerDisplay) timerDisplay.classList.remove('hidden');
     if (icon) icon.classList.remove('animate-spin');
 
     let remaining = seconds;
-    timerDisplay.innerText = `(${remaining}s)`;
+    if (timerDisplay) timerDisplay.innerText = `(${remaining}s)`;
 
-    otpCountdownTimer = setInterval(() => {
+    window.otpCountdownTimer = setInterval(() => {
         remaining--;
 
         if (remaining > 0) {
-            timerDisplay.innerText = `(${remaining}s)`;
+            if (timerDisplay) timerDisplay.innerText = `(${remaining}s)`;
         } else {
-            // انتهاء الـ 60 ثانية: تفعيل الزر وإخفاء العداد
-            clearInterval(otpCountdownTimer);
-            otpCountdownTimer = null;
+            clearInterval(window.otpCountdownTimer);
+            window.otpCountdownTimer = null;
             btn.disabled = false;
-            timerDisplay.classList.add('hidden');
+            if (timerDisplay) timerDisplay.classList.add('hidden');
         }
     }, 1000);
-}
+};
 
-// 5. معالجة إعادة إرسال الرمز
-async function handleResendChangePasswordOTP() {
+// إعادة إرسال رمز التحقق
+window.handleResendChangePasswordOTP = async function() {
     const btn = document.getElementById('resend-otp-btn');
     const icon = document.getElementById('resend-icon');
+    const targetEmail = window.currentOtpTargetEmail || tempRegisterData?.email || currentUser?.email;
 
-    if (!currentOtpTargetEmail) {
-        showToast('تعذر العثور على البريد الإلكتروني للعملية.');
-        return;
+    if (!targetEmail) {
+        return showCustomAlert('تعذر العثور على البريد الإلكتروني للعملية.');
     }
 
-    btn.disabled = true;
+    if (btn) btn.disabled = true;
     if (icon) icon.classList.add('animate-spin');
 
     try {
-        const { error } = await supabase.auth.resetPasswordForEmail(currentOtpTargetEmail);
+        const { error } = await supabase.auth.resetPasswordForEmail(targetEmail);
         if (error) throw error;
 
-        showToast('تمت إعادة إرسال رمز التحقق بنجاح.', false);
-        // تصفير وبدء 60 ثانية جديدة
+        showCustomAlert('تمت إعادة إرسال رمز جديد إلى بريدك بنجاح!', false);
+        const codeInput = document.getElementById('reg-otp-code');
+        if (codeInput) codeInput.value = "";
+        
+        startResendCooldown();
         startOtpCountdown(60);
 
     } catch (err) {
-        showToast('خطأ أثناء إعادة الإرسال: ' + (err.message || err));
-        btn.disabled = false;
+        showCustomAlert('فشل الإرسال: ' + (err.message || err));
+        if (btn) btn.disabled = false;
     } finally {
         if (icon) icon.classList.remove('animate-spin');
     }
-}
-        handleLogout(); 
-    }); 
-}
+};
