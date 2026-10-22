@@ -998,11 +998,11 @@
 
     <!-- ==================== النوافذ المنبثقة ==================== -->
 
-   <!-- نافذة منبثقة مستقلة ومتكاملة: تغيير كلمة المرور للمستخدم المسجل -->
+   <!-- نافذة منبثقة مستقلة: إرسال وتأكيد رمز تغيير كلمة المرور -->
 <div id="change-password-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
     <div class="glass-panel w-full max-w-sm p-6 space-y-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl relative">
         
-        <!-- الترويسة الثابتة -->
+        <!-- الترويسة -->
         <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
             <div class="flex items-center gap-2.5">
                 <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl">
@@ -1031,30 +1031,20 @@
             </button>
         </form>
 
-        <!-- المرحلة 2: إدخال الرمز وكلمة المرور الجديدة (تظهر تلقائياً بعد الإرسال) -->
-        <form id="cp-step-verify-form" onsubmit="handleVerifyAndSaveNewPassword(event)" class="hidden space-y-3.5 text-xs">
+        <!-- المرحلة 2: إدخال رمز التحقق فقط (مطابقة لشاشات التحقق في النظام) -->
+        <form id="cp-step-verify-form" onsubmit="handleVerifyChangePasswordOTP(event)" class="hidden space-y-4 text-xs">
             <div>
                 <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">رمز التحقق المستلم (6 أرقام)</label>
-                <input type="text" id="cp-otp-code-input" maxlength="6" required placeholder="••••••" class="input-field w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-800 dark:text-slate-100 font-mono tracking-widest text-center text-base focus:outline-none focus:border-blue-500" dir="ltr">
+                <input type="text" id="cp-otp-code-input" maxlength="6" required placeholder="••••••" class="input-field w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-800 dark:text-slate-100 font-mono tracking-widest text-center text-lg focus:outline-none focus:border-blue-500" dir="ltr" autocomplete="one-time-code">
             </div>
 
-            <div>
-                <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">كلمة المرور الجديدة</label>
-                <input type="password" id="cp-new-password-input" minlength="8" required placeholder="••••••••" class="input-field w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-800 dark:text-slate-100 font-mono text-left focus:outline-none focus:border-blue-500" dir="ltr">
-            </div>
-
-            <div>
-                <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">تأكيد كلمة المرور الجديدة</label>
-                <input type="password" id="cp-confirm-password-input" minlength="8" required placeholder="••••••••" class="input-field w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-800 dark:text-slate-100 font-mono text-left focus:outline-none focus:border-blue-500" dir="ltr">
-            </div>
-
-            <button type="submit" id="cp-submit-new-pass-btn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black transition shadow-md flex justify-center items-center gap-1.5 cursor-pointer mt-1">
-                <i class="ph-bold ph-check-circle text-base"></i>
-                <span>تأكيد وتغيير كلمة المرور</span>
+            <button type="submit" id="cp-submit-otp-btn" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black transition shadow-md flex justify-center items-center gap-1.5 cursor-pointer">
+                <span>تأكيد الرمز</span>
+                <i class="ph-bold ph-arrow-left"></i>
             </button>
 
             <!-- زر إعادة إرسال الرمز مع عداد الـ 60 ثانية -->
-            <div class="text-center pt-2">
+            <div class="text-center pt-1">
                 <button type="button" 
                         id="cp-resend-btn" 
                         onclick="handleResendChangePasswordOTP()" 
