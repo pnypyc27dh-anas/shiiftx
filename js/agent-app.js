@@ -83,42 +83,46 @@ async function handleAgentTransfer(e) {
     }
 }
 
-// جلب سجل تحويلات وعمولات الوكيل
+// جلب سجل تحويلات وعمولات الوكيل بطلب واحد عبر RPC وتخطي حظر RLS بأمان
 async function loadAgentTransactions() {
     const container = document.getElementById('agent-tx-container');
-    const { data: txs, error } = await supabase
-        .from('agent_transactions')
-        .select('*')
-        .eq('agent_id', currentAgentUser.id)
-        .order('created_at', { ascending: false });
+    
+    try {
+        const { data: txs, error } = await supabase.rpc('get_agent_transactions');
 
-    if (error || !txs || txs.length === 0) {
-        container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">لا توجد تحويلات مسجلة حتى الآن.</div>`;
-        return;
-    }
-
-    container.innerHTML = "";
-    for (const tx of txs) {
-        let targetEmail = 'مستخدم مجهول';
-        if (tx.target_user_id) {
-            const { data: u } = await supabase.from('profiles').select('email').eq('id', tx.target_user_id).maybeSingle();
-            if (u) targetEmail = u.email;
+        if (error) {
+            console.error("RPC Error:", error);
+            container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500 bg-rose-50 dark:bg-rose-950/20 rounded-xl">فشل جلب السجل: ${error.message}</div>`;
+            return;
         }
 
-        const dateStr = new Date(tx.created_at).toLocaleString('en-US', { hour12: false });
-        const item = document.createElement('div');
-        item.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-xs";
-        item.innerHTML = `
-            <div class="space-y-1">
-                <span class="font-bold text-slate-800 dark:text-slate-200 block">${targetEmail}</span>
-                <span class="text-[10px] text-slate-400 block font-mono">${dateStr}</span>
-            </div>
-            <div class="text-left font-mono">
-                <span class="font-black text-amber-600 dark:text-amber-400 block">-$${Number(tx.amount).toFixed(2)}</span>
-                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">+ عمولة $${Number(tx.commission_earned || 0).toFixed(2)}</span>
-            </div>
-        `;
-        container.appendChild(item);
+        if (!txs || txs.length === 0) {
+            container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">لا توجد تحويلات مسجلة حتى الآن.</div>`;
+            return;
+        }
+
+        container.innerHTML = "";
+        txs.forEach(tx => {
+            const displayEmail = tx.target_email || 'مستخدم مسجل';
+            const dateStr = new Date(tx.created_at).toLocaleString('en-US', { hour12: false });
+            
+            const item = document.createElement('div');
+            item.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-xs";
+            item.innerHTML = `
+                <div class="space-y-1">
+                    <span class="font-bold text-slate-800 dark:text-slate-200 block">${displayEmail}</span>
+                    <span class="text-[10px] text-slate-400 block font-mono">${dateStr}</span>
+                </div>
+                <div class="text-left font-mono">
+                    <span class="font-black text-amber-600 dark:text-amber-400 block">-$${Number(tx.amount).toFixed(2)}</span>
+                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">+ عمولة $${Number(tx.commission_earned || 0).toFixed(2)}</span>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    } catch (err) {
+        console.error("Agent Tx Load Error:", err);
+        container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500">حدث خطأ أثناء تحميل السجل.</div>`;
     }
 }
 
