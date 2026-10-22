@@ -725,3 +725,220 @@ async function triggerDeleteAccountFlow() {
         handleLogout(); 
     }); 
 }
+
+// ========================================================================
+// وحدة إدارة تغيير كلمة المرور المستقلة للمستخدم المسجل
+// ========================================================================
+
+let cpCountdownTimer = null;
+let cpActiveEmail = '';
+
+// فتح النافذة وتهيئة المرحلة الأولى
+window.openChangePasswordModal = async function() {
+    const modal = document.getElementById('change-password-modal');
+    const emailInput = document.getElementById('change-pwd-email-input');
+    const reqForm = document.getElementById('cp-step-request-form');
+    const verifyForm = document.getElementById('cp-step-verify-form');
+    const subtitle = document.getElementById('cp-modal-subtitle');
+
+    if (!modal) return;
+
+    // إعادة ضبط الحالات الافتراضية
+    if (reqForm) reqForm.classList.remove('hidden');
+    if (verifyForm) verifyForm.classList.add('hidden');
+    if (subtitle) subtitle.innerText = "سيتم إرسال رمز أمان إلى بريدك المسجل";
+
+    // جلب البريد المسجل للجلسة الحالية
+    let userEmail = (typeof currentUser !== 'undefined' && currentUser?.email) ? currentUser.email : '';
+    if (!userEmail && typeof supabase !== 'undefined') {
+        const { data: { session } } = await supabase.auth.getSession();
+        userEmail = session?.user?.email || '';
+    }
+
+    if (!userEmail) {
+        showCustomAlert('يجب تسجيل الدخول أولاً لتغيير كلمة المرور.');
+        return;
+    }
+
+    cpActiveEmail = userEmail;
+    if (emailInput) emailInput.value = userEmail;
+
+    if (typeof toggleSideMenu === 'function') toggleSideMenu(false);
+    modal.classList.remove('hidden');
+};
+
+// إغلاق النافذة وتنظيف المؤقت
+window.closeChangePasswordModal = function() {
+    const modal = document.getElementById('change-password-modal');
+    if (modal) modal.classList.add('hidden');
+    if (cpCountdownTimer) {
+        clearInterval(cpCountdownTimer);
+        cpCountdownTimer = null;
+    }
+};
+
+// إرسال الرمز والتبديل السلس للمرحلة الثانية
+window.handleSendChangePasswordOTP = async function(e) {
+    if (e) e.preventDefault();
+    const btn = document.getElementById('send-change-otp-btn');
+    const reqForm = document.getElementById('cp-step-request-form');
+    const verifyForm = document.getElementById('cp-step-verify-form');
+    const subtitle = document.getElementById('cp-modal-subtitle');
+
+    if (!cpActiveEmail) {
+        return showCustomAlert('تعذر تحديد البريد الإلكتروني.');
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'جاري إرسال الرمز...';
+    }
+
+    try {
+        const { error } = await supabase.auth.resetPasswordForEmail(cpActiveEmail);
+        if (error) throw error;
+
+        showCustomAlert('تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح.', false);
+
+        // إخفاء المرحلة الأولى وإظهار المرحلة الثانية داخل نفس النافذة
+        if (reqForm) reqForm.classList.add('hidden');
+        if (verifyForm) verifyForm.classList.remove('hidden');
+        if (subtitle) subtitle.innerText = "أدخل الرمز المستلم وكلمة المرور الجديدة";
+
+        const otpInput = document.getElementById('cp-otp-code-input');
+        if (otpInput) {
+            otpInput.value = '';
+            setTimeout(() => otpInput.focus(), 150);
+        }
+
+        startChangePasswordTimer(60);
+
+    } catch (err) {
+        const errMsg = err?.message || String(err);
+        if (errMsg.includes('429') || errMsg.includes('security purposes') || errMsg.includes('rate limit')) {
+            showCustomAlert('يرجى الانتظار لمدة دقيقة واحدة قبل طلب رمز جديد حفاظاً على الأمان.');
+        } else {
+            showCustomAlert('فشل الإرسال: ' + errMsg);
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ph-bold ph-paper-plane-tilt"></i> <span>إرسال رمز التحقق</span>';
+        }
+    }
+};
+
+// مؤقت الـ 60 ثانية لزر إعادة الإرسال
+function startChangePasswordTimer(seconds = 60) {
+    const btn = document.getElementById('cp-resend-btn');
+    const timerDisplay = document.getElementById('cp-resend-timer');
+    const icon = document.getElementById('cp-resend-icon');
+
+    if (!btn || !timerDisplay) return;
+
+    if (cpCountdownTimer) {
+        clearInterval(cpCountdownTimer);
+        cpCountdownTimer = null;
+    }
+
+    btn.disabled = true;
+    timerDisplay.classList.remove('hidden');
+    if (icon) icon.classList.remove('animate-spin');
+
+    let remaining = seconds;
+    timerDisplay.innerText = `(${remaining}s)`;
+
+    cpCountdownTimer = setInterval(() => {
+        remaining--;
+        if (remaining > 0) {
+            timerDisplay.innerText = `(${remaining}s)`;
+        } else {
+            clearInterval(cpCountdownTimer);
+            cpCountdownTimer = null;
+            btn.disabled = false;
+            timerDisplay.classList.add('hidden');
+        }
+    }, 1000);
+}
+
+// إعادة إرسال الرمز
+window.handleResendChangePasswordOTP = async function() {
+    const btn = document.getElementById('cp-resend-btn');
+    const icon = document.getElementById('cp-resend-icon');
+
+    if (!cpActiveEmail) {
+        return showCustomAlert('تعذر العثور على البريد الإلكتروني.');
+    }
+
+    if (btn) btn.disabled = true;
+    if (icon) icon.classList.add('animate-spin');
+
+    try {
+        const { error } = await supabase.auth.resetPasswordForEmail(cpActiveEmail);
+        if (error) throw error;
+
+        showCustomAlert('تمت إعادة إرسال رمز جديد إلى بريدك بنجاح!', false);
+        const otpInput = document.getElementById('cp-otp-code-input');
+        if (otpInput) otpInput.value = '';
+        startChangePasswordTimer(60);
+
+    } catch (err) {
+        showCustomAlert('فشل الإرسال: ' + (err.message || err));
+        if (btn) btn.disabled = false;
+    } finally {
+        if (icon) icon.classList.remove('animate-spin');
+    }
+};
+
+// التحقق من الرمز وتحديث كلمة المرور
+window.handleVerifyAndSaveNewPassword = async function(e) {
+    if (e) e.preventDefault();
+    const token = document.getElementById('cp-otp-code-input').value.trim();
+    const newPassword = document.getElementById('cp-new-password-input').value;
+    const confirmPassword = document.getElementById('cp-confirm-password-input').value;
+    const btn = document.getElementById('cp-submit-new-pass-btn');
+
+    if (!token || token.length < 6) {
+        return showCustomAlert('يرجى إدخال رمز التحقق كاملاً (6 أرقام).');
+    }
+    if (newPassword.length < 8) {
+        return showCustomAlert('الحد الأدنى لكلمة المرور هو 8 خانات.');
+    }
+    if (newPassword !== confirmPassword) {
+        return showCustomAlert('كلمتا المرور غير متطابقتين.');
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> جاري الحفظ والتأكيد...`;
+    }
+
+    try {
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+            email: cpActiveEmail,
+            token: token,
+            type: 'recovery'
+        });
+
+        if (verifyError) {
+            throw new Error('رمز التحقق غير صحيح أو منتهي الصلاحية.');
+        }
+
+        const { error: updateError } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+
+        if (updateError) throw updateError;
+
+        showCustomAlert('تم تغيير كلمة المرور بنجاح تام!', false);
+        window.closeChangePasswordModal();
+
+    } catch (err) {
+        showCustomAlert(err.message || 'حدث خطأ أثناء حفظ كلمة المرور.');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="ph-bold ph-check-circle text-base"></i> <span>تأكيد وتغيير كلمة المرور</span>`;
+        }
+    }
+};
