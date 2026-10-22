@@ -2,6 +2,9 @@
   "name": "shiiftx-store",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "build": "node cache-bust.js"
+  },
   "dependencies": {
     "@google/genai": "latest",
     "@supabase/supabase-js": "^2.48.0"
