@@ -222,7 +222,7 @@ function createTransactionCardElement(tx) {
             <i class="ph-bold ph-hourglass-medium"></i> قيد التدقيق
         </span>`;
     } else if (isRefundedOrder) {
-        statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200/70 dark:border-rose-900/50">مسترد</span>`;
+        statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200/70 dark:border-rose-900/50">مرفوض</span>`;
     } else if (isRejected) {
         const rejectText = (statusKey === 'cancelled' || statusKey === 'ملغي' || statusKey === 'ملغاة') ? 'ملغي' : 'مرفوض';
         statusPill = `<span class="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400 border border-red-200/70 dark:border-red-900/50">${rejectText}</span>`;
