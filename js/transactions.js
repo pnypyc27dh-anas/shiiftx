@@ -138,8 +138,9 @@ function createTransactionCardElement(tx) {
     let cancelReason = rawTx.rejection_reason || rawTx.reason || '';
     let discountInfo = '';
 
+    // البحث بمرونة عن سبب الرفض سواء كان بين أقواس مربعة [...] أو دائرية (...)
     if (!cancelReason) {
-        const refMatch = rawDetails.match(/\[(?:مسترجع\vert{}مرفوض\vert{}سبب الرفض\vert{}سبب):\s*([^\]]+)\]/);
+        const refMatch = rawDetails.match(/[\[\(](?:مسترجع|مرفوض|سبب الرفض|سبب):\s*([^\]\)]+)[\]\)]/);
         if (refMatch) cancelReason = refMatch[1].trim();
     }
 
@@ -150,8 +151,9 @@ function createTransactionCardElement(tx) {
     const idMatch = rawDetails.match(/ID:\s*([^\s)]+)/i);
     if (!playerId && idMatch) playerId = idMatch[1];
 
+    // تنظيف اسم الباقة مع دعم الأقواس بنوعيها وإزالة وسوم الملاحظات
     let cleanPackageName = rawDetails
-        .replace(/\[(?:مسترجع\vert{}مرفوض\vert{}سبب الرفض\vert{}سبب):\s*[^\]]+\]/g, '')
+        .replace(/[\[\(](?:مسترجع|مرفوض|سبب الرفض|سبب):\s*[^\]\)]+[\]\)]/g, '')
         .replace(/\[إشعار:\s*[^\]]+\]/g, '')
         .replace(/\(ID:\s*[^)]+\)/gi, '')
         .replace(/\(خصم كود\s*[^)]+\)/gi, '')
@@ -390,6 +392,7 @@ function openTransactionReceiptModal(tx, opLabel, platformName, packageName, amo
                 <div class="flex justify-between"><span>المرجع:</span><span class="font-mono font-bold select-all">${ref}</span></div>
                 <div class="flex justify-between"><span>التاريخ:</span><span>${dateStr}</span></div>
                 <div class="flex justify-between"><span>الحالة:</span><span class="font-bold ${statusClass}">${statusLabel}</span></div>
+                ${cancelReason ? `<div class="flex justify-between text-rose-500 font-bold border-t border-slate-200/50 dark:border-slate-700/50 pt-1.5"><span>سبب الرفض:</span><span>${cancelReason}</span></div>` : ''}
             </div>
             <div class="flex gap-2 pt-1">
                 <button onclick="printOfficialInvoice('${ref}', '${platformName}', '${packageName}', '${amount.toFixed(2)}', '${dateStr}', '${playerId || ''}', '${statusLabel}')" class="btn-spring flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-blue-600 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
