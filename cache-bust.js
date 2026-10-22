@@ -1,24 +1,42 @@
 const fs = require('fs');
 const crypto = require('crypto');
+const path = require('path');
 
-// 1. الملفات المطلوب أتمتة كسر الكاش لها
-const filesToBust = ['transactions.js', 'admin-app.js', 'store.js', 'auth.js'];
+// 1. قائمة الملفات المطلوب كسر الكاش لها مع مساراتها الدقيقة
+const filesToBust = [
+    'js/config.js',
+    'js/ui.js',
+    'js/auth.js',
+    'js/transactions.js',
+    'js/store.js',
+    'js/chat.js'
+];
 
-// 2. قراءة ملف index.html
-let html = fs.readFileSync('index.html', 'utf8');
+// 2. تحديث index.html
+const htmlPath = path.join(__dirname, 'index.html');
 
-filesToBust.forEach(file => {
-    if (fs.existsSync(file)) {
-        // حساب الـ Hash بناءً على محتوى الملف الفعلي
-        const content = fs.readFileSync(file);
-        const hash = crypto.createHash('md5').update(content).digest('hex').substring(0, 8);
+if (fs.existsSync(htmlPath)) {
+    let html = fs.readFileSync(htmlPath, 'utf8');
 
-        // استبدال الرابط القديم بالرابط المزود بالـ Hash الجديد
-        const regex = new RegExp(`${file}(\\?v=[a-zA-Z0-9_-]+)?`, 'g');
-        html = html.replace(regex, `${file}?v=${hash}`);
-    }
-});
+    filesToBust.forEach(filePath => {
+        const fullPath = path.join(__dirname, filePath);
+        if (fs.existsSync(fullPath)) {
+            // حساب بصمة محتوى الملف الفعلي
+            const content = fs.readFileSync(fullPath);
+            const hash = crypto.createHash('md5').update(content).digest('hex').substring(0, 8);
 
-// 3. حفظ التعديل في index.html
-fs.writeFileSync('index.html', html, 'utf8');
-console.log('✓ تم كسر الكاش وتحديث الروابط في index.html بنجاح.');
+            // استبدال الرابط سواء كان بدون لاحقة أو يحتوي على ?v= قديمة
+            const escapedPath = filePath.replace(/[\/\\]/g, '[\\/\\\\]');
+            const regex = new RegExp(`${escapedPath}(\\?v=[a-zA-Z0-9_-]+)?`, 'g');
+            
+            html = html.replace(regex, `${filePath}?v=${hash}`);
+        } else {
+            console.warn(`⚠️ لم يتم العثور على الملف: ${filePath}`);
+        }
+    });
+
+    fs.writeFileSync(htmlPath, html, 'utf8');
+    console.log('✓ تم كسر الكاش وتحديث جميع مسارات js/ في index.html بنجاح.');
+} else {
+    console.error('❌ لم يتم العثور على ملف index.html في المجلد الرئيسي.');
+}
