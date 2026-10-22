@@ -83,7 +83,7 @@ async function handleAgentTransfer(e) {
     }
 }
 
-// جلب سجل تحويلات وعمولات الوكيل بطلب واحد عبر RPC وتخطي حظر RLS بأمان
+// جلب سجل تحويلات وعمولات الوكيل وعرض الاسم والبريد بطلب واحد فوري
 async function loadAgentTransactions() {
     const container = document.getElementById('agent-tx-container');
     
@@ -103,15 +103,17 @@ async function loadAgentTransactions() {
 
         container.innerHTML = "";
         txs.forEach(tx => {
-            const displayEmail = tx.target_email || 'مستخدم مسجل';
+            const customerName = tx.target_name || 'عميل مسجل';
+            const customerEmail = tx.target_email || '—';
             const dateStr = new Date(tx.created_at).toLocaleString('en-US', { hour12: false });
             
             const item = document.createElement('div');
             item.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-xs";
             item.innerHTML = `
-                <div class="space-y-1">
-                    <span class="font-bold text-slate-800 dark:text-slate-200 block">${displayEmail}</span>
-                    <span class="text-[10px] text-slate-400 block font-mono">${dateStr}</span>
+                <div class="space-y-0.5">
+                    <span class="font-bold text-slate-800 dark:text-slate-100 block">${customerName}</span>
+                    <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono block">${customerEmail}</span>
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">${dateStr}</span>
                 </div>
                 <div class="text-left font-mono">
                     <span class="font-black text-amber-600 dark:text-amber-400 block">-$${Number(tx.amount).toFixed(2)}</span>
