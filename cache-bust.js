@@ -1,44 +1,29 @@
 const fs = require('fs');
-const crypto = require('crypto');
-const path = require('path');
+const { execSync } = require('child_process');
 
-try {
-    const htmlFiles = ['index.html', 'marketing-partner.html', 'admin.html', 'agent.html'];
-    const jsFiles = [
-        'js/config.js', 'js/ui.js', 'js/auth.js', 
-        'js/transactions.js', 'js/store.js', 'js/chat.js', 
-        'js/partner-app.js', 'js/admin-app.js', 'js/agent-app.js', 'js/theme.js'
-    ];
+// 1. الحصول على الهاش من Vercel تلقائياً، أو من Git المحلي، أو طابع زمني كبديل آمن
+let commitHash = process.env.VERCEL_GIT_COMMIT_SHA 
+  ? process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 8) 
+  : '';
 
-    const fileHashes = {};
-    jsFiles.forEach(fileRel => {
-        const fullPath = path.join(__dirname, fileRel);
-        if (fs.existsSync(fullPath)) {
-            const content = fs.readFileSync(fullPath);
-            fileHashes[fileRel] = crypto.createHash('md5').update(content).digest('hex').substring(0, 8);
-        }
-    });
+if (!commitHash) {
+  try {
+    commitHash = execSync('git rev-parse --short HEAD').toString().trim();
+  } catch (err) {
+    commitHash = Date.now().toString(36);
+  }
+}
 
-    htmlFiles.forEach(htmlFile => {
-        const fullHtmlPath = path.join(__dirname, htmlFile);
-        if (!fs.existsSync(fullHtmlPath)) return;
-
-        let html = fs.readFileSync(fullHtmlPath, 'utf8');
-
-        Object.keys(fileHashes).forEach(fileRel => {
-            const hash = fileHashes[fileRel];
-            // استبدال آمن تماماً وصريح لمسارات السكربتات
-            const pattern = new RegExp(`(["'])${fileRel.replace(/\//g, '\\/')}(\\?v=[^"']*)?\\1`, 'g');
-            html = html.replace(pattern, `"${fileRel}?v=${hash}"`);
-        });
-
-        fs.writeFileSync(fullHtmlPath, html, 'utf8');
-        console.log(`✓ تم كسر الكاش في: ${htmlFile}`);
-    });
-
-    console.log('✓ اكتمل كسر الكاش بنجاح.');
-} catch (err) {
-    console.warn('⚠️ تم تجاوز كسر الكاش لضمان استمرار النشر:', err.message);
-} finally {
-    process.exit(0); // الخروج دائماً بـ 0 لضمان عدم توقف النشر في Vercel نهائياً
+// 2. استبدال أي قيمة تأتي بعد ?v= داخل ملف index.html أياً كان شكلها
+const htmlPath = './index.html';
+if (fs.existsSync(htmlPath)) {
+  let html = fs.readFileSync(htmlPath, 'utf8');
+  
+  // يطابق auth.js?v= متبوعة بأي نص أو رقم حتى علامة التنصيص
+  html = html.replace(/(js\/auth\.js\?v=)[^"']+/g, `$1${commitHash}`);
+  
+  fs.writeFileSync(htmlPath, html, 'utf8');
+  console.log(`[Cache-Bust] Successfully updated auth.js hash to: ${commitHash}`);
+} else {
+  console.error('[Cache-Bust] index.html not found!');
 }
