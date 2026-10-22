@@ -537,7 +537,7 @@ async function openChangePasswordModal() {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session || !session.user || !session.user.email) {
-        showToast('يجب تسجيل الدخول أولاً لتغيير كلمة المرور.');
+        showCustomAlert('يجب تسجيل الدخول أولاً لتغيير كلمة المرور.');
         return;
     }
 
@@ -565,7 +565,7 @@ async function handleSendChangePasswordOTP(e) {
     const btn = document.getElementById('send-change-otp-btn');
 
     if (!email) {
-        showToast('تعذر تحديد البريد الإلكتروني.');
+        showCustomAlert('تعذر تحديد البريد الإلكتروني.');
         return;
     }
 
@@ -579,7 +579,7 @@ async function handleSendChangePasswordOTP(e) {
         const { error } = await supabase.auth.resetPasswordForEmail(email);
         if (error) throw error;
 
-        showToast('تم إرسال رمز التحقق إلى بريدك بنجاح.', false);
+        showCustomAlert('تم إرسال رمز التحقق إلى بريدك بنجاح.', false);
         
         // إغلاق النافذة الأولى
         closeChangePasswordModal();
@@ -596,7 +596,7 @@ async function handleSendChangePasswordOTP(e) {
         startOtpCountdown(60);
 
     } catch (err) {
-        showToast('فشل الإرسال: ' + (err.message || err));
+        showCustomAlert('فشل الإرسال: ' + (err.message || err));
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="ph-bold ph-paper-plane-tilt"></i> <span>إرسال رمز التحقق</span>';
@@ -645,7 +645,7 @@ async function handleResendChangePasswordOTP() {
     const icon = document.getElementById('resend-icon');
 
     if (!currentOtpTargetEmail) {
-        showToast('تعذر العثور على البريد الإلكتروني للعملية.');
+        showCustomAlert('تعذر العثور على البريد الإلكتروني للعملية.');
         return;
     }
 
@@ -656,12 +656,12 @@ async function handleResendChangePasswordOTP() {
         const { error } = await supabase.auth.resetPasswordForEmail(currentOtpTargetEmail);
         if (error) throw error;
 
-        showToast('تمت إعادة إرسال رمز التحقق بنجاح.', false);
+        showCustomAlert('تمت إعادة إرسال رمز التحقق بنجاح.', false);
         // تصفير وبدء 60 ثانية جديدة
         startOtpCountdown(60);
 
     } catch (err) {
-        showToast('خطأ أثناء إعادة الإرسال: ' + (err.message || err));
+        showCustomAlert('خطأ أثناء إعادة الإرسال: ' + (err.message || err));
         btn.disabled = false;
     } finally {
         if (icon) icon.classList.remove('animate-spin');
