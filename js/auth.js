@@ -558,50 +558,89 @@ function closeChangePasswordModal() {
 }
 
 // 3. إرسال رمز التحقق الأولي
-async function handleSendChangePasswordOTP(e) {
-    e.preventDefault();
+// إرسال رمز التحقق والانتقال لنافذة إدخال الرمز الأصلية
+window.handleSendChangePasswordOTP = async function(e) {
+    if (e) e.preventDefault();
     const emailInput = document.getElementById('change-pwd-email-input');
-    const email = emailInput ? emailInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : ((typeof currentUser !== 'undefined' && currentUser?.email) || '');
     const btn = document.getElementById('send-change-otp-btn');
 
     if (!email) {
-        showCustomAlert('تعذر تحديد البريد الإلكتروني.');
-        return;
+        return showCustomAlert('تعذر تحديد البريد الإلكتروني.');
     }
 
-    // حفظ البريد في المتغير المركزي للاستخدام في إعادة الإرسال
-    currentOtpTargetEmail = email;
+    window.currentOtpTargetEmail = email;
 
-    btn.disabled = true;
-    btn.innerText = 'جاري إرسال الرمز...';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'جاري إرسال الرمز...';
+    }
 
     try {
         const { error } = await supabase.auth.resetPasswordForEmail(email);
         if (error) throw error;
 
-        showCustomAlert('تم إرسال رمز التحقق إلى بريدك بنجاح.', false);
+        showCustomAlert('تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح.', false);
         
-        // إغلاق النافذة الأولى
-        closeChangePasswordModal();
+        // 1. إغلاق نافذة البريد وإغلاق القائمة الجانبية إن كانت مفتوحة
+        window.closeChangePasswordModal();
+        if (typeof toggleSideMenu === 'function') toggleSideMenu(false);
 
-        // فتح نافذة إدخال الرمز المعتمدة لديك
-        // ملاحظة: استبدل اسم الدالة التالية باسم الدالة التي تفتح نافذة الرمز لديك إذا كانت مختلفة
-        if (typeof openOtpModal === 'function') {
-            openOtpModal(email);
-        } else if (typeof triggerPasswordResetFlow === 'function') {
-            triggerPasswordResetFlow(email);
+        // 2. تهيئة بيانات التحقق
+        currentFlowType = "reset";
+        tempRegisterData = { email: email };
+        if (typeof resetResendButtonState === 'function') resetResendButtonState();
+        
+        // 3. إظهار نافذة إدخال الرمز وفرض طبقة العرض العالية
+        const regModal = document.getElementById('register-modal');
+        if (regModal) {
+            regModal.classList.remove('hidden');
+            regModal.style.display = 'flex';
+            regModal.style.zIndex = '140'; // لضمان ظهورها فوق كل الطبقات
         }
 
-        // إطلاق عداد الـ 60 ثانية فوراً
-        startOtpCountdown(60);
+        // 4. إظهار خانات الرمز حصراً وإخفاء خطوات النموذج الأخرى
+        const otpStep = document.getElementById('register-step-otp');
+        if (otpStep) {
+            otpStep.classList.remove('hidden');
+            otpStep.style.display = 'block';
+        }
+
+        ['register-step-form', 'register-step-password', 'reg-extra-fields'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('hidden');
+                el.style.display = 'none';
+            }
+        });
+        
+        const regTitle = document.getElementById('register-modal-title');
+        if (regTitle) regTitle.innerText = "تأكيد الرمز";
+
+        const otpInput = document.getElementById('reg-otp-code');
+        if (otpInput) {
+            otpInput.value = "";
+            setTimeout(() => otpInput.focus(), 150);
+        }
+        
+        // 5. تشغيل مؤقت إعادة الإرسال
+        if (typeof startResendCooldown === 'function') startResendCooldown();
+        if (typeof window.startOtpCountdown === 'function') window.startOtpCountdown(60);
 
     } catch (err) {
-        showCustomAlert('فشل الإرسال: ' + (err.message || err));
+        const errMsg = err?.message || String(err);
+        if (errMsg.includes('429') || errMsg.includes('security purposes') || errMsg.includes('rate limit')) {
+            showCustomAlert('يرجى الانتظار لمدة دقيقة واحدة قبل طلب رمز جديد حفاظاً على الأمان.');
+        } else {
+            showCustomAlert('فشل الإرسال: ' + errMsg);
+        }
     } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="ph-bold ph-paper-plane-tilt"></i> <span>إرسال رمز التحقق</span>';
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ph-bold ph-paper-plane-tilt"></i> <span>إرسال رمز التحقق</span>';
+        }
     }
-}
+};
 
 // 4. محرك العداد التنازلي لإعادة الإرسال
 function startOtpCountdown(seconds = 60) {
