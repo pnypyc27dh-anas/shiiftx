@@ -33,3 +33,13 @@
     }
   ]
 }
+
+"screenshots": [
+  {
+    "src": "/assets/screen-mobile.png",
+    "sizes": "720x1280",
+    "type": "image/png",
+    "form_factor": "narrow",
+    "label": "واجهة المتجر"
+  }
+]
