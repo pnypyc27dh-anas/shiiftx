@@ -1,25 +1,20 @@
 {
-  "name": "SHIIFT X",
-  "short_name": "SHIIFTX",
-  "description": "متجر SHIIFT X للبطاقات الرقمية والاشتراكات وخدمات الشحن الفوري",
+  "name": "SHIIFT X — Digital Settlements",
+  "short_name": "SHIIFT X",
+  "description": "منصة المدفوعات والاشتراكات الرقمية والتسوية الفورية",
   "start_url": "/",
-  "id": "/",
+  "id": "com.shiiftx.app",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0f172a",
-  "theme_color": "#2563eb",
+  "background_color": "#0D0E12",
+  "theme_color": "#0D0E12",
   "lang": "ar",
   "dir": "rtl",
+  "categories": ["finance", "utilities"],
   "icons": [
     {
-      "src": "assets/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/icon-512.png",
+      "src": "/assets/app-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
