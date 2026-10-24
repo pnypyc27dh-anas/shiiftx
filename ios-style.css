@@ -1,59 +1,70 @@
 /* شريط التنبيه السفلي لآيفون */
 .ios-install-banner {
   position: fixed;
-  bottom: 20px;
+  bottom: 85px; /* مرتفع عن شريط التنقل السفلي لمتجرك */
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 32px);
   max-width: 440px;
   background: #0f172a;
   border: 1px solid #1e293b;
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6);
   z-index: 9998;
+  direction: rtl;
+  box-sizing: border-box;
 }
 
 .banner-content {
   display: flex;
   align-items: center;
   gap: 12px;
+  overflow: hidden;
 }
 
 .banner-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .banner-title {
   color: #ffffff;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.3;
 }
 
 .banner-sub {
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 1.3;
 }
 
 .banner-btn {
-  background: #0ea5e9;
+  background: #005ba3;
   color: #ffffff;
   border: none;
-  padding: 8px 18px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 12px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-right: 8px;
+  transition: transform 0.2s, background 0.2s;
 }
 
-.banner-btn:hover {
-  background: #0284c7;
+.banner-btn:active {
+  transform: scale(0.95);
 }
 
 /* النافذة المنبثقة الإرشادية */
@@ -62,6 +73,7 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 9999;
   display: flex;
   align-items: flex-end;
@@ -71,26 +83,27 @@
 .ios-modal-sheet {
   background: #0b1120;
   border-top: 1px solid #1e293b;
-  border-radius: 24px 24px 0 0;
-  padding: 24px 20px 32px;
+  border-radius: 28px 28px 0 0;
+  padding: 24px 20px 36px;
   width: 100%;
   max-width: 480px;
   direction: rtl;
   color: #ffffff;
-  animation: slideUp 0.3s ease-out;
+  animation: slideUpIos 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
 }
 
-@keyframes slideUp {
+@keyframes slideUpIos {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
 
 .modal-handle {
-  width: 40px;
+  width: 36px;
   height: 4px;
   background: #334155;
   border-radius: 2px;
-  margin: 0 auto 18px;
+  margin: 0 auto 16px;
 }
 
 .modal-header {
@@ -99,27 +112,30 @@
 }
 
 .modal-icon {
-  width: 56px;
-  height: 56px;
+  width: 56px !important;
+  height: 56px !important;
   border-radius: 14px;
-  margin-bottom: 10px;
+  margin: 0 auto 10px;
+  display: block;
 }
 
 .modal-header h3 {
-  font-size: 17px;
+  font-size: 16px;
+  font-weight: 800;
   margin-bottom: 6px;
+  color: #ffffff;
 }
 
 .modal-header p {
-  font-size: 13px;
+  font-size: 12px;
   color: #94a3b8;
 }
 
 .modal-steps {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .step-card {
@@ -128,15 +144,15 @@
   gap: 12px;
   background: #111c33;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: 14px;
   border: 1px solid #1e293b;
 }
 
 .step-number {
-  background: #0ea5e9;
-  color: #0b1120;
-  font-weight: 700;
-  font-size: 13px;
+  background: #005ba3;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 12px;
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -147,7 +163,7 @@
 }
 
 .step-desc {
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   color: #e2e8f0;
 }
@@ -157,23 +173,23 @@
   vertical-align: middle;
   padding: 2px 5px;
   background: #1e293b;
-  border-radius: 4px;
+  border-radius: 6px;
   color: #38bdf8;
 }
 
 .modal-confirm-btn {
   width: 100%;
-  background: #0ea5e9;
+  background: #005ba3;
   color: #ffffff;
   border: none;
-  padding: 12px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 15px;
+  padding: 14px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 14px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: opacity 0.2s;
 }
 
-.modal-confirm-btn:hover {
-  background: #0284c7;
+.modal-confirm-btn:active {
+  opacity: 0.9;
 }
