@@ -1,32 +1,59 @@
 let currentIosStep = 1;
 const totalIosSteps = 3;
 
+// 1. فحص أجهزة أبل (iOS)
 function isIosDevice() {
   const userAgent = window.navigator.userAgent.toLowerCase();
-  const isTestMode = window.location.search.includes('test_install=true');
-  return /iphone|ipad|ipod/.test(userAgent) || isTestMode;
+  const isTestIos = window.location.search.includes('test_install=ios');
+  return (/iphone|ipad|ipod/.test(userAgent) && !window.MSStream) || isTestIos;
 }
 
+// 2. فحص أجهزة أندرويد (Android)
+function isAndroidDevice() {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  const isTestAndroid = window.location.search.includes('test_install=android');
+  return /android/.test(userAgent) || isTestAndroid;
+}
+
+// 3. فحص ما إذا كان التطبيق مثبتاً ومفتوحاً كـ PWA
 function isAppInstalled() {
   return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
 }
 
-// تشغيل ظهور الشريط حصراً عندما تكون شاشة تسجيل الدخول معروضة
+// 4. توجيه ظهور الشريط المناسب حسب نظام الجهاز داخل شاشة تسجيل الدخول فقط
 function checkBannerVisibility() {
   const loginScreen = document.getElementById('login-screen');
-  const banner = document.getElementById('ios-install-banner');
-  if (!banner) return;
+  const iosBanner = document.getElementById('ios-install-banner');
+  const androidBanner = document.getElementById('android-download-banner');
 
   const isLoginVisible = loginScreen && !loginScreen.classList.contains('hidden');
+  const canDisplay = isLoginVisible && !isAppInstalled();
 
-  if (isIosDevice() && !isAppInstalled() && isLoginVisible) {
-    banner.style.display = 'flex';
-  } else {
-    banner.style.display = 'none';
+  // إخفاء الزرين إذا كان المستخدم داخل لوحة التحكم أو التطبيق مثبت
+  if (!canDisplay) {
+    if (iosBanner) iosBanner.style.display = 'none';
+    if (androidBanner) androidBanner.style.display = 'none';
+    return;
+  }
+
+  // عرض زر آيفون لمستخدمي iOS فقط
+  if (isIosDevice()) {
+    if (iosBanner) iosBanner.style.display = 'flex';
+    if (androidBanner) androidBanner.style.display = 'none';
+  } 
+  // عرض زر أندرويد لمستخدمي Android فقط
+  else if (isAndroidDevice()) {
+    if (androidBanner) androidBanner.style.display = 'flex';
+    if (iosBanner) iosBanner.style.display = 'none';
+  } 
+  // إخفاء كليهما على متصفحات الكمبيوتر العادية (خارج وضع الفحص)
+  else {
+    if (iosBanner) iosBanner.style.display = 'none';
+    if (androidBanner) androidBanner.style.display = 'none';
   }
 }
 
-// مراقبة تلقائية للتحول بين شاشة الدخول ولوحة التحكم
+// مراقبة الانتقال بين شاشة الدخول ولوحة التحكم
 function setupScreenObserver() {
   const loginScreen = document.getElementById('login-screen');
   if (loginScreen) {
@@ -37,7 +64,7 @@ function setupScreenObserver() {
   }
 }
 
-// فتح وإغلاق النافذة
+// دوال التحكم بالنافذة المنبثقة التفاعلية لـ iOS
 function openIosModal() {
   goToIosStep(1);
   const modal = document.getElementById('ios-modal');
@@ -50,7 +77,6 @@ function closeIosModal(event) {
   if (modal) modal.style.display = 'none';
 }
 
-// التحكم بالمراحل التفاعلية
 function goToIosStep(step) {
   currentIosStep = step;
 
@@ -106,7 +132,6 @@ function prevIosStep() {
   }
 }
 
-// البدء عند اكتمال تحميل الصفحة
 window.addEventListener('DOMContentLoaded', () => {
   checkBannerVisibility();
   setupScreenObserver();
