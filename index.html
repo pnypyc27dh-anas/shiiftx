@@ -618,6 +618,7 @@
                 <path class="fill-[#005ba3] dark:fill-[#5CE1E6] drop-shadow-[0_0_12px_rgba(92,225,230,0.6)] transition-colors" d="M234.632 132.734L234.737 132.895L270.402 187.555L270.537 187.763L270.388 187.961L234.723 235.284L234.616 235.425H212.435L212.827 234.867L246.018 187.733L212.815 133.272L212.487 132.734H234.632ZM332.739 132.734L332.41 133.272L299.206 187.733L332.398 234.867L332.79 235.425H310.609L310.502 235.284L274.837 187.961L274.688 187.763L274.823 187.555L310.489 132.895L310.593 132.734H332.739ZM225.717 104.646C229.012 104.647 231.91 105.552 234.396 107.37C237.099 109.098 238.429 111.887 238.429 115.655C238.429 119.302 237.094 122.079 234.406 123.931L234.406 123.932C231.918 125.755 229.017 126.664 225.717 126.664C222.102 126.664 219.037 125.76 216.542 123.932C214.011 122.077 212.763 119.296 212.763 115.655C212.763 111.893 214.007 109.103 216.552 107.371C219.045 105.548 222.107 104.646 225.717 104.646ZM319.508 104.646C323.118 104.646 326.181 105.548 328.673 107.371L328.907 107.537C331.294 109.279 332.462 112.011 332.462 115.655C332.462 119.296 331.214 122.077 328.683 123.932C326.189 125.76 323.123 126.664 319.508 126.664C316.208 126.664 313.307 125.755 310.819 123.932V123.931C308.13 122.079 306.796 119.301 306.796 115.655C306.796 111.888 308.126 109.098 310.828 107.37C313.314 105.552 316.213 104.647 319.508 104.646Z"/>
             </svg>
             <p class="text-[10px] text-slate-500 font-bold tracking-[0.25em] uppercase">Premium Digital Wallet</p>
+            <div id="ios-install-banner" class="ios-install-banner" style="display: none;">
         </div>
 
         <div class="w-full max-w-md glass-panel p-8 space-y-6 relative z-10">
@@ -1498,7 +1499,7 @@
   }
 </script>
     <!-- زر التثبيت الذكي لمستخدمي آيفون -->
-<div id="ios-install-banner" class="ios-install-banner" style="display: none;">
+
   <div class="banner-content">
     <img src="/assets/app-icon-192.png" alt="SHIIFT X" class="banner-icon">
     <div>
@@ -1509,15 +1510,63 @@
   <button onclick="openIosModal()" class="banner-btn">تثبيت</button>
 </div>
 
-<!-- النافذة الإرشادية المنبثقة -->
+<!-- نافذة الدليل التفاعلي لمستخدمي آيفون -->
 <div id="ios-modal" class="ios-modal-overlay" style="display: none;" onclick="closeIosModal(event)">
   <div class="ios-modal-sheet" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <div class="modal-header">
-      <img src="/assets/app-icon-192.png" alt="SHIIFT X" class="modal-icon">
-      <h3>تثبيت تطبيق SHIIFT X على جهازك</h3>
-      <p>اتبع الخطوات البسيطة التالية لإضافة التطبيق لشاشتك الرئيسية:</p>
+    
+    <div class="modal-header-top">
+      <span id="wizard-step-counter" class="modal-step-badge">خطوة 1 من 3</span>
+      <button onclick="closeIosModal(event)" type="button" class="modal-close-btn">✕</button>
     </div>
+
+    <!-- مؤشرات التقدم -->
+    <div class="step-progress-dots">
+      <div id="step-dot-1" class="step-dot active"></div>
+      <div id="step-dot-2" class="step-dot"></div>
+      <div id="step-dot-3" class="step-dot"></div>
+    </div>
+
+    <!-- الخطوة 1 -->
+    <div id="ios-step-1" class="interactive-step active-step">
+      <div class="step-visual-box">
+        <i class="ph ph-share-network"></i>
+      </div>
+      <h4 class="step-title-text">زر المشاركة في Safari</h4>
+      <p class="step-info-text">
+        انقر على أيقونة <strong>المشاركة (المربع والسهم للأعلى ⎋)</strong> الموجودة في الشريط السفلي لمتصفح Safari.
+      </p>
+    </div>
+
+    <!-- الخطوة 2 -->
+    <div id="ios-step-2" class="interactive-step">
+      <div class="step-visual-box">
+        <i class="ph ph-plus-square"></i>
+      </div>
+      <h4 class="step-title-text">إضافة إلى الشاشة الرئيسية</h4>
+      <p class="step-info-text">
+        مرر القائمة المنسدلة لأسفل واختر خيار <br><strong>"إضافة إلى الشاشة الرئيسية" (Add to Home Screen ➕)</strong>.
+      </p>
+    </div>
+
+    <!-- الخطوة 3 -->
+    <div id="ios-step-3" class="interactive-step">
+      <div class="step-visual-box">
+        <i class="ph ph-check-circle" style="color: #10b981;"></i>
+      </div>
+      <h4 class="step-title-text">تأكيد التثبيت النهائي</h4>
+      <p class="step-info-text">
+        اضغط على كلمة <strong>"إضافة" (Add)</strong> في أعلى الزاوية. سيظهر لك التطبيق فوراً على واجهة هاتفك!
+      </p>
+    </div>
+
+    <!-- أزرار التنقل التفاعلية -->
+    <div class="step-actions">
+      <button id="wizard-prev-btn" onclick="prevIosStep()" type="button" class="btn-wizard-prev" style="display: none;">السابق</button>
+      <button id="wizard-next-btn" onclick="nextIosStep()" type="button" class="btn-wizard-next">التالي ❯</button>
+    </div>
+
+  </div>
+</div>
 
     <div class="modal-steps">
       <div class="step-card">
