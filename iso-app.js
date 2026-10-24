@@ -1,4 +1,3 @@
-// حالة المرشد التفاعلي
 let currentIosStep = 1;
 const totalIosSteps = 3;
 
@@ -12,14 +11,29 @@ function isAppInstalled() {
   return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
 }
 
-// تشغيل ظهور الشريط فقط في شاشة الدخول
-function initIosInstallPrompt() {
+// تشغيل ظهور الشريط حصراً عندما تكون شاشة تسجيل الدخول معروضة
+function checkBannerVisibility() {
   const loginScreen = document.getElementById('login-screen');
+  const banner = document.getElementById('ios-install-banner');
+  if (!banner) return;
+
   const isLoginVisible = loginScreen && !loginScreen.classList.contains('hidden');
 
   if (isIosDevice() && !isAppInstalled() && isLoginVisible) {
-    const banner = document.getElementById('ios-install-banner');
-    if (banner) banner.style.display = 'flex';
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// مراقبة تلقائية للتحول بين شاشة الدخول ولوحة التحكم
+function setupScreenObserver() {
+  const loginScreen = document.getElementById('login-screen');
+  if (loginScreen) {
+    const observer = new MutationObserver(() => {
+      checkBannerVisibility();
+    });
+    observer.observe(loginScreen, { attributes: true, attributeFilter: ['class', 'style'] });
   }
 }
 
@@ -36,11 +50,10 @@ function closeIosModal(event) {
   if (modal) modal.style.display = 'none';
 }
 
-// التحكم بخطوات الدليل التفاعلي
+// التحكم بالمراحل التفاعلية
 function goToIosStep(step) {
   currentIosStep = step;
 
-  // تحديث محتوى الخطوات
   for (let i = 1; i <= totalIosSteps; i++) {
     const stepEl = document.getElementById(`ios-step-${i}`);
     const dotEl = document.getElementById(`step-dot-${i}`);
@@ -60,11 +73,9 @@ function goToIosStep(step) {
     }
   }
 
-  // تحديث العداد
   const badge = document.getElementById('wizard-step-counter');
   if (badge) badge.innerText = `خطوة ${currentIosStep} من ${totalIosSteps}`;
 
-  // تحديث زري السابق والتالي
   const prevBtn = document.getElementById('wizard-prev-btn');
   const nextBtn = document.getElementById('wizard-next-btn');
 
@@ -95,9 +106,8 @@ function prevIosStep() {
   }
 }
 
-// تشغيل الفحص الأولي
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initIosInstallPrompt);
-} else {
-  initIosInstallPrompt();
-}
+// البدء عند اكتمال تحميل الصفحة
+window.addEventListener('DOMContentLoaded', () => {
+  checkBannerVisibility();
+  setupScreenObserver();
+});
