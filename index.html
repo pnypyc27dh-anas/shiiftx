@@ -1483,89 +1483,93 @@
         </div>
     </div>
 
-    <!-- ==================== استدعاء وحدات النظام البرمجية المقسمة ==================== -->
+   <!-- ==================== استدعاء وحدات النظام البرمجية ==================== -->
     <script src="js/config.js?v=2"></script>
-<script src="js/ui.js?v=2"></script>
-<script src="js/auth.js?v=99999"></script>
-<script src="js/transactions.js?v=2"></script>
-<script src="js/store.js?v=2"></script>
-<script src="js/chat.js?v=2"></script>
-    <script src="/iso-app.js?v=3" defer></script>
-    <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js');
-    });
-  }
-</script>
-    <!-- زر التثبيت الذكي لمستخدمي آيفون -->
-
-  <div class="banner-content">
-    <img src="/assets/app-icon-192.png" alt="SHIIFT X" class="banner-icon">
-    <div>
-      <div class="banner-title">تطبيق SHIIFT X</div>
-      <div class="banner-sub">ثبّت التطبيق على شاشتك الرئيسية للوصول السريع</div>
-    </div>
-  </div>
-  <button onclick="openIosModal()" class="banner-btn">تثبيت</button>
-</div>
-
-<!-- نافذة الدليل التفاعلي لمستخدمي آيفون -->
-<div id="ios-modal" class="ios-modal-overlay" style="display: none;" onclick="closeIosModal(event)">
-  <div class="ios-modal-sheet" onclick="event.stopPropagation()">
+    <script src="js/ui.js?v=2"></script>
+    <script src="js/auth.js?v=99999"></script>
+    <script src="js/transactions.js?v=2"></script>
+    <script src="js/store.js?v=2"></script>
+    <script src="js/chat.js?v=2"></script>
     
-    <div class="modal-header-top">
-      <span id="wizard-step-counter" class="modal-step-badge">خطوة 1 من 3</span>
-      <button onclick="closeIosModal(event)" type="button" class="modal-close-btn">✕</button>
-    </div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js');
+        });
+      }
+    </script>
 
-    <!-- مؤشرات التقدم -->
-    <div class="step-progress-dots">
-      <div id="step-dot-1" class="step-dot active"></div>
-      <div id="step-dot-2" class="step-dot"></div>
-      <div id="step-dot-3" class="step-dot"></div>
-    </div>
-
-    <!-- الخطوة 1 -->
-    <div id="ios-step-1" class="interactive-step active-step">
-      <div class="step-visual-box">
-        <i class="ph ph-share-network"></i>
+    <!-- شريط التثبيت المنضبط (يظهر فقط في شاشة الدخول) -->
+    <div id="ios-install-banner" class="ios-install-banner" style="display: none;">
+      <div class="banner-content">
+        <img src="/apple-touch-icon.png" alt="SHIIFT X" class="banner-icon">
+        <div class="banner-text-group">
+          <span class="banner-title">تطبيق SHIIFT X للآيفون</span>
+          <span class="banner-sub">ثبّت المنصة كتطبيق على جهازك</span>
+        </div>
       </div>
-      <h4 class="step-title-text">زر المشاركة في Safari</h4>
-      <p class="step-info-text">
-        انقر على أيقونة <strong>المشاركة (المربع والسهم للأعلى ⎋)</strong> الموجودة في الشريط السفلي لمتصفح Safari.
-      </p>
+      <button onclick="openIosModal()" type="button" class="banner-btn">تثبيت 📲</button>
     </div>
 
-    <!-- الخطوة 2 -->
-    <div id="ios-step-2" class="interactive-step">
-      <div class="step-visual-box">
-        <i class="ph ph-plus-square"></i>
+    <!-- نافذة الدليل التفاعلي لمستخدمي آيفون -->
+    <div id="ios-modal" class="ios-modal-overlay" style="display: none;" onclick="closeIosModal(event)">
+      <div class="ios-modal-sheet" onclick="event.stopPropagation()">
+        
+        <div class="modal-header-top">
+          <span id="wizard-step-counter" class="modal-step-badge">خطوة 1 من 3</span>
+          <button onclick="closeIosModal(event)" type="button" class="modal-close-btn">✕</button>
+        </div>
+
+        <!-- مؤشرات التقدم -->
+        <div class="step-progress-dots">
+          <div id="step-dot-1" class="step-dot active"></div>
+          <div id="step-dot-2" class="step-dot"></div>
+          <div id="step-dot-3" class="step-dot"></div>
+        </div>
+
+        <!-- الخطوة 1 -->
+        <div id="ios-step-1" class="interactive-step active-step">
+          <div class="step-visual-box">
+            <i class="ph ph-share-network"></i>
+          </div>
+          <h4 class="step-title-text">زر المشاركة في Safari</h4>
+          <p class="step-info-text">
+            انقر على أيقونة <strong>المشاركة (المربع والسهم للأعلى ⎋)</strong> الموجودة في شريط Safari بالأسفل.
+          </p>
+        </div>
+
+        <!-- الخطوة 2 -->
+        <div id="ios-step-2" class="interactive-step">
+          <div class="step-visual-box">
+            <i class="ph ph-plus-square"></i>
+          </div>
+          <h4 class="step-title-text">إضافة إلى الشاشة الرئيسية</h4>
+          <p class="step-info-text">
+            مرر القائمة لأسفل واختر <br><strong>"إضافة إلى الشاشة الرئيسية" (Add to Home Screen ➕)</strong>.
+          </p>
+        </div>
+
+        <!-- الخطوة 3 -->
+        <div id="ios-step-3" class="interactive-step">
+          <div class="step-visual-box">
+            <i class="ph ph-check-circle" style="color: #10b981;"></i>
+          </div>
+          <h4 class="step-title-text">تأكيد التثبيت النهائي</h4>
+          <p class="step-info-text">
+            اضغط على كلمة <strong>"إضافة" (Add)</strong> في أعلى الزاوية. سيظهر التطبيق فوراً على شاشتك!
+          </p>
+        </div>
+
+        <!-- أزرار التنقل التفاعلية -->
+        <div class="step-actions">
+          <button id="wizard-prev-btn" onclick="prevIosStep()" type="button" class="btn-wizard-prev" style="display: none;">السابق</button>
+          <button id="wizard-next-btn" onclick="nextIosStep()" type="button" class="btn-wizard-next">التالي ❯</button>
+        </div>
+
       </div>
-      <h4 class="step-title-text">إضافة إلى الشاشة الرئيسية</h4>
-      <p class="step-info-text">
-        مرر القائمة المنسدلة لأسفل واختر خيار <br><strong>"إضافة إلى الشاشة الرئيسية" (Add to Home Screen ➕)</strong>.
-      </p>
     </div>
 
-    <!-- الخطوة 3 -->
-    <div id="ios-step-3" class="interactive-step">
-      <div class="step-visual-box">
-        <i class="ph ph-check-circle" style="color: #10b981;"></i>
-      </div>
-      <h4 class="step-title-text">تأكيد التثبيت النهائي</h4>
-      <p class="step-info-text">
-        اضغط على كلمة <strong>"إضافة" (Add)</strong> في أعلى الزاوية. سيظهر لك التطبيق فوراً على واجهة هاتفك!
-      </p>
-    </div>
-
-    <!-- أزرار التنقل التفاعلية -->
-    <div class="step-actions">
-      <button id="wizard-prev-btn" onclick="prevIosStep()" type="button" class="btn-wizard-prev" style="display: none;">السابق</button>
-      <button id="wizard-next-btn" onclick="nextIosStep()" type="button" class="btn-wizard-next">التالي ❯</button>
-    </div>
-
-  </div>
-</div>
+    <!-- استدعاء ملف الجافاسكريبت المحدث في النهاية -->
+    <script src="/iso-app.js?v=10"></script>
 </body>
 </html>
