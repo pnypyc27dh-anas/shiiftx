@@ -32,6 +32,7 @@
       "origin": "https://www.shiiftx.com"
     }
   ],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "categories": [
     "finance",
     "shopping",
@@ -57,14 +58,20 @@
       "purpose": "maskable"
     }
   ],
-
   "screenshots": [
+    {
+      "src": "/assets/screen-mobile.png",
+      "sizes": "1024x1239",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "واجهة تسجيل الدخول لمنصة SHIIFT X على الهاتف"
+    },
     {
       "src": "/assets/screen-preview.png",
       "sizes": "1024x912",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "واجهة تسجيل الدخول لمنصة SHIIFT"
+      "label": "واجهة لوحة التحكم والخدمات"
     }
   ]
 }
