@@ -258,3 +258,96 @@
   font-size: 13px;
   cursor: pointer;
 }
+
+/* شريط تحميل تطبيق الأندرويد */
+.android-download-banner {
+  position: fixed;
+  bottom: 96px; /* يرتفع ليكون فوق شريط الآيفون أو مكانه */
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 380px;
+  height: 64px;
+  background: #0f172a;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 20px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+  z-index: 99;
+  direction: rtl;
+  box-sizing: border-box;
+}
+
+.android-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.android-icon-box {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #10b981;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.android-text-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.android-title {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.android-sub {
+  color: #94a3b8;
+  font-size: 11px;
+  line-height: 1.2;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.android-btn {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: #ffffff !important;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.android-btn:active {
+  transform: scale(0.94);
+}
