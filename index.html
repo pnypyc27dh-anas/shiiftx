@@ -1502,7 +1502,7 @@
           <span class="banner-sub">ثبّت المنصة كتطبيق على جهازك</span>
         </div>
       </div>
-      <button onclick="openIosModal()" type="button" class="banner-btn">تثبيت 📲</button>
+      <button onclick="openIosModal()" type="button" class="banner-btn">تثبيت</button>
     </div>
 
     <!-- نافذة الدليل التفاعلي خطوة بخطوة -->
@@ -1522,15 +1522,19 @@
         </div>
 
         <!-- الخطوة 1 -->
-        <div id="ios-step-1" class="interactive-step active-step">
-          <div class="step-visual-box">
-            <i class="ph ph-share-network"></i>
-          </div>
-          <h4 class="step-title-text">زر المشاركة في Safari</h4>
-          <p class="step-info-text">
-            انقر على أيقونة <strong>المشاركة (المربع والسهم للأعلى ⎋)</strong> في شريط متصفح Safari بالأسفل.
-          </p>
-        </div>
+<div id="ios-step-1" class="interactive-step active-step">
+  <div class="step-visual-box">
+    <!-- أيقونة المشاركة الرسمية لمتصفح Safari وiOS -->
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+      <polyline points="16 6 12 2 8 6"></polyline>
+      <line x1="12" y1="2" x2="12" y2="15"></line>
+    </svg>
+  </div>
+  <h4 class="step-title-text">زر المشاركة في Safari</h4>
+  <p class="step-info-text">انقر على زر القائمة في الزاوية السفلى اليسرى ثم اضغط على مشاركة<strong>ا</strong>
+  </p>
+</div>
 
         <!-- الخطوة 2 -->
         <div id="ios-step-2" class="interactive-step">
@@ -1539,7 +1543,7 @@
           </div>
           <h4 class="step-title-text">إضافة إلى الشاشة الرئيسية</h4>
           <p class="step-info-text">
-            مرر القائمة لأسفل واختر <br><strong>"إضافة إلى الشاشة الرئيسية" (Add to Home Screen ➕)</strong>.
+            مرر القائمة لأسفل واختر <br><strong>"إضافة إلى الصفحة الرئيسية"</strong>.
           </p>
         </div>
 
@@ -1550,7 +1554,7 @@
           </div>
           <h4 class="step-title-text">تأكيد التثبيت النهائي</h4>
           <p class="step-info-text">
-            اضغط على كلمة <strong>"إضافة" (Add)</strong> في أعلى الزاوية. سيظهر التطبيق فوراً على شاشتك!
+            اضغط على كلمة <strong>"إضافة" (Add)</strong> في الزاوية العلوية اليسرى. سيظهر التطبيق فوراً على شاشتك!
           </p>
         </div>
 
