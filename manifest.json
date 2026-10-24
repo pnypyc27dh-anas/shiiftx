@@ -6,13 +6,37 @@
   "id": "com.shiiftx.app",
   "scope": "/",
   "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait",
   "background_color": "#0D0E12",
   "theme_color": "#0D0E12",
   "lang": "ar",
   "dir": "rtl",
   "prefer_related_applications": false,
-  "categories": ["finance", "utilities"],
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.shiiftx.app",
+      "url": "https://play.google.com/store/apps/details?id=com.shiiftx.app"
+    }
+  ],
+  "scope_extensions": [
+    {
+      "origin": "https://shiiftx.com"
+    },
+    {
+      "origin": "https://www.shiiftx.com"
+    }
+  ],
+  "categories": [
+    "finance",
+    "shopping",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "/assets/app-icon-192.png",
@@ -24,9 +48,16 @@
       "src": "/assets/app-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
+
   "screenshots": [
     {
       "src": "/assets/screen-mobile.png",
