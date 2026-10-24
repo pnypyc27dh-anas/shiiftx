@@ -262,7 +262,7 @@
 /* شريط تحميل تطبيق الأندرويد */
 .android-download-banner {
   position: fixed;
-  bottom: 96px; /* يرتفع ليكون فوق شريط الآيفون أو مكانه */
+  bottom: 24px; /* تم تعديلها من 96px إلى 24px ليجلس في الأسفل تماماً */
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 32px);
