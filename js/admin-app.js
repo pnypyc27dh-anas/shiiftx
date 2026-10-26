@@ -726,6 +726,57 @@ async function loadAgentsData() {
     }
 }
 
+// فتح نافذة عمليات وكيل محدد
+async function viewAgentOperations(agentId, agentName) {
+    const modal = document.getElementById('agent-ops-modal');
+    const titleEl = document.getElementById('agent-ops-modal-title');
+    const container = document.getElementById('agent-modal-transactions-list');
+
+    if (!modal || !container) return;
+
+    if (titleEl) titleEl.innerText = agentName;
+    container.innerHTML = `<p class="text-xs text-slate-400 p-4 text-center">جاري جلب حركات الوكيل...</p>`;
+    modal.classList.remove('hidden');
+
+    try {
+        const { data: ops, error } = await supabase.rpc('admin_get_agent_transactions_history', {
+            p_target_agent_id: agentId
+        });
+
+        if (error) throw error;
+
+        if (!ops || ops.length === 0) {
+            container.innerHTML = `<p class="text-xs text-slate-400 p-6 text-center">لا توجد عمليات مسجلة لهذا الوكيل حتى الآن.</p>`;
+            return;
+        }
+
+        container.innerHTML = ops.map(op => {
+            const dateStr = new Date(op.created_at).toLocaleString('ar-EG');
+            return `
+                <div class="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-xs">
+                    <div class="space-y-0.5">
+                        <span class="font-bold text-slate-800 dark:text-slate-100 block">${op.target_name}</span>
+                        <span class="text-[11px] text-slate-400 font-mono block">${op.target_email}</span>
+                        <span class="text-[10px] text-slate-400 block">${dateStr} — ${op.notes || 'تحويل مباشر'}</span>
+                    </div>
+                    <div class="text-left font-mono">
+                        <span class="font-black text-slate-800 dark:text-slate-100 block">$${Number(op.amount).toFixed(2)}</span>
+                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">+ عمولة $${Number(op.commission_earned).toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (err) {
+        console.error("View Ops Error:", err);
+        container.innerHTML = `<p class="text-xs text-rose-500 p-4 text-center">فشل تحميل السجل: ${err.message}</p>`;
+    }
+}
+
+function closeAgentOpsModal() {
+    const modal = document.getElementById('agent-ops-modal');
+    if (modal) modal.classList.add('hidden');
+}
 async function openAgentModal() {
     await populateUserDropdown('agent-user-select');
     document.getElementById('agent-commission-input').value = '2';
