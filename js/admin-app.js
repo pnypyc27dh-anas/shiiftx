@@ -671,16 +671,13 @@ async function deleteAffiliateCoupon(userId, name) {
 }
 
 // الوكلاء الماليين
+// الوكلاء الماليين - استخدام الإجراء المخصص للإدارة
 async function loadAgentsData() {
     const tbody = document.getElementById('agents-tbody');
     if (!tbody) return;
 
     try {
-        const { data: agents, error } = await supabase
-            .from('profiles')
-            .select('id, first_name, last_name, email, balance, role, agent_commission_rate')
-            .eq('role', 'agent')
-            .order('created_at', { ascending: false });
+        const { data: agents, error } = await supabase.rpc('admin_get_all_agents');
 
         if (error) throw error;
 
@@ -690,26 +687,32 @@ async function loadAgentsData() {
         }
 
         tbody.innerHTML = agents.map(a => {
-            const agentName = getFullName(a);
-            const commPercent = (a.agent_commission_rate !== null && a.agent_commission_rate !== undefined && a.agent_commission_rate !== '')
-                ? (Number(a.agent_commission_rate) * 100).toFixed(1) + '%' 
+            const agentName = a.full_name || 'بدون اسم';
+            const commPercent = (a.commission_rate !== null && a.commission_rate !== undefined)
+                ? (Number(a.commission_rate) * 100).toFixed(1) + '%' 
                 : 'غير محدد ⚠️';
 
             return `
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${agentName}</td>
+                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">
+                        <div>${agentName}</div>
+                        <div class="text-[10px] text-slate-400 font-mono">حركات الشحن: (${a.transfers_count})</div>
+                    </td>
                     <td class="py-3 font-mono text-slate-500">${a.email || '—'}</td>
-                    <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400">$${Number(a.balance || 0).toFixed(2)}</td>
+                    <td class="py-3 font-mono font-black text-amber-600 dark:text-amber-400">$${Number(a.balance || 0).toFixed(2)}</td>
                     <td class="py-3 font-mono font-bold text-purple-600 dark:text-purple-400 text-center">${commPercent}</td>
                     <td class="py-3 text-center">
-                        <span class="px-2.5 py-1 rounded-md text-[10px] font-black bg-emerald-500/10 text-emerald-600">وكيل معتمد ✓</span>
+                        <button onclick="viewAgentOperations('${a.agent_id}', '${agentName}')" class="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-lg text-xs font-bold transition flex items-center gap-1 mx-auto">
+                            <i class="ph-bold ph-eye"></i>
+                            <span>العمليات (${a.transfers_count})</span>
+                        </button>
                     </td>
                     <td class="py-3 text-center">
                         <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="updateAgentCommissionPrompt('${a.id}', '${agentName}', ${a.agent_commission_rate || 0})" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل نسبة العمولة">
+                            <button onclick="updateAgentCommissionPrompt('${a.agent_id}', '${agentName}', ${a.commission_rate || 0})" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل نسبة العمولة">
                                 <i class="ph-bold ph-pencil-simple text-sm"></i>
                             </button>
-                            <button onclick="demoteAgent('${a.id}', '${agentName !== 'بدون اسم' ? agentName : a.email}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="إلغاء صفة الوكيل">
+                            <button onclick="demoteAgent('${a.agent_id}', '${agentName !== 'بدون اسم' ? agentName : a.email}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="إلغاء صفة الوكيل">
                                 <i class="ph-bold ph-trash text-sm"></i>
                             </button>
                         </div>
