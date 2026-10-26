@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>طلب حذف الحساب | SHIIFT X</title>
 
+    <!-- أيقونة الموقع الأصلية قبل التحديث -->
     <link rel="icon" type="image/png" href="/apple-touch-icon.png">
 
     <!-- الخطوط والتنسيقات -->
@@ -171,7 +172,7 @@
 
         async function sendWebDeleteOTP() {
             const emailInput = document.getElementById('web-del-email');
-            const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+            const email = emailInput ? emailInput.value.trim() : '';
             const btn = document.getElementById('web-send-otp-btn');
 
             if (!email || !email.includes('@')) {
@@ -268,10 +269,10 @@
 
         async function confirmWebDeleteOTP() {
             const codeInput = document.getElementById('web-del-code');
-            const cleanToken = codeInput ? codeInput.value.replace(/\s+/g, '').trim() : '';
+            const code = codeInput ? codeInput.value.trim() : '';
             const btn = document.getElementById('web-confirm-delete-btn');
 
-            if (!cleanToken || cleanToken.length < 6) {
+            if (!code || code.length < 6) {
                 return showStatus("يرجى إدخال رمز التحقق كاملاً (6 أرقام).");
             }
 
@@ -279,63 +280,33 @@
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> <span>جاري التحقق وتنفيذ الطلب...</span>`;
 
             try {
-                // 1. التحقق من صحة الرمز مع التبديل التلقائي بين email و magiclink
-                let { data: authData, error: verifyError } = await client.auth.verifyOtp({
+                // 1. التحقق من صحة رمز الـ OTP
+                const { data: authData, error: verifyError } = await client.auth.verifyOtp({
                     email: activeTargetEmail,
-                    token: cleanToken,
+                    token: code,
                     type: 'email'
                 });
 
-                if (verifyError) {
-                    const fallback = await client.auth.verifyOtp({
-                        email: activeTargetEmail,
-                        token: cleanToken,
-                        type: 'magiclink'
-                    });
-                    authData = fallback.data;
-                    verifyError = fallback.error;
-                }
-
-                if (verifyError || !authData?.user) {
+                if (verifyError || !authData.user) {
                     throw new Error("رمز التحقق غير صحيح أو منتهي الصلاحية.");
                 }
 
-                // 2. استدعاء دالة الخادم الآمنة (بدلاً من تعديل الجدول المباشر)
-                const { data: rpcData, error: rpcError } = await client.rpc('request_account_deletion');
+                // 2. تحديث جدول profiles المباشر (الكود القديم قبل استخدام RPC)
+                const nowIso = new Date().toISOString();
+                const { error: updateError } = await client
+                    .from('profiles')
+                    .update({
+                        is_disabled: true,
+                        deletion_requested_at: nowIso
+                    })
+                    .eq('id', authData.user.id);
 
-                if (rpcError) {
-                    throw new Error(rpcError.message || "فشل تنفيذ العملية.");
-                }
-
-                if (rpcData && rpcData.status === 'error') {
-                    throw new Error(rpcData.message);
-                }
+                if (updateError) throw updateError;
 
                 // 3. إنهاء الجلسة فوراً
                 await client.auth.signOut();
 
-                // 4. معالجة حالة الحساب المجدول مسبقاً
-                if (rpcData && rpcData.status === 'already_scheduled') {
-                    const daysLeft = rpcData.days_left || 14;
-                    document.getElementById('deletion-flow-container').innerHTML = `
-                        <div class="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-3">
-                            <div class="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-2xl">
-                                <i class="ph-bold ph-clock-countdown"></i>
-                            </div>
-                            <h4 class="text-base font-black text-white">الطلب مسجل مسبقاً</h4>
-                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
-                                هذا الحساب مجدول للحذف بالفعل وموقوف مؤقتاً، ومتبقي لديك <span class="text-amber-400 font-bold">(${daysLeft}) يوم</span> ضمن مهلة التراجع قبل المسح التام لكافة بياناتك.
-                            </p>
-                            <p class="text-[11px] text-slate-400">
-                                إذا كنت ترغب بإلغاء الحذف، يمكنك تسجيل الدخول للتطبيق واختيار "إعادة تفعيل الحساب".
-                            </p>
-                        </div>
-                    `;
-                    document.getElementById('web-status-msg').classList.add('hidden');
-                    return;
-                }
-
-                // 5. عرض رسالة النجاح لطلب الحذف الجديد
+                // 4. عرض رسالة النجاح
                 document.getElementById('deletion-flow-container').innerHTML = `
                     <div class="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
                         <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl">
