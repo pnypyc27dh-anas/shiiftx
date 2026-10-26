@@ -1071,6 +1071,77 @@
 
     </div>
 </div>
+
+    <!-- نافذة تأكيد حذف الحساب برمز التحقق (OTP) -->
+<div id="delete-account-otp-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[125]">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[28px] p-6 shadow-2xl text-right space-y-5 border border-slate-100 dark:border-slate-800 slide-down">
+        
+        <!-- الترويسة -->
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div class="flex items-center gap-2.5 text-red-600">
+                <div class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 flex items-center justify-center text-xl">
+                    <i class="ph-bold ph-shield-warning"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-black text-slate-800 dark:text-slate-100">تأكيد حذف الحساب</h4>
+                    <p class="text-[10px] text-red-500 font-bold">مهلة 14 يوماً قبل الحذف التام</p>
+                </div>
+            </div>
+            <button onclick="closeDeleteAccountOTPModal()" type="button" class="modal-btn-close btn-spring w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
+                <i class="ph ph-x font-bold text-base"></i>
+            </button>
+        </div>
+
+        <!-- الخطوة 1: طلب إرسال رمز التحقق -->
+        <div id="del-otp-step-1" class="space-y-4 text-xs">
+            <div class="p-3.5 bg-red-50/60 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 rounded-2xl text-slate-600 dark:text-slate-300 space-y-1.5 leading-relaxed">
+                <p class="font-bold text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                    <i class="ph-fill ph-warning-circle text-base"></i>
+                    <span>تنبيه أمني هام:</span>
+                </p>
+                <p class="text-[11px]">
+                    سيتم إرسال رمز أمان مكون من 6 أرقام إلى بريدك الإلكتروني لتأكيد رغبتك في حذف الحساب وبدء مهلة الـ 14 يوماً.
+                </p>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">البريد الإلكتروني المرتبط</label>
+                <input type="email" id="del-account-email-display" readonly class="input-field w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-mono text-left cursor-not-allowed select-none" dir="ltr">
+            </div>
+
+            <button type="button" id="send-del-otp-btn" onclick="handleSendDeleteAccountOTP()" class="btn-spring w-full py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-black transition shadow-md flex justify-center items-center gap-2 cursor-pointer">
+                <i class="ph-bold ph-paper-plane-tilt text-base"></i>
+                <span>إرسال رمز التحقق للحذف</span>
+            </button>
+        </div>
+
+        <!-- الخطوة 2: إدخال الرمز وتأكيد الحذف -->
+        <div id="del-otp-step-2" class="hidden space-y-4 text-xs">
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed text-center">
+                أدخل رمز الأمان المكون من 6 أرقام المرسل إلى بريدك:
+            </p>
+
+            <div>
+                <input type="text" id="del-otp-code-input" maxlength="6" inputmode="numeric" placeholder="••••••" class="input-field no-spin w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-800 dark:text-slate-100 font-mono tracking-[0.4em] text-center text-xl font-bold focus:outline-none focus:border-red-500" dir="ltr" autocomplete="one-time-code">
+            </div>
+
+            <button type="button" id="confirm-del-with-otp-btn" onclick="handleVerifyAndDeleteAccount()" class="btn-spring w-full py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-black transition shadow-md flex justify-center items-center gap-2 cursor-pointer">
+                <i class="ph-bold ph-trash"></i>
+                <span>تأكيد الحذف النهائي</span>
+            </button>
+
+            <!-- زر إعادة الإرسال ومؤقت 60 ثانية -->
+            <div class="text-center pt-1">
+                <button type="button" id="del-resend-btn" onclick="handleResendDeleteAccountOTP()" disabled class="text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition inline-flex items-center gap-1.5 cursor-pointer">
+                    <i class="ph-bold ph-arrows-clockwise" id="del-resend-icon"></i>
+                    <span>إعادة إرسال الرمز</span>
+                    <span id="del-resend-timer" class="font-mono text-red-500 font-bold">(60s)</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
     <!-- نافذة إعادة تفعيل الحساب المؤتمتة -->
     <div id="reactivate-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[115]">
     <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[28px] p-6 shadow-2xl text-center space-y-4 border border-slate-100 dark:border-slate-800">
