@@ -2,184 +2,198 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHIIFT X — طلب حذف الحساب والبيانات</title>
-    
-    <!-- الأيقونات والخطوط -->
-    <link rel="icon" type="image/png" href="assets/logo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلب حذف الحساب | SHIIFT X</title>
+
+    <!-- أيقونة الموقع (Favicon) متناسقة مع المنصة الأساسية -->
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+    <link rel="alternate icon" type="image/png" href="assets/logo.png">
+
+    <!-- خط Tajawal وتنسيقات Tailwind CSS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- مكتبة Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
-    <!-- مكتبة Supabase وملف الإعدادات -->
+
+    <!-- مكتبة Supabase JS v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/config.js"></script>
 
     <style>
         body {
-            font-family: 'Tajawal', 'Plus Jakarta Sans', sans-serif;
-            background-color: #0b1120;
-            background-image: radial-gradient(#1e293b 1px, transparent 1px);
-            background-size: 24px 24px;
-            color: #f8fafc;
-            -webkit-tap-highlight-color: transparent;
+            font-family: 'Tajawal', sans-serif;
         }
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.88);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
-        .input-field {
-            background: rgba(15, 23, 42, 0.8) !important;
-            border: 1.5px solid #334155 !important;
-            border-radius: 14px !important;
-            color: #ffffff !important;
-            transition: all 0.25s ease;
-        }
-        .input-field:focus {
-            border-color: #005ba3 !important;
-            box-shadow: 0 0 0 3px rgba(0, 91, 163, 0.25) !important;
-            outline: none;
-        }
-        .no-spin::-webkit-outer-spin-button,
-        .no-spin::-webkit-inner-spin-button {
-            -webkit-appearance: none !important;
-            margin: 0 !important;
-        }
-        .no-spin { -moz-appearance: textfield !important; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4 sm:p-6 antialiased">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-rose-500 selection:text-white">
 
-    <!-- شريط الترويسة -->
-    <header class="w-full max-w-xl mx-auto flex items-center justify-between py-4">
-        <a href="/" class="flex items-center gap-2">
-            <span class="text-xl font-black tracking-wider text-white">SHIIFT<span class="text-[#5CE1E6]">X</span></span>
-        </a>
-        <a href="/" class="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1.5 transition">
-            <i class="ph ph-arrow-left"></i>
-            <span>العودة للمنصة الرئيسية</span>
-        </a>
+    <!-- رأس الصفحة (Header) -->
+    <header class="w-full border-b border-slate-800/80 bg-slate-900/50 backdrop-blur px-6 py-4">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-rose-950/40">
+                    X
+                </div>
+                <div>
+                    <h1 class="text-base font-black tracking-wide text-white">SHIIFT X</h1>
+                    <p class="text-[10px] text-slate-400">بوابة إدارة وأمان الحسابات</p>
+                </div>
+            </div>
+            <a href="/" class="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1.5 font-medium">
+                <span>العودة للمنصة</span>
+                <i class="ph ph-arrow-left"></i>
+            </a>
+        </div>
     </header>
 
-    <!-- الحاوية المركزية لمعالجة الطلب -->
-    <main class="w-full max-w-xl mx-auto my-auto py-4">
-        <div class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
-            
-            <div class="text-center space-y-2">
-                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-red-500/10 text-red-500 border border-red-500/20 mb-1">
-                    <i class="ph-bold ph-shield-warning text-2xl"></i>
-                </div>
-                <h1 class="text-xl font-black text-white">طلب حذف الحساب والبيانات</h1>
-                <p class="text-xs text-slate-400 leading-relaxed max-w-md mx-auto">
-                    بموجب سياسات حماية البيانات ومتطلبات Google Play، يتيح هذا النموذج طلب حذف حسابك وبياناتك المرتبطة حتى لو حذفت التطبيق من جهازك.
-                </p>
-            </div>
+    <!-- المحتوى الرئيسي -->
+    <main class="flex-1 flex items-center justify-center p-4 sm:p-6">
+        <div class="w-full max-w-md">
 
-            <!-- سياسة الخصوصية وتفاصيل الحذف للامتثال لشروط المتجر -->
-            <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2.5 text-xs">
-                <h3 class="font-bold text-slate-200 flex items-center gap-2">
-                    <i class="ph-fill ph-info text-blue-400"></i> تفاصيل دورة الحذف والبيانات:
-                </h3>
-                <ul class="space-y-1.5 text-slate-400 pr-4 list-disc leading-relaxed">
-                    <li><strong class="text-slate-300">مهلة التراجع (14 يوماً):</strong> فور تأكيد الطلب يتم تعطيل الوصول، وتمنح مهلة 14 يوماً لإلغاء الحذف بمجرد تسجيل الدخول في أي وقت.</li>
-                    <li><strong class="text-slate-300">البيانات التي تُحذف نهائياً:</strong> بيانات تسجيل الدخول، البريد، رقم الهاتف، الاسم، والعناوين الرقمية.</li>
-                    <li><strong class="text-slate-300">البيانات المحتفظ بها قانونياً:</strong> سجلات التحويلات والفواتير المالية المكتملة تُحفظ بصفة مشفرة ومفصولة لأغراض التدقيق المحاسبي والامتثال الضريبي.</li>
-                </ul>
-            </div>
+            <!-- بطاقة حذف الحساب -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+                <div class="absolute -top-24 -left-24 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-            <!-- النموذج التفاعلي (مرحلتين) -->
-            <div id="deletion-flow-container" class="space-y-4">
-                
-                <!-- المرحلة 1: إدخال البريد الإلكتروني وطلب رمز التحقق -->
-                <div id="step-request-otp" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-300 mb-1.5">البريد الإلكتروني المسجل بالحساب</label>
-                        <div class="relative">
-                            <i class="ph ph-envelope-simple absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                            <input id="web-del-email" type="email" required placeholder="name@example.com" class="input-field w-full pr-11 pl-4 py-3 text-xs" dir="ltr">
-                        </div>
+                <!-- عنوان البطاقة -->
+                <div class="text-center space-y-2 mb-6">
+                    <div class="w-14 h-14 bg-rose-500/10 text-rose-500 rounded-2xl flex items-center justify-center mx-auto text-2xl border border-rose-500/20 shadow-inner">
+                        <i class="ph-bold ph-shield-warning"></i>
                     </div>
-
-                    <button id="web-send-otp-btn" type="button" onclick="sendWebDeleteOTP()" class="w-full py-3.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 cursor-pointer">
-                        <i class="ph-bold ph-paper-plane-tilt text-base"></i>
-                        <span>إرسال رمز التحقق للحذف</span>
-                    </button>
+                    <h2 class="text-lg font-black text-white">طلب حذف وتصفية الحساب</h2>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        وفقاً لسياسة الأمان ومهلة الـ 14 يوماً المعتمدة، سيتم تعطيل الحساب فوراً قبل المسح الشامل.
+                    </p>
                 </div>
 
-                <!-- المرحلة 2: إدخال الرمز المكون من 6 أرقام والتأكيد النهائي -->
-                <div id="step-verify-otp" class="hidden space-y-4">
-                    <div>
-                        <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-xs font-bold text-slate-300">رمز التحقق المستلم (6 أرقام)</label>
-                            <span id="target-email-badge" class="text-[11px] text-blue-400 font-mono"></span>
+                <!-- حاوية تدفق الخطوات التفاعلية -->
+                <div id="deletion-flow-container" class="space-y-4">
+
+                    <!-- الخطوة 1: إدخال البريد الإلكتروني -->
+                    <div id="web-step-1" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">البريد الإلكتروني المسجل للحساب</label>
+                            <div class="relative">
+                                <input type="email" id="web-del-email" placeholder="name@example.com" dir="ltr"
+                                    class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors">
+                                <i class="ph ph-envelope absolute left-3.5 top-3.5 text-slate-500 text-base"></i>
+                            </div>
                         </div>
-                        <input id="web-del-code" type="text" maxlength="6" inputmode="numeric" placeholder="••••••" class="input-field no-spin w-full px-4 py-3.5 text-center text-xl font-mono font-bold tracking-[0.4em] focus:border-red-500" dir="ltr" autocomplete="one-time-code">
-                    </div>
 
-                    <button id="web-confirm-delete-btn" type="button" onclick="confirmWebDeleteOTP()" class="w-full py-3.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 cursor-pointer">
-                        <i class="ph-bold ph-trash text-base"></i>
-                        <span>تأكيد طلب الحذف (مهلة 14 يوماً)</span>
-                    </button>
-
-                    <!-- إعادة إرسال الرمز مع عداد 60 ثانية -->
-                    <div class="text-center pt-1">
-                        <button id="web-resend-btn" type="button" onclick="resendWebDeleteOTP()" disabled class="text-xs font-bold text-slate-400 hover:text-red-400 disabled:opacity-50 disabled:cursor-not-allowed transition inline-flex items-center gap-1.5 cursor-pointer">
-                            <i class="ph-bold ph-arrows-clockwise" id="web-resend-icon"></i>
-                            <span>إعادة إرسال الرمز</span>
-                            <span id="web-resend-timer" class="font-mono text-red-400 font-bold">(60s)</span>
+                        <button onclick="sendWebDeleteOTP()" id="web-send-otp-btn"
+                            class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-all border border-slate-700">
+                            <i class="ph-bold ph-paper-plane-tilt"></i>
+                            <span>إرسال رمز التحقق (OTP)</span>
                         </button>
                     </div>
+
+                    <!-- الخطوة 2: إدخال الرمز المكون من 6 أرقام (مخفية افتراضياً) -->
+                    <div id="web-step-2" class="space-y-4 hidden">
+                        <div class="p-3 bg-slate-900/70 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
+                            <span class="text-slate-400">المرسل إليه:</span>
+                            <span id="web-email-preview" class="font-bold text-slate-200" dir="ltr"></span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5 text-center">أدخل رمز الأمان المكون من 6 أرقام</label>
+                            <input type="text" id="web-del-code" maxlength="6" placeholder="• • • • • •" dir="ltr"
+                                class="w-full text-center tracking-[0.5em] text-lg font-black bg-slate-900/90 border border-slate-700/80 rounded-xl py-3 text-white placeholder-slate-600 focus:outline-none focus:border-rose-500 transition-colors">
+                        </div>
+
+                        <button onclick="confirmWebDeleteOTP()" id="web-confirm-delete-btn"
+                            class="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-3.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-rose-950/50">
+                            <i class="ph-bold ph-trash"></i>
+                            <span>تأكيد طلب الحذف (مهلة 14 يوماً)</span>
+                        </button>
+
+                        <div class="text-center pt-1">
+                            <button onclick="resendWebDeleteOTP()" id="web-del-resend-btn" disabled
+                                class="text-xs text-slate-400 hover:text-white transition-colors flex items-center justify-center gap-1.5 mx-auto">
+                                <i class="ph ph-arrows-clockwise" id="web-resend-icon"></i>
+                                <span>إعادة إرسال الرمز</span>
+                                <span id="web-del-timer" class="text-rose-400 font-bold">(60s)</span>
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
 
-            </div>
+                <!-- رسائل الحالة والأخطاء -->
+                <div id="web-status-msg" class="hidden mt-4 p-3 rounded-xl text-xs font-medium border text-center transition-all"></div>
 
-            <!-- رسالة الحالة والتنبيهات -->
-            <div id="web-status-msg" class="hidden p-4 rounded-2xl text-xs font-bold text-center leading-relaxed"></div>
+                <!-- توضيحات وشروط الحذف -->
+                <div class="mt-6 pt-5 border-t border-slate-800/80 text-[11px] text-slate-400 leading-relaxed space-y-1.5">
+                    <p class="flex items-start gap-1.5">
+                        <i class="ph ph-check text-emerald-400 mt-0.5"></i>
+                        <span>يتم تجميد وتعطيل الحساب فوراً عند تأكيد هذا الطلب.</span>
+                    </p>
+                    <p class="flex items-start gap-1.5">
+                        <i class="ph ph-check text-emerald-400 mt-0.5"></i>
+                        <span>تُمنح مهلة سماح مدتها 14 يوماً للتراجع واستعادة الحساب عبر التطبيق.</span>
+                    </p>
+                    <p class="flex items-start gap-1.5">
+                        <i class="ph ph-check text-emerald-400 mt-0.5"></i>
+                        <span>بعد انقضاء المهلة، تُمحى كافة بياناتك الشخصية وبيانات الدخول نهائياً.</span>
+                    </p>
+                </div>
+            </div>
 
         </div>
     </main>
 
-    <!-- التذييل -->
-    <footer class="w-full max-w-xl mx-auto text-center py-4 text-[11px] text-slate-500">
-        منصة SHIIFT X © 2026 — جميع الحقوق محفوظة
+    <!-- تذييل الصفحة -->
+    <footer class="w-full border-t border-slate-900 py-4 text-center text-xs text-slate-500">
+        جميع الحقوق محفوظة &copy; 2026 SHIIFT X
     </footer>
 
-    <!-- منطق المعالجة بالجافاسكريبت -->
+    <!-- منطق العمليات والتكامل مع Supabase -->
     <script>
-        // التحقق من تعريف عميل Supabase سواء عبر config.js أو مباشرة
-        const client = (typeof supabase !== 'undefined') ? supabase : (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+        // إعداد عميل Supabase (يتم استخدام نفس مفاتيح مشروعك)
+        const SUPABASE_URL = "https://your-project.supabase.co"; // ضع رابط مشروعك هنا إن لم يكن مدمجاً
+        const SUPABASE_ANON_KEY = "your-anon-key";              // ضع المفتاح العام هنا
+
+        // إنشاء العميل
+        const client = (typeof supabase !== 'undefined' && supabase.createClient) 
+            ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
 
         let activeTargetEmail = '';
-        let resendCountdownTimer = null;
+        let webCountdownTimer = null;
 
-        function showStatus(text, type = 'error') {
-            const box = document.getElementById('web-status-msg');
-            box.classList.remove('hidden');
-            if (type === 'success') {
-                box.className = 'p-4 rounded-2xl text-xs font-bold text-center leading-relaxed bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 block';
+        // إظهار رسائل الحالة للمستخدم
+        function showStatus(text, isError = true) {
+            const el = document.getElementById('web-status-msg');
+            if (!el) return;
+            el.classList.remove('hidden', 'bg-rose-500/10', 'border-rose-500/30', 'text-rose-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+            
+            if (isError) {
+                el.classList.add('bg-rose-500/10', 'border-rose-500/30', 'text-rose-400');
             } else {
-                box.className = 'p-4 rounded-2xl text-xs font-bold text-center leading-relaxed bg-red-500/10 border border-red-500/30 text-red-400 block';
+                el.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
             }
-            box.innerText = text;
+            el.innerText = text;
         }
 
-        // 1. إرسال رمز التحقق
+        // 1. إرسال رمز التحقق OTP
         async function sendWebDeleteOTP() {
             const emailInput = document.getElementById('web-del-email');
-            const email = emailInput ? emailInput.value.trim() : '';
+            const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
             const btn = document.getElementById('web-send-otp-btn');
 
-            if (!email) {
-                return showStatus("يرجى إدخال البريد الإلكتروني المسجل.");
+            if (!email || !email.includes('@')) {
+                return showStatus("يرجى إدخال بريد إلكتروني صحيح.");
             }
 
             activeTargetEmail = email;
             btn.disabled = true;
-            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> <span>جاري إرسال الرمز...</span>`;
-            document.getElementById('web-status-msg').classList.add('hidden');
+            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> <span>جاري إرسال رمز الأمان...</span>`;
 
             try {
                 const { error } = await client.auth.signInWithOtp({
@@ -189,12 +203,13 @@
 
                 if (error) throw error;
 
-                document.getElementById('step-request-otp').classList.add('hidden');
-                document.getElementById('step-verify-otp').classList.remove('hidden');
-                document.getElementById('target-email-badge').innerText = activeTargetEmail;
-
-                showStatus("تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح.", "success");
-                startWebResendTimer(60);
+                // التبديل للخطوة 2
+                document.getElementById('web-step-1').classList.add('hidden');
+                document.getElementById('web-step-2').classList.remove('hidden');
+                document.getElementById('web-email-preview').innerText = activeTargetEmail;
+                
+                showStatus("تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح.", false);
+                startWebCountdown(60);
 
                 const codeInput = document.getElementById('web-del-code');
                 if (codeInput) {
@@ -203,55 +218,48 @@
                 }
 
             } catch (err) {
-                const errMsg = err?.message || String(err);
-                if (errMsg.includes('429') || errMsg.includes('security purposes') || errMsg.includes('rate limit')) {
+                const msg = err.message || String(err);
+                if (msg.includes('429') || msg.includes('security purposes') || msg.includes('rate limit')) {
                     showStatus("يرجى الانتظار لمدة دقيقة واحدة قبل طلب رمز جديد حفاظاً على الأمان.");
                 } else {
-                    showStatus("فشل إرسال الرمز: " + errMsg);
+                    showStatus("فشل إرسال الرمز: " + msg);
                 }
+            } finally {
                 btn.disabled = false;
-                btn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt text-base"></i> <span>إرسال رمز التحقق للحذف</span>`;
+                btn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt"></i> <span>إرسال رمز التحقق (OTP)</span>`;
             }
         }
 
-        // 2. مؤقت إعادة الإرسال (60 ثانية)
-        function startWebResendTimer(seconds = 60) {
-            const btn = document.getElementById('web-resend-btn');
-            const timerDisplay = document.getElementById('web-resend-timer');
-            const icon = document.getElementById('web-resend-icon');
+        // 2. مؤقت إعادة الإرسال
+        function startWebCountdown(seconds = 60) {
+            const btn = document.getElementById('web-del-resend-btn');
+            const timerEl = document.getElementById('web-del-timer');
+            if (!btn || !timerEl) return;
 
-            if (!btn || !timerDisplay) return;
-
-            if (resendCountdownTimer) clearInterval(resendCountdownTimer);
+            if (webCountdownTimer) clearInterval(webCountdownTimer);
 
             btn.disabled = true;
-            timerDisplay.classList.remove('hidden');
-            if (icon) icon.classList.remove('animate-spin');
+            timerEl.classList.remove('hidden');
 
             let remaining = seconds;
-            timerDisplay.innerText = `(${remaining}s)`;
+            timerEl.innerText = `(${remaining}s)`;
 
-            resendCountdownTimer = setInterval(() => {
+            webCountdownTimer = setInterval(() => {
                 remaining--;
                 if (remaining > 0) {
-                    timerDisplay.innerText = `(${remaining}s)`;
+                    timerEl.innerText = `(${remaining}s)`;
                 } else {
-                    clearInterval(resendCountdownTimer);
-                    resendCountdownTimer = null;
+                    clearInterval(webCountdownTimer);
+                    webCountdownTimer = null;
                     btn.disabled = false;
-                    timerDisplay.classList.add('hidden');
+                    timerEl.classList.add('hidden');
                 }
             }, 1000);
         }
 
         // 3. إعادة إرسال الرمز
         async function resendWebDeleteOTP() {
-            const btn = document.getElementById('web-resend-btn');
             const icon = document.getElementById('web-resend-icon');
-
-            if (!activeTargetEmail) return;
-
-            btn.disabled = true;
             if (icon) icon.classList.add('animate-spin');
 
             try {
@@ -262,25 +270,25 @@
 
                 if (error) throw error;
 
-                showStatus("تمت إعادة إرسال رمز جديد إلى بريدك بنجاح.", "success");
-                document.getElementById('web-del-code').value = '';
-                startWebResendTimer(60);
+                showStatus("تمت إعادة إرسال رمز التحقق بنجاح.", false);
+                const codeInput = document.getElementById('web-del-code');
+                if (codeInput) codeInput.value = '';
+                startWebCountdown(60);
 
             } catch (err) {
                 showStatus("فشل إعادة الإرسال: " + (err.message || err));
-                btn.disabled = false;
             } finally {
                 if (icon) icon.classList.remove('animate-spin');
             }
         }
 
-        // 4. التحقق من الرمز وتنفيذ جدولة الحذف
+        // 4. تأكيد الرمز وتنفيذ طلب الحذف الذكي
         async function confirmWebDeleteOTP() {
             const codeInput = document.getElementById('web-del-code');
-            const code = codeInput ? codeInput.value.trim() : '';
+            const cleanToken = codeInput ? codeInput.value.replace(/\s+/g, '').trim() : '';
             const btn = document.getElementById('web-confirm-delete-btn');
 
-            if (!code || code.length < 6) {
+            if (!cleanToken || cleanToken.length < 6) {
                 return showStatus("يرجى إدخال رمز التحقق كاملاً (6 أرقام).");
             }
 
@@ -288,29 +296,64 @@
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> <span>جاري التحقق وتنفيذ الطلب...</span>`;
 
             try {
-                // التحقق من صحة رمز الـ OTP
-                const { data: authData, error: verifyError } = await client.auth.verifyOtp({
+                // التحقق من صحة الرمز مع التجربة المزدوجة لتفادي أخطاء النوع
+                let { data: authData, error: verifyError } = await client.auth.verifyOtp({
                     email: activeTargetEmail,
-                    token: code,
+                    token: cleanToken,
                     type: 'email'
                 });
 
-                if (verifyError || !authData.user) {
+                if (verifyError) {
+                    const fallback = await client.auth.verifyOtp({
+                        email: activeTargetEmail,
+                        token: cleanToken,
+                        type: 'magiclink'
+                    });
+                    authData = fallback.data;
+                    verifyError = fallback.error;
+                }
+
+                if (verifyError || !authData?.user) {
                     throw new Error("رمز التحقق غير صحيح أو منتهي الصلاحية.");
                 }
 
-                // تعطيل الحساب وتوثيق تاريخ طلب الحذف لبدء مهلة الـ 14 يوماً
-                // الكود الجديد الآمن:
-const { data: rpcData, error: rpcError } = await client.rpc('request_account_deletion');
+                // استدعاء دالة الخادم الذكية
+                const { data: rpcData, error: rpcError } = await client.rpc('request_account_deletion');
 
-if (rpcError || (rpcData && rpcData.status === 'error')) {
-    throw new Error(rpcError?.message || rpcData?.message || "فشل تسجيل طلب الحذف");
-}
+                if (rpcError) {
+                    throw new Error(rpcError.message || "فشل تنفيذ العملية.");
+                }
 
-                // إنهاء الجلسة المفتوحة فوراً
+                // الحساب محذوف نهائياً
+                if (rpcData && rpcData.status === 'error') {
+                    throw new Error(rpcData.message);
+                }
+
+                // إنهاء الجلسة فوراً
                 await client.auth.signOut();
 
-                // استبدال النموذج برسالة التأكيد النهائية المعتمدة
+                // حالة الحساب المجدول مسبقاً (تم حذفه من index أو من هنا سابقاً)
+                if (rpcData && rpcData.status === 'already_scheduled') {
+                    const daysLeft = rpcData.days_left || 14;
+                    document.getElementById('deletion-flow-container').innerHTML = `
+                        <div class="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-3">
+                            <div class="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-2xl">
+                                <i class="ph-bold ph-clock-countdown"></i>
+                            </div>
+                            <h4 class="text-base font-black text-white">الطلب مسجل مسبقاً</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                هذا الحساب مجدول للحذف بالفعل وموقوف مؤقتاً، ومتبقي لديك <span class="text-amber-400 font-bold">(${daysLeft}) يوم</span> ضمن مهلة التراجع قبل المسح التام لكافة بياناتك.
+                            </p>
+                            <p class="text-[11px] text-slate-400">
+                                إذا كنت ترغب بإلغاء الحذف، يمكنك تسجيل الدخول للتطبيق واختيار "إعادة تفعيل الحساب".
+                            </p>
+                        </div>
+                    `;
+                    document.getElementById('web-status-msg').classList.add('hidden');
+                    return;
+                }
+
+                // حالة نجاح طلب الحذف الجديد
                 document.getElementById('deletion-flow-container').innerHTML = `
                     <div class="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
                         <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl">
@@ -327,7 +370,7 @@ if (rpcError || (rpcData && rpcData.status === 'error')) {
             } catch (err) {
                 showStatus(err.message || "حدث خطأ أثناء تأكيد العملية.");
                 btn.disabled = false;
-                btn.innerHTML = `<i class="ph-bold ph-trash text-base"></i> <span>تأكيد طلب الحذف (مهلة 14 يوماً)</span>`;
+                btn.innerHTML = `<i class="ph-bold ph-trash"></i> <span>تأكيد طلب الحذف (مهلة 14 يوماً)</span>`;
             }
         }
     </script>
