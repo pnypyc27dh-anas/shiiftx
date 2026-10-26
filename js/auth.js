@@ -55,7 +55,9 @@ function stopInactivityTracking() {
     });
 }
 
+// ========================================================================
 // 1. الاستماع لتغير حالات جلسة الدخول
+// ========================================================================
 supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
         stopInactivityTracking();
@@ -72,59 +74,60 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         toggleView('register-step-form', false);
         toggleView('register-step-otp', false);
         toggleView('register-step-password', true);
-        document.getElementById('register-modal-title').innerText = "تعيين كلمة المرور الجديدة";
+        const modalTitle = document.getElementById('register-modal-title');
+        if (modalTitle) modalTitle.innerText = "تعيين كلمة المرور الجديدة";
         toggleView('register-modal', true);
     } else if (event === 'SIGNED_IN') {
-    if (isSettingNewPassword) return;
-    if (currentFlowType !== 'reset') {
-        const { data: prof } = await supabase
-            .from('profiles')
-            .select('status, deletion_requested_at')
-            .eq('id', session.user.id)
-            .single();
+        if (isSettingNewPassword) return;
+        if (currentFlowType !== 'reset' && session?.user) {
+            const { data: prof } = await supabase
+                .from('profiles')
+                .select('status, deletion_requested_at')
+                .eq('id', session.user.id)
+                .single();
 
-        // 1. رفض الحساب المحذوف نهائياً
-        if (prof && (prof.status === 'deleted' || prof.status === 'محذوف')) {
-            stopInactivityTracking();
-            await supabase.auth.signOut();
-            currentUser = null;
-            toggleView('dashboard-screen', false);
-            toggleView('login-screen', true);
-            showCustomAlert("تم حذف هذا الحساب نهائياً ولا يمكن استرجاعه.");
-            return;
-        }
+            // 1. الحساب المحذوف نهائياً
+            if (prof && (prof.status === 'deleted' || prof.status === 'محذوف')) {
+                stopInactivityTracking();
+                await supabase.auth.signOut();
+                currentUser = null;
+                toggleView('dashboard-screen', false);
+                toggleView('login-screen', true);
+                showCustomAlert("تم حذف هذا الحساب وبياناته نهائياً ولا يمكن استرجاعه.");
+                return;
+            }
 
-        // 2. فحص الحظر
-        if (prof && prof.status === 'banned') {
-            stopInactivityTracking();
-            await supabase.auth.signOut();
-            currentUser = null;
-            showCustomAlert("هذا الحساب محظور إدارياً. يرجى التواصل مع الإدارة.");
-            return;
-        }
+            // 2. الحساب المحظور إدارياً
+            if (prof && prof.status === 'banned') {
+                stopInactivityTracking();
+                await supabase.auth.signOut();
+                currentUser = null;
+                showCustomAlert("هذا الحساب محظور إدارياً. يرجى التواصل مع الإدارة.");
+                return;
+            }
 
-        // 3. مهلة الـ 14 يوماً
-        if (prof && (prof.status === 'inactive' || prof.status === 'معطل' || prof.deletion_requested_at)) {
-            stopInactivityTracking();
-            currentUser = session.user;
-            updateReactivateNotice(prof);
-            toggleView('dashboard-screen', false);
-            toggleView('login-screen', true);
-            toggleView('reactivate-modal', true);
-        } else {
-            currentUser = session.user;
-            postLoginSetup();
+            // 3. الحساب المعلق ضمن مهلة الـ 14 يوماً
+            if (prof && (prof.status === 'inactive' || prof.status === 'معطل' || prof.deletion_requested_at)) {
+                stopInactivityTracking();
+                currentUser = session.user;
+                updateReactivateNotice(prof);
+                toggleView('dashboard-screen', false);
+                toggleView('login-screen', true);
+                toggleView('reactivate-modal', true);
+            } else {
+                currentUser = session.user;
+                postLoginSetup();
+            }
         }
-    }
-}
-    }else if (event === 'SIGNED_OUT') {
+    } else if (event === 'SIGNED_OUT') {
         stopInactivityTracking();
         currentUser = null;
     }
 });
 
-
+// ========================================================================
 // 2. التحقق من الجلسة المخزنة عند فتح الصفحة لأول مرة
+// ========================================================================
 supabase.auth.getSession().then(async ({ data: { session } }) => {
     const isRecoveryHash = window.location.hash.includes('type=recovery');
     if (session && !isRecoveryHash) { 
@@ -134,55 +137,56 @@ supabase.auth.getSession().then(async ({ data: { session } }) => {
             .eq('id', session.user.id)
             .single();
 
-        // الحالة الأولى: الحساب محذوف نهائياً (طرد فوري ومسح الجلسة)
         if (prof && (prof.status === 'deleted' || prof.status === 'محذوف')) {
             await supabase.auth.signOut();
             currentUser = null;
             toggleView('dashboard-screen', false);
             toggleView('login-screen', true);
             showCustomAlert("تم حذف هذا الحساب وبياناته نهائياً ولا يمكن استرجاعه.");
-        } 
-        // الحالة الثانية: الحساب محظور إدارياً (طرد وتوجيه لتسجيل الدخول)
-        else if (prof && prof.status === 'banned') {
+        } else if (prof && prof.status === 'banned') {
             await supabase.auth.signOut();
             currentUser = null;
             toggleView('dashboard-screen', false);
             toggleView('login-screen', true);
-            showCustomAlert("هذا الحساب محظور إدارياً. يرجى التواصل مع الإدارة.");
-        } 
-        // الحالة الثالثة: الحساب مجدول للحذف أو معطل مؤقتاً (عرض نافذة مهلة الـ 14 يوماً)
-        else if (prof && (prof.status === 'inactive' || prof.status === 'معطل' || prof.deletion_requested_at)) {
+        } else if (prof && (prof.status === 'inactive' || prof.status === 'معطل' || prof.deletion_requested_at)) {
             currentUser = session.user;
             updateReactivateNotice(prof);
             toggleView('dashboard-screen', false);
             toggleView('login-screen', true);
             toggleView('reactivate-modal', true);
-        } 
-        // الحالة الرابعة: حساب سليم ونشط (السماح بالدخول المباشر للوحة التحكم)
-        else {
+        } else {
             currentUser = session.user; 
             postLoginSetup(); 
         }
     }
 });
 
+// ========================================================================
 // 3. معالجة تسجيل الدخول اليدوي
+// ========================================================================
 async function handleLogin() { 
-    const email = document.getElementById('login-email').value.trim();
-    const pass = document.getElementById('login-password').value;
+    const emailEl = document.getElementById('login-email');
+    const passEl = document.getElementById('login-password');
     const btn = document.getElementById('login-btn'); 
+
+    const email = emailEl ? emailEl.value.trim() : '';
+    const pass = passEl ? passEl.value : '';
 
     if (!email || !pass) return showCustomAlert("يرجى إدخال البريد الإلكتروني وكلمة المرور."); 
 
-    btn.disabled = true; 
-    btn.innerHTML = `<span class="flex items-center justify-center gap-2">${BRAND_LOADER_SVG} <span>جاري التحقق...</span></span>`; 
+    if (btn) {
+        btn.disabled = true; 
+        btn.innerHTML = `<span class="flex items-center justify-center gap-2">${typeof BRAND_LOADER_SVG !== 'undefined' ? BRAND_LOADER_SVG : '<i class="ph ph-spinner animate-spin"></i>'} <span>جاري التحقق...</span></span>`; 
+    }
     
     const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass }); 
     
     if (error) { 
         showCustomAlert("بيانات الدخول غير صحيحة."); 
-        btn.disabled = false; 
-        btn.innerHTML = `<span>تسجيل الدخول</span><i class="ph ph-sign-in text-lg"></i>`; 
+        if (btn) {
+            btn.disabled = false; 
+            btn.innerHTML = `<span>تسجيل الدخول</span><i class="ph ph-sign-in text-lg"></i>`; 
+        }
         return;
     }
 
@@ -192,34 +196,39 @@ async function handleLogin() {
         .eq('id', data.user.id)
         .single();
 
-    btn.disabled = false; 
-    btn.innerHTML = `<span>تسجيل الدخول</span><i class="ph ph-sign-in text-lg"></i>`;
+    if (btn) {
+        btn.disabled = false; 
+        btn.innerHTML = `<span>تسجيل الدخول</span><i class="ph ph-sign-in text-lg"></i>`;
+    }
 
     // 1. فحص الحساب المحذوف نهائياً
-if (prof && (prof.status === 'deleted' || prof.status === 'محذوف')) {
-    await supabase.auth.signOut();
-    currentUser = null;
-    return showCustomAlert("تم حذف هذا الحساب وبياناته نهائياً ولا يمكن استرجاعه.");
-}
+    if (prof && (prof.status === 'deleted' || prof.status === 'محذوف')) {
+        await supabase.auth.signOut();
+        currentUser = null;
+        return showCustomAlert("تم حذف هذا الحساب وبياناته نهائياً ولا يمكن استرجاعه.");
+    }
 
-// 2. فحص الحساب المحظور إدارياً
-if (prof && prof.status === 'banned') {
-    await supabase.auth.signOut();
-    currentUser = null;
-    return showCustomAlert("هذا الحساب محظور إدارياً. يرجى التواصل مع الإدارة.");
-}
+    // 2. فحص الحظر الإداري
+    if (prof && prof.status === 'banned') {
+        await supabase.auth.signOut();
+        currentUser = null;
+        return showCustomAlert("هذا الحساب محظور إدارياً. يرجى التواصل مع الإدارة.");
+    }
 
-// 3. فحص الحساب المعلق مؤقتاً ضمن مهلة الـ 14 يوماً
-if (prof && (prof.status === 'inactive' || prof.status === 'معطل' || prof.deletion_requested_at)) {
-    currentUser = data.user;
-    updateReactivateNotice(prof);
-    toggleView('reactivate-modal', true);
-    return;
-}
+    // 3. فحص مهلة الـ 14 يوماً
+    if (prof && (prof.status === 'inactive' || prof.status === 'معطل' || prof.deletion_requested_at)) {
+        currentUser = data.user;
+        updateReactivateNotice(prof);
+        toggleView('reactivate-modal', true);
+        return;
+    }
 
     currentUser = data.user; 
     postLoginSetup(); 
 }
+
+// إتاحة الدالة في النطاق العام للنافذة لمنع ReferenceError
+window.handleLogin = handleLogin;
 
 // دالة مساعدة لحساب الأيام المتبقية لمهلة الحذف وعرضها في نافذة التراجع
 function updateReactivateNotice(prof) {
