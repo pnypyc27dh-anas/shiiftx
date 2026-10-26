@@ -3,6 +3,7 @@
 // ========================================================================
 
 let currentAgentUser = null;
+let currentAgentProfile = null; // تم تعريف المتغير العام لحفظ بيانات الوكيل
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. التحقق من وجود جلسة مسجلة
@@ -33,6 +34,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    // تخزين بيانات الملف الشخصي في المتغير العام لاستخدامه في العمليات اللاحقة
+    currentAgentProfile = prof;
+
     // 3. عرض الرصيد المتاح للوكيل (Float)
     const availableFloat = parseFloat(prof.balance || 0);
     const balanceEl = document.getElementById('agent-float-balance');
@@ -56,7 +60,7 @@ async function handleAgentTransfer(e) {
     btn.innerText = "جاري التنفيذ...";
 
     try {
-        // استخراج اسم الوكيل المعتمد (الاسم الأول والأخير)
+        // استخراج اسم الوكيل المعتمد (الاسم الأول والأخير) بأمان
         const agentName = [currentAgentProfile?.first_name, currentAgentProfile?.last_name]
             .filter(Boolean)
             .join(' ')
@@ -79,7 +83,7 @@ async function handleAgentTransfer(e) {
             
             const { data: prof } = await supabase.from('profiles').select('balance').eq('id', currentAgentUser.id).single();
             if (prof) {
-                currentAgentProfile.balance = prof.balance;
+                if (currentAgentProfile) currentAgentProfile.balance = prof.balance;
                 document.getElementById('agent-float-balance').innerText = '$' + Number(prof.balance).toFixed(2);
             }
             loadAgentTransactions();
@@ -87,6 +91,7 @@ async function handleAgentTransfer(e) {
             showToast(data?.message || "فشلت عملية التحويل.");
         }
     } catch (err) {
+        console.error("Agent Transfer Error:", err); // تسجيل تفاصيل الخطأ في الكونسول لتسهيل التتبع
         showToast("خطأ: " + (err.message || err));
     } finally {
         btn.disabled = false;
