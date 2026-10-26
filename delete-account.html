@@ -5,20 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>طلب حذف الحساب | SHIIFT X</title>
 
-    <!-- أيقونة الموقع (Favicon) متناسقة مع المنصة الأساسية -->
-    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
-    <link rel="alternate icon" type="image/png" href="assets/logo.png">
+    <link rel="icon" type="image/png" href="/apple-touch-icon.png">
 
-    <!-- خط Tajawal وتنسيقات Tailwind CSS -->
+    <!-- الخطوط والتنسيقات -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- مكتبة Phosphor Icons -->
+    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <!-- مكتبة Supabase JS v2 -->
+    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -35,7 +33,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-rose-500 selection:text-white">
 
-    <!-- رأس الصفحة (Header) -->
+    <!-- الرأس -->
     <header class="w-full border-b border-slate-800/80 bg-slate-900/50 backdrop-blur px-6 py-4">
         <div class="max-w-4xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -54,15 +52,13 @@
         </div>
     </header>
 
-    <!-- المحتوى الرئيسي -->
+    <!-- المحتوى -->
     <main class="flex-1 flex items-center justify-center p-4 sm:p-6">
         <div class="w-full max-w-md">
 
-            <!-- بطاقة حذف الحساب -->
             <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
                 <div class="absolute -top-24 -left-24 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                <!-- عنوان البطاقة -->
                 <div class="text-center space-y-2 mb-6">
                     <div class="w-14 h-14 bg-rose-500/10 text-rose-500 rounded-2xl flex items-center justify-center mx-auto text-2xl border border-rose-500/20 shadow-inner">
                         <i class="ph-bold ph-shield-warning"></i>
@@ -73,10 +69,9 @@
                     </p>
                 </div>
 
-                <!-- حاوية تدفق الخطوات التفاعلية -->
                 <div id="deletion-flow-container" class="space-y-4">
 
-                    <!-- الخطوة 1: إدخال البريد الإلكتروني -->
+                    <!-- المرحلة 1: إدخال البريد الإلكتروني -->
                     <div id="web-step-1" class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-300 mb-1.5">البريد الإلكتروني المسجل للحساب</label>
@@ -94,7 +89,7 @@
                         </button>
                     </div>
 
-                    <!-- الخطوة 2: إدخال الرمز المكون من 6 أرقام (مخفية افتراضياً) -->
+                    <!-- المرحلة 2: إدخال الرمز -->
                     <div id="web-step-2" class="space-y-4 hidden">
                         <div class="p-3 bg-slate-900/70 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
                             <span class="text-slate-400">المرسل إليه:</span>
@@ -125,10 +120,8 @@
 
                 </div>
 
-                <!-- رسائل الحالة والأخطاء -->
                 <div id="web-status-msg" class="hidden mt-4 p-3 rounded-xl text-xs font-medium border text-center transition-all"></div>
 
-                <!-- توضيحات وشروط الحذف -->
                 <div class="mt-6 pt-5 border-t border-slate-800/80 text-[11px] text-slate-400 leading-relaxed space-y-1.5">
                     <p class="flex items-start gap-1.5">
                         <i class="ph ph-check text-emerald-400 mt-0.5"></i>
@@ -148,18 +141,14 @@
         </div>
     </main>
 
-    <!-- تذييل الصفحة -->
     <footer class="w-full border-t border-slate-900 py-4 text-center text-xs text-slate-500">
         جميع الحقوق محفوظة &copy; 2026 SHIIFT X
     </footer>
 
-    <!-- منطق العمليات والتكامل مع Supabase -->
     <script>
-        // إعداد عميل Supabase (يتم استخدام نفس مفاتيح مشروعك)
-        const SUPABASE_URL = "https://your-project.supabase.co"; // ضع رابط مشروعك هنا إن لم يكن مدمجاً
-        const SUPABASE_ANON_KEY = "your-anon-key";              // ضع المفتاح العام هنا
+        const SUPABASE_URL = "https://your-project.supabase.co";
+        const SUPABASE_ANON_KEY = "your-anon-key";
 
-        // إنشاء العميل
         const client = (typeof supabase !== 'undefined' && supabase.createClient) 
             ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
             : null;
@@ -167,7 +156,6 @@
         let activeTargetEmail = '';
         let webCountdownTimer = null;
 
-        // إظهار رسائل الحالة للمستخدم
         function showStatus(text, isError = true) {
             const el = document.getElementById('web-status-msg');
             if (!el) return;
@@ -181,7 +169,6 @@
             el.innerText = text;
         }
 
-        // 1. إرسال رمز التحقق OTP
         async function sendWebDeleteOTP() {
             const emailInput = document.getElementById('web-del-email');
             const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
@@ -203,7 +190,6 @@
 
                 if (error) throw error;
 
-                // التبديل للخطوة 2
                 document.getElementById('web-step-1').classList.add('hidden');
                 document.getElementById('web-step-2').classList.remove('hidden');
                 document.getElementById('web-email-preview').innerText = activeTargetEmail;
@@ -230,7 +216,6 @@
             }
         }
 
-        // 2. مؤقت إعادة الإرسال
         function startWebCountdown(seconds = 60) {
             const btn = document.getElementById('web-del-resend-btn');
             const timerEl = document.getElementById('web-del-timer');
@@ -257,7 +242,6 @@
             }, 1000);
         }
 
-        // 3. إعادة إرسال الرمز
         async function resendWebDeleteOTP() {
             const icon = document.getElementById('web-resend-icon');
             if (icon) icon.classList.add('animate-spin');
@@ -282,7 +266,6 @@
             }
         }
 
-        // 4. تأكيد الرمز وتنفيذ طلب الحذف الذكي
         async function confirmWebDeleteOTP() {
             const codeInput = document.getElementById('web-del-code');
             const cleanToken = codeInput ? codeInput.value.replace(/\s+/g, '').trim() : '';
@@ -296,7 +279,7 @@
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> <span>جاري التحقق وتنفيذ الطلب...</span>`;
 
             try {
-                // التحقق من صحة الرمز مع التجربة المزدوجة لتفادي أخطاء النوع
+                // 1. التحقق من صحة الرمز مع التبديل التلقائي بين email و magiclink
                 let { data: authData, error: verifyError } = await client.auth.verifyOtp({
                     email: activeTargetEmail,
                     token: cleanToken,
@@ -317,22 +300,21 @@
                     throw new Error("رمز التحقق غير صحيح أو منتهي الصلاحية.");
                 }
 
-                // استدعاء دالة الخادم الذكية
+                // 2. استدعاء دالة الخادم الآمنة (بدلاً من تعديل الجدول المباشر)
                 const { data: rpcData, error: rpcError } = await client.rpc('request_account_deletion');
 
                 if (rpcError) {
                     throw new Error(rpcError.message || "فشل تنفيذ العملية.");
                 }
 
-                // الحساب محذوف نهائياً
                 if (rpcData && rpcData.status === 'error') {
                     throw new Error(rpcData.message);
                 }
 
-                // إنهاء الجلسة فوراً
+                // 3. إنهاء الجلسة فوراً
                 await client.auth.signOut();
 
-                // حالة الحساب المجدول مسبقاً (تم حذفه من index أو من هنا سابقاً)
+                // 4. معالجة حالة الحساب المجدول مسبقاً
                 if (rpcData && rpcData.status === 'already_scheduled') {
                     const daysLeft = rpcData.days_left || 14;
                     document.getElementById('deletion-flow-container').innerHTML = `
@@ -353,7 +335,7 @@
                     return;
                 }
 
-                // حالة نجاح طلب الحذف الجديد
+                // 5. عرض رسالة النجاح لطلب الحذف الجديد
                 document.getElementById('deletion-flow-container').innerHTML = `
                     <div class="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
                         <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl">
