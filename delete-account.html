@@ -169,7 +169,7 @@
         // 1. إرسال رمز التحقق
         async function sendWebDeleteOTP() {
             const emailInput = document.getElementById('web-del-email');
-            const email = emailInput ? emailInput.value.trim() : '';
+            const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
             const btn = document.getElementById('web-send-otp-btn');
 
             if (!email) {
@@ -274,13 +274,14 @@
             }
         }
 
-        // 4. التحقق من الرمز وتنفيذ جدولة الحذف
+        // 4. التحقق من الرمز وتنفيذ جدولة الحذف عبر دالة الخادم الآمنة
         async function confirmWebDeleteOTP() {
             const codeInput = document.getElementById('web-del-code');
-            const code = codeInput ? codeInput.value.trim() : '';
+            const rawToken = codeInput ? codeInput.value : '';
+            const cleanToken = rawToken.replace(/\s+/g, '').trim();
             const btn = document.getElementById('web-confirm-delete-btn');
 
-            if (!code || code.length < 6) {
+            if (!cleanToken || cleanToken.length < 6) {
                 return showStatus("يرجى إدخال رمز التحقق كاملاً (6 أرقام).");
             }
 
@@ -289,32 +290,63 @@
 
             try {
                 // التحقق من صحة رمز الـ OTP
-                const { data: authData, error: verifyError } = await client.auth.verifyOtp({
+                let { data: authData, error: verifyError } = await client.auth.verifyOtp({
                     email: activeTargetEmail,
-                    token: code,
+                    token: cleanToken,
                     type: 'email'
                 });
 
-                if (verifyError || !authData.user) {
+                // المحاولة البديلة بـ magiclink إن فشل email
+                if (verifyError) {
+                    const fallback = await client.auth.verifyOtp({
+                        email: activeTargetEmail,
+                        token: cleanToken,
+                        type: 'magiclink'
+                    });
+                    authData = fallback.data;
+                    verifyError = fallback.error;
+                }
+
+                if (verifyError || !authData?.user) {
                     throw new Error("رمز التحقق غير صحيح أو منتهي الصلاحية.");
                 }
 
-                // تعطيل الحساب وتوثيق تاريخ طلب الحذف لبدء مهلة الـ 14 يوماً
-                const nowIso = new Date().toISOString();
-                const { error: updateError } = await client
-                    .from('profiles')
-                    .update({
-                        is_disabled: true,
-                        deletion_requested_at: nowIso
-                    })
-                    .eq('id', authData.user.id);
+                // استدعاء دالة الخادم الآمنة المسؤولة عن تجميد الحساب
+                const { data: rpcData, error: rpcError } = await client.rpc('request_account_deletion');
 
-                if (updateError) throw updateError;
+                if (rpcError) {
+                    throw new Error(rpcError.message || "فشل تنفيذ العملية.");
+                }
 
-                // إنهاء الجلسة المفتوحة فوراً
+                if (rpcData && rpcData.status === 'error') {
+                    throw new Error(rpcData.message);
+                }
+
+                // تسجيل الخروج فوراً لإنهاء الجلسة المؤقتة
                 await client.auth.signOut();
 
-                // استبدال النموذج برسالة التأكيد النهائية المعتمدة
+                // معالجة حالة الحساب المجدول للحذف مسبقاً
+                if (rpcData && rpcData.status === 'already_scheduled') {
+                    const daysLeft = rpcData.days_left || 14;
+                    document.getElementById('deletion-flow-container').innerHTML = `
+                        <div class="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-3">
+                            <div class="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-2xl">
+                                <i class="ph-bold ph-clock-countdown"></i>
+                            </div>
+                            <h4 class="text-base font-black text-white">الطلب مسجل مسبقاً</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                هذا الحساب مجدول للحذف بالفعل وموقوف مؤقتاً، ومتبقي لديك <span class="text-amber-400 font-bold">(${daysLeft}) يوم</span> ضمن مهلة التراجع قبل المسح التام لكافة بياناتك.
+                            </p>
+                            <p class="text-[11px] text-slate-400">
+                                يمكنك استعادة حسابك في أي وقت عبر تسجيل الدخول في المنصة الرئيسية.
+                            </p>
+                        </div>
+                    `;
+                    document.getElementById('web-status-msg').classList.add('hidden');
+                    return;
+                }
+
+                // استبدال النموذج برسالة التأكيد النهائية لطلب جديد
                 document.getElementById('deletion-flow-container').innerHTML = `
                     <div class="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
                         <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl">
