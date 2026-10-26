@@ -739,32 +739,222 @@ async function handleResendChangePasswordOTP() {
     }
 }
 
-async function triggerDeleteAccountFlow() { 
-    showCustomPrompt("أدخل كلمة المرور لتأكيد طلب حذف الحساب :", async function(pass) { 
-        const { error: authError } = await supabase.auth.signInWithPassword({ 
-            email: currentUser.email, 
-            password: pass 
+// ========================================================================
+// وحدة حذف الحساب عبر رمز التحقق بالبريد (OTP Deletion Controller)
+// ========================================================================
+
+let delOtpCountdownTimer = null;
+let delActiveEmail = '';
+
+// 1. فتح نافذة الحذف وتعبئة البريد المسجل
+window.triggerDeleteAccountFlow = function() {
+    const modal = document.getElementById('delete-account-otp-modal');
+    const emailDisplay = document.getElementById('del-account-email-display');
+    const step1 = document.getElementById('del-otp-step-1');
+    const step2 = document.getElementById('del-otp-step-2');
+
+    if (!modal) return;
+
+    delActiveEmail = (typeof currentUser !== 'undefined' && currentUser?.email) 
+        ? currentUser.email 
+        : '';
+
+    if (!delActiveEmail) {
+        showCustomAlert("تعذر تحديد البريد الإلكتروني للحساب الحالي.");
+        return;
+    }
+
+    if (emailDisplay) emailDisplay.value = delActiveEmail;
+    if (step1) step1.classList.remove('hidden');
+    if (step2) step2.classList.add('hidden');
+
+    if (typeof toggleSideMenu === 'function') toggleSideMenu(false);
+    modal.classList.remove('hidden');
+};
+
+// 2. إغلاق النافذة وتنظيف المؤقت
+window.closeDeleteAccountOTPModal = function() {
+    const modal = document.getElementById('delete-account-otp-modal');
+    if (modal) modal.classList.add('hidden');
+    if (delOtpCountdownTimer) {
+        clearInterval(delOtpCountdownTimer);
+        delOtpCountdownTimer = null;
+    }
+};
+
+// 3. إرسال رمز التحقق المكون من 6 أرقام إلى البريد
+window.handleSendDeleteAccountOTP = async function() {
+    const btn = document.getElementById('send-del-otp-btn');
+    const step1 = document.getElementById('del-otp-step-1');
+    const step2 = document.getElementById('del-otp-step-2');
+    const codeInput = document.getElementById('del-otp-code-input');
+
+    if (!delActiveEmail) {
+        return showCustomAlert("البريد الإلكتروني غير متوفر.");
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> <span>جاري إرسال الرمز...</span>`;
+    }
+
+    try {
+        const { error } = await supabase.auth.signInWithOtp({
+            email: delActiveEmail,
+            options: { shouldCreateUser: false }
         });
-        if (authError) return showCustomAlert("كلمة المرور غير صحيحة."); 
-        
-        // 1. استدعاء دالة التعطيل المعتمدة
-        const { data, error } = await supabase.rpc('deactivate_my_account'); 
-        
-        if (error || (data && data.status === 'error')) {
-            return showCustomAlert("فشل تسجيل الطلب: " + (error?.message || data?.message));
+
+        if (error) throw error;
+
+        showCustomAlert("تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح.", false);
+
+        if (step1) step1.classList.add('hidden');
+        if (step2) step2.classList.remove('hidden');
+
+        if (codeInput) {
+            codeInput.value = '';
+            setTimeout(() => codeInput.focus(), 150);
         }
 
-        // 2. توثيق تاريخ طلب الحذف لبدء مهلة الـ 14 يوماً
+        startDeleteOtpCountdown(60);
+
+    } catch (err) {
+        const errMsg = err?.message || String(err);
+        if (errMsg.includes('429') || errMsg.includes('security purposes') || errMsg.includes('rate limit')) {
+            showCustomAlert("يرجى الانتظار لمدة دقيقة واحدة قبل طلب رمز جديد حفاظاً على الأمان.");
+        } else {
+            showCustomAlert("فشل إرسال رمز التحقق: " + errMsg);
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt text-base"></i> <span>إرسال رمز التحقق للحذف</span>`;
+        }
+    }
+};
+
+// 4. مؤقت 60 ثانية لزر إعادة الإرسال
+function startDeleteOtpCountdown(seconds = 60) {
+    const btn = document.getElementById('del-resend-btn');
+    const timerDisplay = document.getElementById('del-resend-timer');
+    const icon = document.getElementById('del-resend-icon');
+
+    if (!btn || !timerDisplay) return;
+
+    if (delOtpCountdownTimer) {
+        clearInterval(delOtpCountdownTimer);
+        delOtpCountdownTimer = null;
+    }
+
+    btn.disabled = true;
+    timerDisplay.classList.remove('hidden');
+    if (icon) icon.classList.remove('animate-spin');
+
+    let remaining = seconds;
+    timerDisplay.innerText = `(${remaining}s)`;
+
+    delOtpCountdownTimer = setInterval(() => {
+        remaining--;
+        if (remaining > 0) {
+            timerDisplay.innerText = `(${remaining}s)`;
+        } else {
+            clearInterval(delOtpCountdownTimer);
+            delOtpCountdownTimer = null;
+            btn.disabled = false;
+            timerDisplay.classList.add('hidden');
+        }
+    }, 1000);
+}
+
+// 5. إعادة إرسال رمز التحقق
+window.handleResendDeleteAccountOTP = async function() {
+    const btn = document.getElementById('del-resend-btn');
+    const icon = document.getElementById('del-resend-icon');
+
+    if (!delActiveEmail) return;
+
+    btn.disabled = true;
+    if (icon) icon.classList.add('animate-spin');
+
+    try {
+        const { error } = await supabase.auth.signInWithOtp({
+            email: delActiveEmail,
+            options: { shouldCreateUser: false }
+        });
+
+        if (error) throw error;
+
+        showCustomAlert("تمت إعادة إرسال رمز التحقق بنجاح.", false);
+        const codeInput = document.getElementById('del-otp-code-input');
+        if (codeInput) codeInput.value = '';
+        startDeleteOtpCountdown(60);
+
+    } catch (err) {
+        showCustomAlert("فشل إعادة الإرسال: " + (err.message || err));
+        btn.disabled = false;
+    } finally {
+        if (icon) icon.classList.remove('animate-spin');
+    }
+};
+
+// 6. التحقق من الرمز وتنفيذ جدولة الحذف (مهلة 14 يوماً)
+window.handleVerifyAndDeleteAccount = async function() {
+    const codeInput = document.getElementById('del-otp-code-input');
+    const token = codeInput ? codeInput.value.trim() : '';
+    const btn = document.getElementById('confirm-del-with-otp-btn');
+
+    if (!token || token.length < 6) {
+        return showCustomAlert("يرجى إدخال رمز التحقق كاملاً (6 أرقام).");
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> <span>جاري التحقق من الرمز...</span>`;
+    }
+
+    try {
+        // التحقق من صحة رمز الـ OTP
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+            email: delActiveEmail,
+            token: token,
+            type: 'email'
+        });
+
+        if (verifyError) {
+            throw new Error("رمز التحقق غير صحيح أو منتهي الصلاحية.");
+        }
+
+        // 1. تعطيل الحساب عبر RPC
+        const { data: deactData, error: deactError } = await supabase.rpc('deactivate_my_account');
+        if (deactError || (deactData && deactData.status === 'error')) {
+            throw new Error(deactError?.message || deactData?.message || "فشل تعطيل الحساب");
+        }
+
+        // 2. تسجيل تاريخ بدء مهلة الـ 14 يوماً
         const nowIso = new Date().toISOString();
-        await supabase
+        const { error: updateError } = await supabase
             .from('profiles')
             .update({ deletion_requested_at: nowIso })
             .eq('id', currentUser.id);
 
-        showCustomAlert("تم تقديم طلب حذف الحساب بنجاح. لديك مهلة 14 يوماً للتراجع قبل الحذف النهائي.", false); 
-        handleLogout(); 
-    }); 
-}
+        if (updateError) throw updateError;
+
+        closeDeleteAccountOTPModal();
+        showCustomAlert("تم تأكيد الرمز بنجاح وجدولة حذف الحساب. لديك مهلة 14 يوماً للتراجع.", false);
+
+        // تسجيل الخروج تلقائياً بعد ثانيتين
+        setTimeout(() => {
+            handleLogout();
+        }, 1800);
+
+    } catch (err) {
+        showCustomAlert(err.message || "حدث خطأ أثناء تأكيد العملية.");
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="ph-bold ph-trash"></i> <span>تأكيد الحذف النهائي</span>`;
+        }
+    }
+};
 
 // ========================================================================
 // وحدة إدارة تغيير كلمة المرور للمستخدم المسجل
