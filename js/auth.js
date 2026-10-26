@@ -79,13 +79,14 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         if (currentFlowType !== 'reset') {
             const { data: prof } = await supabase
                 .from('profiles')
-                .select('status')
+                .select('status, deletion_requested_at')
                 .eq('id', session.user.id)
                 .single();
 
-            if (prof && (prof.status === 'inactive' || prof.status === 'محذوف' || prof.status === 'معطل')) {
+            if (prof && (prof.status === 'inactive' || prof.status === 'محذوف' || prof.status === 'معطل' || prof.deletion_requested_at)) {
                 stopInactivityTracking();
                 currentUser = session.user;
+                updateReactivateNotice(prof);
                 toggleView('dashboard-screen', false);
                 toggleView('login-screen', true);
                 toggleView('reactivate-modal', true);
@@ -111,12 +112,13 @@ supabase.auth.getSession().then(async ({ data: { session } }) => {
     if (session && !isRecoveryHash) { 
         const { data: prof } = await supabase
             .from('profiles')
-            .select('status')
+            .select('status, deletion_requested_at')
             .eq('id', session.user.id)
             .single();
 
-        if (prof && (prof.status === 'inactive' || prof.status === 'محذوف' || prof.status === 'معطل')) {
+        if (prof && (prof.status === 'inactive' || prof.status === 'محذوف' || prof.status === 'معطل' || prof.deletion_requested_at)) {
             currentUser = session.user;
+            updateReactivateNotice(prof);
             toggleView('dashboard-screen', false);
             toggleView('login-screen', true);
             toggleView('reactivate-modal', true);
@@ -152,9 +154,10 @@ async function handleLogin() {
         return;
     }
 
+    // غيّر select('status') إلى select('status, deletion_requested_at')
     const { data: prof } = await supabase
         .from('profiles')
-        .select('status')
+        .select('status, deletion_requested_at')
         .eq('id', data.user.id)
         .single();
 
@@ -167,8 +170,10 @@ async function handleLogin() {
         return showCustomAlert("هذا الحساب محظور إدارياً. يرجى التواصل مع الإدارة.");
     }
 
-    if (prof && (prof.status === 'inactive' || prof.status === 'محذوف' || prof.status === 'معطل')) {
+    // فحص ما إذا كان الحساب معطلاً أو مجدولاً للحذف
+    if (prof && (prof.status === 'inactive' || prof.status === 'محذوف' || prof.status === 'معطل' || prof.deletion_requested_at)) {
         currentUser = data.user;
+        updateReactivateNotice(prof); // تحديث نص العداد التنازلي
         toggleView('reactivate-modal', true);
         return;
     }
@@ -177,13 +182,40 @@ async function handleLogin() {
     postLoginSetup(); 
 }
 
-// 4. إعادة تنشيط الحساب المعطل
+// دالة مساعدة لحساب الأيام المتبقية لمهلة الحذف وعرضها في نافذة التراجع
+function updateReactivateNotice(prof) {
+    const descElem = document.getElementById('reactivate-modal-desc');
+    if (!descElem) return;
+
+    if (prof && prof.deletion_requested_at) {
+        const reqDate = new Date(prof.deletion_requested_at);
+        const deadline = new Date(reqDate.getTime() + (14 * 24 * 60 * 60 * 1000));
+        const diffMs = deadline - new Date();
+        const remainingDays = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+
+        descElem.innerText = `حسابك مجدول للحذف النهائي، ومتبقي لديك (${remainingDays}) يوم للتراجع قبل المسح التام لكافة بياناتك. هل ترغب في إلغاء طلب الحذف واستعادة الحساب الآن؟`;
+    } else {
+        descElem.innerText = "لقد تقدمت سابقاً بطلب لحذف هذا الحساب أو تم تعطيله. هل ترغب في إعادة تنشيطه والدخول إلى محفظتك؟";
+    }
+}
+
+// 4. إعادة تنشيط الحساب وإلغاء طلب الحذف
 async function handleConfirmReactivate() {
     const btn = document.getElementById('confirm-reactivate-btn');
     btn.disabled = true;
-    btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> جاري إعادة التنشيط...`;
+    btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> جاري إلغاء طلب الحذف...`;
 
+    // 1. إعادة تنشيط الحساب عبر الـ RPC
     const { data, error } = await supabase.rpc('reactivate_my_account');
+
+    // 2. تصفير تاريخ طلب الحذف في جدول profiles
+    if (currentUser) {
+        await supabase
+            .from('profiles')
+            .update({ deletion_requested_at: null })
+            .eq('id', currentUser.id);
+    }
+
     btn.disabled = false;
     btn.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> <span>إعادة تفعيل الحساب ومتابعة الدخول</span>`;
 
@@ -192,7 +224,7 @@ async function handleConfirmReactivate() {
     }
 
     toggleView('reactivate-modal', false);
-    showCustomAlert("تمت إعادة تفعيل حسابك بنجاح! أهلاً بك مجدداً.", false);
+    showCustomAlert("تم إلغاء طلب الحذف واستعادة حسابك بنجاح! أهلاً بك مجدداً.", false);
     postLoginSetup();
 }
 
@@ -204,7 +236,7 @@ async function handleCancelReactivate() {
         const el = document.getElementById(id);
         if (el) el.value = "";
     });
-    showCustomAlert("تم إلغاء الدخول، حسابك ما زال معطلاً.", false);
+    showCustomAlert("تم إلغاء الدخول، يبقى حسابك معلقاً ومجدولاً للحذف.", false);
 }
 
 // 5. تهيئة الواجهة بعد نجاح الدخول
@@ -708,20 +740,28 @@ async function handleResendChangePasswordOTP() {
 }
 
 async function triggerDeleteAccountFlow() { 
-    showCustomPrompt("أدخل كلمة المرور لتأكيد تعطيل حسابك:", async function(pass) { 
+    showCustomPrompt("أدخل كلمة المرور لتأكيد طلب حذف الحساب :", async function(pass) { 
         const { error: authError } = await supabase.auth.signInWithPassword({ 
             email: currentUser.email, 
             password: pass 
         });
         if (authError) return showCustomAlert("كلمة المرور غير صحيحة."); 
         
+        // 1. استدعاء دالة التعطيل المعتمدة
         const { data, error } = await supabase.rpc('deactivate_my_account'); 
         
         if (error || (data && data.status === 'error')) {
-            return showCustomAlert("فشل تعطيل الحساب: " + (error?.message || data?.message));
+            return showCustomAlert("فشل تسجيل الطلب: " + (error?.message || data?.message));
         }
 
-        showCustomAlert("تم تعطيل حسابك بنجاح. نراك قريباً!", false); 
+        // 2. توثيق تاريخ طلب الحذف لبدء مهلة الـ 14 يوماً
+        const nowIso = new Date().toISOString();
+        await supabase
+            .from('profiles')
+            .update({ deletion_requested_at: nowIso })
+            .eq('id', currentUser.id);
+
+        showCustomAlert("تم تقديم طلب حذف الحساب بنجاح. لديك مهلة 14 يوماً للتراجع قبل الحذف النهائي.", false); 
         handleLogout(); 
     }); 
 }
