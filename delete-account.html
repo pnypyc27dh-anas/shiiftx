@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHIIFT X — طلب حذف الحساب والبيانات</title>
+    
+    <!-- الأيقونات والخطوط -->
+    <link rel="icon" type="image/png" href="/apple-touch-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+
+    <style>
+        body {
+            font-family: 'Tajawal', 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b1120;
+            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: #f8fafc;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
+        }
+        .input-field {
+            background: rgba(15, 23, 42, 0.8) !important;
+            border: 1.5px solid #334155 !important;
+            border-radius: 14px !important;
+            color: #ffffff !important;
+            transition: all 0.25s ease;
+        }
+        .input-field:focus {
+            border-color: #005ba3 !important;
+            box-shadow: 0 0 0 3px rgba(0, 91, 163, 0.25) !important;
+            outline: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 sm:p-6">
+
+    <!-- شريط الترويسة والشعار -->
+    <header class="w-full max-w-2xl mx-auto flex items-center justify-between py-4">
+        <a href="/" class="flex items-center gap-2">
+            <span class="text-xl font-black tracking-wider text-white">SHIIFT<span class="text-[#5CE1E6]">X</span></span>
+        </a>
+        <a href="/" class="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1 transition">
+            <i class="ph ph-arrow-left"></i>
+            <span>العودة للمنصة</span>
+        </a>
+    </header>
+
+    <!-- الحاوية الرئيسية للطلب -->
+    <main class="w-full max-w-xl mx-auto my-auto py-6">
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            
+            <div class="text-center space-y-2">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-red-500/10 text-red-500 border border-red-500/20 mb-1">
+                    <i class="ph-bold ph-trash text-2xl"></i>
+                </div>
+                <h1 class="text-xl font-black text-white">طلب حذف الحساب والبيانات</h1>
+                <p class="text-xs text-slate-400 leading-relaxed max-w-md mx-auto">
+                    حرصاً على خصوصيتك وتوافقاً مع معايير Google Play، يمكنك تقديم طلب رسمي لحذف حسابك نهائياً من خوادمنا عبر هذا النموذج.
+                </p>
+            </div>
+
+            <!-- سياسة وضوابط الحذف للامتثال لغوغل -->
+            <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3 text-xs">
+                <h3 class="font-bold text-slate-200 flex items-center gap-2">
+                    <i class="ph-fill ph-info text-blue-400"></i> تفاصيل دورة الحذف والبيانات:
+                </h3>
+                <ul class="space-y-2 text-slate-400 pr-4 list-disc leading-relaxed">
+                    <li><strong class="text-slate-300">مهلة التراجع (14 يوماً):</strong> يتم تعطيل حسابك فور تقديم الطلب ومنحك فترة سماح مدتها 14 يوماً، يمكنك خلالها تسجيل الدخول مجدداً لإلغاء الحذف.</li>
+                    <li><strong class="text-slate-300">البيانات التي تُحذف نهائياً:</strong> معرّف الحساب، بيانات الدخول، الاسم، البريد الإلكتروني، رقم الهاتف، وسجلات الأنشطة المؤقتة.</li>
+                    <li><strong class="text-slate-300">البيانات المحتفظ بها قانونياً:</strong> قد نحتفظ بسجلات المعاملات المالية المكتملة وأرقام الحوالات لأغراض الامتثال الضريبي والمحاسبي ومنع الاحتيال وفقاً للقوانين السارية.</li>
+                </ul>
+            </div>
+
+            <!-- نموذج طلب الحذف المباشر -->
+            <form id="web-delete-form" onsubmit="handleWebDeletionRequest(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">البريد الإلكتروني المسجل بالحساب</label>
+                    <input id="del-email" type="email" required placeholder="name@example.com" class="input-field w-full px-4 py-3 text-xs" dir="ltr">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">كلمة المرور الحالية لتأكيد الهوية</label>
+                    <input id="del-password" type="password" required placeholder="••••••••" class="input-field w-full px-4 py-3 text-xs" dir="ltr">
+                </div>
+
+                <div class="pt-2">
+                    <button id="del-submit-btn" type="submit" class="w-full py-3.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="ph-bold ph-warning"></i>
+                        <span>تأكيد طلب حذف الحساب</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- رسالة الحالة بعد الإرسال -->
+            <div id="status-box" class="hidden p-4 rounded-2xl text-xs font-bold text-center leading-relaxed"></div>
+        </div>
+    </main>
+
+    <!-- التذييل القانوني -->
+    <footer class="w-full max-w-2xl mx-auto text-center py-4 text-[11px] text-slate-500">
+        منصة SHIIFT X © 2026 — جميع الحقوق محفوظة
+    </footer>
+
+    <script>
+        async function handleWebDeletionRequest(e) {
+            e.preventDefault();
+            const email = document.getElementById('del-email').value.trim();
+            const password = document.getElementById('del-password').value;
+            const btn = document.getElementById('del-submit-btn');
+            const statusBox = document.getElementById('status-box');
+
+            btn.disabled = true;
+            btn.innerText = 'جاري التحقق وتنفيذ الطلب...';
+            statusBox.className = 'hidden';
+
+            try {
+                // 1. التحقق من صحة بيانات الدخول
+                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (authError || !authData.user) {
+                    throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة.');
+                }
+
+                // 2. تفعيل التعطيل وتوثيق تاريخ طلب الحذف لبدء مهلة الـ 14 يوماً
+                const nowIso = new Date().toISOString();
+                const { error: updateError } = await supabase
+                    .from('profiles')
+                    .update({
+                        is_disabled: true,
+                        deletion_requested_at: nowIso
+                    })
+                    .eq('id', authData.user.id);
+
+                if (updateError) throw updateError;
+
+                // 3. إنهاء الجلسة فوراً
+                await supabase.auth.signOut();
+
+                // عرض رسالة النجاح
+                document.getElementById('web-delete-form').classList.add('hidden');
+                statusBox.className = 'p-4 rounded-2xl text-xs font-bold text-center leading-relaxed bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 block';
+                statusBox.innerHTML = `تم استلام طلب حذف الحساب بنجاح. تم تعطيل حسابك الآن، وسيبدأ الحذف النهائي تلقائياً بعد انقضاء مهلة الـ 14 يوماً.`;
+
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ph-bold ph-warning"></i> <span>تأكيد طلب حذف الحساب</span>';
+                statusBox.className = 'p-4 rounded-2xl text-xs font-bold text-center leading-relaxed bg-red-500/10 border border-red-500/30 text-red-400 block';
+                statusBox.innerText = err.message || 'حدث خطأ أثناء معالجة الطلب، يرجى المحاولة لاحقاً.';
+            }
+        }
+    </script>
+</body>
+</html>
