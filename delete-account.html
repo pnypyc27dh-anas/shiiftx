@@ -145,187 +145,243 @@
     <footer class="w-full border-t border-slate-900 py-4 text-center text-xs text-slate-500">
         جميع الحقوق محفوظة &copy; 2026 SHIIFT X
     </footer>
+<script>
+    // ========================================================================
+    // 1. تهيئة عميل Supabase (تأكد من وضع رابط ومفتاح مشروعك الحقيقيين هنا)
+    // ========================================================================
+    const SUPABASE_URL = "https://your-project.supabase.co"; // ضع رابط مشروعك هنا
+    const SUPABASE_ANON_KEY = "your-anon-key";              // ضع المفتاح العام هنا
 
-    <script>
-        const SUPABASE_URL = "https://your-project.supabase.co";
-        const SUPABASE_ANON_KEY = "your-anon-key";
+    // نستخدم نفس الاسم المعتمد في المنصة (supabase) لضمان تطابق الدوال
+    const supabase = (typeof window.supabase !== 'undefined' && window.supabase.createClient)
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
 
-        const client = (typeof supabase !== 'undefined' && supabase.createClient) 
-            ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-            : null;
+    let delActiveEmail = '';
+    let delOtpCountdownTimer = null;
 
-        let activeTargetEmail = '';
-        let webCountdownTimer = null;
+    // دالة مساعدة لإظهار رسائل الحالة
+    function showStatus(text, isError = true) {
+        const el = document.getElementById('web-status-msg');
+        if (!el) return;
+        el.className = "mt-4 p-3 rounded-xl text-xs font-medium border text-center transition-all " + 
+            (isError ? "bg-rose-500/10 border-rose-500/30 text-rose-400" : "bg-emerald-500/10 border-emerald-500/30 text-emerald-400");
+        el.innerText = text;
+        el.classList.remove('hidden');
+    }
 
-        function showStatus(text, isError = true) {
-            const el = document.getElementById('web-status-msg');
-            if (!el) return;
-            el.classList.remove('hidden', 'bg-rose-500/10', 'border-rose-500/30', 'text-rose-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
-            
-            if (isError) {
-                el.classList.add('bg-rose-500/10', 'border-rose-500/30', 'text-rose-400');
-            } else {
-                el.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
-            }
-            el.innerText = text;
+    // ========================================================================
+    // 2. إرسال رمز التحقق (نفس دالة handleSendDeleteAccountOTP من auth.js)
+    // ========================================================================
+    async function sendWebDeleteOTP() {
+        const emailInput = document.getElementById('web-del-email');
+        const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+        const btn = document.getElementById('web-send-otp-btn');
+
+        if (!email || !email.includes('@')) {
+            return showStatus("يرجى إدخال بريد إلكتروني صحيح.");
         }
 
-        async function sendWebDeleteOTP() {
-            const emailInput = document.getElementById('web-del-email');
-            const email = emailInput ? emailInput.value.trim() : '';
-            const btn = document.getElementById('web-send-otp-btn');
+        delActiveEmail = email;
 
-            if (!email || !email.includes('@')) {
-                return showStatus("يرجى إدخال بريد إلكتروني صحيح.");
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> <span>جاري إرسال الرمز...</span>`;
+        }
+
+        try {
+            // نفس استدعاء auth.js تماماً
+            const { error } = await supabase.auth.signInWithOtp({
+                email: delActiveEmail,
+                options: { shouldCreateUser: false }
+            });
+
+            if (error) throw error;
+
+            showStatus("تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح.", false);
+
+            // الانتقال للخطوة الثانية
+            document.getElementById('web-step-1').classList.add('hidden');
+            document.getElementById('web-step-2').classList.remove('hidden');
+            document.getElementById('web-email-preview').innerText = delActiveEmail;
+
+            const codeInput = document.getElementById('web-del-code');
+            if (codeInput) {
+                codeInput.value = '';
+                setTimeout(() => codeInput.focus(), 150);
             }
 
-            activeTargetEmail = email;
-            btn.disabled = true;
-            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> <span>جاري إرسال رمز الأمان...</span>`;
+            startDeleteOtpCountdown(60);
 
-            try {
-                const { error } = await client.auth.signInWithOtp({
-                    email: activeTargetEmail,
-                    options: { shouldCreateUser: false }
-                });
-
-                if (error) throw error;
-
-                document.getElementById('web-step-1').classList.add('hidden');
-                document.getElementById('web-step-2').classList.remove('hidden');
-                document.getElementById('web-email-preview').innerText = activeTargetEmail;
-                
-                showStatus("تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح.", false);
-                startWebCountdown(60);
-
-                const codeInput = document.getElementById('web-del-code');
-                if (codeInput) {
-                    codeInput.value = '';
-                    setTimeout(() => codeInput.focus(), 150);
-                }
-
-            } catch (err) {
-                const msg = err.message || String(err);
-                if (msg.includes('429') || msg.includes('security purposes') || msg.includes('rate limit')) {
-                    showStatus("يرجى الانتظار لمدة دقيقة واحدة قبل طلب رمز جديد حفاظاً على الأمان.");
-                } else {
-                    showStatus("فشل إرسال الرمز: " + msg);
-                }
-            } finally {
+        } catch (err) {
+            const errMsg = err?.message || String(err);
+            if (errMsg.includes('429') || errMsg.includes('security purposes') || errMsg.includes('rate limit')) {
+                showStatus("يرجى الانتظار لمدة دقيقة واحدة قبل طلب رمز جديد حفاظاً على الأمان.");
+            } else {
+                showStatus("فشل إرسال رمز التحقق: " + errMsg);
+            }
+        } finally {
+            if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt"></i> <span>إرسال رمز التحقق (OTP)</span>`;
             }
         }
+    }
 
-        function startWebCountdown(seconds = 60) {
-            const btn = document.getElementById('web-del-resend-btn');
-            const timerEl = document.getElementById('web-del-timer');
-            if (!btn || !timerEl) return;
+    // ========================================================================
+    // 3. مؤقت الـ 60 ثانية وإعادة الإرسال
+    // ========================================================================
+    function startDeleteOtpCountdown(seconds = 60) {
+        const btn = document.getElementById('web-del-resend-btn');
+        const timerDisplay = document.getElementById('web-del-timer');
+        const icon = document.getElementById('web-resend-icon');
 
-            if (webCountdownTimer) clearInterval(webCountdownTimer);
+        if (!btn || !timerDisplay) return;
+        if (delOtpCountdownTimer) clearInterval(delOtpCountdownTimer);
 
-            btn.disabled = true;
-            timerEl.classList.remove('hidden');
+        btn.disabled = true;
+        timerDisplay.classList.remove('hidden');
+        if (icon) icon.classList.remove('animate-spin');
 
-            let remaining = seconds;
-            timerEl.innerText = `(${remaining}s)`;
+        let remaining = seconds;
+        timerDisplay.innerText = `(${remaining}s)`;
 
-            webCountdownTimer = setInterval(() => {
-                remaining--;
-                if (remaining > 0) {
-                    timerEl.innerText = `(${remaining}s)`;
-                } else {
-                    clearInterval(webCountdownTimer);
-                    webCountdownTimer = null;
-                    btn.disabled = false;
-                    timerEl.classList.add('hidden');
-                }
-            }, 1000);
-        }
-
-        async function resendWebDeleteOTP() {
-            const icon = document.getElementById('web-resend-icon');
-            if (icon) icon.classList.add('animate-spin');
-
-            try {
-                const { error } = await client.auth.signInWithOtp({
-                    email: activeTargetEmail,
-                    options: { shouldCreateUser: false }
-                });
-
-                if (error) throw error;
-
-                showStatus("تمت إعادة إرسال رمز التحقق بنجاح.", false);
-                const codeInput = document.getElementById('web-del-code');
-                if (codeInput) codeInput.value = '';
-                startWebCountdown(60);
-
-            } catch (err) {
-                showStatus("فشل إعادة الإرسال: " + (err.message || err));
-            } finally {
-                if (icon) icon.classList.remove('animate-spin');
+        delOtpCountdownTimer = setInterval(() => {
+            remaining--;
+            if (remaining > 0) {
+                timerDisplay.innerText = `(${remaining}s)`;
+            } else {
+                clearInterval(delOtpCountdownTimer);
+                delOtpCountdownTimer = null;
+                btn.disabled = false;
+                timerDisplay.classList.add('hidden');
             }
-        }
+        }, 1000);
+    }
 
-        async function confirmWebDeleteOTP() {
+    async function resendWebDeleteOTP() {
+        const btn = document.getElementById('web-del-resend-btn');
+        const icon = document.getElementById('web-resend-icon');
+
+        if (!delActiveEmail) return;
+
+        btn.disabled = true;
+        if (icon) icon.classList.add('animate-spin');
+
+        try {
+            const { error } = await supabase.auth.signInWithOtp({
+                email: delActiveEmail,
+                options: { shouldCreateUser: false }
+            });
+
+            if (error) throw error;
+
+            showStatus("تمت إعادة إرسال رمز التحقق بنجاح.", false);
             const codeInput = document.getElementById('web-del-code');
-            const code = codeInput ? codeInput.value.trim() : '';
-            const btn = document.getElementById('web-confirm-delete-btn');
+            if (codeInput) codeInput.value = '';
+            startDeleteOtpCountdown(60);
 
-            if (!code || code.length < 6) {
-                return showStatus("يرجى إدخال رمز التحقق كاملاً (6 أرقام).");
+        } catch (err) {
+            showStatus("فشل إعادة الإرسال: " + (err.message || err));
+            btn.disabled = false;
+        } finally {
+            if (icon) icon.classList.remove('animate-spin');
+        }
+    }
+
+    // ========================================================================
+    // 4. التحقق والحذف (نفس دالة handleVerifyAndDeleteAccount من auth.js)
+    // ========================================================================
+    async function confirmWebDeleteOTP() {
+        const codeInput = document.getElementById('web-del-code');
+        const rawToken = codeInput ? codeInput.value : '';
+        const cleanToken = rawToken.replace(/\s+/g, '').trim();
+        const btn = document.getElementById('web-confirm-delete-btn');
+
+        if (!cleanToken || cleanToken.length < 6) {
+            return showStatus("يرجى إدخال رمز التحقق كاملاً (6 أرقام).");
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> <span>جاري التحقق من الرمز...</span>`;
+        }
+
+        try {
+            // التحقق المزدوج المعتمد في auth.js
+            let { error: verifyError } = await supabase.auth.verifyOtp({
+                email: delActiveEmail,
+                token: cleanToken,
+                type: 'email'
+            });
+
+            if (verifyError) {
+                const fallback = await supabase.auth.verifyOtp({
+                    email: delActiveEmail,
+                    token: cleanToken,
+                    type: 'magiclink'
+                });
+                verifyError = fallback.error;
             }
 
-            btn.disabled = true;
-            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> <span>جاري التحقق وتنفيذ الطلب...</span>`;
+            if (verifyError) {
+                throw new Error("رمز التحقق غير صحيح أو منتهي الصلاحية.");
+            }
 
-            try {
-                // 1. التحقق من صحة رمز الـ OTP
-                const { data: authData, error: verifyError } = await client.auth.verifyOtp({
-                    email: activeTargetEmail,
-                    token: code,
-                    type: 'email'
-                });
+            // استدعاء دالة الخادم الآمنة فور نجاح الرمز
+            const { data: rpcData, error: rpcError } = await supabase.rpc('request_account_deletion');
 
-                if (verifyError || !authData.user) {
-                    throw new Error("رمز التحقق غير صحيح أو منتهي الصلاحية.");
-                }
+            if (rpcError) {
+                throw new Error(rpcError.message || "فشل تنفيذ العملية.");
+            }
 
-                // 2. تحديث جدول profiles المباشر (الكود القديم قبل استخدام RPC)
-                const nowIso = new Date().toISOString();
-                const { error: updateError } = await client
-                    .from('profiles')
-                    .update({
-                        is_disabled: true,
-                        deletion_requested_at: nowIso
-                    })
-                    .eq('id', authData.user.id);
+            if (rpcData && rpcData.status === 'error') {
+                throw new Error(rpcData.message);
+            }
 
-                if (updateError) throw updateError;
+            // تسجيل الخروج فوراً
+            await supabase.auth.signOut();
 
-                // 3. إنهاء الجلسة فوراً
-                await client.auth.signOut();
-
-                // 4. عرض رسالة النجاح
+            // فحص إذا كان الحساب مجدولاً مسبقاً
+            if (rpcData && rpcData.status === 'already_scheduled') {
+                const daysLeft = rpcData.days_left || 14;
                 document.getElementById('deletion-flow-container').innerHTML = `
-                    <div class="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
-                        <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl">
-                            <i class="ph-bold ph-check-circle"></i>
+                    <div class="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-3">
+                        <div class="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-2xl">
+                            <i class="ph-bold ph-clock-countdown"></i>
                         </div>
-                        <h4 class="text-base font-black text-white">تم تأكيد طلب الحذف بنجاح</h4>
+                        <h4 class="text-base font-black text-white">الطلب مسجل مسبقاً</h4>
                         <p class="text-xs text-slate-300 leading-relaxed font-medium">
-                            تم التحقق من هويتك بنجاح وتعطيل حسابك فوراً. حسابك الآن ضمن مهلة السماح (14 يوماً)، وسيتم مسح كافة البيانات بشكل نهائي وتلقائي فور انتهاء المهلة.
+                            هذا الحساب مجدول للحذف بالفعل وموقوف مؤقتاً، ومتبقي لديك <span class="text-amber-400 font-bold">(${daysLeft}) يوم</span> ضمن مهلة التراجع قبل المسح التام لكافة بياناتك.
                         </p>
                     </div>
                 `;
                 document.getElementById('web-status-msg').classList.add('hidden');
+                return;
+            }
 
-            } catch (err) {
-                showStatus(err.message || "حدث خطأ أثناء تأكيد العملية.");
+            // رسالة النجاح لطلب الحذف الجديد
+            document.getElementById('deletion-flow-container').innerHTML = `
+                <div class="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
+                    <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl">
+                        <i class="ph-bold ph-check-circle"></i>
+                    </div>
+                    <h4 class="text-base font-black text-white">تم تأكيد طلب الحذف بنجاح</h4>
+                    <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                        تم التحقق من هويتك بنجاح وتعطيل حسابك فوراً. حسابك الآن ضمن مهلة السماح (14 يوماً)، وسيتم مسح كافة البيانات بشكل نهائي وتلقائي فور انتهاء المهلة.
+                    </p>
+                </div>
+            `;
+            document.getElementById('web-status-msg').classList.add('hidden');
+
+        } catch (err) {
+            showStatus(err.message || "حدث خطأ أثناء تأكيد العملية.");
+            if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = `<i class="ph-bold ph-trash"></i> <span>تأكيد طلب الحذف (مهلة 14 يوماً)</span>`;
             }
         }
-    </script>
+    }
+</script>
 </body>
 </html>
