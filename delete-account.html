@@ -300,16 +300,12 @@
                 }
 
                 // تعطيل الحساب وتوثيق تاريخ طلب الحذف لبدء مهلة الـ 14 يوماً
-                const nowIso = new Date().toISOString();
-                const { error: updateError } = await client
-                    .from('profiles')
-                    .update({
-                        is_disabled: true,
-                        deletion_requested_at: nowIso
-                    })
-                    .eq('id', authData.user.id);
+                // الكود الجديد الآمن:
+const { data: rpcData, error: rpcError } = await client.rpc('request_account_deletion');
 
-                if (updateError) throw updateError;
+if (rpcError || (rpcData && rpcData.status === 'error')) {
+    throw new Error(rpcError?.message || rpcData?.message || "فشل تسجيل طلب الحذف");
+}
 
                 // إنهاء الجلسة المفتوحة فوراً
                 await client.auth.signOut();
