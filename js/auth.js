@@ -154,7 +154,6 @@ async function handleLogin() {
         return;
     }
 
-    // غيّر select('status') إلى select('status, deletion_requested_at')
     const { data: prof } = await supabase
         .from('profiles')
         .select('status, deletion_requested_at')
@@ -173,7 +172,7 @@ async function handleLogin() {
     // فحص ما إذا كان الحساب معطلاً أو مجدولاً للحذف
     if (prof && (prof.status === 'inactive' || prof.status === 'محذوف' || prof.status === 'معطل' || prof.deletion_requested_at)) {
         currentUser = data.user;
-        updateReactivateNotice(prof); // تحديث نص العداد التنازلي
+        updateReactivateNotice(prof);
         toggleView('reactivate-modal', true);
         return;
     }
@@ -205,16 +204,8 @@ async function handleConfirmReactivate() {
     btn.disabled = true;
     btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> جاري إلغاء طلب الحذف...`;
 
-    // 1. إعادة تنشيط الحساب عبر الـ RPC
+    // استدعاء RPC الآمنة التي تعيد التنشيط وتصفر تاريخ الحذف داخلياً
     const { data, error } = await supabase.rpc('reactivate_my_account');
-
-    // 2. تصفير تاريخ طلب الحذف في جدول profiles
-    if (currentUser) {
-        await supabase
-            .from('profiles')
-            .update({ deletion_requested_at: null })
-            .eq('id', currentUser.id);
-    }
 
     btn.disabled = false;
     btn.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> <span>إعادة تفعيل الحساب ومتابعة الدخول</span>`;
@@ -249,7 +240,6 @@ function postLoginSetup() {
     if (!syncInterval && typeof silentSyncData === 'function') {
         syncInterval = setInterval(silentSyncData, 30000);
     }
-    // بدء مراقبة الخمول التلقائي فور الدخول للوحة التحكم
     startInactivityTracking();
 }
 
@@ -539,7 +529,7 @@ async function resendOtpCode() {
     startResendCooldown();
 }
 
-// 14. تعديل الملف الشخصي وتعطيل الحساب
+// 14. تعديل الملف الشخصي
 async function handleUpdateProfileView() { 
     const fName = document.getElementById('prof-first-name').value.trim();
     const lName = document.getElementById('prof-last-name').value.trim();
@@ -558,14 +548,13 @@ async function handleUpdateProfileView() {
 // ========================================================================
 
 let otpCountdownTimer = null;
-let currentOtpTargetEmail = ''; // متغير مركزي لحفظ البريد النشط
+let currentOtpTargetEmail = '';
 
 // 1. فتح نافذة تغيير كلمة المرور وتعبئة بريد الجلسة
 async function openChangePasswordModal() {
     const modal = document.getElementById('change-password-modal');
     const emailInput = document.getElementById('change-pwd-email-input');
 
-    // جلب بيانات المستخدم المعتمدة من الجلسة
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session || !session.user || !session.user.email) {
@@ -573,7 +562,6 @@ async function openChangePasswordModal() {
         return;
     }
 
-    // تثبيت البريد الموثق في الحقل
     if (emailInput) {
         emailInput.value = session.user.email;
     }
@@ -590,7 +578,6 @@ function closeChangePasswordModal() {
 }
 
 // 3. إرسال رمز التحقق الأولي
-// إرسال رمز التحقق والانتقال لنافذة إدخال الرمز الأصلية
 window.handleSendChangePasswordOTP = async function(e) {
     if (e) e.preventDefault();
     const emailInput = document.getElementById('change-pwd-email-input');
@@ -614,24 +601,20 @@ window.handleSendChangePasswordOTP = async function(e) {
 
         showCustomAlert('تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح.', false);
         
-        // 1. إغلاق نافذة البريد وإغلاق القائمة الجانبية إن كانت مفتوحة
         window.closeChangePasswordModal();
         if (typeof toggleSideMenu === 'function') toggleSideMenu(false);
 
-        // 2. تهيئة بيانات التحقق
         currentFlowType = "reset";
         tempRegisterData = { email: email };
         if (typeof resetResendButtonState === 'function') resetResendButtonState();
         
-        // 3. إظهار نافذة إدخال الرمز وفرض طبقة العرض العالية
         const regModal = document.getElementById('register-modal');
         if (regModal) {
             regModal.classList.remove('hidden');
             regModal.style.display = 'flex';
-            regModal.style.zIndex = '140'; // لضمان ظهورها فوق كل الطبقات
+            regModal.style.zIndex = '140';
         }
 
-        // 4. إظهار خانات الرمز حصراً وإخفاء خطوات النموذج الأخرى
         const otpStep = document.getElementById('register-step-otp');
         if (otpStep) {
             otpStep.classList.remove('hidden');
@@ -655,7 +638,6 @@ window.handleSendChangePasswordOTP = async function(e) {
             setTimeout(() => otpInput.focus(), 150);
         }
         
-        // 5. تشغيل مؤقت إعادة الإرسال
         if (typeof startResendCooldown === 'function') startResendCooldown();
         if (typeof window.startOtpCountdown === 'function') window.startOtpCountdown(60);
 
@@ -682,7 +664,6 @@ function startOtpCountdown(seconds = 60) {
 
     if (!btn || !timerDisplay) return;
 
-    // تنظيف أي مؤقت سابق لمنع تسريب الذاكرة أو تسارع الثواني
     if (otpCountdownTimer) {
         clearInterval(otpCountdownTimer);
         otpCountdownTimer = null;
@@ -701,7 +682,6 @@ function startOtpCountdown(seconds = 60) {
         if (remaining > 0) {
             timerDisplay.innerText = `(${remaining}s)`;
         } else {
-            // انتهاء الـ 60 ثانية: تفعيل الزر وإخفاء العداد
             clearInterval(otpCountdownTimer);
             otpCountdownTimer = null;
             btn.disabled = false;
@@ -728,7 +708,6 @@ async function handleResendChangePasswordOTP() {
         if (error) throw error;
 
         showCustomAlert('تمت إعادة إرسال رمز التحقق بنجاح.', false);
-        // تصفير وبدء 60 ثانية جديدة
         startOtpCountdown(60);
 
     } catch (err) {
@@ -897,7 +876,7 @@ window.handleResendDeleteAccountOTP = async function() {
     }
 };
 
-// 6. التحقق من الرمز وتنفيذ جدولة الحذف (مهلة 14 يوماً)
+// 6. التحقق من الرمز وتنفيذ جدولة الحذف عبر دالة RPC الآمنة
 window.handleVerifyAndDeleteAccount = async function() {
     const codeInput = document.getElementById('del-otp-code-input');
     const token = codeInput ? codeInput.value.trim() : '';
@@ -924,28 +903,19 @@ window.handleVerifyAndDeleteAccount = async function() {
             throw new Error("رمز التحقق غير صحيح أو منتهي الصلاحية.");
         }
 
-        // 1. تعطيل الحساب عبر RPC
-        const { data: deactData, error: deactError } = await supabase.rpc('deactivate_my_account');
-        if (deactError || (deactData && deactData.status === 'error')) {
-            throw new Error(deactError?.message || deactData?.message || "فشل تعطيل الحساب");
+        // تنفيذ طلب الحذف والتعطيل في خطوة واحدة آمنة عبر الخادم
+        const { data: rpcData, error: rpcError } = await supabase.rpc('request_account_deletion');
+        if (rpcError || (rpcData && rpcData.status === 'error')) {
+            throw new Error(rpcError?.message || rpcData?.message || "فشل تسجيل طلب الحذف");
         }
-
-        // 2. تسجيل تاريخ بدء مهلة الـ 14 يوماً
-        const nowIso = new Date().toISOString();
-        const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ deletion_requested_at: nowIso })
-            .eq('id', currentUser.id);
-
-        if (updateError) throw updateError;
 
         closeDeleteAccountOTPModal();
         showCustomAlert("تم تأكيد الرمز بنجاح وجدولة حذف الحساب. لديك مهلة 14 يوماً للتراجع.", false);
 
-        // تسجيل الخروج تلقائياً بعد ثانيتين
+        // تسجيل الخروج تلقائياً بعد ثانية ونصف
         setTimeout(() => {
             handleLogout();
-        }, 1800);
+        }, 1500);
 
     } catch (err) {
         showCustomAlert(err.message || "حدث خطأ أثناء تأكيد العملية.");
@@ -1133,7 +1103,6 @@ window.handleVerifyChangePasswordOTP = async function(e) {
     }
 
     try {
-        // تهيئة المتغيرات العامة لضمان استلام نافذة كلمة المرور للبيانات بسلاسة
         tempRegisterData = { email: cpActiveEmail };
         currentFlowType = "reset";
 
@@ -1147,7 +1116,6 @@ window.handleVerifyChangePasswordOTP = async function(e) {
             throw new Error('الرمز غير صحيح أو منتهي الصلاحية.');
         }
 
-        // إغلاق هذه النافذة فوراً؛ وسيتكفل حدث PASSWORD_RECOVERY بإظهار نافذة تعيين كلمة المرور
         window.closeChangePasswordModal();
 
     } catch (err) {
