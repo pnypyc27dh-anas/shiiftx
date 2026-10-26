@@ -553,6 +553,35 @@
         </div>
     </div>
 
+    <!-- نافذة استعراض عمليات وتحويلات الوكيل المالي -->
+    <div id="agent-ops-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div>
+                    <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="ph-bold ph-clock-counter-clockwise text-amber-500 text-base"></i>
+                        <span>سجل عمليات الوكيل: <span id="agent-ops-modal-title" class="text-amber-600">---</span></span>
+                    </h4>
+                    <p class="text-[11px] text-slate-400">كافة الإيداعات وعمولات الشحن المنفذة للعملاء</p>
+                </div>
+                <button type="button" onclick="closeAgentOpsModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <!-- قائمة الحركات -->
+            <div id="agent-modal-transactions-list" class="space-y-2 max-h-80 overflow-y-auto pr-1">
+                <p class="text-xs text-slate-400 p-4 text-center">جاري تحميل السجل...</p>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                <button type="button" onclick="closeAgentOpsModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold transition">
+                    إغلاق
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- استدعاء الإعدادات المشتركة وتطبيق الإدارة المخصص -->
     <script src="js/config.js"></script>
     <script src="js/admin-app.js"></script>
