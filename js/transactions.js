@@ -798,3 +798,100 @@ function printOfficialInvoice(ref, platform, pkg, amount, date, playerId, status
     printWindow.focus();
     setTimeout(() => { printWindow.print(); }, 400);
 }
+
+// ========================================================================
+// وحدة شبكة الوكلاء الماليين المعتمدين (APPROVED CASH AGENTS)
+// ========================================================================
+
+const APPROVED_AGENTS = [
+    {
+        id: "agent_1",
+        name: "وكالة الشام المعتمدة",
+        region: "دمشق وريفها / شام كاش فوري",
+        wallet: "bc5441c36262221d741a4d8a676ebd46", // رقم الحساب أو المحفظة
+        phone: "963900000000" // رقم الواتساب بدون + أو أصفار دولية بادئة
+    },
+    {
+        id: "agent_2",
+        name: "وكالة الشمال الرقمية",
+        region: "حلب والشمال",
+        wallet: "9874123564889",
+        phone: "963911111111"
+    }
+];
+
+// دالة تهيئة قائمة الوكلاء المعتمدين في صفحة الإيداع
+function initAgentsList() {
+    const select = document.getElementById("agent-select");
+    if (!select) return;
+
+    select.innerHTML = "";
+    APPROVED_AGENTS.forEach((agent) => {
+        const opt = document.createElement("option");
+        opt.value = agent.id;
+        opt.textContent = `${agent.name} — ${agent.region}`;
+        select.appendChild(opt);
+    });
+
+    onAgentChanged();
+}
+
+// تحديث بيانات بطاقة الوكيل ورابط الواتساب تلقائياً عند تغيير الاختيار
+function onAgentChanged() {
+    const select = document.getElementById("agent-select");
+    if (!select) return;
+
+    const selectedId = select.value;
+    const agent = APPROVED_AGENTS.find(a => a.id === selectedId) || APPROVED_AGENTS[0];
+    if (!agent) return;
+
+    const nameEl = document.getElementById("agent-display-name");
+    const regionEl = document.getElementById("agent-region-text");
+    const walletEl = document.getElementById("agent-display-wallet");
+    const waBtn = document.getElementById("agent-whatsapp-btn");
+
+    if (nameEl) nameEl.textContent = agent.name;
+    if (regionEl) regionEl.textContent = agent.region;
+    if (walletEl) walletEl.textContent = agent.wallet;
+
+    const clientName = document.getElementById("live-client-name")?.textContent || "عميل مسجل";
+    const amountVal = document.getElementById("sub-form-amount-select")?.value || "";
+    
+    const defaultMsg = encodeURIComponent(
+        `مرحباً، أود شحن رصيد محفظتي في SHIIFT X عبركم.\n` +
+        `• العميل: ${clientName}\n` +
+        (amountVal ? `• المبلغ المطلوب: $${amountVal}\n` : '') +
+        `يرجى تزويدي بطريقة الدفع المناسبة لتأكيد الإيداع.`
+    );
+
+    if (waBtn) {
+        waBtn.href = `https://wa.me/${agent.phone}?text=${defaultMsg}`;
+    }
+}
+
+// تحديث رسالة الواتساب فور كتابة العميل للمبلغ المطلوب
+function onCustomAmountTyped() {
+    onAgentChanged();
+}
+
+// دالة اختيار المبالغ السريعة
+function setPresetAmount(val, btn) {
+    const input = document.getElementById("sub-form-amount-select");
+    if (input) {
+        input.value = val;
+        onCustomAmountTyped();
+    }
+    document.querySelectorAll('.amount-preset-btn').forEach(b => {
+        b.classList.remove('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+    });
+    if (btn) {
+        btn.classList.add('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+    }
+}
+
+// تشغيل التهيئة تلقائياً عند جاهزية الصفحة
+if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", initAgentsList);
+} else {
+    initAgentsList();
+}
