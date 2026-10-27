@@ -102,6 +102,7 @@ async function handleAgentTransfer(e) {
 // جلب سجل تحويلات وعمولات الوكيل وعرض الاسم والبريد بطلب واحد فوري
 async function loadAgentTransactions() {
     const container = document.getElementById('agent-tx-container');
+    if (!container) return;
     
     try {
         const { data: txs, error } = await supabase.rpc('get_agent_transactions');
@@ -122,19 +123,35 @@ async function loadAgentTransactions() {
             const customerName = tx.target_name || 'عميل مسجل';
             const customerEmail = tx.target_email || '—';
             const dateStr = new Date(tx.created_at).toLocaleString('en-US', { hour12: false });
+            const isRejected = (tx.status === 'rejected');
             
             const item = document.createElement('div');
             item.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-xs";
+            
+            let statusMarkup = '';
+            if (isRejected) {
+                statusMarkup = `
+                    <div class="text-left font-mono">
+                        <span class="text-xs font-bold text-slate-400 line-through block">$${Number(tx.amount).toFixed(2)}</span>
+                        <span class="text-[10px] text-rose-600 dark:text-rose-400 font-bold block">مرفوض: ${tx.notes || 'ملغي'}</span>
+                    </div>
+                `;
+            } else {
+                statusMarkup = `
+                    <div class="text-left font-mono">
+                        <span class="font-black text-amber-600 dark:text-amber-400 block">-$${Number(tx.amount).toFixed(2)}</span>
+                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">+ عمولة $${Number(tx.commission_earned || 0).toFixed(2)}</span>
+                    </div>
+                `;
+            }
+
             item.innerHTML = `
                 <div class="space-y-0.5">
                     <span class="font-bold text-slate-800 dark:text-slate-100 block">${customerName}</span>
                     <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono block">${customerEmail}</span>
                     <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">${dateStr}</span>
                 </div>
-                <div class="text-left font-mono">
-                    <span class="font-black text-amber-600 dark:text-amber-400 block">-$${Number(tx.amount).toFixed(2)}</span>
-                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">+ عمولة $${Number(tx.commission_earned || 0).toFixed(2)}</span>
-                </div>
+                ${statusMarkup}
             `;
             container.appendChild(item);
         });
@@ -143,7 +160,6 @@ async function loadAgentTransactions() {
         container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500">حدث خطأ أثناء تحميل السجل.</div>`;
     }
 }
-
 // عرض رسائل التنبيه العائمة
 function showToast(msg, isError = true) {
     const toast = document.getElementById('custom-toast');
