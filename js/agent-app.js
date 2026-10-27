@@ -3,7 +3,7 @@
 // ========================================================================
 
 let currentAgentUser = null;
-let currentAgentProfile = null; // تم تعريف المتغير العام لحفظ بيانات الوكيل
+let currentAgentProfile = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. التحقق من وجود جلسة مسجلة
@@ -34,20 +34,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // تخزين بيانات الملف الشخصي في المتغير العام لاستخدامه في العمليات اللاحقة
     currentAgentProfile = prof;
 
-    // 3. عرض الرصيد المتاح للوكيل (Float)
+    // 3. عرض الرصيد المتاح للوكيل
     const availableFloat = parseFloat(prof.balance || 0);
     const balanceEl = document.getElementById('agent-float-balance');
     if (balanceEl) {
         balanceEl.innerText = '$' + availableFloat.toFixed(2);
     }
+    
+    // 4. تحميل الطلبات المعلقة وسجل العمليات معاً
     loadAgentPendingOrders();
     loadAgentTransactions();
 });
 
-// معالجة التحويل الفوري لمحفظة العميل
+// معالجة التحويل الفوري المباشر (التحويل اليدوي)
 async function handleAgentTransfer(e) {
     e.preventDefault();
     const email = document.getElementById('target-email').value.trim();
@@ -60,7 +61,6 @@ async function handleAgentTransfer(e) {
     btn.innerText = "جاري التنفيذ...";
 
     try {
-        // استخراج اسم الوكيل المعتمد (الاسم الأول والأخير) بأمان
         const agentName = [currentAgentProfile?.first_name, currentAgentProfile?.last_name]
             .filter(Boolean)
             .join(' ')
@@ -91,7 +91,7 @@ async function handleAgentTransfer(e) {
             showToast(data?.message || "فشلت عملية التحويل.");
         }
     } catch (err) {
-        console.error("Agent Transfer Error:", err); // تسجيل تفاصيل الخطأ في الكونسول لتسهيل التتبع
+        console.error("Agent Transfer Error:", err);
         showToast("خطأ: " + (err.message || err));
     } finally {
         btn.disabled = false;
@@ -99,83 +99,10 @@ async function handleAgentTransfer(e) {
     }
 }
 
-// جلب سجل تحويلات وعمولات الوكيل وعرض الاسم والبريد بطلب واحد فوري
-async function loadAgentTransactions() {
-    const container = document.getElementById('agent-tx-container');
-    if (!container) return;
-    
-    try {
-        const { data: txs, error } = await supabase.rpc('get_agent_transactions');
-
-        if (error) {
-            console.error("RPC Error:", error);
-            container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500 bg-rose-50 dark:bg-rose-950/20 rounded-xl">فشل جلب السجل: ${error.message}</div>`;
-            return;
-        }
-
-        if (!txs || txs.length === 0) {
-            container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">لا توجد تحويلات مسجلة حتى الآن.</div>`;
-            return;
-        }
-
-        container.innerHTML = "";
-        txs.forEach(tx => {
-            const customerName = tx.target_name || 'عميل مسجل';
-            const customerEmail = tx.target_email || '—';
-            const dateStr = new Date(tx.created_at).toLocaleString('en-US', { hour12: false });
-            const isRejected = (tx.status === 'rejected');
-            
-            const item = document.createElement('div');
-            item.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-xs";
-            
-            let statusMarkup = '';
-            if (isRejected) {
-                statusMarkup = `
-                    <div class="text-left font-mono">
-                        <span class="text-xs font-bold text-slate-400 line-through block">$${Number(tx.amount).toFixed(2)}</span>
-                        <span class="text-[10px] text-rose-600 dark:text-rose-400 font-bold block">مرفوض: ${tx.notes || 'ملغي'}</span>
-                    </div>
-                `;
-            } else {
-                statusMarkup = `
-                    <div class="text-left font-mono">
-                        <span class="font-black text-amber-600 dark:text-amber-400 block">-$${Number(tx.amount).toFixed(2)}</span>
-                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">+ عمولة $${Number(tx.commission_earned || 0).toFixed(2)}</span>
-                    </div>
-                `;
-            }
-
-            item.innerHTML = `
-                <div class="space-y-0.5">
-                    <span class="font-bold text-slate-800 dark:text-slate-100 block">${customerName}</span>
-                    <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono block">${customerEmail}</span>
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">${dateStr}</span>
-                </div>
-                ${statusMarkup}
-            `;
-            container.appendChild(item);
-        });
-    } catch (err) {
-        console.error("Agent Tx Load Error:", err);
-        container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500">حدث خطأ أثناء تحميل السجل.</div>`;
-    }
-}
-// عرض رسائل التنبيه العائمة
-function showToast(msg, isError = true) {
-    const toast = document.getElementById('custom-toast');
-    if (!toast) return;
-    toast.className = `fixed top-5 left-1/2 -translate-x-1/2 z-[130] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold transition-all ${isError ? 'bg-rose-500 text-white' : 'bg-emerald-600 text-white'}`;
-    toast.innerText = msg;
-    toast.classList.remove('hidden');
-    setTimeout(() => toast.classList.add('hidden'), 4000);
-}
-
-
 // ========================================================================
-// إدارة طلبات الإيداع المعلقة للوكيل (استقبال، اعتماد، رفض)
+// 1. قسم معالجة طلبات الإيداع الواردة والمعلقة
 // ========================================================================
 
-// 1. جلب وعرض طلبات الإيداع الموجهة لهذا الوكيل
 async function loadAgentPendingOrders() {
     const container = document.getElementById('agent-pending-orders-container');
     if (!container) return;
@@ -243,7 +170,6 @@ async function loadAgentPendingOrders() {
     }
 }
 
-// 2. اعتماد الطلب وشحن رصيد العميل واقتطاع العمولة بضغطة زر
 async function approveDepositOrder(orderId, btn) {
     if (!confirm("هل تأكدت من استلام المبلغ وترغب في إتمام الشحن للعميل واحتساب عمولتك الآن؟")) return;
 
@@ -261,14 +187,12 @@ async function approveDepositOrder(orderId, btn) {
         if (data && data.status === 'success') {
             showToast(data.message, false);
             
-            // تحديث رصيد الوكيل المالي في الواجهة
             const { data: prof } = await supabase.from('profiles').select('balance').eq('id', currentAgentUser.id).single();
-            if (prof) {
-                if (currentAgentProfile) currentAgentProfile.balance = prof.balance;
+            if (prof && currentAgentProfile) {
+                currentAgentProfile.balance = prof.balance;
                 document.getElementById('agent-float-balance').innerText = '$' + Number(prof.balance).toFixed(2);
             }
             
-            // إعادة تحميل الطلبات المعلقة وسجل التحويلات
             loadAgentPendingOrders();
             loadAgentTransactions();
         } else {
@@ -284,7 +208,6 @@ async function approveDepositOrder(orderId, btn) {
     }
 }
 
-// 3. رفض الطلب في حال عدم وصول المبلغ أو خطأ الإشعار
 async function rejectDepositOrder(orderId, btn) {
     const reason = prompt("يرجى كتابة سبب الرفض:", "لم يتم استلام المبلغ أو رقم الإشعار غير مطابق");
     if (!reason) return;
@@ -302,6 +225,7 @@ async function rejectDepositOrder(orderId, btn) {
         if (data && data.status === 'success') {
             showToast(data.message, false);
             loadAgentPendingOrders();
+            loadAgentTransactions();
         } else {
             showToast(data?.message || "فشل رفض الطلب.");
             btn.disabled = false;
@@ -311,4 +235,78 @@ async function rejectDepositOrder(orderId, btn) {
         showToast("خطأ: " + (err.message || err));
         btn.disabled = false;
     }
+}
+
+// ========================================================================
+// 2. سجل تحويلات الوكيل الشامل (مكتملة ومرفوضة)
+// ========================================================================
+
+async function loadAgentTransactions() {
+    const container = document.getElementById('agent-tx-container');
+    if (!container) return;
+    
+    try {
+        const { data: txs, error } = await supabase.rpc('get_agent_transactions');
+
+        if (error) {
+            console.error("RPC Error:", error);
+            container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500 bg-rose-50 dark:bg-rose-950/20 rounded-xl">فشل جلب السجل: ${error.message}</div>`;
+            return;
+        }
+
+        if (!txs || txs.length === 0) {
+            container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">لا توجد تحويلات مسجلة حتى الآن.</div>`;
+            return;
+        }
+
+        container.innerHTML = "";
+        txs.forEach(tx => {
+            const customerName = tx.target_name || 'عميل مسجل';
+            const customerEmail = tx.target_email || '—';
+            const dateStr = new Date(tx.created_at).toLocaleString('en-US', { hour12: false });
+            const isRejected = (tx.status === 'rejected');
+            
+            const item = document.createElement('div');
+            item.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-xs";
+            
+            let statusMarkup = '';
+            if (isRejected) {
+                statusMarkup = `
+                    <div class="text-left font-mono">
+                        <span class="text-xs font-bold text-slate-400 line-through block">$${Number(tx.amount).toFixed(2)}</span>
+                        <span class="text-[10px] text-rose-600 dark:text-rose-400 font-bold block">مرفوض: ${tx.notes || 'ملغي'}</span>
+                    </div>
+                `;
+            } else {
+                statusMarkup = `
+                    <div class="text-left font-mono">
+                        <span class="font-black text-amber-600 dark:text-amber-400 block">-$${Number(tx.amount).toFixed(2)}</span>
+                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">+ عمولة $${Number(tx.commission_earned || 0).toFixed(2)}</span>
+                    </div>
+                `;
+            }
+
+            item.innerHTML = `
+                <div class="space-y-0.5">
+                    <span class="font-bold text-slate-800 dark:text-slate-100 block">${customerName}</span>
+                    <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono block">${customerEmail}</span>
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">${dateStr}</span>
+                </div>
+                ${statusMarkup}
+            `;
+            container.appendChild(item);
+        });
+    } catch (err) {
+        console.error("Agent Tx Load Error:", err);
+        container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500">حدث خطأ أثناء تحميل السجل.</div>`;
+    }
+}
+
+function showToast(msg, isError = true) {
+    const toast = document.getElementById('custom-toast');
+    if (!toast) return;
+    toast.className = `fixed top-5 left-1/2 -translate-x-1/2 z-[130] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold transition-all ${isError ? 'bg-rose-500 text-white' : 'bg-emerald-600 text-white'}`;
+    toast.innerText = msg;
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 4000);
 }
