@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (balanceEl) {
         balanceEl.innerText = '$' + availableFloat.toFixed(2);
     }
-    
+    loadAgentPendingOrders();
     loadAgentTransactions();
 });
 
@@ -152,4 +152,147 @@ function showToast(msg, isError = true) {
     toast.innerText = msg;
     toast.classList.remove('hidden');
     setTimeout(() => toast.classList.add('hidden'), 4000);
+}
+
+
+// ========================================================================
+// إدارة طلبات الإيداع المعلقة للوكيل (استقبال، اعتماد، رفض)
+// ========================================================================
+
+// 1. جلب وعرض طلبات الإيداع الموجهة لهذا الوكيل
+async function loadAgentPendingOrders() {
+    const container = document.getElementById('agent-pending-orders-container');
+    if (!container) return;
+
+    try {
+        const { data: orders, error } = await supabase.rpc('get_agent_pending_deposit_orders');
+
+        if (error) {
+            console.error("Fetch Orders RPC Error:", error);
+            container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500 bg-rose-50 dark:bg-rose-950/20 rounded-xl">فشل تحميل الطلبات: ${error.message}</div>`;
+            return;
+        }
+
+        if (!orders || orders.length === 0) {
+            container.innerHTML = `
+                <div class="py-6 text-center text-xs text-slate-400 dark:text-slate-500 space-y-1">
+                    <i class="ph ph-tray text-2xl opacity-40"></i>
+                    <p class="font-bold">لا توجد طلبات إيداع معلقة حالياً</p>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = "";
+        orders.forEach(order => {
+            const dateStr = new Date(order.created_at).toLocaleString('en-US', { hour12: false });
+            const item = document.createElement('div');
+            item.className = "p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80 space-y-3";
+            item.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-black text-slate-900 dark:text-slate-100 text-sm block">${order.customer_name}</span>
+                            <span class="text-[10px] font-mono text-slate-400 select-all">#${order.transaction_ref}</span>
+                        </div>
+                        <span class="text-xs font-mono text-slate-500 dark:text-slate-400 block mt-0.5">${order.customer_email}</span>
+                        <span class="text-[10px] text-slate-400 block mt-0.5">${dateStr}</span>
+                    </div>
+                    <div class="text-left font-mono">
+                        <span class="text-base font-black text-emerald-600 dark:text-emerald-400 block">+$${Number(order.amount).toFixed(2)}</span>
+                        <span class="text-[10px] bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900 px-2 py-0.5 rounded-md font-bold">معلق</span>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-800 text-xs flex justify-between items-center">
+                    <span class="text-slate-500">بيان الدفع / رقم الإشعار:</span>
+                    <span class="font-mono font-bold text-slate-800 dark:text-slate-200 select-all">${order.receipt_num}</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button onclick="approveDepositOrder('${order.order_id}', this)" class="btn-spring py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
+                        <i class="ph-bold ph-check"></i>
+                        <span>اعتماد وشحن فوري</span>
+                    </button>
+                    <button onclick="rejectDepositOrder('${order.order_id}', this)" class="btn-spring py-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="ph-bold ph-x"></i>
+                        <span>رفض الطلب</span>
+                    </button>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    } catch (err) {
+        console.error("Load Orders Error:", err);
+        container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500">حدث خطأ أثناء تحميل الطلبات.</div>`;
+    }
+}
+
+// 2. اعتماد الطلب وشحن رصيد العميل واقتطاع العمولة بضغطة زر
+async function approveDepositOrder(orderId, btn) {
+    if (!confirm("هل تأكدت من استلام المبلغ وترغب في إتمام الشحن للعميل واحتساب عمولتك الآن؟")) return;
+
+    btn.disabled = true;
+    const oldText = btn.innerHTML;
+    btn.innerHTML = `<i class="ph ph-circle-notch animate-spin"></i> جاري الشحن...`;
+
+    try {
+        const { data, error } = await supabase.rpc('agent_approve_deposit_order', {
+            p_order_id: orderId
+        });
+
+        if (error) throw error;
+
+        if (data && data.status === 'success') {
+            showToast(data.message, false);
+            
+            // تحديث رصيد الوكيل المالي في الواجهة
+            const { data: prof } = await supabase.from('profiles').select('balance').eq('id', currentAgentUser.id).single();
+            if (prof) {
+                if (currentAgentProfile) currentAgentProfile.balance = prof.balance;
+                document.getElementById('agent-float-balance').innerText = '$' + Number(prof.balance).toFixed(2);
+            }
+            
+            // إعادة تحميل الطلبات المعلقة وسجل التحويلات
+            loadAgentPendingOrders();
+            loadAgentTransactions();
+        } else {
+            showToast(data?.message || "فشل اعتماد الطلب.");
+            btn.disabled = false;
+            btn.innerHTML = oldText;
+        }
+    } catch (err) {
+        console.error("Approve Deposit Order Error:", err);
+        showToast("خطأ: " + (err.message || err));
+        btn.disabled = false;
+        btn.innerHTML = oldText;
+    }
+}
+
+// 3. رفض الطلب في حال عدم وصول المبلغ أو خطأ الإشعار
+async function rejectDepositOrder(orderId, btn) {
+    const reason = prompt("يرجى كتابة سبب الرفض:", "لم يتم استلام المبلغ أو رقم الإشعار غير مطابق");
+    if (!reason) return;
+
+    btn.disabled = true;
+
+    try {
+        const { data, error } = await supabase.rpc('agent_reject_deposit_order', {
+            p_order_id: orderId,
+            p_reason: reason
+        });
+
+        if (error) throw error;
+
+        if (data && data.status === 'success') {
+            showToast(data.message, false);
+            loadAgentPendingOrders();
+        } else {
+            showToast(data?.message || "فشل رفض الطلب.");
+            btn.disabled = false;
+        }
+    } catch (err) {
+        console.error("Reject Deposit Order Error:", err);
+        showToast("خطأ: " + (err.message || err));
+        btn.disabled = false;
+    }
 }
