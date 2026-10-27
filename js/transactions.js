@@ -895,3 +895,152 @@ if (document.readyState === 'loading') {
 } else {
     initAgentsList();
 }
+
+// ========================================================================
+// شبكة الوكلاء الماليين — جلب تلقائي وإرسال طلبات الإيداع المباشرة
+// ========================================================================
+
+let loadedAgentsList = [];
+
+// جلب قائمة الوكلاء المعتمدين النشطين تلقائياً من Supabase
+async function fetchAndRenderAgents() {
+    const select = document.getElementById("agent-select");
+    if (!select) return;
+
+    try {
+        const { data: agents, error } = await supabase.rpc('get_active_agents_list');
+        
+        if (error) throw error;
+
+        if (!agents || agents.length === 0) {
+            select.innerHTML = `<option value="">لا يوجد وكلاء متاحون حالياً</option>`;
+            return;
+        }
+
+        loadedAgentsList = agents;
+        select.innerHTML = "";
+
+        agents.forEach(agent => {
+            const opt = document.createElement("option");
+            opt.value = agent.id;
+            opt.textContent = agent.name;
+            select.appendChild(opt);
+        });
+
+        onAgentChanged();
+    } catch (err) {
+        console.error("Fetch Agents Error:", err);
+        select.innerHTML = `<option value="">فشل تحميل الوكلاء</option>`;
+    }
+}
+
+// تحديث بطاقة بيانات الوكيل ورابط الواتساب عند تغيير الاختيار
+function onAgentChanged() {
+    const select = document.getElementById("agent-select");
+    if (!select || loadedAgentsList.length === 0) return;
+
+    const selectedId = select.value;
+    const agent = loadedAgentsList.find(a => a.id === selectedId) || loadedAgentsList[0];
+    if (!agent) return;
+
+    const nameEl = document.getElementById("agent-display-name");
+    const phoneEl = document.getElementById("agent-display-phone");
+    const waBtn = document.getElementById("agent-whatsapp-btn");
+
+    if (nameEl) nameEl.textContent = agent.name;
+    if (phoneEl) phoneEl.textContent = agent.phone || "رقم الهاتف غير مسجل";
+
+    if (waBtn) {
+        if (agent.phone) {
+            // تنظيف الرقم من أي رموز أو مسافات
+            let cleanPhone = agent.phone.replace(/[^0-9]/g, '');
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = '963' + cleanPhone.substring(1); // تحويل التنسيق المحلي للدولي
+            }
+            const clientName = document.getElementById("live-client-name")?.textContent || "عميل SHIIFT X";
+            const amountVal = document.getElementById("sub-form-amount-select")?.value || "";
+            
+            const msg = encodeURIComponent(
+                `مرحباً ${agent.name}، أود شحن رصيد في SHIIFT X.\n` +
+                `• العميل: ${clientName}\n` +
+                (amountVal ? `• المبلغ المطلوب: $${amountVal}\n` : '') +
+                `أرجو تزويدي بتفاصيل الدفع المناسبة لتأكيد الطلب.`
+            );
+            waBtn.href = `https://wa.me/${cleanPhone}?text=${msg}`;
+            waBtn.classList.remove('pointer-events-none', 'opacity-50');
+        } else {
+            waBtn.href = "#";
+            waBtn.classList.add('pointer-events-none', 'opacity-50');
+        }
+    }
+}
+
+// دالة تحديد المبالغ السريعة
+function setPresetAmount(val, btn) {
+    const input = document.getElementById("sub-form-amount-select");
+    if (input) input.value = val;
+    document.querySelectorAll('.amount-preset-btn').forEach(b => {
+        b.classList.remove('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+    });
+    if (btn) btn.classList.add('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+    onAgentChanged();
+}
+
+// إرسال طلب الشحن وحفظه في deposit_orders بانتظار اعتماد الوكيل
+async function submitAgentDepositRequest() {
+    const agentSelect = document.getElementById("agent-select");
+    const amountInput = document.getElementById("sub-form-amount-select");
+    const receiptInput = document.getElementById("sub-form-tx-number");
+    const btn = document.getElementById("sub-deposit-final-btn");
+
+    const agentId = agentSelect ? agentSelect.value : null;
+    const amount = parseFloat(amountInput ? amountInput.value : 0);
+    const receiptNum = receiptInput ? receiptInput.value.trim() : "";
+
+    if (!agentId) {
+        return (typeof showCustomAlert === 'function') ? showCustomAlert("يرجى اختيار الوكيل المعتمد أولاً.") : alert("يرجى اختيار الوكيل المعتمد أولاً.");
+    }
+    if (isNaN(amount) || amount <= 0) {
+        return (typeof showCustomAlert === 'function') ? showCustomAlert("يرجى إدخال مبلغ شحن صحيح.") : alert("يرجى إدخال مبلغ شحن صحيح.");
+    }
+
+    btn.disabled = true;
+    const origHtml = btn.innerHTML;
+    btn.innerHTML = `<i class="ph ph-circle-notch animate-spin text-lg"></i> <span>جاري إرسال الطلب للوكيل...</span>`;
+
+    try {
+        const { data, error } = await supabase.rpc('customer_submit_agent_deposit', {
+            p_agent_id: agentId,
+            p_amount: amount,
+            p_receipt_num: receiptNum || "دفع نقدي كاش"
+        });
+
+        if (error) throw error;
+
+        if (data && data.status === 'success') {
+            if (typeof showCustomAlert === 'function') {
+                showCustomAlert(data.message, false);
+            } else {
+                alert(data.message);
+            }
+            if (amountInput) amountInput.value = "";
+            if (receiptInput) receiptInput.value = "";
+            if (typeof silentSyncData === 'function') silentSyncData();
+        } else {
+            alert(data?.message || "فشل إرسال الطلب.");
+        }
+    } catch (err) {
+        console.error("Submit Request Error:", err);
+        alert("خطأ: " + (err.message || err));
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+    }
+}
+
+// تشغيل جلب الوكلاء فور تحميل المستند
+if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", fetchAndRenderAgents);
+} else {
+    fetchAndRenderAgents();
+}
