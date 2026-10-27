@@ -762,99 +762,114 @@
             </div>
 
             <!-- صفحة الإيداع -->
-         <!-- صفحة الإيداع (شحن مباشر مع مبالغ سريعة وإدخال حر) -->
-            <div id="view-deposit" class="hidden space-y-6 data-view fade-in md:max-w-xl md:mx-auto w-full">
-                <div class="glass-panel p-6 sm:p-8 space-y-6 border border-slate-200/70 dark:border-slate-800">
-                    
-                    <!-- الترويسة -->
-                    <div class="text-center space-y-1.5">
-                        <div class="inline-flex justify-center items-center w-12 h-12 bg-blue-50 dark:bg-blue-950/60 text-[#005ba3] dark:text-blue-400 rounded-2xl mb-1 shadow-sm border border-blue-100 dark:border-blue-900/40">
-                            <i class="ph-fill ph-wallet text-2xl"></i>
-                        </div>
-                        <h3 class="font-black text-lg text-slate-900 dark:text-slate-100 tracking-tight">تمويل رصيد المحفظة</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">حول المبلغ إلى حساب المتجر المعتمد، ثم سجّل رقم الحوالة لتأكيد الإيداع.</p>
-                    </div>
+        <!-- صفحة الإيداع (الشحن عبر شبكة الوكلاء الماليين المعتمدين) -->
+<div id="view-deposit" class="hidden space-y-6 data-view fade-in md:max-w-xl md:mx-auto w-full">
+    <div class="glass-panel p-6 sm:p-8 space-y-6 border border-slate-200/70 dark:border-slate-800">
+        
+        <!-- الترويسة -->
+        <div class="text-center space-y-1.5">
+            <div class="inline-flex justify-center items-center w-12 h-12 bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 rounded-2xl mb-1 shadow-sm border border-amber-100 dark:border-amber-900/40">
+                <i class="ph-fill ph-handshake text-2xl"></i>
+            </div>
+            <h3 class="font-black text-lg text-slate-900 dark:text-slate-100 tracking-tight">شحن الرصيد عبر الوكلاء المعتمدين</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                اختر أقرب وكيل مالي لك لتحويل المبلغ أو الدفع نقداً، ثم نسّق معه لتأكيد إيداع الرصيد في محفظتك.
+            </p>
+        </div>
 
-                    <div class="space-y-5">
-                        
-                        <!-- 1. اختيار قناة الدفع المباشرة -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">اختر قناة التحويل</label>
-                            <div class="relative">
-                                <i class="ph ph-bank absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg z-10 pointer-events-none"></i>
-                                <select id="sub-payment-method" onchange="updateDirectWalletInfo()" class="input-field w-full pr-12 pl-10 py-3.5 text-xs font-bold text-slate-800 dark:text-slate-100 appearance-none relative cursor-pointer">
-                                    
-                                    <option value="شام كاش" data-wallet="bc5441c36262221d741a4d8a676ebd46">شام كاش Cham Cash</option>
-                                   
-                                </select>
-                                <i class="ph ph-caret-down absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
-                            </div>
-                        </div>
-
-                        <!-- 2. بطاقة رقم الحساب للنسخ (مظهر مالي هادئ ومتناسق) -->
-                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 space-y-2.5 transition">
-                            <div class="flex items-center justify-between text-xs px-1">
-                                <span class="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                                    <i class="ph-fill ph-check-circle text-blue-600 dark:text-blue-400 text-sm"></i>
-                                    <span id="direct-gateway-name-label">رقم حساب شام كاش:</span>
-                                </span>
-                                <span class="text-[10px] bg-blue-50 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 font-bold px-2 py-0.5 rounded-full border border-blue-200/50 dark:border-blue-900/40">حساب معتمد</span>
-                            </div>
-
-                            <div class="bg-white dark:bg-slate-900 py-3 px-4 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between shadow-sm" dir="ltr">
-                                <span id="direct-official-wallet-num" class="text-lg font-mono font-black text-slate-900 dark:text-emerald-400 tracking-wider tabular-nums select-all">bc5441c36262221d741a4d8a676ebd46</span>
-                                <button onclick="copyToClipboard(document.getElementById('direct-official-wallet-num').innerText)" type="button" class="btn-spring flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg shadow-sm cursor-pointer">
-                                    <i class="ph-bold ph-copy text-sm"></i>
-                                    <span>نسخ</span>
-                                </button>
-                            </div>
-                            <p class="text-[11px] text-slate-400 dark:text-slate-400 text-right">يرجى تحويل المبلغ بدقة إلى هذا الرقم قبل إرسال الطلب.</p>
-                        </div>
-
-                        <!-- 3. تحديد المبلغ (أزرار سريعة + إدخال حر) -->
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-center">
-                                <label class="text-xs font-bold text-slate-700 dark:text-slate-200">المبلغ المراد شحنه ($)</label>
-                                <span class="text-[10px] text-slate-400 font-medium">اختر باقة أو أدخل أي مبلغ</span>
-                            </div>
-
-                            <!-- أزرار المبالغ السريعة -->
-                            <div class="grid grid-cols-5 gap-2 pb-1">
-                                <button type="button" onclick="setPresetAmount(5, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$5</button>
-                                <button type="button" onclick="setPresetAmount(10, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$10</button>
-                                <button type="button" onclick="setPresetAmount(25, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$25</button>
-                                <button type="button" onclick="setPresetAmount(50, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$50</button>
-                                <button type="button" onclick="setPresetAmount(100, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$100</button>
-                            </div>
-
-                            <!-- خانة الإدخال الحر بدون أسهم العداد -->
-                            <div class="relative">
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm pointer-events-none">$</span>
-                                <input id="sub-form-amount-select" oninput="onCustomAmountTyped()" type="text" inputmode="decimal" placeholder="أو اكتب أي مبلغ تريده (مثال: 15.5)" class="input-field no-spin w-full pr-9 pl-4 py-3.5 text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400">
-                            </div>
-                        </div>
-
-                        <!-- 4. رقم إشعار الحوالة (بدون أسهم عداد إطلاقاً) -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">رقم إشعار الحوالة (الرقم المرجعي)</label>
-                            <div class="relative">
-                                <i class="ph ph-receipt absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none"></i>
-                                <input id="sub-form-tx-number" type="text" inputmode="numeric" placeholder="مثال: 984521780" class="input-field no-spin w-full pr-12 pl-4 py-3.5 text-xs font-mono font-bold text-slate-900 dark:text-slate-100 tracking-wider text-left placeholder:text-slate-400" dir="ltr" autocomplete="off">
-                            </div>
-                            <p class="text-[10px] text-slate-400 dark:text-slate-400 mt-1.5">رقم العملية كما وصلك في رسالة تأكيد الإرسال من شركة الدفع.</p>
-                        </div>
-
-                        <!-- 5. زر التأكيد والإرسال -->
-                        <div class="pt-2">
-                            <button id="sub-deposit-final-btn" onclick="submitSubFinalDeposit()" class="btn-glow-sheen btn-spring w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-4 rounded-xl text-xs shadow-[0_8px_20px_-4px_rgba(5,150,105,0.4)] flex justify-center items-center gap-2 cursor-pointer">
-                                <i class="ph-fill ph-check-circle text-lg"></i>
-                                <span class="tracking-wide">تأكيد وإرسال طلب الشحن</span>
-                            </button>
-                        </div>
-
-                    </div>
+        <div class="space-y-5">
+            
+            <!-- 1. اختيار الوكيل المعتمد -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">اختر الوكيل المالي المعتمد</label>
+                <div class="relative">
+                    <i class="ph ph-user-check absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg z-10 pointer-events-none"></i>
+                    <select id="agent-select" onchange="onAgentChanged()" class="input-field w-full pr-12 pl-10 py-3.5 text-xs font-bold text-slate-800 dark:text-slate-100 appearance-none relative cursor-pointer">
+                        <!-- تُملأ الخيارات ديناميكياً بواسطة الجافاسكريبت -->
+                    </select>
+                    <i class="ph ph-caret-down absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                 </div>
             </div>
+
+            <!-- 2. بطاقة بيانات الوكيل المختار -->
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 space-y-3 transition">
+                
+                <div class="flex items-center justify-between text-xs border-b border-slate-200/60 dark:border-slate-700/60 pb-2.5">
+                    <div>
+                        <span id="agent-display-name" class="font-black text-slate-900 dark:text-slate-100 block text-sm">اسم الوكيل</span>
+                        <span id="agent-display-region" class="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                            <i class="ph ph-map-pin text-amber-500"></i>
+                            <span id="agent-region-text">المدينة / التغطية</span>
+                        </span>
+                    </div>
+                    <span class="text-[10px] bg-emerald-50 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-900/40">
+                        وكيل موثق
+                    </span>
+                </div>
+
+                <!-- رقم محفظة الوكيل -->
+                <div class="space-y-1">
+                    <span class="text-[11px] font-bold text-slate-600 dark:text-slate-300">رقم المحفظة / حساب التحويل:</span>
+                    <div class="bg-white dark:bg-slate-900 py-2.5 px-3 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between shadow-sm" dir="ltr">
+                        <span id="agent-display-wallet" class="text-sm font-mono font-black text-slate-900 dark:text-emerald-400 tracking-wider tabular-nums select-all">...</span>
+                        <button onclick="copyToClipboard(document.getElementById('agent-display-wallet').innerText)" type="button" class="btn-spring flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold px-3 py-1 rounded-lg shadow-sm cursor-pointer">
+                            <i class="ph-bold ph-copy text-xs"></i>
+                            <span>نسخ</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- زر التواصل المباشر عبر واتساب مع الوكيل -->
+                <div class="pt-1">
+                    <a id="agent-whatsapp-btn" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-3 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="ph-fill ph-whatsapp-logo text-base"></i>
+                        <span>مراسلة الوكيل عبر واتساب لتأكيد الشحن</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 3. تحديد المبلغ المطلوب (اختياري لمعرفة المبلغ المنسق بشأنه) -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <label class="text-xs font-bold text-slate-700 dark:text-slate-200">المبلغ المراد شحنه ($)</label>
+                    <span class="text-[10px] text-slate-400 font-medium">مبالغ سريعة أو كتابة حرة</span>
+                </div>
+
+                <div class="grid grid-cols-5 gap-2 pb-1">
+                    <button type="button" onclick="setPresetAmount(5, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$5</button>
+                    <button type="button" onclick="setPresetAmount(10, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$10</button>
+                    <button type="button" onclick="setPresetAmount(25, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$25</button>
+                    <button type="button" onclick="setPresetAmount(50, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$50</button>
+                    <button type="button" onclick="setPresetAmount(100, this)" class="amount-preset-btn py-2 rounded-xl text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition btn-spring">$100</button>
+                </div>
+
+                <div class="relative">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm pointer-events-none">$</span>
+                    <input id="sub-form-amount-select" oninput="onCustomAmountTyped()" type="text" inputmode="decimal" placeholder="أو اكتب أي مبلغ تريده (مثال: 15.5)" class="input-field no-spin w-full pr-9 pl-4 py-3.5 text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400">
+                </div>
+            </div>
+
+            <!-- 4. رقم إشعار الحوالة لتسجيل العملية في سجل النظام -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">رقم إشعار الحوالة (إن وُجد)</label>
+                <div class="relative">
+                    <i class="ph ph-receipt absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none"></i>
+                    <input id="sub-form-tx-number" type="text" inputmode="numeric" placeholder="مثال: 984521780 أو كاش" class="input-field no-spin w-full pr-12 pl-4 py-3.5 text-xs font-mono font-bold text-slate-900 dark:text-slate-100 tracking-wider text-left placeholder:text-slate-400" dir="ltr" autocomplete="off">
+                </div>
+                <p class="text-[10px] text-slate-400 dark:text-slate-400 mt-1.5">اكتب رقم الإشعار المستلم من الوكيل أو اكتب "كاش" في حال الدفع اليدوي.</p>
+            </div>
+
+            <!-- 5. زر التأكيد وإرسال الإشعار -->
+            <div class="pt-2">
+                <button id="sub-deposit-final-btn" onclick="submitAgentDepositRequest()" class="btn-glow-sheen btn-spring w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-4 rounded-xl text-xs shadow-[0_8px_20px_-4px_rgba(5,150,105,0.4)] flex justify-center items-center gap-2 cursor-pointer">
+                    <i class="ph-fill ph-check-circle text-lg"></i>
+                    <span class="tracking-wide">تسجيل طلب الإيداع والمتابعة</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
 
            <!-- صفحة الملف الشخصي -->
             <div id="view-profile" class="hidden space-y-5 data-view fade-in md:max-w-xl md:mx-auto w-full">
