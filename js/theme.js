@@ -1,5 +1,5 @@
 // ========================================================================
-// SHIIFT X — وحدة المظهر العام (الوضع الليلي والنهاري)
+// SHIIFT X — وحدة المظهر العام (الوضع الليلي والنهاري) المحسنة
 // ========================================================================
 
 function updateThemeIcon(isDark) {
@@ -16,30 +16,40 @@ function toggleTheme() {
 
     if (icon) icon.classList.add('theme-rotating');
 
-    setTimeout(() => {
-        const isDark = html.classList.toggle('dark');
-        try {
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        } catch (_) {}
-        
-        updateThemeIcon(isDark);
+    // قلب الوضع فوراً دون تأخير
+    const isDark = html.classList.toggle('dark');
+    try {
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    } catch (_) {}
+    
+    updateThemeIcon(isDark);
 
+    if (icon) {
         setTimeout(() => {
-            if (icon) icon.classList.remove('theme-rotating');
+            icon.classList.remove('theme-rotating');
         }, 200);
-    }, 150);
+    }
 }
 
-// مزامنة الأيقونة فور تحميل السكريبت مع الـ DOM المتاح دون حظر
-(function initThemeIcon() {
-    const applyIcon = () => {
-        const isDark = document.documentElement.classList.contains('dark');
-        updateThemeIcon(isDark);
+// استعادة الثيم المحفوظ ومزامنة الأيقونة فور جاهزية الـ DOM
+(function initTheme() {
+    const applyTheme = () => {
+        try {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+
+            document.documentElement.classList.toggle('dark', isDark);
+            updateThemeIcon(isDark);
+        } catch (_) {
+            const isDark = document.documentElement.classList.contains('dark');
+            updateThemeIcon(isDark);
+        }
     };
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', applyIcon, { once: true, passive: true });
+        document.addEventListener('DOMContentLoaded', applyTheme, { once: true, passive: true });
     } else {
-        applyIcon();
+        applyTheme();
     }
 })();
