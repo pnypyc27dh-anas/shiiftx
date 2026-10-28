@@ -555,46 +555,67 @@ window.deleteAffiliate = async function(userId) {
 };
 
 // =========================================================================
-// 8. تبويب الوكلاء الماليين (Agents)
+// 8. تبويب الوكلاء الماليين (مطابق 100% لأعمدة الجدول الستة)
 // =========================================================================
 window.loadAgentsTab = async function() {
     const tbody = document.getElementById('agents-tbody');
     if (!tbody) return;
 
-    tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-xs text-slate-400"><i class="ph ph-spinner animate-spin text-lg mb-1 inline-block text-indigo-500"></i><p>جاري تحميل قائمة الوكلاء الماليين...</p></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-400"><i class="ph ph-spinner animate-spin text-lg mb-1 inline-block text-indigo-500"></i><p>جاري تحميل قائمة الوكلاء الماليين...</p></td></tr>`;
 
     try {
         const { data: agents, error } = await supabase.rpc('admin_get_all_agents');
         if (error) throw error;
 
         if (!agents || agents.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-xs text-slate-500">لا يوجد وكلاء ماليين مسجلين حالياً.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500">لا يوجد وكلاء ماليين مسجلين حالياً.</td></tr>`;
             return;
         }
 
-        tbody.innerHTML = agents.map(a => `
-            <tr class="border-b border-slate-800/60 hover:bg-slate-800/30 text-xs text-slate-300">
-                <td class="py-3 px-4"><div class="font-bold text-white">${a.full_name}</div><div class="text-[10px] text-slate-400">${a.email}</div></td>
-                <td class="py-3 px-4 font-mono font-bold text-emerald-400 text-sm">$${Number(a.balance).toFixed(2)}</td>
-                <td class="py-3 px-4 font-mono font-bold text-indigo-400">${Number(a.commission_rate)}%</td>
-                <td class="py-3 px-4 font-mono font-bold text-slate-200">$${Number(a.total_transferred).toFixed(2)}</td>
-                <td class="py-3 px-4 font-mono font-bold text-emerald-400">$${Number(a.total_commissions).toFixed(2)}</td>
-                <td class="py-3 px-4 font-mono text-center">${a.transfers_count}</td>
-                <td class="py-3 px-4">
-                    <div class="flex items-center gap-1.5">
-                        <button onclick="openAgentOpsModal('${a.agent_id}', '${a.full_name}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 rounded-lg text-xs font-semibold">
-                            سجل العمليات
-                        </button>
-                        <button onclick="editAgentCommission('${a.agent_id}', ${a.commission_rate})" class="px-2.5 py-1 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-800 rounded-lg text-xs">
-                            تعديل النسبة
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = agents.map(a => {
+            // معالجة النسبة لتظهر بالنسبة المئوية الصحيحة (مثلاً 0.05 تظهر 5%، و 5 تظهر 5%)
+            const rawRate = Number(a.commission_rate || 0);
+            const displayRate = rawRate < 1 && rawRate > 0 ? (rawRate * 100).toFixed(0) : rawRate;
+
+            // تحديد شارة الحالة
+            const statusBadge = (a.status === 'active' || !a.status)
+                ? '<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-400 border border-emerald-800 font-semibold">نشط ✓</span>'
+                : '<span class="px-2 py-0.5 rounded text-[10px] bg-rose-950/80 text-rose-400 border border-rose-800 font-semibold">معطل</span>';
+
+            return `
+                <tr class="border-b border-slate-800/60 hover:bg-slate-800/30 text-xs text-slate-300">
+                    <!-- 1. الوكيل المالي -->
+                    <td class="py-3 px-4 font-bold text-white">${a.full_name}</td>
+
+                    <!-- 2. البريد الإلكتروني -->
+                    <td class="py-3 px-4 font-mono text-slate-400">${a.email}</td>
+
+                    <!-- 3. الرصيد المالي في الموقع -->
+                    <td class="py-3 px-4 font-mono font-bold text-emerald-400 text-sm">$${Number(a.balance || 0).toFixed(2)}</td>
+
+                    <!-- 4. نسبة العمولة اليدوية -->
+                    <td class="py-3 px-4 font-mono font-bold text-indigo-400">${displayRate}%</td>
+
+                    <!-- 5. الحالة -->
+                    <td class="py-3 px-4">${statusBadge}</td>
+
+                    <!-- 6. إجراءات -->
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="openAgentOpsModal('${a.agent_id}', '${a.full_name}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 rounded-lg text-xs font-semibold">
+                                سجل العمليات
+                            </button>
+                            <button onclick="editAgentCommission('${a.agent_id}', ${displayRate})" class="px-2.5 py-1 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-800 rounded-lg text-xs">
+                                تعديل النسبة
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
 
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-rose-400 text-xs text-center">تعذر تحميل بيانات الوكلاء: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-rose-400 text-xs text-center">تعذر تحميل بيانات الوكلاء: ${err.message}</td></tr>`;
     }
 };
 
