@@ -61,7 +61,6 @@ window.switchTab = function(tabName) {
         }
     });
 
-    // تحميل بيانات التبويب المستدعى لحظياً
     switch (tabName) {
         case 'orders': loadPendingOrders(); break;
         case 'deposits': loadDepositsAuditTab(); break;
@@ -133,7 +132,7 @@ window.loadPendingOrders = async function() {
         }
 
         if (!txs || txs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-xs text-slate-500">لا توجد طلبات ID معلقة حالياً ✓</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400">لا توجد طلبات ID معلقة حالياً ✓</td></tr>`;
             return;
         }
 
@@ -222,7 +221,7 @@ window.loadDepositsAuditTab = async function() {
         }
 
         if (!records || records.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-xs text-slate-500">لا توجد طلبات إيداع مسجلة.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400">لا توجد طلبات إيداع مسجلة.</td></tr>`;
             return;
         }
 
@@ -309,7 +308,7 @@ window.loadInventoryData = async function() {
         });
 
         if (!products || products.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500">لا توجد باقات من نوع كود رقمي مضافة في المنصة.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400">لا توجد باقات من نوع كود رقمي مضافة في المنصة.</td></tr>`;
             return;
         }
 
@@ -391,7 +390,7 @@ function renderFilteredProducts() {
     const list = selectedPl ? allProductsCache.filter(p => p.platform === selectedPl) : allProductsCache;
 
     if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500">لا توجد باقات معروضة.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400">لا توجد باقات معروضة.</td></tr>`;
         return;
     }
 
@@ -486,7 +485,7 @@ window.loadAffiliatesData = async function() {
         if (error) throw error;
 
         if (!coupons || coupons.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-xs text-slate-500">لا يوجد شركاء تسويقيين مسجلين حتى الآن.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400">لا يوجد شركاء تسويقيين مسجلين حتى الآن.</td></tr>`;
             return;
         }
 
@@ -589,7 +588,7 @@ window.loadAgentsTab = async function() {
         if (error) throw error;
 
         if (!agents || agents.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500">لا يوجد وكلاء ماليين مسجلين حالياً.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400">لا يوجد وكلاء ماليين مسجلين حالياً.</td></tr>`;
             return;
         }
 
@@ -733,7 +732,7 @@ window.openAgentOpsModal = async function(agentId, agentName) {
         if (error) throw error;
 
         if (!txs || txs.length === 0) {
-            list.innerHTML = '<div class="py-6 text-center text-xs text-slate-500">لا توجد حركات سابقة لهذا الوكيل.</div>';
+            list.innerHTML = '<div class="py-6 text-center text-xs text-slate-500 dark:text-slate-400">لا توجد حركات سابقة لهذا الوكيل.</div>';
             return;
         }
 
