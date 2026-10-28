@@ -1,312 +1,308 @@
-// ========================================================================
-// SHIIFT X — وحدة لوحة الوكيل المالي (Agent Dashboard App)
-// ========================================================================
+// =========================================================================
+// SHIIFT X - لوحة تحكم الوكيل المالي المعتمد (Agent Dashboard)
+// تحديث شامل: دعم فحص السيولة، شحن العملاء، واعتماد طلبات الإيداع المباشرة
+// =========================================================================
 
-let currentAgentUser = null;
-let currentAgentProfile = null;
+let currentAgent = null;
+let currentTab = 'pending-deposits';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. التحقق من وجود جلسة مسجلة
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    // 1. التحقق من جلسة تسجيل الدخول
+    const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
     
-    if (sessionError || !session || !session.user) {
-        window.location.href = 'index.html';
+    if (sessionErr || !session) {
+        window.location.replace('index.html');
         return;
     }
-    
-    currentAgentUser = session.user;
-    
-    const emailDisplay = document.getElementById('agent-email-display');
-    if (emailDisplay) {
-        emailDisplay.innerText = currentAgentUser.email || 'حساب وكيل معتمد';
-    }
 
-    // 2. التحقق من رتبة المستخدم (agent أو admin)
-    const { data: prof, error: profError } = await supabase
+    // 2. التحقق من صلاحية الوكيل أو المشرف
+    const { data: profile, error: profErr } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', currentAgentUser.id)
+        .eq('id', session.user.id)
         .single();
-    
-    if (profError || !prof || (prof.role !== 'agent' && prof.role !== 'admin')) {
-        alert("غير مصرح بالدخول: هذه اللوحة مخصصة للوكلاء الماليين (Agents) حصراً.");
-        window.location.href = 'index.html';
+
+    if (profErr || !profile || !['agent', 'admin'].includes(profile.role)) {
+        alert('غير مصرح لك بالوصول: هذه اللوحة مخصصة للوكلاء الماليين فقط.');
+        window.location.replace('index.html');
         return;
     }
 
-    currentAgentProfile = prof;
+    currentAgent = profile;
 
-    // 3. عرض الرصيد المتاح للوكيل
-    const availableFloat = parseFloat(prof.balance || 0);
-    const balanceEl = document.getElementById('agent-float-balance');
-    if (balanceEl) {
-        balanceEl.innerText = '$' + availableFloat.toFixed(2);
-    }
-    
-    // 4. تحميل الطلبات المعلقة وسجل العمليات معاً
-    loadAgentPendingOrders();
-    loadAgentTransactions();
+    // 3. عرض بيانات الوكيل في شريط الواجهة
+    renderAgentHeader(profile);
+
+    // 4. تحميل طلبات الإيداع المعلقة تلقائياً
+    await loadPendingDeposits();
+
+    // 5. ربط أحداث النماذج والأزرار
+    setupEventListeners();
 });
 
-// معالجة التحويل الفوري المباشر (التحويل اليدوي)
-async function handleAgentTransfer(e) {
-    e.preventDefault();
-    const email = document.getElementById('target-email').value.trim();
-    const amount = parseFloat(document.getElementById('transfer-amount').value);
-    const btn = document.getElementById('submit-btn');
+// عرض معلومات الوكيل والسيولة
+function renderAgentHeader(agent) {
+    const nameEl = document.getElementById('agentName');
+    const balanceEl = document.getElementById('agentBalance');
+    const rateEl = document.getElementById('agentCommissionRate');
 
-    if (!email || isNaN(amount) || amount <= 0) return showToast("يرجى إدخال بيانات صحيحة.");
-
-    btn.disabled = true;
-    btn.innerText = "جاري التنفيذ...";
-
-    try {
-        const agentName = [currentAgentProfile?.first_name, currentAgentProfile?.last_name]
-            .filter(Boolean)
-            .join(' ')
-            .trim() || currentAgentProfile?.full_name || currentAgentUser?.email || 'الوكيل المالي';
-
-        const depositNote = `تحويل نقدي مباشر من الوكيل (${agentName})`;
-
-        const { data, error } = await supabase.rpc('agent_process_deposit', {
-            p_target_user_email: email,
-            p_amount: amount,
-            p_notes: depositNote
-        });
-
-        if (error) throw error;
-
-        if (data && data.status === 'success') {
-            showToast(data.message, false);
-            document.getElementById('target-email').value = '';
-            document.getElementById('transfer-amount').value = '';
-            
-            const { data: prof } = await supabase.from('profiles').select('balance').eq('id', currentAgentUser.id).single();
-            if (prof) {
-                if (currentAgentProfile) currentAgentProfile.balance = prof.balance;
-                document.getElementById('agent-float-balance').innerText = '$' + Number(prof.balance).toFixed(2);
-            }
-            loadAgentTransactions();
-        } else {
-            showToast(data?.message || "فشلت عملية التحويل.");
-        }
-    } catch (err) {
-        console.error("Agent Transfer Error:", err);
-        showToast("خطأ: " + (err.message || err));
-    } finally {
-        btn.disabled = false;
-        btn.innerText = "تنفيذ التحويل الفوري للعميل";
+    if (nameEl) {
+        nameEl.textContent = [agent.first_name, agent.last_name].filter(Boolean).join(' ') || agent.email;
+    }
+    if (balanceEl) {
+        balanceEl.textContent = `$${Number(agent.balance || 0).toFixed(2)}`;
+    }
+    if (rateEl) {
+        const rate = Number(agent.agent_commission_rate || 0);
+        rateEl.textContent = rate >= 1 ? `${rate}%` : `${(rate * 100).toFixed(0)}%`;
     }
 }
 
-// ========================================================================
-// 1. قسم معالجة طلبات الإيداع الواردة والمعلقة
-// ========================================================================
+// إعداد مستمعات الأحداث (Tabs & Forms)
+function setupEventListeners() {
+    // نموذج الشحن المباشر للعميل من سيولة الوكيل
+    const directTopupForm = document.getElementById('agentDirectTopupForm');
+    if (directTopupForm) {
+        directTopupForm.addEventListener('submit', handleDirectTopup);
+    }
+}
 
-async function loadAgentPendingOrders() {
-    const container = document.getElementById('agent-pending-orders-container');
+// تبديل التبويبات في اللوحة
+window.switchAgentTab = async function(tabName) {
+    currentTab = tabName;
+    
+    document.querySelectorAll('.agent-tab-btn').forEach(btn => {
+        btn.classList.toggle('active-tab', btn.dataset.tab === tabName);
+    });
+
+    const pendingSection = document.getElementById('pendingDepositsSection');
+    const directSection = document.getElementById('directTopupSection');
+    const historySection = document.getElementById('agentHistorySection');
+
+    if (pendingSection) pendingSection.classList.toggle('hidden', tabName !== 'pending-deposits');
+    if (directSection) directSection.classList.toggle('hidden', tabName !== 'direct-topup');
+    if (historySection) historySection.classList.toggle('hidden', tabName !== 'history');
+
+    if (tabName === 'pending-deposits') {
+        await loadPendingDeposits();
+    } else if (tabName === 'history') {
+        await loadAgentHistory();
+    }
+};
+
+// =========================================================================
+// 1. إدارة طلبات الإيداع المعلقة (جديد)
+// =========================================================================
+
+async function loadPendingDeposits() {
+    const container = document.getElementById('pendingOrdersContainer');
     if (!container) return;
 
-    try {
-        const { data: orders, error } = await supabase.rpc('get_agent_pending_deposit_orders');
+    container.innerHTML = `
+        <div class="p-8 text-center text-gray-500">
+            <i class="ph ph-spinner animate-spin text-3xl mb-2 text-indigo-400"></i>
+            <p class="text-sm">جاري جلب طلبات الشحن المعلقة...</p>
+        </div>
+    `;
 
-        if (error) {
-            console.error("Fetch Orders RPC Error:", error);
-            container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500 bg-rose-50 dark:bg-rose-950/20 rounded-xl">فشل تحميل الطلبات: ${error.message}</div>`;
-            return;
-        }
+    try {
+        const { data: orders, error } = await supabase
+            .from('deposit_orders')
+            .select(`
+                id,
+                transaction_ref,
+                amount,
+                payment_method,
+                transfer_receipt_num,
+                created_at,
+                profiles:user_id (email, first_name, last_name, phone)
+            `)
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
 
         if (!orders || orders.length === 0) {
             container.innerHTML = `
-                <div class="py-6 text-center text-xs text-slate-400 dark:text-slate-500 space-y-1">
-                    <i class="ph ph-tray text-2xl opacity-40"></i>
-                    <p class="font-bold">لا توجد طلبات إيداع معلقة حالياً</p>
-                </div>`;
+                <div class="p-8 text-center text-gray-500 bg-gray-900/40 rounded-xl border border-gray-800">
+                    <i class="ph ph-check-circle text-4xl mb-2 text-emerald-500/50"></i>
+                    <p class="text-sm">لا توجد طلبات إيداع معلقة حالياً ✓</p>
+                </div>
+            `;
             return;
         }
 
-        container.innerHTML = "";
-        orders.forEach(order => {
-            const dateStr = new Date(order.created_at).toLocaleString('en-US', { hour12: false });
-            const item = document.createElement('div');
-            item.className = "p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80 space-y-3";
-            item.innerHTML = `
-                <div class="flex justify-between items-start">
+        container.innerHTML = orders.map(order => {
+            const customerName = [order.profiles?.first_name, order.profiles?.last_name].filter(Boolean).join(' ') || order.profiles?.email || 'عميل';
+            return `
+                <div class="p-4 bg-gray-900/80 border border-gray-800 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gray-700 transition">
                     <div>
                         <div class="flex items-center gap-2">
-                            <span class="font-black text-slate-900 dark:text-slate-100 text-sm block">${order.customer_name}</span>
-                            <span class="text-[10px] font-mono text-slate-400 select-all">#${order.transaction_ref}</span>
+                            <span class="font-bold text-white text-base">${customerName}</span>
+                            <span class="text-xs px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800 font-mono">${order.transaction_ref}</span>
                         </div>
-                        <span class="text-xs font-mono text-slate-500 dark:text-slate-400 block mt-0.5">${order.customer_email}</span>
-                        <span class="text-[10px] text-slate-400 block mt-0.5">${dateStr}</span>
+                        <div class="text-xs text-gray-400 mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                            <span>الوسيلة: <b class="text-gray-200">${order.payment_method}</b></span>
+                            <span>رقم الإشعار: <b class="font-mono text-emerald-400 font-bold">${order.transfer_receipt_num || '—'}</b></span>
+                            <span>الهاتف: <b class="text-gray-300 font-mono">${order.profiles?.phone || 'غير مسجل'}</b></span>
+                            <span>الوقت: ${new Date(order.created_at).toLocaleTimeString('ar-EG')}</span>
+                        </div>
                     </div>
-                    <div class="text-left font-mono">
-                        <span class="text-base font-black text-emerald-600 dark:text-emerald-400 block">+$${Number(order.amount).toFixed(2)}</span>
-                        <span class="text-[10px] bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900 px-2 py-0.5 rounded-md font-bold">معلق</span>
+                    <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+                        <span class="text-lg font-bold text-emerald-400 font-mono">$${Number(order.amount).toFixed(2)}</span>
+                        <div class="flex gap-2">
+                            <button onclick="approveDepositOrder('${order.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-lg shadow-emerald-900/20 transition">
+                                <i class="ph ph-check font-bold"></i> قبول وشحن
+                            </button>
+                            <button onclick="rejectDepositOrder('${order.id}')" class="px-3 py-1.5 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                                <i class="ph ph-x font-bold"></i> رفض
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                <div class="bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-800 text-xs flex justify-between items-center">
-                    <span class="text-slate-500">بيان الدفع / رقم الإشعار:</span>
-                    <span class="font-mono font-bold text-slate-800 dark:text-slate-200 select-all">${order.receipt_num}</span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 pt-1">
-                    <button onclick="approveDepositOrder('${order.order_id}', this)" class="btn-spring py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
-                        <i class="ph-bold ph-check"></i>
-                        <span>اعتماد وشحن فوري</span>
-                    </button>
-                    <button onclick="rejectDepositOrder('${order.order_id}', this)" class="btn-spring py-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                        <i class="ph-bold ph-x"></i>
-                        <span>رفض الطلب</span>
-                    </button>
                 </div>
             `;
-            container.appendChild(item);
-        });
+        }).join('');
+
     } catch (err) {
-        console.error("Load Orders Error:", err);
-        container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500">حدث خطأ أثناء تحميل الطلبات.</div>`;
+        console.error('Error fetching pending deposits:', err);
+        container.innerHTML = `<p class="text-rose-400 text-sm p-4">تعذر تحميل الطلبات المعلقة: ${err.message}</p>`;
     }
 }
 
-async function approveDepositOrder(orderId, btn) {
-    if (!confirm("هل تأكدت من استلام المبلغ وترغب في إتمام الشحن للعميل واحتساب عمولتك الآن؟")) return;
-
-    btn.disabled = true;
-    const oldText = btn.innerHTML;
-    btn.innerHTML = `<i class="ph ph-circle-notch animate-spin"></i> جاري الشحن...`;
+// اعتماد شحن الرصيد للعميل
+window.approveDepositOrder = async function(orderId) {
+    if (!confirm('هل تأكدت من استلام الحوالة وترغب في شحن الرصيد لحساب العميل الآن؟')) return;
 
     try {
-        const { data, error } = await supabase.rpc('agent_approve_deposit_order', {
-            p_order_id: orderId
+        const { data, error } = await supabase.rpc('agent_process_customer_deposit', {
+            p_order_id: orderId,
+            p_action: 'approve'
         });
 
         if (error) throw error;
-
-        if (data && data.status === 'success') {
-            showToast(data.message, false);
-            
-            const { data: prof } = await supabase.from('profiles').select('balance').eq('id', currentAgentUser.id).single();
-            if (prof && currentAgentProfile) {
-                currentAgentProfile.balance = prof.balance;
-                document.getElementById('agent-float-balance').innerText = '$' + Number(prof.balance).toFixed(2);
-            }
-            
-            loadAgentPendingOrders();
-            loadAgentTransactions();
+        if (data.status === 'success') {
+            alert(data.message);
+            await loadPendingDeposits();
         } else {
-            showToast(data?.message || "فشل اعتماد الطلب.");
-            btn.disabled = false;
-            btn.innerHTML = oldText;
+            alert(data.message || 'حدث خطأ أثناء معالجة الطلب.');
         }
     } catch (err) {
-        console.error("Approve Deposit Order Error:", err);
-        showToast("خطأ: " + (err.message || err));
-        btn.disabled = false;
-        btn.innerHTML = oldText;
+        alert('تعذر تنفيذ العملية: ' + err.message);
     }
-}
+};
 
-async function rejectDepositOrder(orderId, btn) {
-    const reason = prompt("يرجى كتابة سبب الرفض:", "لم يتم استلام المبلغ أو رقم الإشعار غير مطابق");
-    if (!reason) return;
-
-    btn.disabled = true;
+// رفض الطلب مع توثيق السبب
+window.rejectDepositOrder = async function(orderId) {
+    const reason = prompt('يرجى ذكر سبب الرفض (يظهر للعميل وفي السجل الرقابي للمشرف):');
+    if (reason === null) return;
 
     try {
-        const { data, error } = await supabase.rpc('agent_reject_deposit_order', {
+        const { data, error } = await supabase.rpc('agent_process_customer_deposit', {
             p_order_id: orderId,
+            p_action: 'reject',
             p_reason: reason
         });
 
         if (error) throw error;
-
-        if (data && data.status === 'success') {
-            showToast(data.message, false);
-            loadAgentPendingOrders();
-            loadAgentTransactions();
+        if (data.status === 'success') {
+            alert(data.message);
+            await loadPendingDeposits();
         } else {
-            showToast(data?.message || "فشل رفض الطلب.");
-            btn.disabled = false;
+            alert(data.message || 'حدث خطأ أثناء رفض الطلب.');
         }
     } catch (err) {
-        console.error("Reject Deposit Order Error:", err);
-        showToast("خطأ: " + (err.message || err));
-        btn.disabled = false;
+        alert('تعذر رفض الطلب: ' + err.message);
+    }
+};
+
+// =========================================================================
+// 2. الشحن المباشر من سيولة الوكيل (كاش يدوي)
+// =========================================================================
+
+async function handleDirectTopup(e) {
+    e.preventDefault();
+    const emailInput = document.getElementById('targetUserEmail');
+    const amountInput = document.getElementById('topupAmount');
+    const notesInput = document.getElementById('topupNotes');
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+
+    const email = emailInput.value.trim();
+    const amount = Number(amountInput.value);
+    const notes = notesInput ? notesInput.value.trim() : '';
+
+    if (!email || amount <= 0) {
+        alert('يرجى إدخال بريد إلكتروني صالح ومبلغ أكبر من الصفر.');
+        return;
+    }
+
+    if (!confirm(`تأكيد تحويل $${amount} إلى العميل (${email}) وخصمها من سيولتك؟`)) return;
+
+    try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> جاري التحويل...';
+
+        const { data, error } = await supabase.rpc('agent_process_deposit', {
+            p_target_user_email: email,
+            p_amount: amount,
+            p_notes: notes || 'شحن سيولة كاش مباشر عبر الوكيل'
+        });
+
+        if (error) throw error;
+
+        if (data.status === 'success') {
+            alert(`${data.message}\nالعمولة المكتسبة: $${data.commission}`);
+            e.target.reset();
+            // تحديث رصيد الوكيل المعروض
+            const { data: updatedProfile } = await supabase.from('profiles').select('balance').eq('id', currentAgent.id).single();
+            if (updatedProfile) {
+                currentAgent.balance = updatedProfile.balance;
+                renderAgentHeader(currentAgent);
+            }
+        } else {
+            alert(data.message || 'فشلت العملية.');
+        }
+    } catch (err) {
+        alert('خطأ أثناء التحويل: ' + err.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'تنفيذ الشحن الفوري';
     }
 }
 
-// ========================================================================
-// 2. سجل تحويلات الوكيل الشامل (مكتملة ومرفوضة)
-// ========================================================================
+// =========================================================================
+// 3. سجل حركات الوكيل
+// =========================================================================
 
-async function loadAgentTransactions() {
-    const container = document.getElementById('agent-tx-container');
-    if (!container) return;
-    
+async function loadAgentHistory() {
+    const tableBody = document.getElementById('agentHistoryTableBody');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500">جاري تحميل السجل...</td></tr>`;
+
     try {
         const { data: txs, error } = await supabase.rpc('get_agent_transactions');
-
-        if (error) {
-            console.error("RPC Error:", error);
-            container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500 bg-rose-50 dark:bg-rose-950/20 rounded-xl">فشل جلب السجل: ${error.message}</div>`;
-            return;
-        }
+        if (error) throw error;
 
         if (!txs || txs.length === 0) {
-            container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl">لا توجد تحويلات مسجلة حتى الآن.</div>`;
+            tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500">لا توجد عمليات سابقة.</td></tr>`;
             return;
         }
 
-        container.innerHTML = "";
-        txs.forEach(tx => {
-            const customerName = tx.target_name || 'عميل مسجل';
-            const customerEmail = tx.target_email || '—';
-            const dateStr = new Date(tx.created_at).toLocaleString('en-US', { hour12: false });
-            const isRejected = (tx.status === 'rejected');
-            
-            const item = document.createElement('div');
-            item.className = "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-xs";
-            
-            let statusMarkup = '';
-            if (isRejected) {
-                statusMarkup = `
-                    <div class="text-left font-mono">
-                        <span class="text-xs font-bold text-slate-400 line-through block">$${Number(tx.amount).toFixed(2)}</span>
-                        <span class="text-[10px] text-rose-600 dark:text-rose-400 font-bold block">مرفوض: ${tx.notes || 'ملغي'}</span>
-                    </div>
-                `;
-            } else {
-                statusMarkup = `
-                    <div class="text-left font-mono">
-                        <span class="font-black text-amber-600 dark:text-amber-400 block">-$${Number(tx.amount).toFixed(2)}</span>
-                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">+ عمولة $${Number(tx.commission_earned || 0).toFixed(2)}</span>
-                    </div>
-                `;
-            }
-
-            item.innerHTML = `
-                <div class="space-y-0.5">
-                    <span class="font-bold text-slate-800 dark:text-slate-100 block">${customerName}</span>
-                    <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono block">${customerEmail}</span>
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">${dateStr}</span>
-                </div>
-                ${statusMarkup}
-            `;
-            container.appendChild(item);
-        });
+        tableBody.innerHTML = txs.map(t => `
+            <tr class="border-b border-gray-800 hover:bg-gray-800/30 text-sm">
+                <td class="p-3 text-white font-medium">${t.target_name}<br><span class="text-xs text-gray-400">${t.target_email}</span></td>
+                <td class="p-3 font-bold text-emerald-400 font-mono">$${Number(t.amount).toFixed(2)}</td>
+                <td class="p-3 text-indigo-400 font-mono">+$${Number(t.commission_earned || 0).toFixed(2)}</td>
+                <td class="p-3">
+                    <span class="px-2 py-0.5 rounded text-xs ${t.status === 'completed' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-rose-950 text-rose-400 border border-rose-800'}">
+                        ${t.status === 'completed' ? 'ناجحة' : 'مرفوضة'}
+                    </span>
+                </td>
+                <td class="p-3 text-xs text-gray-400">${t.notes || '—'}</td>
+                <td class="p-3 text-xs text-gray-500">${new Date(t.created_at).toLocaleString('ar-EG')}</td>
+            </tr>
+        `).join('');
     } catch (err) {
-        console.error("Agent Tx Load Error:", err);
-        container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500">حدث خطأ أثناء تحميل السجل.</div>`;
+        tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-rose-400">حدث خطأ: ${err.message}</td></tr>`;
     }
-}
-
-function showToast(msg, isError = true) {
-    const toast = document.getElementById('custom-toast');
-    if (!toast) return;
-    toast.className = `fixed top-5 left-1/2 -translate-x-1/2 z-[130] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold transition-all ${isError ? 'bg-rose-500 text-white' : 'bg-emerald-600 text-white'}`;
-    toast.innerText = msg;
-    toast.classList.remove('hidden');
-    setTimeout(() => toast.classList.add('hidden'), 4000);
 }
