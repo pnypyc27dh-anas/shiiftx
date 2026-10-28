@@ -257,36 +257,62 @@ async function handleDirectTopup(e) {
 // 3. سجل حركات الوكيل
 // =========================================================================
 
+// تحميل وعرض سجل العمليات في الحاوية الحقيقية agent-tx-container
 async function loadAgentHistory() {
-    const tableBody = document.getElementById('agentHistoryTableBody');
-    if (!tableBody) return;
+    const container = document.getElementById('agent-tx-container');
+    if (!container) return;
 
-    tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500">جاري تحميل السجل...</td></tr>`;
+    container.innerHTML = `
+        <div class="py-6 text-center text-xs text-slate-400">
+            <i class="ph ph-spinner animate-spin text-lg mb-1 inline-block text-amber-500"></i>
+            <p>جاري تحميل سجل العمليات...</p>
+        </div>
+    `;
 
     try {
         const { data: txs, error } = await supabase.rpc('get_agent_transactions');
         if (error) throw error;
 
         if (!txs || txs.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500">لا توجد عمليات سابقة.</td></tr>`;
+            container.innerHTML = `
+                <div class="py-6 text-center text-xs text-slate-500">
+                    لا توجد عمليات سابقة في السجل حتى الآن.
+                </div>
+            `;
             return;
         }
 
-        tableBody.innerHTML = txs.map(t => `
-            <tr class="border-b border-gray-800 hover:bg-gray-800/30 text-sm">
-                <td class="p-3 text-white font-medium">${t.target_name}<br><span class="text-xs text-gray-400">${t.target_email}</span></td>
-                <td class="p-3 font-bold text-emerald-400 font-mono">$${Number(t.amount).toFixed(2)}</td>
-                <td class="p-3 text-indigo-400 font-mono">+$${Number(t.commission_earned || 0).toFixed(2)}</td>
-                <td class="p-3">
-                    <span class="px-2 py-0.5 rounded text-xs ${t.status === 'completed' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-rose-950 text-rose-400 border border-rose-800'}">
-                        ${t.status === 'completed' ? 'ناجحة' : 'مرفوضة'}
-                    </span>
-                </td>
-                <td class="p-3 text-xs text-gray-400">${t.notes || '—'}</td>
-                <td class="p-3 text-xs text-gray-500">${new Date(t.created_at).toLocaleString('ar-EG')}</td>
-            </tr>
-        `).join('');
+        container.innerHTML = txs.map(t => {
+            const isCompleted = t.status === 'completed' || t.status === 'approved';
+            const statusBadge = isCompleted 
+                ? '<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-950/80 text-emerald-400 border border-emerald-800 font-semibold">ناجحة</span>'
+                : '<span class="px-2 py-0.5 rounded text-[10px] bg-rose-950/80 text-rose-400 border border-rose-800 font-semibold">مرفوضة</span>';
+
+            return `
+                <div class="p-3 bg-slate-800/60 border border-slate-700/50 rounded-xl mb-2 flex justify-between items-center gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-bold text-white">${t.target_name || 'عميل'}</span>
+                            ${statusBadge}
+                        </div>
+                        <div class="text-[11px] text-slate-400 mt-1">
+                            <span>${t.target_email || '—'}</span>
+                            ${t.notes ? `<span class="mr-2 text-slate-300">• ${t.notes}</span>` : ''}
+                        </div>
+                        <div class="text-[10px] text-slate-500 mt-0.5 font-mono">
+                            ${new Date(t.created_at).toLocaleString('ar-EG')}
+                        </div>
+                    </div>
+                    <div class="text-left font-mono">
+                        <div class="text-base font-bold text-emerald-400">$${Number(t.amount).toFixed(2)}</div>
+                        ${Number(t.commission_earned) > 0 ? `<div class="text-[11px] text-indigo-400">+${Number(t.commission_earned).toFixed(2)}$ عمولة</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
     } catch (err) {
-        tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-rose-400">حدث خطأ: ${err.message}</td></tr>`;
+        console.error('Error loading history:', err);
+        container.innerHTML = `<p class="text-rose-400 text-xs p-3">تعذر تحميل السجل: ${err.message}</p>`;
     }
 }
