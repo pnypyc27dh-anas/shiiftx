@@ -16,30 +16,37 @@ function toggleTheme() {
 
     if (icon) icon.classList.add('theme-rotating');
 
-    setTimeout(() => {
-        const isDark = html.classList.toggle('dark');
-        try {
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        } catch (_) {}
-        
-        updateThemeIcon(isDark);
+    const isDark = html.classList.toggle('dark');
+    try {
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    } catch (_) {}
+    
+    updateThemeIcon(isDark);
 
+    if (icon) {
         setTimeout(() => {
-            if (icon) icon.classList.remove('theme-rotating');
+            icon.classList.remove('theme-rotating');
         }, 200);
-    }, 150);
+    }
 }
 
-// مزامنة الأيقونة فور تحميل السكريبت مع الـ DOM المتاح دون حظر
-(function initThemeIcon() {
-    const applyIcon = () => {
+// مزامنة الثيم المحفوظ في المتصفح فور تحميل الصفحة
+(function initTheme() {
+    try {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+
+        document.documentElement.classList.toggle('dark', isDark);
+        
+        const applyIcon = () => updateThemeIcon(isDark);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', applyIcon, { once: true });
+        } else {
+            applyIcon();
+        }
+    } catch (_) {
         const isDark = document.documentElement.classList.contains('dark');
         updateThemeIcon(isDark);
-    };
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', applyIcon, { once: true, passive: true });
-    } else {
-        applyIcon();
     }
 })();
