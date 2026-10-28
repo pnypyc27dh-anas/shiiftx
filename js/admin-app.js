@@ -1,988 +1,305 @@
-// ========================================================================
-// SHIIFT X — وحدة لوحة الإدارة والتحكم (Admin App Controller)
-// ========================================================================
+// =========================================================================
+// SHIIFT X - لوحة تحكم الإدارة والمشرف (Admin Dashboard)
+// تحديث شامل: تفعيل السجل الرقابي للإيداعات (Audit Trail)، المنتجات، والوكلاء
+// =========================================================================
 
-let currentAdminUser = null;
-let allProductsCache = [];
-let inventoryProductsCache = [];
-let editingAffiliateUserId = null;
+let currentAdmin = null;
+let currentTab = 'kpis';
 
-async function checkAdminAuth() {
-    try {
-        const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
-        if (sessionErr || !session) {
-            showAuthAlert("⚠️ يجب تسجيل الدخول بالحساب الإداري من المتجر أولاً لتفعيل العمليات.");
-            return;
-        }
-
-        const { data: profile, error: profileErr } = await supabase
-            .from('profiles')
-            .select('id, email, role')
-            .eq('id', session.user.id)
-            .single();
-
-        if (profileErr || !profile || profile.role !== 'admin') {
-            showAuthAlert(`⛔ هذا الحساب (${profile?.role || 'مستخدم عادي'}) لا يملك صلاحيات المشرف.`);
-            return;
-        }
-
-        currentAdminUser = session.user;
-        const alertBar = document.getElementById('auth-alert-bar');
-        if (alertBar) alertBar.classList.add('hidden');
-        loadAllAdminData();
-    } catch (err) {
-        console.error("Auth Guard Error:", err);
-        showAuthAlert("حدث خطأ في الاتصال بالخادم: " + (err.message || err));
-    }
-}
-
-function showAuthAlert(msg) {
-    const bar = document.getElementById('auth-alert-bar');
-    const txt = document.getElementById('auth-alert-text');
-    if (bar && txt) {
-        txt.innerText = msg;
-        bar.classList.remove('hidden');
-    }
-}
-
-async function loadAllAdminData() {
-    try { loadKPIs(); } catch (e) {}
-    try { loadPendingOrders(); } catch (e) {}
-    try { loadPendingDeposits(); } catch (e) {}
-    try { loadProducts(); } catch (e) {}
-    try { loadInventoryData(); } catch (e) {}
-}
-
-async function loadKPIs() {
-    const { data: kpis } = await supabase.rpc('admin_get_kpis');
-    if (kpis) {
-        document.getElementById('kpi-sales-today').innerText = "$" + Number(kpis.sales_today).toFixed(2);
-        document.getElementById('kpi-sales-month').innerText = "$" + Number(kpis.sales_month).toFixed(2);
-        document.getElementById('kpi-commissions').innerText = "$" + Number(kpis.total_commissions).toFixed(2);
-        document.getElementById('kpi-balances').innerText = "$" + Number(kpis.customer_balances).toFixed(2);
-
-        const ordersBadge = document.getElementById('badge-orders-count');
-        if (ordersBadge) {
-            ordersBadge.innerText = kpis.pending_orders;
-            ordersBadge.classList.toggle('hidden', kpis.pending_orders === 0);
-        }
-
-        const depositsBadge = document.getElementById('badge-deposits-count');
-        if (depositsBadge) {
-            depositsBadge.innerText = kpis.pending_deposits;
-            depositsBadge.classList.toggle('hidden', kpis.pending_deposits === 0);
-        }
-    }
-}
-
-async function loadPendingOrders() {
-    const tbody = document.getElementById('orders-tbody');
-    const { data: orders } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('status', 'pending')
-        .eq('delivery_type', 'DIRECT_ID')
-        .order('created_at', { ascending: false });
-
-    if (!orders || orders.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">لا توجد أي طلبات شحن ID معلقة حالياً ✓</td></tr>`;
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. التحقق من صلاحية المشرف
+    const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
+    if (sessionErr || !session) {
+        window.location.replace('index.html');
         return;
     }
 
-    tbody.innerHTML = orders.map(o => `
-        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-            <td class="py-3 font-mono text-[11px] text-slate-400">${o.transaction_ref}</td>
-            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${o.details}</td>
-            <td class="py-3 font-mono font-black text-amber-600 dark:text-amber-400 select-all">${o.player_id || '---'}</td>
-            <td class="py-3 font-mono font-bold">$${Number(o.amount).toFixed(2)}</td>
-            <td class="py-3 text-center flex justify-center gap-2">
-                <button onclick="handleProcessOrder('${o.id}', 'complete')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold">
-                    تم الشحن ✓
-                </button>
-                <button onclick="handleProcessOrder('${o.id}', 'refund')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold">
-                    رفض واسترجاع ✕
-                </button>
-            </td>
-        </tr>
-    `).join('');
-}
+    const { data: profile, error: profErr } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
 
-async function handleProcessOrder(id, action) {
-    const msg = action === 'complete' 
-        ? 'هل تم شحن هذا الحساب بالفعل داخل اللعبة وتريد تحرير عمولة الوكيل؟' 
-        : 'هل أنت متأكد من رفض الطلب، إعادة المبلغ للعميل، وإلغاء العمولة المعلقة؟';
-    if (!confirm(msg)) return;
-
-    let reason = '';
-    if (action === 'refund') {
-        const inputReason = prompt('سبب الرفض:', 'معرف الحساب غير صحيح');
-        if (inputReason === null) return; // تراجع المشرف
-        reason = inputReason.trim() || 'معرف الحساب غير صحيح';
+    if (profErr || !profile || profile.role !== 'admin') {
+        alert('غير مصرح: هذه اللوحة خاصة بمشرف النظام فقط.');
+        window.location.replace('index.html');
+        return;
     }
 
-    const { data, error } = await supabase.rpc('admin_process_order', {
-        p_tx_id: id,
-        p_action: action,
-        p_reason: reason
+    currentAdmin = profile;
+
+    // 2. تحميل المؤشرات العامة
+    await loadKPIs();
+
+    // 3. ربط النوافذ المنبثقة وأحداث الإدخال
+    setupAdminEventListeners();
+});
+
+// تبديل التبويبات في لوحة الإدارة
+window.switchAdminTab = async function(tabName) {
+    currentTab = tabName;
+
+    document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+        btn.classList.toggle('bg-indigo-600', btn.dataset.tab === tabName);
+        btn.classList.toggle('text-white', btn.dataset.tab === tabName);
+        btn.classList.toggle('text-gray-400', btn.dataset.tab !== tabName);
     });
 
-    if (error || (data && data.status === 'error')) {
-        alert(error ? error.message : data.message);
-    } else {
-        alert(data.message);
-        loadAllAdminData();
+    const sections = ['kpisSection', 'ordersSection', 'depositsSection', 'productsSection', 'agentsSection'];
+    sections.forEach(secId => {
+        const el = document.getElementById(secId);
+        if (el) el.classList.add('hidden');
+    });
+
+    const activeSec = document.getElementById(`${tabName}Section`);
+    if (activeSec) activeSec.classList.remove('hidden');
+
+    // تحميل محتوى التبويب المختار
+    if (tabName === 'kpis') await loadKPIs();
+    if (tabName === 'orders') await loadOrdersTab();
+    if (tabName === 'deposits') await loadDepositsAuditTab();
+    if (tabName === 'products') await loadProductsTab();
+    if (tabName === 'agents') await loadAgentsTab();
+};
+
+// =========================================================================
+// 1. مؤشرات الأداء (KPIs)
+// =========================================================================
+
+async function loadKPIs() {
+    try {
+        const { data, error } = await supabase.rpc('admin_get_kpis');
+        if (error) throw error;
+
+        document.getElementById('kpiSalesToday').textContent = `$${Number(data.sales_today || 0).toFixed(2)}`;
+        document.getElementById('kpiSalesMonth').textContent = `$${Number(data.sales_month || 0).toFixed(2)}`;
+        document.getElementById('kpiTotalCommissions').textContent = `$${Number(data.total_commissions || 0).toFixed(2)}`;
+        document.getElementById('kpiCustomerBalances').textContent = `$${Number(data.customer_balances || 0).toFixed(2)}`;
+        document.getElementById('kpiPendingOrders').textContent = data.pending_orders || 0;
+        document.getElementById('kpiPendingDeposits').textContent = data.pending_deposits || 0;
+    } catch (err) {
+        console.error('Error fetching KPIs:', err);
     }
 }
 
-async function loadPendingDeposits() {
-    const tbody = document.getElementById('deposits-tbody');
-    if (!tbody) return;
+// =========================================================================
+// 2. السجل الرقابي الشامل لطلبات الإيداع (Audit Trail)
+// =========================================================================
 
-    const { data: deposits } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('status', 'pending')
-        .in('transaction_type', ['Deposit', 'شحن رصيد'])
-        .order('created_at', { ascending: false });
+async function loadDepositsAuditTab() {
+    const tableBody = document.getElementById('depositsTableBody') || document.getElementById('depositsAuditTableBody');
+    if (!tableBody) return;
 
-    if (!deposits || deposits.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">لا توجد أي طلبات شحن رصيد معلقة حالياً ✓</td></tr>`;
-        return;
+    tableBody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-500">جاري تحميل السجل الرقابي للإيداعات...</td></tr>`;
+
+    try {
+        const { data: records, error } = await supabase.rpc('admin_get_deposits_audit');
+        if (error) throw error;
+
+        if (!records || records.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-500">لا توجد عمليات إيداع مسجلة.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = records.map(r => {
+            const statusBadge = 
+                r.status === 'approved' ? '<span class="px-2 py-0.5 rounded text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 font-semibold">مقبول ومكتمل</span>' :
+                r.status === 'rejected' ? '<span class="px-2 py-0.5 rounded text-xs bg-rose-950 text-rose-400 border border-rose-800 font-semibold">مرفوض</span>' :
+                '<span class="px-2 py-0.5 rounded text-xs bg-amber-950 text-amber-400 border border-amber-800 font-semibold animate-pulse">قيد الانتظار</span>';
+
+            const auditInfo = r.processed_by_name !== '—' ? `
+                <div class="text-indigo-300 font-medium">${r.processed_by_name}</div>
+                <div class="text-[10px] text-gray-400">الصفة: ${r.processed_by_role === 'agent' ? 'وكيل مالي' : 'مشرف نظام'}</div>
+                <div class="text-[10px] text-gray-500 font-mono">${new Date(r.processed_at).toLocaleString('ar-EG')}</div>
+            ` : '<span class="text-amber-500/80 text-xs">بانتظار المعالجة</span>';
+
+            return `
+                <tr class="border-b border-gray-800 hover:bg-gray-800/30 text-sm">
+                    <td class="p-3 font-mono text-xs text-yellow-400">${r.transaction_ref}</td>
+                    <td class="p-3">
+                        <div class="font-medium text-white">${r.customer_name}</div>
+                        <div class="text-xs text-gray-400">${r.customer_email}</div>
+                    </td>
+                    <td class="p-3 font-bold text-emerald-400 font-mono">$${Number(r.amount).toFixed(2)}</td>
+                    <td class="p-3 text-xs text-gray-300">
+                        <div>${r.payment_method}</div>
+                        <div class="font-mono text-gray-500 text-[11px]">${r.receipt_num || '—'}</div>
+                    </td>
+                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3 text-xs">${auditInfo}</td>
+                    <td class="p-3 text-xs text-gray-400 max-w-xs truncate">${r.rejection_reason || '—'}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Error loading audit log:', err);
+        tableBody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-rose-400">حدث خطأ: ${err.message}</td></tr>`;
     }
-
-    tbody.innerHTML = deposits.map(d => `
-        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-            <td class="py-3 font-mono text-[11px] text-slate-400">${d.transaction_ref}</td>
-            <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${d.details}</td>
-            <td class="py-3 text-center font-mono font-bold">${d.player_id || '---'}</td>
-            <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400">+$${Number(d.amount).toFixed(2)}</td>
-            <td class="py-3 text-[10px] text-slate-400">${new Date(d.created_at).toLocaleString('ar-EG')}</td>
-            <td class="py-3 text-center flex justify-center gap-2">
-                <button onclick="handleProcessDeposit('${d.id}', 'approve')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold transition">تأكيد ✓</button>
-                <button onclick="handleProcessDeposit('${d.id}', 'reject')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold transition">رفض ✕</button>
-            </td>
-        </tr>
-    `).join('');
 }
 
-async function handleProcessDeposit(txId, action) {
-    const confirmMsg = action === 'approve'
-        ? 'هل وصلك التحويل المالي بالفعل وتريد إيداع المبلغ في محفظة العميل الآن؟'
-        : 'هل أنت متأكد من رفض طلب الشحن وإلغائه؟';
+// =========================================================================
+// 3. إدارة طلبات الشحن المباشر (Direct Orders)
+// =========================================================================
 
-    if (!confirm(confirmMsg)) return;
+async function loadOrdersTab() {
+    const tableBody = document.getElementById('ordersTableBody');
+    if (!tableBody) return;
 
+    tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500">جاري تحميل الطلبات...</td></tr>`;
+
+    try {
+        const { data: orders, error } = await supabase
+            .from('orders')
+            .select(`
+                id,
+                order_ref,
+                transaction_ref,
+                package_name,
+                platform,
+                product_type,
+                player_id,
+                price,
+                status,
+                created_at,
+                profiles:user_id (email, first_name, last_name)
+            `)
+            .eq('product_type', 'ID')
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+        if (error) throw error;
+
+        if (!orders || orders.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500">لا توجد طلبات شحن معرفات حالياً.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = orders.map(o => {
+            const cust = [o.profiles?.first_name, o.profiles?.last_name].filter(Boolean).join(' ') || o.profiles?.email || 'عميل';
+            return `
+                <tr class="border-b border-gray-800 hover:bg-gray-800/30 text-sm">
+                    <td class="p-3 font-mono text-xs text-indigo-400">${o.order_ref}</td>
+                    <td class="p-3">
+                        <div class="text-white font-medium">${cust}</div>
+                        <div class="text-xs text-gray-400">${o.platform} - ${o.package_name}</div>
+                    </td>
+                    <td class="p-3 font-mono text-amber-400 font-bold select-all">${o.player_id || '—'}</td>
+                    <td class="p-3 font-bold text-emerald-400 font-mono">$${Number(o.price).toFixed(2)}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded text-xs ${
+                            o.status === 'completed' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :
+                            o.status === 'cancelled' ? 'bg-rose-950 text-rose-400 border border-rose-800' :
+                            'bg-amber-950 text-amber-400 border border-amber-800 animate-pulse'
+                        }">
+                            ${o.status === 'completed' ? 'تم الشحن' : o.status === 'cancelled' ? 'ملغي ومسترد' : 'معلق'}
+                        </span>
+                    </td>
+                    <td class="p-3">
+                        ${o.status === 'pending' ? `
+                            <div class="flex gap-1.5">
+                                <button onclick="processDirectOrder('${o.transaction_ref}', 'complete')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-semibold">تأكيد</button>
+                                <button onclick="processDirectOrder('${o.transaction_ref}', 'refund')" class="px-2.5 py-1 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 rounded text-xs">إرجاع</button>
+                            </div>
+                        ` : '<span class="text-gray-500 text-xs">مكتمل</span>'}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-rose-400">خطأ: ${err.message}</td></tr>`;
+    }
+}
+
+// معالجة طلب شحن ID (تأكيد أو رفض مع إرجاع الرصيد)
+window.processDirectOrder = async function(txRef, action) {
     let reason = '';
-    if (action === 'reject') {
-        const inputReason = prompt('سبب الرفض (اختياري):', 'لم يتم استلام المبلغ في الحساب');
-        if (inputReason === null) return; // تراجع المشرف
-        reason = inputReason.trim() || 'لم يتم استلام المبلغ في الحساب';
+    if (action === 'refund') {
+        reason = prompt('أدخل سبب الرفض وإرجاع الرصيد للعميل (مثال: معرف اللاعب غير صحيح):');
+        if (reason === null) return;
+    } else {
+        if (!confirm('تأكيد إتمام الشحن في اللعبة وتحرير عمولة الشريك إن وجدت؟')) return;
     }
 
     try {
-        const { data, error } = await supabase.rpc('admin_process_deposit', {
-            p_tx_id: txId,
+        const { data: tx } = await supabase.from('transactions').select('id').eq('transaction_ref', txRef).single();
+        if (!tx) throw new Error('تعذر العثور على المعاملة المقابلة.');
+
+        const { data, error } = await supabase.rpc('admin_process_order', {
+            p_tx_id: tx.id,
             p_action: action,
             p_reason: reason
         });
 
         if (error) throw error;
-        if (data && data.status === 'success') {
-            alert(data.message);
-            loadAllAdminData();
-        } else {
-            alert("فشل الإجراء: " + (data ? data.message : "حدث خطأ غير متوقع"));
-        }
+        alert(data.message);
+        await loadOrdersTab();
     } catch (err) {
-        console.error("Deposit Process Error:", err);
-        alert("حدث خطأ في الاتصال: " + (err.message || err));
+        alert('حدث خطأ: ' + err.message);
     }
-}
+};
 
-// مخزون الأكواد الرقمية (code_inventory)
-async function loadInventoryData() {
-    const tbody = document.getElementById('inventory-tbody');
-    const select = document.getElementById('restock-product-select');
+// =========================================================================
+// 4. إدارة الوكلاء والشركاء
+// =========================================================================
 
-    try {
-        const { data: prods, error: prodErr } = await supabase
-            .from('products')
-            .select('*')
-            .eq('product_type', 'CODE')
-            .order('platform', { ascending: true });
+async function loadAgentsTab() {
+    const tableBody = document.getElementById('agentsTableBody');
+    if (!tableBody) return;
 
-        if (prodErr) throw prodErr;
-        inventoryProductsCache = prods || [];
-
-        if (select) {
-            if (inventoryProductsCache.length === 0) {
-                select.innerHTML = `<option value="" disabled selected>لا توجد منتجات رقمية (CODE)</option>`;
-            } else {
-                const currentVal = select.value;
-                select.innerHTML = `<option value="" disabled ${!currentVal ? 'selected' : ''}>-- اختر الباقة لتزويدها بالأكواد --</option>` +
-                    inventoryProductsCache.map(p => `<option value="${p.id}" ${currentVal === p.id ? 'selected' : ''}>${p.platform} - ${p.package_name} ($${Number(p.price).toFixed(2)})</option>`).join('');
-            }
-        }
-
-        if (!tbody) return;
-
-        if (inventoryProductsCache.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">لا توجد منتجات رقمية من نوع كود</td></tr>`;
-            return;
-        }
-
-        const { data: codes, error: codesErr } = await supabase
-            .from('code_inventory')
-            .select('product_id, status');
-
-        if (codesErr) console.error("Error fetching code_inventory:", codesErr);
-
-        const allCodes = codes || [];
-
-        tbody.innerHTML = inventoryProductsCache.map(p => {
-            const prodCodes = allCodes.filter(c => c.product_id === p.id);
-            const available = prodCodes.filter(c => c.status === 'available').length;
-            const sold = prodCodes.filter(c => c.status && c.status !== 'available').length;
-
-            return `
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.platform}</td>
-                    <td class="py-3 font-medium text-slate-700 dark:text-slate-200">${p.package_name}</td>
-                    <td class="py-3 font-mono font-bold">$${Number(p.price).toFixed(2)}</td>
-                    <td class="py-3 text-center">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-mono font-black ${available > 0 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500'}">
-                            ${available} متوفر
-                        </span>
-                    </td>
-                    <td class="py-3 text-center font-mono text-slate-400">${sold}</td>
-                    <td class="py-3 text-center">
-                        <button onclick="quickSelectRestock('${p.id}')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-bold transition">
-                            شحن أكواد +
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-
-    } catch (err) {
-        console.error("Inventory Load Error:", err);
-        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-rose-500">فشل تحميل المخزون: ${err.message}</td></tr>`;
-    }
-}
-
-function quickSelectRestock(productId) {
-    const select = document.getElementById('restock-product-select');
-    if (select) {
-        select.value = productId;
-        updateSelectedStockBadge();
-        const codesInput = document.getElementById('restock-codes');
-        if (codesInput) codesInput.focus();
-    }
-}
-
-function updateSelectedStockBadge() {
-    const select = document.getElementById('restock-product-select');
-    const badge = document.getElementById('selected-stock-badge');
-    if (!select || !badge) return;
-    const prod = inventoryProductsCache.find(p => p.id === select.value);
-    if (prod) {
-        badge.innerHTML = `<span class="text-emerald-600 font-bold">تم اختيار: ${prod.platform} — ${prod.package_name}</span>`;
-    } else {
-        badge.innerHTML = '';
-    }
-}
-
-function updateCodesCountLive() {
-    const text = document.getElementById('restock-codes').value;
-    const badge = document.getElementById('codes-count-badge');
-    if (!badge) return;
-    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-    badge.innerText = `${lines.length} كود`;
-}
-
-async function handleRestockSubmit(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btn-restock-submit');
-    const prodId = document.getElementById('restock-product-select').value;
-    const codesText = document.getElementById('restock-codes').value.trim();
-
-    if (!prodId) return alert("يرجى اختيار باقة أولاً.");
-    if (!codesText) return alert("يرجى إدخال كود واحد على الأقل.");
-
-    btn.disabled = true;
-    btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-sm"></i> جاري الإضافة...`;
-
-    try {
-        const { data, error } = await supabase.rpc('admin_add_inventory_codes', {
-            p_product_id: prodId,
-            p_codes_text: codesText
-        });
-
-        if (error) throw error;
-
-        if (data && data.status === 'success') {
-            alert(data.message || "✓ تم شحن الأكواد إلى المخزون بنجاح!");
-            document.getElementById('restock-codes').value = '';
-            updateCodesCountLive();
-            await loadInventoryData();
-        } else {
-            alert("خطأ: " + (data ? data.message : "فشلت إضافة الأكواد"));
-        }
-    } catch (err) {
-        console.error("Restock Error:", err);
-        alert("حدث خطأ أثناء إضافة الأكواد: " + (err.message || err));
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="ph-bold ph-plus-circle text-sm"></i> إضافة الأكواد إلى المخزون فوراً`;
-    }
-}
-
-// المنصات والباقات
-async function loadProducts() {
-    const tbody = document.getElementById('products-tbody');
-    const filterSelect = document.getElementById('products-platform-filter');
-
-    try {
-        const { data: prods, error } = await supabase
-            .from('products')
-            .select('*')
-            .order('platform', { ascending: true });
-
-        if (error) throw error;
-        allProductsCache = prods || [];
-
-        if (filterSelect) {
-            const currentFilter = filterSelect.value || 'ALL';
-            const platforms = [...new Set(allProductsCache.map(p => p.platform).filter(Boolean))];
-            filterSelect.innerHTML = `<option value="ALL">جميع المنصات</option>` +
-                platforms.map(p => `<option value="${p}">${p}</option>`).join('');
-            filterSelect.value = currentFilter;
-        }
-
-        renderProductsTable(allProductsCache);
-    } catch (err) {
-        console.error("Products load error:", err);
-        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-rose-500">فشل تحميل المنتجات: ${err.message}</td></tr>`;
-    }
-}
-
-function renderProductsTable(productsList) {
-    const tbody = document.getElementById('products-tbody');
-    if (!tbody) return;
-
-    if (!productsList || productsList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">لا توجد باقات معروضة حالياً</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = productsList.map(p => {
-        const isCode = p.product_type === 'CODE';
-        const isActive = p.status === 'active' || p.status === 'نشط';
-
-        const typeBadge = isCode
-            ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-600">كود فوري (CODE)</span>`
-            : `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/10 text-blue-600">شحن ID مباشر</span>`;
-
-        const statusBadge = isActive
-            ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-600">معروض ✓</span>`
-            : `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-500/10 text-slate-400">مخفي ✕</span>`;
-
-        return `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                <td class="py-3 font-bold text-slate-800 dark:text-slate-100">${p.platform}</td>
-                <td class="py-3 font-medium text-slate-700 dark:text-slate-200">${p.package_name}</td>
-                <td class="py-3 font-mono font-bold text-slate-900 dark:text-slate-100">$${Number(p.price).toFixed(2)}</td>
-                <td class="py-3">${typeBadge}</td>
-                <td class="py-3 text-center">${statusBadge}</td>
-                <td class="py-3 text-center">
-                    <div class="flex items-center justify-center gap-1.5">
-                        <button onclick="openEditProductModal('${p.id}')" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل الباقة">
-                            <i class="ph-bold ph-pencil-simple text-sm"></i>
-                        </button>
-                        <button onclick="handleDeleteProduct('${p.id}', '${p.package_name}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="حذف الباقة">
-                            <i class="ph-bold ph-trash text-sm"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
-
-function filterProductsByPlatform() {
-    const filterVal = document.getElementById('products-platform-filter').value;
-    if (filterVal === 'ALL') {
-        renderProductsTable(allProductsCache);
-    } else {
-        const filtered = allProductsCache.filter(p => p.platform === filterVal);
-        renderProductsTable(filtered);
-    }
-}
-
-function openAddModal() {
-    document.getElementById('edit-prod-id').value = '';
-    
-    const platformInput = document.getElementById('edit-prod-platform');
-    platformInput.disabled = false;
-    platformInput.value = '';
-    platformInput.placeholder = 'مثال: PUBG, Netflix, Steam';
-
-    document.getElementById('edit-prod-name').value = '';
-    document.getElementById('edit-prod-price').value = '';
-    document.getElementById('edit-prod-type').value = 'CODE';
-    document.getElementById('edit-prod-category').value = 'Games';
-    document.getElementById('edit-prod-image').value = '';
-    document.getElementById('edit-prod-status').value = 'active';
-
-    const modalTitle = document.querySelector('#edit-product-modal h4 span');
-    if (modalTitle) modalTitle.innerText = 'إضافة باقة جديدة ➕';
-    
-    const saveBtn = document.getElementById('btn-save-edit-prod');
-    if (saveBtn) saveBtn.innerHTML = `<i class="ph-bold ph-plus-circle text-sm"></i> <span>إضافة الباقة للمتجر</span>`;
-
-    document.getElementById('edit-product-modal').classList.remove('hidden');
-}
-
-function openEditProductModal(productId) {
-    const prod = allProductsCache.find(p => p.id === productId);
-    if (!prod) return;
-
-    document.getElementById('edit-prod-id').value = prod.id;
-    document.getElementById('edit-prod-platform').value = prod.platform || '';
-    document.getElementById('edit-prod-type').value = prod.product_type || 'CODE';
-    document.getElementById('edit-prod-name').value = prod.package_name || '';
-    document.getElementById('edit-prod-price').value = prod.price || '';
-    document.getElementById('edit-prod-category').value = prod.category || '';
-    document.getElementById('edit-prod-image').value = prod.image_url || '';
-    document.getElementById('edit-prod-status').value = prod.status || 'active';
-
-    const modalTitle = document.querySelector('#edit-product-modal h4 span');
-    if (modalTitle) modalTitle.innerText = 'تعديل بيانات الباقة';
-
-    const saveBtn = document.getElementById('btn-save-edit-prod');
-    if (saveBtn) saveBtn.innerHTML = `<i class="ph-bold ph-floppy-disk text-sm"></i> <span>حفظ التعديلات</span>`;
-
-    document.getElementById('edit-product-modal').classList.remove('hidden');
-}
-
-function closeEditModal() {
-    document.getElementById('edit-product-modal').classList.add('hidden');
-}
-
-async function handleEditProductSubmit(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btn-save-edit-prod');
-    btn.disabled = true;
-    btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الحفظ...`;
-
-    const prodId = document.getElementById('edit-prod-id').value || null;
-    const platform = document.getElementById('edit-prod-platform').value.trim();
-    const pkgName = document.getElementById('edit-prod-name').value.trim();
-    const price = parseFloat(document.getElementById('edit-prod-price').value);
-    const pType = document.getElementById('edit-prod-type').value;
-    const category = document.getElementById('edit-prod-category').value.trim();
-    const img = document.getElementById('edit-prod-image').value.trim();
-    const status = document.getElementById('edit-prod-status').value;
-
-    try {
-        const { data, error } = await supabase.rpc('admin_save_product', {
-            p_id: prodId,
-            p_platform: platform,
-            p_package_name: pkgName,
-            p_price: price,
-            p_product_type: pType,
-            p_category: category,
-            p_image_url: img || null,
-            p_status: status
-        });
-
-        if (error) throw error;
-
-        if (data && data.status === 'success') {
-            alert(data.message || "تم حفظ الباقة بنجاح ✓");
-            closeEditModal();
-            await loadProducts();
-            await loadInventoryData();
-        } else {
-            alert("خطأ: " + (data ? data.message : "فشل حفظ الباقة"));
-        }
-    } catch (err) {
-        alert("خطأ أثناء الحفظ: " + (err.message || err));
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="ph-bold ph-floppy-disk text-sm"></i> <span>حفظ التعديلات</span>`;
-    }
-}
-
-async function handleDeleteProduct(id, name) {
-    if (!confirm(`هل أنت متأكد من حذف الباقة (${name}) نهائياً من المتجر؟`)) return;
-
-    try {
-        const { data, error } = await supabase.rpc('admin_delete_product', { p_id: id });
-        if (error) throw error;
-
-        if (data && data.status === 'success') {
-            alert(data.message || "تم حذف الباقة بنجاح");
-            await loadProducts();
-            await loadInventoryData();
-        } else {
-            alert("خطأ: " + (data ? data.message : "فشل الحذف"));
-        }
-    } catch (err) {
-        alert("خطأ: " + (err.message || err));
-    }
-}
-
-// الشركاء التسويقيين
-function openAffiliateModal() {
-    editingAffiliateUserId = null;
-    populateUserDropdown('affiliate-user-select');
-    document.getElementById('affiliate-user-select').disabled = false;
-    document.getElementById('affiliate-code-input').value = '';
-    document.getElementById('affiliate-discount-input').value = '5';
-    document.getElementById('affiliate-comm-input').value = '5';
-    document.getElementById('btn-save-affiliate').innerText = "حفظ واعتماد الشريك";
-    document.getElementById('affiliate-modal').classList.remove('hidden');
-}
-
-function closeAffiliateModal() {
-    editingAffiliateUserId = null;
-    document.getElementById('affiliate-modal').classList.add('hidden');
-}
-
-async function handleAffiliateSubmit(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btn-save-affiliate');
-    btn.disabled = true;
-    btn.innerText = "جاري الحفظ...";
-
-    const userId = editingAffiliateUserId || document.getElementById('affiliate-user-select').value;
-    const code = document.getElementById('affiliate-code-input').value.trim().toUpperCase();
-    const discount = parseFloat(document.getElementById('affiliate-discount-input').value);
-    const commission = parseFloat(document.getElementById('affiliate-comm-input').value);
-
-    try {
-        const { data, error } = await supabase.rpc('admin_manage_affiliate', {
-            p_user_id: userId,
-            p_coupon_code: code,
-            p_discount_percent: discount,
-            p_commission_percent: commission,
-            p_action: 'save'
-        });
-
-        if (error) throw error;
-
-        await supabase.from('profiles').update({ role: 'marketing_partner' }).eq('id', userId).neq('role', 'admin');
-
-        if (data && data.status === 'success') {
-            alert("تم اعتماد الشريك التسويقي وتفعيل لوحة التحكم في حسابه بنجاح ✓");
-            closeAffiliateModal();
-            loadAffiliatesData();
-        } else {
-            alert("خطأ: " + (data ? data.message : "فشلت العملية"));
-        }
-    } catch (err) {
-        alert("خطأ أثناء حفظ الشريك: " + (err.message || err));
-    } finally {
-        btn.disabled = false;
-        btn.innerText = "حفظ واعتماد الشريك";
-    }
-}
-
-async function loadAffiliatesData() {
-    const tbody = document.getElementById('affiliates-tbody');
-    if (!tbody) return;
-
-    try {
-        const { data: coupons, error } = await supabase
-            .from('coupons')
-            .select('*, profiles:affiliate_id(id, first_name, last_name, email, balance, role)')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        if (!coupons || coupons.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400">لا يوجد شركاء تسويقيين مسجلين حالياً</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = coupons.map(c => {
-            const prof = c.profiles || {};
-            const partnerName = getFullName(prof);
-            return `
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">
-                        <div>${partnerName}</div>
-                        <div class="text-[10px] text-slate-400 font-mono">${prof.email || '—'}</div>
-                    </td>
-                    <td class="py-3 font-mono font-black text-purple-600 dark:text-purple-400 select-all">${c.code}</td>
-                    <td class="py-3 font-mono font-bold">${c.discount_percent}%</td>
-                    <td class="py-3 font-mono font-bold text-emerald-600">${c.affiliate_commission_percent}%</td>
-                    <td class="py-3 font-mono font-bold text-slate-600 dark:text-slate-300">${c.usage_count || 0}</td>
-                    <td class="py-3 font-mono font-black text-emerald-600">$${Number(prof.balance || 0).toFixed(2)}</td>
-                    <td class="py-3 text-center">
-                        <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="editAffiliatePartner('${prof.id}', '${c.code}', ${c.discount_percent}, ${c.affiliate_commission_percent})" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل الشريك والكود">
-                                <i class="ph-bold ph-pencil-simple text-sm"></i>
-                            </button>
-                            <button onclick="deleteAffiliateCoupon('${prof.id}', '${partnerName}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="إلغاء الشراكة">
-                                <i class="ph-bold ph-trash text-sm"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    } catch (err) {
-        console.error("Affiliates load error:", err);
-        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-500">فشل تحميل الشركاء: ${err.message}</td></tr>`;
-    }
-}
-
-function editAffiliatePartner(userId, code, discount, comm) {
-    editingAffiliateUserId = userId;
-    const select = document.getElementById('affiliate-user-select');
-    select.innerHTML = `<option value="${userId}" selected>تعديل الشريك الحالي</option>`;
-    select.disabled = true;
-
-    document.getElementById('affiliate-code-input').value = code;
-    document.getElementById('affiliate-discount-input').value = discount;
-    document.getElementById('affiliate-comm-input').value = comm;
-    document.getElementById('btn-save-affiliate').innerText = "تحديث بيانات الشريك";
-    document.getElementById('affiliate-modal').classList.remove('hidden');
-}
-
-async function deleteAffiliateCoupon(userId, name) {
-    if (!confirm(`هل أنت متأكد من إلغاء الشريك (${name}) وحذف الكوبون المرتبط به؟`)) return;
-    try {
-        const { data, error } = await supabase.rpc('admin_manage_affiliate', {
-            p_user_id: userId,
-            p_action: 'delete'
-        });
-        if (error) throw error;
-
-        await supabase.from('profiles').update({ role: 'customer' }).eq('id', userId).neq('role', 'admin');
-
-        alert(data.message || "تم إلغاء الشراكة بنجاح");
-        loadAffiliatesData();
-    } catch (err) {
-        alert("خطأ: " + (err.message || err));
-    }
-}
-
-// الوكلاء الماليين
-// الوكلاء الماليين - استخدام الإجراء المخصص للإدارة
-async function loadAgentsData() {
-    const tbody = document.getElementById('agents-tbody');
-    if (!tbody) return;
+    tableBody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-500">جاري تحميل قائمة الوكلاء...</td></tr>`;
 
     try {
         const { data: agents, error } = await supabase.rpc('admin_get_all_agents');
-
         if (error) throw error;
 
         if (!agents || agents.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">لا يوجد وكلاء ماليين معتمدين حالياً</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-500">لا يوجد وكلاء مسجلون حالياً.</td></tr>`;
             return;
         }
 
-        tbody.innerHTML = agents.map(a => {
-            const agentName = a.full_name || 'بدون اسم';
-            const commPercent = (a.commission_rate !== null && a.commission_rate !== undefined)
-                ? (Number(a.commission_rate) * 100).toFixed(1) + '%' 
-                : 'غير محدد ⚠️';
-
-            return `
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td class="py-3 font-bold text-slate-800 dark:text-slate-100">
-                        <div>${agentName}</div>
-                        <div class="text-[10px] text-slate-400 font-mono">حركات الشحن: (${a.transfers_count})</div>
-                    </td>
-                    <td class="py-3 font-mono text-slate-500">${a.email || '—'}</td>
-                    <td class="py-3 font-mono font-black text-amber-600 dark:text-amber-400">$${Number(a.balance || 0).toFixed(2)}</td>
-                    <td class="py-3 font-mono font-bold text-purple-600 dark:text-purple-400 text-center">${commPercent}</td>
-                    <td class="py-3 text-center">
-                        <button onclick="viewAgentOperations('${a.agent_id}', '${agentName}')" class="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-lg text-xs font-bold transition flex items-center gap-1 mx-auto">
-                            <i class="ph-bold ph-eye"></i>
-                            <span>العمليات (${a.transfers_count})</span>
-                        </button>
-                    </td>
-                    <td class="py-3 text-center">
-                        <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="updateAgentCommissionPrompt('${a.agent_id}', '${agentName}', ${a.commission_rate || 0})" class="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition" title="تعديل نسبة العمولة">
-                                <i class="ph-bold ph-pencil-simple text-sm"></i>
-                            </button>
-                            <button onclick="demoteAgent('${a.agent_id}', '${agentName !== 'بدون اسم' ? agentName : a.email}')" class="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition" title="إلغاء صفة الوكيل">
-                                <i class="ph-bold ph-trash text-sm"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }).join('');
+        tableBody.innerHTML = agents.map(a => `
+            <tr class="border-b border-gray-800 hover:bg-gray-800/30 text-sm">
+                <td class="p-3 text-white font-medium">${a.full_name}<br><span class="text-xs text-gray-400">${a.email}</span></td>
+                <td class="p-3 font-bold text-emerald-400 font-mono">$${Number(a.balance).toFixed(2)}</td>
+                <td class="p-3 font-mono text-indigo-400">${a.commission_rate}%</td>
+                <td class="p-3 font-mono text-gray-300">$${Number(a.total_transferred).toFixed(2)}</td>
+                <td class="p-3 font-mono text-amber-400">+$${Number(a.total_commissions).toFixed(2)}</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded text-xs bg-emerald-950 text-emerald-400 border border-emerald-800">${a.status}</span></td>
+                <td class="p-3">
+                    <button onclick="payoutAgentCash('${a.email}')" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs font-semibold">تسليم أرباح</button>
+                </td>
+            </tr>
+        `).join('');
     } catch (err) {
-        console.error("Agents load error:", err);
-        tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-rose-500">فشل تحميل الوكلاء: ${err.message}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-rose-400">خطأ: ${err.message}</td></tr>`;
     }
 }
 
-// فتح نافذة عمليات وكيل محدد
-async function viewAgentOperations(agentId, agentName) {
-    const modal = document.getElementById('agent-ops-modal');
-    const titleEl = document.getElementById('agent-ops-modal-title');
-    const container = document.getElementById('agent-modal-transactions-list');
-
-    if (!modal || !container) return;
-
-    if (titleEl) titleEl.innerText = agentName;
-    container.innerHTML = `<p class="text-xs text-slate-400 p-4 text-center">جاري جلب حركات الوكيل...</p>`;
-    modal.classList.remove('hidden');
-
-    try {
-        const { data: ops, error } = await supabase.rpc('admin_get_agent_transactions_history', {
-            p_target_agent_id: agentId
-        });
-
-        if (error) throw error;
-
-        if (!ops || ops.length === 0) {
-            container.innerHTML = `<p class="text-xs text-slate-400 p-6 text-center">لا توجد عمليات مسجلة لهذا الوكيل حتى الآن.</p>`;
-            return;
-        }
-
-        container.innerHTML = ops.map(op => {
-            const dateStr = new Date(op.created_at).toLocaleString('ar-EG');
-            return `
-                <div class="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-xs">
-                    <div class="space-y-0.5">
-                        <span class="font-bold text-slate-800 dark:text-slate-100 block">${op.target_name}</span>
-                        <span class="text-[11px] text-slate-400 font-mono block">${op.target_email}</span>
-                        <span class="text-[10px] text-slate-400 block">${dateStr} — ${op.notes || 'تحويل مباشر'}</span>
-                    </div>
-                    <div class="text-left font-mono">
-                        <span class="font-black text-slate-800 dark:text-slate-100 block">$${Number(op.amount).toFixed(2)}</span>
-                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">+ عمولة $${Number(op.commission_earned).toFixed(2)}</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-    } catch (err) {
-        console.error("View Ops Error:", err);
-        container.innerHTML = `<p class="text-xs text-rose-500 p-4 text-center">فشل تحميل السجل: ${err.message}</p>`;
-    }
-}
-
-function closeAgentOpsModal() {
-    const modal = document.getElementById('agent-ops-modal');
-    if (modal) modal.classList.add('hidden');
-}
-async function openAgentModal() {
-    await populateUserDropdown('agent-user-select');
-    document.getElementById('agent-commission-input').value = '2';
-    document.getElementById('agent-modal').classList.remove('hidden');
-}
-
-function closeAgentModal() {
-    document.getElementById('agent-modal').classList.add('hidden');
-}
-
-async function handleAgentSubmit(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btn-save-agent');
-    btn.disabled = true;
-    btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full ml-1"></span> جاري الاعتماد...`;
-
-    const userId = document.getElementById('agent-user-select').value;
-    const rawCommission = parseFloat(document.getElementById('agent-commission-input').value);
-
-    if (isNaN(rawCommission) || rawCommission <= 0 || rawCommission > 100) {
-        alert("يرجى إدخال نسبة عمولة صالحة كنسبة مئوية (مثال: 10 لـ 10% أو 5 لـ 5%).");
-        btn.disabled = false;
-        btn.innerHTML = "اعتماد كوكيل مالي";
+// تسليم أرباح كاش للوكيل
+window.payoutAgentCash = async function(agentEmail) {
+    const amountStr = prompt(`المبلغ المراد تسليمه كاش للوكيل (${agentEmail}):`);
+    if (!amountStr) return;
+    const amount = Number(amountStr);
+    if (isNaN(amount) || amount <= 0) {
+        alert('يرجى إدخال مبلغ صحيح.');
         return;
     }
 
-    const decimalRate = rawCommission / 100.0;
-
     try {
-        const { data, error } = await supabase.rpc('admin_manage_agent', {
-            p_user_id: userId,
-            p_action: 'promote',
-            p_commission_rate: decimalRate
+        const { data, error } = await supabase.rpc('payout_agent_cash', {
+            p_agent_email: agentEmail,
+            p_payout_amount: amount,
+            p_note: 'تسليم أرباح كاش يداً بيد'
         });
 
         if (error) throw error;
-
-        if (data && data.status === 'success') {
-            alert(data.message);
-            closeAgentModal();
-            await loadAgentsData();
-        } else {
-            alert("خطأ: " + (data ? data.message : "فشلت العملية"));
-        }
-    } catch (err) {
-        console.error("Agent Submit Error:", err);
-        alert("خطأ أثناء ترقية الوكيل: " + (err.message || err));
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = "اعتماد كوكيل مالي";
-    }
-}
-
-async function updateAgentCommissionPrompt(userId, agentName, currentDecimalRate) {
-    const currentPercent = currentDecimalRate !== null && currentDecimalRate !== undefined
-        ? (Number(currentDecimalRate) * 100).toFixed(1)
-        : '0';
-
-    const newPercentInput = prompt(`أدخل نسبة العمولة الجديدة (%) للوكيل (${agentName}):`, currentPercent);
-    if (newPercentInput === null) return;
-
-    const newPercent = parseFloat(newPercentInput);
-    if (isNaN(newPercent) || newPercent <= 0 || newPercent > 100) {
-        return alert("يرجى إدخال نسبة مئوية صالحة بين 0.1 و 100.");
-    }
-
-    const decimalRate = newPercent / 100.0;
-
-    try {
-        const { data, error } = await supabase.rpc('admin_manage_agent', {
-            p_user_id: userId,
-            p_action: 'update_commission',
-            p_commission_rate: decimalRate
-        });
-
-        if (error) throw error;
-
-        if (data && data.status === 'success') {
-            alert(data.message || "✓ تم تحديث نسبة العمولة بنجاح");
-            await loadAgentsData();
-        } else {
-            alert("خطأ: " + (data ? data.message : "فشلت العملية"));
-        }
-    } catch (err) {
-        console.error("Update Commission Error:", err);
-        alert("خطأ أثناء التحديث: " + (err.message || err));
-    }
-}
-
-async function demoteAgent(userId, name) {
-    if (!confirm(`هل أنت متأكد من إلغاء رتبة الوكيل للمستخدم (${name}) وإعادته لعميل عادي؟`)) return;
-
-    try {
-        const { data, error } = await supabase.rpc('admin_manage_agent', {
-            p_user_id: userId,
-            p_action: 'demote',
-            p_commission_rate: null
-        });
-
-        if (error) throw error;
-
         alert(data.message);
-        await loadAgentsData();
+        await loadAgentsTab();
     } catch (err) {
-        alert("خطأ: " + (err.message || err));
+        alert('تعذر صرف الأرباح: ' + err.message);
     }
+};
+
+function setupAdminEventListeners() {
+    // يمكن ربط نماذج إضافة المنتجات أو تعديل النسب هنا
 }
-
-// الإيداع اليدوي
-async function handleManualTopup() {
-    const emailInput = document.getElementById('topup-email');
-    const amtInput = document.getElementById('topup-amount');
-    const noteInput = document.getElementById('topup-note');
-
-    const email = emailInput ? emailInput.value.trim() : '';
-    const amount = parseFloat(amtInput ? amtInput.value : 0);
-    const note = noteInput ? noteInput.value.trim() : '';
-
-    if (!email || isNaN(amount) || amount <= 0) {
-        return alert("يرجى إدخال بريد إلكتروني صالح ومبلغ أكبر من الصفر.");
-    }
-
-    if (!confirm(`هل أنت متأكد من شحن مبلغ $${amount.toFixed(2)} يدوياً إلى حساب (${email})؟`)) return;
-
-    try {
-        const { data, error } = await supabase.rpc('admin_manual_topup', {
-            p_email: email,
-            p_amount: amount,
-            p_note: note || 'إيداع يدوي عبر الإدارة'
-        });
-
-        if (error) throw error;
-
-        if (data && data.status === 'success') {
-            alert(data.message || "✓ تم إيداع الرصيد بنجاح!");
-            emailInput.value = '';
-            amtInput.value = '';
-            noteInput.value = '';
-            loadAllAdminData();
-        } else {
-            alert("خطأ: " + (data ? data.message : "فشلت عملية الإيداع"));
-        }
-    } catch (err) {
-        console.error("Manual Topup Error:", err);
-        alert("حدث خطأ أثناء الإيداع: " + (err.message || err));
-    }
-}
-
-// أدوات مساعدة عامة
-async function populateUserDropdown(selectElementId) {
-    const select = document.getElementById(selectElementId);
-    if (!select) return;
-
-    select.innerHTML = `<option value="">جاري جلب الحسابات...</option>`;
-    try {
-        const { data: users, error } = await supabase
-            .from('profiles')
-            .select('id, first_name, last_name, email, role')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        if (users && users.length > 0) {
-            select.innerHTML = users.map(u => `
-                <option value="${u.id}">
-                    ${getFullName(u)} (${u.email || u.id.slice(0, 8)}) [${u.role || 'customer'}]
-                </option>
-            `).join('');
-        } else {
-            select.innerHTML = `<option value="">لا يوجد مستخدمين مسجلين</option>`;
-        }
-    } catch (err) {
-        console.error("Dropdown error:", err);
-        select.innerHTML = `<option value="">فشل تحميل الحسابات</option>`;
-    }
-}
-
-function getFullName(userObj) {
-    if (!userObj) return 'بدون اسم';
-    const full = [userObj.first_name, userObj.last_name].filter(Boolean).join(' ').trim();
-    return full || 'بدون اسم';
-}
-
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.tab-btn').forEach(b => {
-        b.className = "tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap";
-    });
-
-    const activeSec = document.getElementById(`sec-${tabId}`);
-    const activeTab = document.getElementById(`tab-${tabId}`);
-    if (activeSec) activeSec.classList.remove('hidden');
-    if (activeTab) activeTab.className = "tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap";
-    
-    if (tabId === 'orders') loadPendingOrders();
-    else if (tabId === 'deposits') loadPendingDeposits();
-    else if (tabId === 'inventory') loadInventoryData();
-    else if (tabId === 'products') loadProducts();
-    else if (tabId === 'affiliates') loadAffiliatesData();
-    else if (tabId === 'agents') loadAgentsData();
-}
-
-async function handleLogout() {
-    await supabase.auth.signOut();
-    window.location.href = "index.html";
-}
-
-// بدء الفحص التلقائي للصلاحيات
-checkAdminAuth();
