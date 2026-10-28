@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 4. تحميل طلبات الإيداع المعلقة تلقائياً
     await loadPendingDeposits();
+    await loadAgentHistory();
 
     // 5. ربط أحداث النماذج والأزرار
     setupEventListeners();
