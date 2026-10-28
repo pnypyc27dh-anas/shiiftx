@@ -93,79 +93,63 @@ window.switchAgentTab = async function(tabName) {
 // =========================================================================
 // 1. إدارة طلبات الإيداع المعلقة (جديد)
 // =========================================================================
-
 async function loadPendingDeposits() {
-    const container = document.getElementById('pendingOrdersContainer');
+    // تم التعديل إلى المعرف الحقيقي الدقيق الموجود في صفحتك
+    const container = document.getElementById('agent-pending-orders-container');
     if (!container) return;
 
     container.innerHTML = `
-        <div class="p-8 text-center text-gray-500">
-            <i class="ph ph-spinner animate-spin text-3xl mb-2 text-indigo-400"></i>
-            <p class="text-sm">جاري جلب طلبات الشحن المعلقة...</p>
+        <div class="py-6 text-center text-xs text-slate-400">
+            <i class="ph ph-spinner animate-spin text-lg mb-1 inline-block text-amber-500"></i>
+            <p>جاري تحميل الطلبات المعلقة...</p>
         </div>
     `;
 
     try {
-        const { data: orders, error } = await supabase
-            .from('deposit_orders')
-            .select(`
-                id,
-                transaction_ref,
-                amount,
-                payment_method,
-                transfer_receipt_num,
-                created_at,
-                profiles:user_id (email, first_name, last_name, phone)
-            `)
-            .eq('status', 'pending')
-            .order('created_at', { ascending: false });
+        const { data: orders, error } = await supabase.rpc('agent_get_all_pending_deposits');
 
         if (error) throw error;
 
         if (!orders || orders.length === 0) {
             container.innerHTML = `
-                <div class="p-8 text-center text-gray-500 bg-gray-900/40 rounded-xl border border-gray-800">
-                    <i class="ph ph-check-circle text-4xl mb-2 text-emerald-500/50"></i>
-                    <p class="text-sm">لا توجد طلبات إيداع معلقة حالياً ✓</p>
+                <div class="py-6 text-center text-xs text-slate-500">
+                    لا توجد طلبات إيداع بانتظار التأكيد حالياً ✓
                 </div>
             `;
             return;
         }
 
-        container.innerHTML = orders.map(order => {
-            const customerName = [order.profiles?.first_name, order.profiles?.last_name].filter(Boolean).join(' ') || order.profiles?.email || 'عميل';
-            return `
-                <div class="p-4 bg-gray-900/80 border border-gray-800 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gray-700 transition">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold text-white text-base">${customerName}</span>
-                            <span class="text-xs px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800 font-mono">${order.transaction_ref}</span>
-                        </div>
-                        <div class="text-xs text-gray-400 mt-1 flex flex-wrap gap-x-4 gap-y-1">
-                            <span>الوسيلة: <b class="text-gray-200">${order.payment_method}</b></span>
-                            <span>رقم الإشعار: <b class="font-mono text-emerald-400 font-bold">${order.transfer_receipt_num || '—'}</b></span>
-                            <span>الهاتف: <b class="text-gray-300 font-mono">${order.profiles?.phone || 'غير مسجل'}</b></span>
-                            <span>الوقت: ${new Date(order.created_at).toLocaleTimeString('ar-EG')}</span>
-                        </div>
+        container.innerHTML = orders.map(order => `
+            <div class="p-3 bg-slate-800/60 border border-slate-700/60 rounded-xl mb-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-white text-sm">${order.customer_name}</span>
+                        <span class="text-[11px] px-1.5 py-0.5 rounded bg-amber-950/80 text-amber-400 border border-amber-800 font-mono">${order.transaction_ref}</span>
                     </div>
-                    <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-                        <span class="text-lg font-bold text-emerald-400 font-mono">$${Number(order.amount).toFixed(2)}</span>
-                        <div class="flex gap-2">
-                            <button onclick="approveDepositOrder('${order.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-lg shadow-emerald-900/20 transition">
-                                <i class="ph ph-check font-bold"></i> قبول وشحن
-                            </button>
-                            <button onclick="rejectDepositOrder('${order.id}')" class="px-3 py-1.5 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
-                                <i class="ph ph-x font-bold"></i> رفض
-                            </button>
-                        </div>
+                    <div class="text-[11px] text-slate-400 mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                        <span>الوسيلة: <b class="text-slate-200">${order.payment_method}</b></span>
+                        <span>رقم الإشعار: <b class="font-mono text-emerald-400">${order.transfer_receipt_num}</b></span>
+                        <span>الهاتف: <b class="font-mono text-slate-300">${order.customer_phone}</b></span>
+                        <span>الوقت: ${new Date(order.created_at).toLocaleTimeString('ar-EG')}</span>
                     </div>
                 </div>
-            `;
-        }).join('');
+                <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+                    <span class="text-base font-bold text-emerald-400 font-mono">$${Number(order.amount).toFixed(2)}</span>
+                    <div class="flex gap-1.5">
+                        <button onclick="approveDepositOrder('${order.id}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-semibold">
+                            قبول وشحن
+                        </button>
+                        <button onclick="rejectDepositOrder('${order.id}')" class="px-2.5 py-1 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 rounded text-xs">
+                            رفض
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
 
     } catch (err) {
         console.error('Error fetching pending deposits:', err);
-        container.innerHTML = `<p class="text-rose-400 text-sm p-4">تعذر تحميل الطلبات المعلقة: ${err.message}</p>`;
+        container.innerHTML = `<p class="text-rose-400 text-xs p-3">تعذر تحميل الطلبات: ${err.message}</p>`;
     }
 }
 
