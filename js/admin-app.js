@@ -900,16 +900,24 @@ function setupAdminEventListeners() {
         });
     }
 
-    // 5. زر حفظ وكيل مالي
+    // 5. زر حفظ واعتماد وكيل مالي جديد (مصحح 100% مع فحص الأخطاء)
     const btnSaveAgent = document.getElementById('btn-save-agent');
     if (btnSaveAgent) {
         btnSaveAgent.addEventListener('click', async (e) => {
             e.preventDefault();
-            const userId = document.getElementById('agent-user-select').value;
-            const rate = Number(document.getElementById('agent-commission-input').value || 0);
+            const select = document.getElementById('agent-user-select');
+            const rateInput = document.getElementById('agent-commission-input');
+
+            const userId = select?.value;
+            const rate = Number(rateInput?.value);
 
             if (!userId) {
                 alert('يرجى اختيار مستخدم من القائمة');
+                return;
+            }
+
+            if (isNaN(rate) || rate <= 0) {
+                alert('يجب إدخال نسبة عمولة صالحة أكبر من الصفر (مثال: 5)');
                 return;
             }
 
@@ -917,14 +925,20 @@ function setupAdminEventListeners() {
             btnSaveAgent.textContent = 'جاري الاعتماد...';
 
             try {
-                const { error } = await supabase.rpc('admin_manage_agent', {
+                const { data, error } = await supabase.rpc('admin_manage_agent', {
                     p_user_id: userId,
-                    p_action: 'make_agent',
+                    p_action: 'promote', // تم التعديل إلى promote لمطابقة شرط الدالة
                     p_commission_rate: rate
                 });
 
                 if (error) throw error;
-                alert('تم اعتماد الوكيل المالي بنجاح ✓');
+
+                if (data && data.status === 'error') {
+                    alert(data.message);
+                    return;
+                }
+
+                alert(data?.message || 'تم اعتماد الوكيل المالي بنجاح ✓');
                 closeAgentModal();
                 await loadAgentsTab();
             } catch (err) {
@@ -935,7 +949,7 @@ function setupAdminEventListeners() {
             }
         });
     }
-
+    
     // 6. ربط أزرار الإلغاء في كافة النوافذ المنبثقة
     document.querySelectorAll('#edit-product-modal button, #affiliate-modal button, #agent-modal button, #agent-ops-modal button').forEach(btn => {
         if (btn.innerText.trim() === 'إلغاء' || btn.innerHTML.includes('ph-x')) {
