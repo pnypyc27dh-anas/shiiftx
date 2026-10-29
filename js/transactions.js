@@ -941,7 +941,18 @@ async function submitAgentDepositRequest() {
         }
     } catch (err) {
         console.error("Submit Request Error:", err);
-        alert("خطأ: " + (err.message || err));
+        let errorMsg = "حدث خطأ أثناء إرسال الطلب.";
+        if (err.code === '23505' || (err.message && err.message.includes('unique_active_receipt_num'))) {
+            errorMsg = "رقم إشعار التحويل هذا مستخدم مسبقاً في طلب آخر، يرجى التأكد من كتابة رقم الإشعار الصحيح.";
+        } else if (err.message) {
+            errorMsg = err.message;
+        }
+
+        if (typeof showCustomAlert === 'function') {
+            showCustomAlert(errorMsg, true);
+        } else {
+            alert(errorMsg);
+        }
     } finally {
         btn.disabled = false;
         btn.innerHTML = origHtml;
