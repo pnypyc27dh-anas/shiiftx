@@ -281,6 +281,7 @@ window.loadInventoryData = async function() {
     tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400"><i class="ph ph-spinner animate-spin text-lg mb-1 inline-block text-indigo-500"></i><p>جاري فحص مخزون الأكواد...</p></td></tr>`;
 
     try {
+        // 1. جلب باقات الأكواد
         const { data: products, error: pErr } = await supabase
             .from('products')
             .select('*')
@@ -289,17 +290,14 @@ window.loadInventoryData = async function() {
 
         if (pErr) throw pErr;
 
-        if (select) {
-            select.innerHTML = '<option value="">اختر الباقة الرقمية لإيداع الأكواد...</option>' + 
-                products.map(p => `<option value="${p.id}">[${p.platform}] ${p.package_name} - $${p.price}</option>`).join('');
-        }
-
+        // 2. جلب جميع الأكواد لحساب المخزون
         const { data: codes, error: cErr } = await supabase
             .from('code_inventory')
             .select('product_id, status');
 
         if (cErr) throw cErr;
 
+        // 3. حساب المتوفر والمباع لكل باقة
         const countMap = {};
         (codes || []).forEach(c => {
             if (!countMap[c.product_id]) countMap[c.product_id] = { available: 0, sold: 0 };
@@ -307,11 +305,21 @@ window.loadInventoryData = async function() {
             if (c.status === 'sold') countMap[c.product_id].sold++;
         });
 
+        // 4. تعبئة القائمة المنسدلة للباقات مع المخزون الحالي (المكان الجديد هنا)
+        if (select) {
+            select.innerHTML = '<option value="">اختر الباقة الرقمية لإيداع الأكواد...</option>' + 
+                (products || []).map(p => {
+                    const counts = countMap[p.id] || { available: 0, sold: 0 };
+                    return `<option value="${p.id}" data-stock="${counts.available}">[${p.platform}] ${p.package_name} - ($${Number(p.price).toFixed(2)}) — [متوفر: ${counts.available}]</option>`;
+                }).join('');
+        }
+
         if (!products || products.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400">لا توجد باقات من نوع كود رقمي مضافة في المنصة.</td></tr>`;
             return;
         }
 
+        // 5. رسم جدول حالة المخزون (السطر الذي تقف عنده)
         tbody.innerHTML = products.map(p => {
             const counts = countMap[p.id] || { available: 0, sold: 0 };
             const stockColor = counts.available > 5 
@@ -338,16 +346,7 @@ window.loadInventoryData = async function() {
         tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-rose-500 text-xs text-center">تعذر تحميل بيانات المخزون: ${err.message}</td></tr>`;
     }
 };
-
-window.quickSelectRestock = function(productId) {
-    const select = document.getElementById('restock-product-select');
-    if (select) {
-        select.value = productId;
-        select.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        select.focus();
-    }
-};
-
+```[cite: 5]
 // =========================================================================
 // 6. تبويب المنصات والباقات (Products Management)
 // =========================================================================
