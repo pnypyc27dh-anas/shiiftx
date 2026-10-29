@@ -209,13 +209,18 @@ function createTransactionCardElement(tx) {
     }
 
     if (!platformName) {
-        const methodMatch = rawDetails.match(/عبر\s*\(([^)]+)\)/);
-        if (methodMatch) {
-            platformName = methodMatch[1];
-            packageName = 'شحن الرصيد';
-        } else if (isDeposit) {
+        if (isDeposit) {
             platformName = 'قنوات الدفع المعتمدة';
-            packageName = rawDetails || 'شحن الرصيد';
+            
+            // استخراج اسم الوكيل بمرونة وإزالة الأقواس لتجنب انكسار النص الإنجليزي
+            let agentName = '';
+            const agentMatch = rawDetails.match(/عبر(?:\s+الوكيل)?\s*[\(]?([^\)]+?)[\)]?(?:\s*$)/i);
+            if (agentMatch) {
+                agentName = agentMatch[1].replace(/[\(\)]/g, '').trim();
+            }
+
+            packageName = agentName ? `طلب شحن عبر الوكيل ${agentName}` : 'طلب شحن عبر الوكيل المعتمد';
+        }
         } else if (isRefund) {
             platformName = 'محفظة SHIIFTX';
             packageName = cleanPackageName || 'استرداد';
