@@ -220,7 +220,6 @@ function createTransactionCardElement(tx) {
             }
 
             packageName = agentName ? `طلب شحن عبر الوكيل ${agentName}` : 'طلب شحن عبر الوكيل المعتمد';
-        }
         } else if (isRefund) {
             platformName = 'محفظة SHIIFTX';
             packageName = cleanPackageName || 'استرداد';
@@ -234,8 +233,6 @@ function createTransactionCardElement(tx) {
                 packageName = 'اشتراك رقمي';
             }
         }
-    }
-
     const opConfig = TX_OP_CONFIG[tx.type] || { 
         label: tx.type || 'معاملة مالية', 
         color: 'text-slate-600 bg-slate-100 border-slate-200 dark:bg-slate-800 dark:text-slate-300', 
