@@ -5,44 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SHIIFT X — طلب حذف الحساب والبيانات</title>
     
-    <!-- الأيقونات والخطوط -->
-    <link rel="icon" type="image/png" href="/apple-touch-icon.png">
+    <!-- أيقونات المتجر الرسمية المعتمدة -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    
+    <!-- الخطوط وملف التنسيق -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
-   <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <!-- مكتبة Supabase وملف الإعدادات -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/config.js"></script>
 
+    <!-- مزامنة المظهر فوراً قبل رسم الصفحة لمنع الوميض -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     <style>
         body {
             font-family: 'Tajawal', 'Plus Jakarta Sans', sans-serif;
-            background-color: #0b1120;
-            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
             background-size: 24px 24px;
-            color: #f8fafc;
+            color: #0f172a;
             -webkit-tap-highlight-color: transparent;
         }
+
+        /* التبديل التلقائي للوضع الليلي */
+        html.dark body {
+            background-color: #0b1120;
+            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+            color: #f8fafc;
+        }
+
         .glass-panel {
-            background: rgba(15, 23, 42, 0.88);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.07);
+        }
+
+        html.dark .glass-panel {
+            background: rgba(15, 23, 42, 0.88);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
+
         .input-field {
-            background: rgba(15, 23, 42, 0.8) !important;
-            border: 1.5px solid #334155 !important;
+            background: #ffffff !important;
+            border: 1.5px solid #cbd5e1 !important;
             border-radius: 14px !important;
-            color: #ffffff !important;
+            color: #0f172a !important;
             transition: all 0.25s ease;
         }
+
+        html.dark .input-field {
+            background: rgba(15, 23, 42, 0.8) !important;
+            border: 1.5px solid #334155 !important;
+            color: #ffffff !important;
+        }
+
         .input-field:focus {
             border-color: #005ba3 !important;
             box-shadow: 0 0 0 3px rgba(0, 91, 163, 0.25) !important;
             outline: none;
         }
+
         .no-spin::-webkit-outer-spin-button,
         .no-spin::-webkit-inner-spin-button {
             -webkit-appearance: none !important;
@@ -51,15 +87,16 @@
         .no-spin { -moz-appearance: textfield !important; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4 sm:p-6 antialiased">
+<body class="min-h-screen flex flex-col justify-between p-4 sm:p-6 antialiased transition-colors duration-200">
 
     <!-- شريط الترويسة -->
     <header class="w-full max-w-xl mx-auto flex items-center justify-between py-4">
-        <a href="/" class="flex items-center gap-2">
-            <span class="text-xl font-black tracking-wider text-white">SHIIFT<span class="text-[#5CE1E6]">X</span></span>
+        <a href="index.html" class="flex items-center gap-2.5">
+            <img src="assets/app-icon-192.png" alt="SHIIFT X Logo" class="w-7 h-7 rounded-lg shadow-sm object-cover">
+            <span class="text-xl font-black tracking-wider text-slate-900 dark:text-white">SHIIFT<span class="text-indigo-600 dark:text-[#5CE1E6]">X</span></span>
         </a>
-        <a href="/" class="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1.5 transition">
-            <i class="ph ph-arrow-left"></i>
+        <a href="index.html" class="text-xs font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1.5 transition">
+            <i class="ph ph-arrow-right"></i>
             <span>العودة للمنصة الرئيسية</span>
         </a>
     </header>
@@ -69,24 +106,25 @@
         <div class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
             
             <div class="text-center space-y-2">
-                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-red-500/10 text-red-500 border border-red-500/20 mb-1">
-                    <i class="ph-bold ph-shield-warning text-2xl"></i>
+                <!-- الأيقونة الرسمية للمتجر في صدارة البطاقة -->
+                <div class="flex justify-center mb-3">
+                    <img src="assets/app-icon-192.png" alt="SHIIFT X" class="w-16 h-16 rounded-2xl shadow-lg shadow-indigo-600/15 border border-slate-200 dark:border-slate-800 object-cover">
                 </div>
-                <h1 class="text-xl font-black text-white">طلب حذف الحساب والبيانات</h1>
-                <p class="text-xs text-slate-400 leading-relaxed max-w-md mx-auto">
+                <h1 class="text-xl font-black text-slate-900 dark:text-white">طلب حذف الحساب والبيانات</h1>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-md mx-auto">
                     بموجب سياسات حماية البيانات ومتطلبات Google Play، يتيح هذا النموذج طلب حذف حسابك وبياناتك المرتبطة حتى لو حذفت التطبيق من جهازك.
                 </p>
             </div>
 
             <!-- سياسة الخصوصية وتفاصيل الحذف للامتثال لشروط المتجر -->
-            <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2.5 text-xs">
-                <h3 class="font-bold text-slate-200 flex items-center gap-2">
-                    <i class="ph-fill ph-info text-blue-400"></i> تفاصيل دورة الحذف والبيانات:
+            <div class="p-4 rounded-2xl bg-slate-100/80 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs">
+                <h3 class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <i class="ph-fill ph-info text-blue-500"></i> تفاصيل دورة الحذف والبيانات:
                 </h3>
-                <ul class="space-y-1.5 text-slate-400 pr-4 list-disc leading-relaxed">
-                    <li><strong class="text-slate-300">مهلة التراجع (14 يوماً):</strong> فور تأكيد الطلب يتم تعطيل الوصول، وتمنح مهلة 14 يوماً لإلغاء الحذف بمجرد تسجيل الدخول في أي وقت.</li>
-                    <li><strong class="text-slate-300">البيانات التي تُحذف نهائياً:</strong> بيانات تسجيل الدخول، البريد، رقم الهاتف، الاسم، والعناوين الرقمية.</li>
-                    <li><strong class="text-slate-300">البيانات المحتفظ بها قانونياً:</strong> سجلات التحويلات والفواتير المالية المكتملة تُحفظ بصفة مشفرة ومفصولة لأغراض التدقيق المحاسبي والامتثال الضريبي.</li>
+                <ul class="space-y-1.5 text-slate-600 dark:text-slate-400 pr-4 list-disc leading-relaxed">
+                    <li><strong class="text-slate-800 dark:text-slate-300">مهلة التراجع (14 يوماً):</strong> فور تأكيد الطلب يتم تعطيل الوصول، وتمنح مهلة 14 يوماً لإلغاء الحذف بمجرد تسجيل الدخول في أي وقت.</li>
+                    <li><strong class="text-slate-800 dark:text-slate-300">البيانات التي تُحذف نهائياً:</strong> بيانات تسجيل الدخول، البريد، رقم الهاتف، الاسم، والعناوين الرقمية.</li>
+                    <li><strong class="text-slate-800 dark:text-slate-300">البيانات المحتفظ بها قانونياً:</strong> سجلات التحويلات والفواتير المالية المكتملة تُحفظ بصفة مشفرة ومفصولة لأغراض التدقيق المحاسبي والامتثال الضريبي.</li>
                 </ul>
             </div>
 
@@ -96,7 +134,7 @@
                 <!-- المرحلة 1: إدخال البريد الإلكتروني وطلب رمز التحقق -->
                 <div id="step-request-otp" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-300 mb-1.5">البريد الإلكتروني المسجل بالحساب</label>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">البريد الإلكتروني المسجل بالحساب</label>
                         <div class="relative">
                             <i class="ph ph-envelope-simple absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
                             <input id="web-del-email" type="email" required placeholder="name@example.com" class="input-field w-full pr-11 pl-4 py-3 text-xs" dir="ltr">
@@ -113,8 +151,8 @@
                 <div id="step-verify-otp" class="hidden space-y-4">
                     <div>
                         <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-xs font-bold text-slate-300">رمز التحقق المستلم (6 أرقام)</label>
-                            <span id="target-email-badge" class="text-[11px] text-blue-400 font-mono"></span>
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300">رمز التحقق المستلم (6 أرقام)</label>
+                            <span id="target-email-badge" class="text-[11px] text-blue-600 dark:text-blue-400 font-mono font-bold"></span>
                         </div>
                         <input id="web-del-code" type="text" maxlength="6" inputmode="numeric" placeholder="••••••" class="input-field no-spin w-full px-4 py-3.5 text-center text-xl font-mono font-bold tracking-[0.4em] focus:border-red-500" dir="ltr" autocomplete="one-time-code">
                     </div>
@@ -126,10 +164,10 @@
 
                     <!-- إعادة إرسال الرمز مع عداد 60 ثانية -->
                     <div class="text-center pt-1">
-                        <button id="web-resend-btn" type="button" onclick="resendWebDeleteOTP()" disabled class="text-xs font-bold text-slate-400 hover:text-red-400 disabled:opacity-50 disabled:cursor-not-allowed transition inline-flex items-center gap-1.5 cursor-pointer">
+                        <button id="web-resend-btn" type="button" onclick="resendWebDeleteOTP()" disabled class="text-xs font-bold text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 disabled:opacity-50 disabled:cursor-not-allowed transition inline-flex items-center gap-1.5 cursor-pointer">
                             <i class="ph-bold ph-arrows-clockwise" id="web-resend-icon"></i>
                             <span>إعادة إرسال الرمز</span>
-                            <span id="web-resend-timer" class="font-mono text-red-400 font-bold">(60s)</span>
+                            <span id="web-resend-timer" class="font-mono text-red-500 font-bold">(60s)</span>
                         </button>
                     </div>
                 </div>
@@ -143,13 +181,12 @@
     </main>
 
     <!-- التذييل -->
-    <footer class="w-full max-w-xl mx-auto text-center py-4 text-[11px] text-slate-500">
+    <footer class="w-full max-w-xl mx-auto text-center py-4 text-[11px] text-slate-500 dark:text-slate-400">
         منصة SHIIFT X © 2026 — جميع الحقوق محفوظة
     </footer>
 
     <!-- منطق المعالجة بالجافاسكريبت -->
     <script>
-        // التحقق من تعريف عميل Supabase سواء عبر config.js أو مباشرة
         const client = (typeof supabase !== 'undefined') ? supabase : (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
 
         let activeTargetEmail = '';
@@ -159,9 +196,9 @@
             const box = document.getElementById('web-status-msg');
             box.classList.remove('hidden');
             if (type === 'success') {
-                box.className = 'p-4 rounded-2xl text-xs font-bold text-center leading-relaxed bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 block';
+                box.className = 'p-4 rounded-2xl text-xs font-bold text-center leading-relaxed bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/10 dark:border-emerald-500/30 dark:text-emerald-400 block';
             } else {
-                box.className = 'p-4 rounded-2xl text-xs font-bold text-center leading-relaxed bg-red-500/10 border border-red-500/30 text-red-400 block';
+                box.className = 'p-4 rounded-2xl text-xs font-bold text-center leading-relaxed bg-rose-100 text-rose-800 border border-rose-300 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400 block';
             }
             box.innerText = text;
         }
@@ -289,14 +326,12 @@
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-base"></i> <span>جاري التحقق وتنفيذ الطلب...</span>`;
 
             try {
-                // التحقق من صحة رمز الـ OTP
                 let { data: authData, error: verifyError } = await client.auth.verifyOtp({
                     email: activeTargetEmail,
                     token: cleanToken,
                     type: 'email'
                 });
 
-                // المحاولة البديلة بـ magiclink إن فشل email
                 if (verifyError) {
                     const fallback = await client.auth.verifyOtp({
                         email: activeTargetEmail,
@@ -311,7 +346,6 @@
                     throw new Error("رمز التحقق غير صحيح أو منتهي الصلاحية.");
                 }
 
-                // استدعاء دالة الخادم الآمنة المسؤولة عن تجميد الحساب
                 const { data: rpcData, error: rpcError } = await client.rpc('request_account_deletion');
 
                 if (rpcError) {
@@ -322,22 +356,20 @@
                     throw new Error(rpcData.message);
                 }
 
-                // تسجيل الخروج فوراً لإنهاء الجلسة المؤقتة
                 await client.auth.signOut();
 
-                // معالجة حالة الحساب المجدول للحذف مسبقاً
                 if (rpcData && rpcData.status === 'already_scheduled') {
                     const daysLeft = rpcData.days_left || 14;
                     document.getElementById('deletion-flow-container').innerHTML = `
                         <div class="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-3">
-                            <div class="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-2xl">
+                            <div class="w-12 h-12 bg-amber-500/20 text-amber-500 rounded-full flex items-center justify-center mx-auto text-2xl">
                                 <i class="ph-bold ph-clock-countdown"></i>
                             </div>
-                            <h4 class="text-base font-black text-white">الطلب مسجل مسبقاً</h4>
-                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
-                                هذا الحساب مجدول للحذف بالفعل وموقوف مؤقتاً، ومتبقي لديك <span class="text-amber-400 font-bold">(${daysLeft}) يوم</span> ضمن مهلة التراجع قبل المسح التام لكافة بياناتك.
+                            <h4 class="text-base font-black text-slate-900 dark:text-white">الطلب مسجل مسبقاً</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                                هذا الحساب مجدول للحذف بالفعل وموقوف مؤقتاً، ومتبقي لديك <span class="text-amber-500 font-bold">(${daysLeft}) يوم</span> ضمن مهلة التراجع قبل المسح التام لكافة بياناتك.
                             </p>
-                            <p class="text-[11px] text-slate-400">
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">
                                 يمكنك استعادة حسابك في أي وقت عبر تسجيل الدخول في المنصة الرئيسية.
                             </p>
                         </div>
@@ -346,14 +378,13 @@
                     return;
                 }
 
-                // استبدال النموذج برسالة التأكيد النهائية لطلب جديد
                 document.getElementById('deletion-flow-container').innerHTML = `
                     <div class="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
-                        <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl">
+                        <div class="w-12 h-12 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto text-2xl">
                             <i class="ph-bold ph-check-circle"></i>
                         </div>
-                        <h4 class="text-base font-black text-white">تم تأكيد طلب الحذف بنجاح</h4>
-                        <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                        <h4 class="text-base font-black text-slate-900 dark:text-white">تم تأكيد طلب الحذف بنجاح</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                             تم التحقق من هويتك بنجاح وتعطيل حسابك فوراً. حسابك الآن ضمن مهلة السماح (14 يوماً)، وسيتم مسح كافة البيانات بشكل نهائي وتلقائي فور انتهاء المهلة.
                         </p>
                     </div>
