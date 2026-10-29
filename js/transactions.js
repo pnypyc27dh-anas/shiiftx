@@ -2,7 +2,7 @@
 // SHIIFT X — وحدة المعاملات المالية والفواتير (Ledger & Receipts)
 // ========================================================================
 
-// 1. قاموس إعدادات أنواع المعاملات والأيقونات والألوان
+// 1. قاموس إعدادات أنواع المعاملات والأيقونات والألوان الموحدة
 const TX_OP_CONFIG = {
     'Deposit': { label: 'شحن الرصيد', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-900/50', icon: 'ph-bold ph-arrow-down-left' },
     'شحن رصيد': { label: 'شحن الرصيد', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-900/50', icon: 'ph-bold ph-arrow-down-left' },
@@ -12,11 +12,15 @@ const TX_OP_CONFIG = {
     'شحن مباشر (ID)': { label: 'شحن عبر ID', color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-900/50', icon: 'ph-bold ph-game-controller' },
     'Refund': { label: 'استرداد', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-900/50', icon: 'ph-bold ph-arrow-u-up-left' },
     'استرجاع رصيد': { label: 'استرداد', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-900/50', icon: 'ph-bold ph-arrow-u-up-left' },
-    'Agent Wallet Transfer': { label: 'تحويل وكيل صادر', color: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-900/50', icon: 'ph-bold ph-paper-plane-tilt' },
-    'Agent Financial Commission': { label: 'عمولة وكيل مالي', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900/50', icon: 'ph-bold ph-seal-percent' },
-    'Marketing Partner Commission': { label: 'أرباح شريك تسويقي', color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 border-purple-200 dark:border-purple-900/50', icon: 'ph-bold ph-megaphone' },
-    'Affiliate Commission': { label: 'أرباح شريك تسويقي', color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 border-purple-200 dark:border-purple-900/50', icon: 'ph-bold ph-megaphone' },
-    'Commission Payout': { label: 'صرف أرباح كاش', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900/50', icon: 'ph-bold ph-money' }
+    'Agent Wallet Transfer': { label: 'تحويل رصيد', color: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-900/50', icon: 'ph-bold ph-paper-plane-tilt' },
+    'تحويل رصيد': { label: 'تحويل رصيد', color: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-900/50', icon: 'ph-bold ph-paper-plane-tilt' },
+    'Agent Financial Commission': { label: 'عمولة', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900/50', icon: 'ph-bold ph-seal-percent' },
+    'عمولة': { label: 'عمولة', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900/50', icon: 'ph-bold ph-seal-percent' },
+    'Marketing Partner Commission': { label: 'ارباح التسويق', color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 border-purple-200 dark:border-purple-900/50', icon: 'ph-bold ph-megaphone' },
+    'Affiliate Commission': { label: 'ارباح التسويق', color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 border-purple-200 dark:border-purple-900/50', icon: 'ph-bold ph-megaphone' },
+    'ارباح التسويق': { label: 'ارباح التسويق', color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 border-purple-200 dark:border-purple-900/50', icon: 'ph-bold ph-megaphone' },
+    'Commission Payout': { label: 'صرف الارباح', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900/50', icon: 'ph-bold ph-money' },
+    'صرف الارباح': { label: 'صرف الارباح', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900/50', icon: 'ph-bold ph-money' }
 };
 
 // 2. المزامنة الدورية الهادئة للرصيد، الصلاحيات، وسجل العمليات
@@ -124,9 +128,10 @@ function createTransactionCardElement(tx) {
 
     const isRefund = tx.type === 'Refund' || tx.type === 'استرجاع رصيد' || tx.type === 'استرداد';
     const isDeposit = tx.type === 'Deposit' || tx.type === 'شحن رصيد' || tx.type === 'شحن الرصيد';
-    const isAgentTransferOut = tx.type === 'Agent Wallet Transfer';
-    const isAgentCommission = tx.type === 'Agent Financial Commission';
-    const isPartnerCommission = tx.type === 'Marketing Partner Commission' || tx.type === 'Affiliate Commission';
+    const isAgentTransferOut = tx.type === 'Agent Wallet Transfer' || tx.type === 'تحويل وكيل صادر' || tx.type === 'تحويل رصيد';
+    const isAgentCommission = tx.type === 'Agent Financial Commission' || tx.type === 'عمولة وكيل مالي' || tx.type === 'عمولة';
+    const isPartnerCommission = tx.type === 'Marketing Partner Commission' || tx.type === 'Affiliate Commission' || tx.type === 'أرباح شريك تسويقي' || tx.type === 'ارباح التسويق';
+    const isCommissionPayout = tx.type === 'Commission Payout' || tx.type === 'صرف أرباح كاش' || tx.type === 'صرف الارباح';
     const isCommission = isAgentCommission || isPartnerCommission;
 
     const isRefundedOrder = statusKey === 'refunded' || statusKey === 'مسترجع';
@@ -163,15 +168,19 @@ function createTransactionCardElement(tx) {
     let packageName = cleanPackageName;
     let platformImageUrl = '';
 
+    // تعيين العناوين والأوصاف المعتمدة للوكلاء والشركاء
     if (isAgentTransferOut) {
-        platformName = 'نظام الوكيل المالي (Agents)';
-        packageName = rawDetails || 'تحويل رصيد رقمي صادر لعميل';
+        platformName = 'عمليات الوكيل المعتمد';
+        packageName = 'شحن رصيد للعميل';
     } else if (isAgentCommission) {
-        platformName = 'مكافآت الوكيل المالي (Agents)';
-        packageName = rawDetails || 'عمولة تحويل رصيد رقمي لعميل';
+        platformName = 'ارباح الوكيل المعتمد';
+        packageName = 'عمولة عن عملية شحن للعميل';
+    } else if (isCommissionPayout) {
+        platformName = 'سحب الارباح والعمولات';
+        packageName = 'استلام مستحقات الوكيل المعتمد';
     } else if (isPartnerCommission) {
-        platformName = 'برنامج الشريك التسويقي (Partner)';
-        packageName = rawDetails || 'أرباح عمولة من كود الخصم التسويقي';
+        platformName = 'شركاء التسويق';
+        packageName = 'عمولة عن استخدام كود الخصم';
     } else if (typeof globalProductsRaw !== 'undefined' && globalProductsRaw.length > 0) {
         const matched = globalProductsRaw.find(p => 
             p.package_name.trim().toLowerCase() === cleanPackageName.toLowerCase() ||
@@ -215,7 +224,7 @@ function createTransactionCardElement(tx) {
     };
     const opLabel = isRefundedOrder ? 'شحن عبر ID' : opConfig.label;
 
-    // شارات الحالة المحدثة
+    // شارات الحالة المعتمدة
     let statusPill = '';
     if (isPending) {
         statusPill = `<span class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200/70 dark:border-amber-900/50 flex items-center gap-1 animate-pulse">
@@ -240,7 +249,7 @@ function createTransactionCardElement(tx) {
         </span>`;
     }
 
-    // عرض المبالغ (بدون نصوص إضافية أسفل مبالغ الانتظار والاسترجاع)
+    // عرض المبالغ المالية
     let amountHtml = '';
     if (isDeposit || isRefund || isCommission) {
         if (isPending) {
@@ -276,7 +285,7 @@ function createTransactionCardElement(tx) {
             </div>`;
     }
 
-    // حقول البيانات الموحدة
+    // حقول المرجع والتاريخ والمعرف
     const txRef = tx.tx_id || rawTx.transaction_ref || '---';
     let chipsHtml = `
         <div class="flex items-center gap-1.5 flex-wrap text-[10px] text-slate-400 pt-0.5 font-sans">
@@ -309,7 +318,7 @@ function createTransactionCardElement(tx) {
         `;
     }
 
-    // تنبيه الرفض/الإلغاء (بدون عبارة إعادة الرصيد للمحفظة فوراً)
+    // تنبيه الرفض أو الإلغاء
     let cancelAlertHtml = '';
     if (cancelReason || isRejected || isRefundedOrder) {
         const displayReason = cancelReason || (isCommission ? 'تم إلغاء العمولة لإلغاء الطلب الأساسي' : 'تم رفض العملية من قبل الإدارة');
@@ -365,7 +374,7 @@ function openTransactionReceiptModal(tx, opLabel, platformName, packageName, amo
     const rawTx = tx.raw || {};
     const ref = tx.tx_id || rawTx.transaction_ref || 'TX-UNKNOWN';
     const dateStr = tx.date || new Date().toLocaleString();
-    const isCredit = tx.type === 'Refund' || tx.type === 'استرجاع رصيد' || tx.type === 'استرداد' || tx.type === 'Deposit' || tx.type === 'شحن رصيد' || tx.type === 'شحن الرصيد' || tx.type === 'Agent Financial Commission' || tx.type === 'Marketing Partner Commission' || tx.type === 'Affiliate Commission';
+    const isCredit = tx.type === 'Refund' || tx.type === 'استرجاع رصيد' || tx.type === 'استرداد' || tx.type === 'Deposit' || tx.type === 'شحن رصيد' || tx.type === 'شحن الرصيد' || tx.type === 'Agent Financial Commission' || tx.type === 'عمولة' || tx.type === 'Marketing Partner Commission' || tx.type === 'Affiliate Commission' || tx.type === 'ارباح التسويق';
 
     let statusLabel = 'مكتمل ✓';
     let statusClass = 'text-emerald-600 dark:text-emerald-400';
@@ -381,7 +390,7 @@ function openTransactionReceiptModal(tx, opLabel, platformName, packageName, amo
         statusClass = 'text-red-600';
     }
 
-    const isCommissionTx = tx.type === 'Agent Financial Commission' || tx.type === 'Marketing Partner Commission' || tx.type === 'Affiliate Commission';
+    const isCommissionTx = tx.type === 'Agent Financial Commission' || tx.type === 'عمولة' || tx.type === 'Marketing Partner Commission' || tx.type === 'Affiliate Commission' || tx.type === 'ارباح التسويق';
     const reasonTitle = isCommissionTx ? 'سبب الإلغاء:' : (statusKey === 'refunded' || statusKey === 'مسترجع' ? 'سبب الاسترداد:' : 'سبب الرفض:');
 
     const receiptHtml = `
@@ -759,6 +768,7 @@ function printOfficialInvoice(ref, platform, pkg, amount, date, playerId, status
             </div>
             <div class="footer-seal">
                 <div class="security-badge">
+                    <div class="seal-icon">✓</div>
                     <div class="security-text">
                         <h6>معاملة مشفرة وموثقة</h6>
                         <p>وثيقة إلكترونية رسمية صادرة آلياً ومسجلة في قاعدة بيانات SHIIFT X المعتمدة.</p>
