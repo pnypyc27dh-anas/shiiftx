@@ -164,6 +164,20 @@ function createTransactionCardElement(tx) {
         .replace(/استرجاع رصيد طلب مرفوض:\s*/g, '')
         .trim();
 
+    // -------------------------------------------------------------
+    // استخراج اسم العميل ديناميكياً لمعاملات الوكيل
+    // -------------------------------------------------------------
+    let targetClientName = rawTx.client_name || rawTx.customer_name || rawTx.target_user_name || rawTx.target_name || '';
+    if (!targetClientName && rawDetails) {
+        const clientMatch = rawDetails.match(/(?:للعميل|العميل)(?:\s*:|\s+)\s*([^\(\[\n,•\-]+)/i);
+        if (clientMatch) {
+            targetClientName = clientMatch[1]
+                .replace(/\b(?:عبر|بمبلغ|بقيمة|برقم|حساب|كاش|نقدي)\b.*/gi, '')
+                .trim();
+        }
+    }
+    const clientSuffix = targetClientName ? ` ${targetClientName}` : '';
+
     let platformName = '';
     let packageName = cleanPackageName;
     let platformImageUrl = '';
@@ -171,10 +185,10 @@ function createTransactionCardElement(tx) {
     // تعيين العناوين والأوصاف المعتمدة للوكلاء والشركاء
     if (isAgentTransferOut) {
         platformName = 'عمليات الوكيل المعتمد';
-        packageName = 'شحن رصيد للعميل';
+        packageName = `شحن رصيد للعميل${clientSuffix}`;
     } else if (isAgentCommission) {
         platformName = 'ارباح الوكيل المعتمد';
-        packageName = 'عمولة عن عملية شحن للعميل';
+        packageName = `عمولة عن عملية شحن للعميل${clientSuffix}`;
     } else if (isCommissionPayout) {
         platformName = 'سحب الارباح والعمولات';
         packageName = 'استلام مستحقات الوكيل المعتمد';
