@@ -10,16 +10,6 @@
     <script src="js/theme.js"></script>
 
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#fff1f2', 500: '#f43f5e', 600: '#e11d48' }
-                    }
-                }
-            }
-        };
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
