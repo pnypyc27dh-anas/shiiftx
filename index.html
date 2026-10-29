@@ -62,9 +62,6 @@
 
     <!-- تفعيل الوضع الليلي في Tailwind -->
     <script>
-        tailwind.config = {
-            darkMode: 'class'
-        };
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
