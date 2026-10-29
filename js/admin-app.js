@@ -54,9 +54,9 @@ window.switchTab = function(tabName) {
 
         if (tabBtn) {
             if (t === tabName) {
-                tabBtn.className = 'px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 bg-indigo-600 text-white shadow-lg shadow-indigo-600/30';
+                tabBtn.className = 'tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap shadow-sm';
             } else {
-                tabBtn.className = 'px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60';
+                tabBtn.className = 'tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap hover:bg-slate-50 dark:hover:bg-slate-800/60 transition';
             }
         }
     });
@@ -69,6 +69,18 @@ window.switchTab = function(tabName) {
         case 'affiliates': loadAffiliatesData(); break;
         case 'agents': loadAgentsTab(); break;
     }
+};
+
+window.loadAllAdminData = async function() {
+    await loadKPIs();
+    await loadPendingOrders();
+    if (typeof loadDepositsAuditTab === 'function') loadDepositsAuditTab();
+    if (typeof loadInventoryData === 'function') loadInventoryData();
+};
+
+window.handleLogout = async function() {
+    await supabase.auth.signOut();
+    window.location.replace('index.html');
 };
 
 // =========================================================================
@@ -281,7 +293,6 @@ window.loadInventoryData = async function() {
     tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400"><i class="ph ph-spinner animate-spin text-lg mb-1 inline-block text-indigo-500"></i><p>جاري فحص مخزون الأكواد...</p></td></tr>`;
 
     try {
-        // 1. جلب باقات الأكواد
         const { data: products, error: pErr } = await supabase
             .from('products')
             .select('*')
@@ -290,14 +301,12 @@ window.loadInventoryData = async function() {
 
         if (pErr) throw pErr;
 
-        // 2. جلب جميع الأكواد لحساب المخزون
         const { data: codes, error: cErr } = await supabase
             .from('code_inventory')
             .select('product_id, status');
 
         if (cErr) throw cErr;
 
-        // 3. حساب المتوفر والمباع لكل باقة
         const countMap = {};
         (codes || []).forEach(c => {
             if (!countMap[c.product_id]) countMap[c.product_id] = { available: 0, sold: 0 };
@@ -305,9 +314,8 @@ window.loadInventoryData = async function() {
             if (c.status === 'sold') countMap[c.product_id].sold++;
         });
 
-        // 4. تعبئة القائمة المنسدلة للباقات مع المخزون الحالي (المكان الجديد هنا)
         if (select) {
-            select.innerHTML = '<option value="">اختر الباقة الرقمية لإيداع الأكواد...</option>' + 
+            select.innerHTML = '<option value="" disabled selected>اختر الباقة المراد تزويدها...</option>' + 
                 (products || []).map(p => {
                     const counts = countMap[p.id] || { available: 0, sold: 0 };
                     return `<option value="${p.id}" data-stock="${counts.available}">[${p.platform}] ${p.package_name} - ($${Number(p.price).toFixed(2)}) — [متوفر: ${counts.available}]</option>`;
@@ -319,7 +327,6 @@ window.loadInventoryData = async function() {
             return;
         }
 
-        // 5. رسم جدول حالة المخزون (السطر الذي تقف عنده)
         tbody.innerHTML = products.map(p => {
             const counts = countMap[p.id] || { available: 0, sold: 0 };
             const stockColor = counts.available > 5 
@@ -346,7 +353,102 @@ window.loadInventoryData = async function() {
         tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-rose-500 text-xs text-center">تعذر تحميل بيانات المخزون: ${err.message}</td></tr>`;
     }
 };
-```[cite: 5]
+
+window.quickSelectRestock = function(productId) {
+    const select = document.getElementById('restock-product-select');
+    if (select) {
+        select.value = productId;
+        updateSelectedStockBadge();
+        select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        select.focus();
+    }
+};
+
+// 1. تحديث العداد الحي للأكواد الملصقة فورياً
+window.updateCodesCountLive = function() {
+    const textarea = document.getElementById('restock-codes');
+    const badge = document.getElementById('codes-count-badge');
+    if (!textarea || !badge) return;
+
+    const lines = textarea.value
+        .split(/\r?\n/)
+        .map(l => l.trim())
+        .filter(l => l.length >= 3);
+
+    badge.innerText = `${lines.length} كود`;
+};
+
+// 2. تحديث شارة المخزون الحالي للباقة المختارة
+window.updateSelectedStockBadge = function() {
+    const select = document.getElementById('restock-product-select');
+    const badge = document.getElementById('selected-stock-badge');
+    if (!select || !badge) return;
+
+    const opt = select.selectedOptions[0];
+    const available = opt ? opt.getAttribute('data-stock') : null;
+
+    if (available !== null && available !== undefined) {
+        badge.innerHTML = `<span class="text-slate-500 dark:text-slate-400">المخزون الحالي: </span><span class="font-bold text-emerald-600 dark:text-emerald-400">${available} كود</span>`;
+    } else {
+        badge.innerHTML = '';
+    }
+};
+
+// 3. معالجة إرسال نموذج تعبئة الأكواد
+window.handleRestockSubmit = async function(event) {
+    if (event) event.preventDefault();
+
+    const prodSelect = document.getElementById('restock-product-select');
+    const codesInput = document.getElementById('restock-codes');
+    const btnRestock = document.getElementById('btn-restock-submit');
+
+    const prodId = prodSelect?.value;
+    const codesText = codesInput?.value.trim();
+
+    if (!prodId) {
+        alert('يرجى اختيار الباقة المراد تعبئة أكوادها أولاً.');
+        return;
+    }
+    if (!codesText) {
+        alert('يرجى كتابة أو لصق الأكواد في الصندوق.');
+        return;
+    }
+
+    const lines = codesText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length >= 3);
+    if (lines.length === 0) {
+        alert('لم يتم العثور على أكواد صالحة للإدخال.');
+        return;
+    }
+
+    const origBtnHtml = btnRestock.innerHTML;
+    btnRestock.disabled = true;
+    btnRestock.innerHTML = `<i class="ph ph-circle-notch animate-spin text-sm"></i> <span>جاري إيداع الأكواد (${lines.length})...</span>`;
+
+    try {
+        const { data, error } = await supabase.rpc('admin_add_inventory_codes', {
+            p_product_id: prodId,
+            p_codes_text: codesText
+        });
+
+        if (error) throw error;
+        if (data && data.status === 'error') {
+            alert(data.message);
+            return;
+        }
+
+        alert(data?.message || 'تمت إضافة الأكواد بنجاح ✓');
+        codesInput.value = '';
+        updateCodesCountLive();
+        await loadInventoryData();
+        await loadProducts();
+    } catch (err) {
+        alert('فشل إضافة الأكواد: ' + err.message);
+    } finally {
+        btnRestock.disabled = false;
+        btnRestock.innerHTML = origBtnHtml;
+    }
+};
+
 // =========================================================================
 // 6. تبويب المنصات والباقات (Products Management)
 // =========================================================================
@@ -369,7 +471,7 @@ window.loadProducts = async function() {
         if (filter) {
             const platforms = [...new Set(allProductsCache.map(p => p.platform).filter(Boolean))];
             const currentFilter = filter.value;
-            filter.innerHTML = '<option value="">جميع المنصات</option>' + 
+            filter.innerHTML = '<option value="ALL">جميع المنصات</option>' + 
                 platforms.map(pl => `<option value="${pl}" ${pl === currentFilter ? 'selected' : ''}>${pl}</option>`).join('');
         }
 
@@ -380,13 +482,17 @@ window.loadProducts = async function() {
     }
 };
 
+window.filterProductsByPlatform = function() {
+    renderFilteredProducts();
+};
+
 function renderFilteredProducts() {
     const tbody = document.getElementById('products-tbody');
     const filter = document.getElementById('products-platform-filter');
     if (!tbody) return;
 
     const selectedPl = filter?.value;
-    const list = selectedPl ? allProductsCache.filter(p => p.platform === selectedPl) : allProductsCache;
+    const list = (selectedPl && selectedPl !== 'ALL') ? allProductsCache.filter(p => p.platform === selectedPl) : allProductsCache;
 
     if (list.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400">لا توجد باقات معروضة.</td></tr>`;
@@ -454,6 +560,7 @@ window.closeProductModal = function() {
     const modal = document.getElementById('edit-product-modal');
     if (modal) modal.classList.add('hidden');
 };
+window.closeEditModal = window.closeProductModal;
 
 window.deleteProduct = async function(id) {
     if (!confirm('هل أنت متأكد من حذف هذه الباقة؟')) return;
@@ -465,6 +572,11 @@ window.deleteProduct = async function(id) {
     } catch (err) {
         alert('تعذر حذف الباقة: ' + err.message);
     }
+};
+
+window.handleEditProductSubmit = function(e) {
+    if (e) e.preventDefault();
+    document.getElementById('btn-save-edit-prod')?.click();
 };
 
 // =========================================================================
@@ -571,6 +683,11 @@ window.deleteAffiliate = async function(userId) {
     } catch (err) {
         alert('تعذر إلغاء الشراكة: ' + err.message);
     }
+};
+
+window.handleAffiliateSubmit = function(e) {
+    if (e) e.preventDefault();
+    document.getElementById('btn-save-affiliate')?.click();
 };
 
 // =========================================================================
@@ -758,6 +875,11 @@ window.closeAgentOpsModal = function() {
     if (modal) modal.classList.add('hidden');
 };
 
+window.handleAgentSubmit = function(e) {
+    if (e) e.preventDefault();
+    document.getElementById('btn-save-agent')?.click();
+};
+
 // =========================================================================
 // 9. تبويب الإيداع اليدوي في المحفظة (Manual Top-up)
 // =========================================================================
@@ -808,60 +930,13 @@ window.handleManualTopup = async function() {
 // 10. ربط أحداث النماذج والنوافذ التفاعلية
 // =========================================================================
 function setupAdminEventListeners() {
-    // 1. زر إضافة أكواد للمخزون
-    const btnRestock = document.getElementById('btn-restock-submit');
-    if (btnRestock) {
-        btnRestock.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const prodSelect = document.getElementById('restock-product-select');
-            const codesInput = document.getElementById('restock-codes');
-
-            const prodId = prodSelect?.value;
-            const codesText = codesInput?.value.trim();
-
-            if (!prodId) {
-                alert('يرجى اختيار الباقة المراد تعبئة أكوادها');
-                return;
-            }
-            if (!codesText) {
-                alert('يرجى كتابة أو لصق الأكواد في الصندوق');
-                return;
-            }
-
-            btnRestock.disabled = true;
-            btnRestock.textContent = 'جاري إيداع الأكواد...';
-
-            try {
-                const { data, error } = await supabase.rpc('admin_add_inventory_codes', {
-                    p_product_id: prodId,
-                    p_codes_text: codesText
-                });
-
-                if (error) throw error;
-                if (data && data.status === 'error') {
-                    alert(data.message);
-                    return;
-                }
-
-                alert(data?.message || 'تمت إضافة الأكواد بنجاح ✓');
-                codesInput.value = '';
-                await loadInventoryData();
-            } catch (err) {
-                alert('فشل إضافة الأكواد: ' + err.message);
-            } finally {
-                btnRestock.disabled = false;
-                btnRestock.textContent = 'إضافة الأكواد إلى المخزون فوراً';
-            }
-        });
-    }
-
-    // 2. فلتر المنصات في تبويب المنتجات
+    // 1. فلتر المنصات في تبويب المنتجات
     const filter = document.getElementById('products-platform-filter');
     if (filter) {
         filter.addEventListener('change', renderFilteredProducts);
     }
 
-    // 3. زر حفظ / تعديل الباقة
+    // 2. زر حفظ / تعديل الباقة
     const btnSaveProd = document.getElementById('btn-save-edit-prod');
     if (btnSaveProd) {
         btnSaveProd.addEventListener('click', async (e) => {
@@ -913,7 +988,7 @@ function setupAdminEventListeners() {
         });
     }
 
-    // 4. زر حفظ شريك تسويقي
+    // 3. زر حفظ شريك تسويقي
     const btnSaveAff = document.getElementById('btn-save-affiliate');
     if (btnSaveAff) {
         btnSaveAff.addEventListener('click', async (e) => {
@@ -958,7 +1033,7 @@ function setupAdminEventListeners() {
         });
     }
 
-    // 5. زر حفظ واعتماد وكيل مالي جديد
+    // 4. زر حفظ واعتماد وكيل مالي جديد
     const btnSaveAgent = document.getElementById('btn-save-agent');
     if (btnSaveAgent) {
         btnSaveAgent.addEventListener('click', async (e) => {
@@ -1007,7 +1082,7 @@ function setupAdminEventListeners() {
         });
     }
 
-    // 6. ربط أزرار الإلغاء في كافة النوافذ المنبثقة
+    // 5. ربط أزرار الإلغاء في كافة النوافذ المنبثقة
     document.querySelectorAll('#edit-product-modal button, #affiliate-modal button, #agent-modal button, #agent-ops-modal button').forEach(btn => {
         if (btn.innerText.trim() === 'إلغاء' || btn.innerHTML.includes('ph-x')) {
             btn.addEventListener('click', (e) => {
