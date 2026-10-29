@@ -231,6 +231,7 @@ function createTransactionCardElement(tx) {
             } else {
                 platformName = cleanPackageName || 'متجر SHIIFTX';
                 packageName = 'اشتراك رقمي';
+                }
             }
         }
     const opConfig = TX_OP_CONFIG[tx.type] || { 
