@@ -246,7 +246,7 @@ function createTransactionCardElement(tx) {
     if (isPending) {
         statusPill = `<span class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200/70 dark:border-amber-900/50 flex items-center gap-1 animate-pulse">
             <i class="ph-bold ph-hourglass-medium"></i>
-            <span>قيد المراجعة والتدقيق</span>
+            <span>قيد المراجعة</span>
         </span>`;
     } else if (isRefundedOrder) {
         statusPill = `<span class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-purple-50 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400 border border-purple-200/70 dark:border-purple-900/50 flex items-center gap-1">
@@ -397,7 +397,7 @@ function openTransactionReceiptModal(tx, opLabel, platformName, packageName, amo
     let statusClass = 'text-emerald-600 dark:text-emerald-400';
 
     if (statusKey === 'pending' || statusKey === 'معلق') {
-        statusLabel = 'قيد المراجعة والتدقيق ⏳';
+        statusLabel = 'قيد المراجعة ⏳';
         statusClass = 'text-amber-600 dark:text-amber-400 animate-pulse';
     } else if (statusKey === 'refunded' || statusKey === 'مسترجع') {
         statusLabel = 'مسترجع';
