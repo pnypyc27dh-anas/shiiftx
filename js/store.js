@@ -2,6 +2,21 @@
 // SHIIFT X — وحدة المتجر والشراء والتمويل (Store & Checkout Controller)
 // ========================================================================
 
+// دالة مساعدة مركزية: التحقق مما إذا كانت الباقة مخصصة لشحن رصيد الهاتف
+function isPhoneProduct(product) {
+    if (!product) return false;
+    
+    // 1. التحقق المباشر من المعرف التقني الموحد
+    if ((product.input_type || '').toUpperCase() === 'PHONE') return true;
+
+    // 2. فحص احتياطي ذكي لكلمات وتصنيفات رصيد الجوال واللهجة المحلية
+    const cat = (product.category || '').toLowerCase();
+    const plat = (product.platform || '').toLowerCase();
+    const syrianKeywords = ['telecom', 'رصيد', 'وحدات', 'تعبئة', 'عبيلي', 'سيريتل', 'سيرياتيل', 'mtn', 'ام تي ان', 'mobile'];
+    
+    return syrianKeywords.some(k => cat.includes(k) || plat.includes(k));
+}
+
 // 1. جلب المنتجات النشطة من قاعدة البيانات مباشرة
 async function fetchStoreProductsDirectly() { 
     const { data: prods, error } = await supabase
@@ -22,7 +37,8 @@ async function fetchStoreProductsDirectly() {
             package_name: p.package_name, 
             price: parseFloat(p.price), 
             type: p.product_type, 
-            image_url: p.image_url
+            image_url: p.image_url,
+            input_type: p.input_type || (isPhoneProduct(p) ? 'PHONE' : 'PLAYER_ID')
         }));
 
         const storeView = document.getElementById('view-store');
@@ -103,12 +119,18 @@ function openPlansModal(platformName, categoryName) {
     
     plans.forEach(plan => { 
         const isCode = plan.type === 'CODE';
+        const isPhone = isPhoneProduct(plan);
         const card = document.createElement('div'); 
         card.className = "card-lift bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-4 rounded-[22px] flex justify-between items-center gap-3 text-right shadow-sm"; 
         
-        const badgeHtml = isCode 
-            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"><i class="ph-fill ph-lightning"></i> كود فوري</span>`
-            : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20"><i class="ph-fill ph-user-circle"></i> شحن بالمعرف</span>`;
+        let badgeHtml = '';
+        if (isCode) {
+            badgeHtml = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"><i class="ph-fill ph-lightning"></i> كود فوري</span>`;
+        } else if (isPhone) {
+            badgeHtml = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"><i class="ph-fill ph-phone-call"></i> شحن رصيد</span>`;
+        } else {
+            badgeHtml = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20"><i class="ph-fill ph-user-circle"></i> شحن بالمعرف</span>`;
+        }
 
         card.innerHTML = `
             <div class="flex items-center gap-3.5">
@@ -128,38 +150,92 @@ function openPlansModal(platformName, categoryName) {
     toggleView('plans-modal', true); 
 }
 
-// 5. فتح نافذة إدخال المعرف (ID) أو إشعار الكود
+// 5. فتح نافذة إدخال المعرف (ID) أو رقم الهاتف أو إشعار الكود
 function openAccountInputsModal(productId, fullName, price) { 
     selectedProductId = productId; 
     selectedItemName = fullName; 
     selectedItemPrice = price; 
     
-    document.getElementById('target-player-id').value = "";
-    document.getElementById('target-player-id-confirm').value = "";
+    const inputMain = document.getElementById('target-player-id');
+    const inputConfirm = document.getElementById('target-player-id-confirm');
+    if (inputMain) inputMain.value = "";
+    if (inputConfirm) inputConfirm.value = "";
     
     const prod = globalProductsRaw.find(p => p.id === productId);
     const isIdFlow = prod && (prod.type || '').trim().toUpperCase() === "ID"; 
+    const isPhone = isPhoneProduct(prod);
+
+    // البحث المرن عن التسميات النصية (عبر الـ ID أو بالـ querySelector)
+    const mainLabel = document.getElementById('target-id-label') || document.querySelector('#id-fields-container > div:first-child label');
+    const confirmLabel = document.getElementById('target-id-confirm-label') || document.querySelector('#id-fields-container > div:last-child label');
+
+    if (isPhone) {
+        if (mainLabel) mainLabel.innerText = "أدخل رقم الهاتف";
+        if (confirmLabel) confirmLabel.innerText = "تأكيد رقم الهاتف";
+        if (inputMain) {
+            inputMain.placeholder = "09xxxxxxxx";
+            inputMain.type = "tel";
+            inputMain.maxLength = 10;
+        }
+        if (inputConfirm) {
+            inputConfirm.placeholder = "أعد إدخال رقم الهاتف للتأكيد";
+            inputConfirm.type = "tel";
+            inputConfirm.maxLength = 10;
+        }
+    } else {
+        if (mainLabel) mainLabel.innerText = "أدخل معرف العميل (ID)";
+        if (confirmLabel) confirmLabel.innerText = "تأكيد معرف العميل (ID)";
+        if (inputMain) {
+            inputMain.placeholder = "مثال: 123456789";
+            inputMain.type = "text";
+            inputMain.removeAttribute('maxLength');
+        }
+        if (inputConfirm) {
+            inputConfirm.placeholder = "أعد إدخال المعرف للتأكيد";
+            inputConfirm.type = "text";
+            inputConfirm.removeAttribute('maxLength');
+        }
+    }
     
     toggleView('id-fields-container', isIdFlow); 
     toggleView('code-fields-notice', !isIdFlow); 
     toggleView('account-inputs-modal', true); 
 } 
 
-// 6. المتابعة إلى شاشة مراجعة الفاتورة النهائية
+// 6. المتابعة إلى شاشة مراجعة الفاتورة النهائية مع التحقق الصارم
 function proceedToReview() { 
     const prod = globalProductsRaw.find(p => p.id === selectedProductId);
     const isIdFlow = prod && (prod.type || '').trim().toUpperCase() === "ID";
+    const isPhone = isPhoneProduct(prod);
 
     if (isIdFlow) { 
         inputPlayerId = document.getElementById('target-player-id').value.trim(); 
         inputPlayerIdConfirm = document.getElementById('target-player-id-confirm').value.trim(); 
         
-        if (!inputPlayerId || inputPlayerId !== inputPlayerIdConfirm) {
-            return showCustomAlert("معرف الحساب غير متطابق أو فارغ."); 
+        if (!inputPlayerId) {
+            return showCustomAlert(isPhone ? "يرجى إدخال رقم الهاتف للمتابعة." : "يرجى إدخال معرف الحساب (ID)."); 
+        }
+
+        if (inputPlayerId !== inputPlayerIdConfirm) {
+            return showCustomAlert(isPhone ? "رقم الهاتف وتأكيده غير متطابقين." : "معرف الحساب غير متطابق."); 
+        }
+
+        // فحص صيغة أرقام الهواتف السورية (يبدأ بـ 09 ويتألف من 10 أرقام تماماً)
+        if (isPhone) {
+            const syrianPhoneRegex = /^09\d{8}$/;
+            if (!syrianPhoneRegex.test(inputPlayerId)) {
+                return showCustomAlert("رقم الهاتف غير صالح! يجب أن يبدأ بـ 09 ويتكون من 10 أرقام تماماً (مثال: 0933222111).");
+            }
+        }
+
+        // تحديث عنوان الصف في بطاقة الفاتورة
+        const reviewIdLabel = document.querySelector('#review-id-row span:first-child');
+        if (reviewIdLabel) {
+            reviewIdLabel.innerText = isPhone ? "رقم الهاتف المطلوب:" : "معرف الشحن (ID):";
         }
 
         document.getElementById('review-item-player-id').innerText = inputPlayerId; 
-        document.getElementById('review-item-delivery-type').innerText = `شحن مباشر`; 
+        document.getElementById('review-item-delivery-type').innerText = isPhone ? `شحن فوري للرصيد` : `شحن مباشر`; 
         toggleView('review-id-row', true);
     } else { 
         inputPlayerId = "";
@@ -188,7 +264,6 @@ async function applyCouponCode() {
     const btn = document.getElementById('apply-coupon-btn');
     const code = input ? input.value.trim().toUpperCase() : '';
 
-    // منع حسابات الشركاء والوكلاء الماليين من استخدام الكوبونات نهائياً
     if (currentUserRole === 'agent' || currentUserRole === 'marketing_partner') {
         const discountRow = document.getElementById('discount-breakdown-row');
         if (discountRow) {
@@ -205,7 +280,6 @@ async function applyCouponCode() {
         return;
     }
 
-    // إذا مسح المستخدم الحقل وضغط تطبيق لإلغاء الكود
     if (!code) {
         activeCoupon = null;
         discountedPrice = selectedItemPrice;
@@ -304,11 +378,13 @@ async function executeSubscriptionPurchase() {
             if (r.mode === "CODE") {
                 showCodeDeliveryModal(r.code, selectedItemName);
             } else {
+                const prod = globalProductsRaw.find(p => p.id === selectedProductId);
                 showDirectIdSuccessModal({
                     itemName: selectedItemName,
                     playerId: inputPlayerId,
                     price: finalDuePrice,
-                    txRef: r.tx_ref || ''
+                    txRef: r.tx_ref || '',
+                    isPhone: isPhoneProduct(prod)
                 });
             }
         } else { 
@@ -326,10 +402,12 @@ async function executeSubscriptionPurchase() {
     }
 }
 
-// 9. نافذة تأكيد طلب شحن المعرف المباشر (Direct ID)
+// 9. نافذة تأكيد طلب شحن المعرف المباشر أو رصيد الهاتف
 function showDirectIdSuccessModal(data) {
     const oldModal = document.getElementById('direct-id-success-modal');
     if (oldModal) oldModal.remove();
+
+    const recipientLabel = data.isPhone ? 'رقم الهاتف المستلم:' : 'المعرف المستلم (ID):';
 
     const modalHtml = `
     <div id="direct-id-success-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[99]">
@@ -349,7 +427,7 @@ function showDirectIdSuccessModal(data) {
                     <span class="font-bold text-slate-800 dark:text-slate-200">${data.itemName}</span>
                 </div>
                 <div class="flex justify-between items-center">
-                    <span class="text-slate-400">المعرف المستلم (ID):</span>
+                    <span class="text-slate-400">${recipientLabel}</span>
                     <span class="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded" dir="ltr">${data.playerId}</span>
                 </div>
                 <div class="flex justify-between items-center">
