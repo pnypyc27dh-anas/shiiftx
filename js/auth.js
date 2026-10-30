@@ -999,3 +999,43 @@ window.handleVerifyChangePasswordOTP = async function(e) {
         }
     }
 };
+
+
+// =========================================================================
+// نظام الموافقة على الشروط والسياسات أثناء إنشاء الحساب (SHIIFT X)
+// =========================================================================
+
+// 1. تفعيل أو تعطيل زر متابعة إنشاء الحساب
+window.toggleRegisterSubmitState = function() {
+    const checkbox = document.getElementById('reg-consent-checkbox');
+    const submitBtn = document.getElementById('reg-submit-btn');
+
+    if (!checkbox || !submitBtn) return;
+    submitBtn.disabled = !checkbox.checked;
+};
+
+// 2. ضبط حالة الزر والمربع عند فتح النافذة
+// (يضمن تصفير الخانة عند فتح إنشاء الحساب، وتفعيل الزر تلقائياً عند استعادة كلمة المرور)
+const originalOpenRegisterModal = window.openRegisterModal;
+window.openRegisterModal = function() {
+    if (typeof originalOpenRegisterModal === 'function') originalOpenRegisterModal();
+
+    const checkbox = document.getElementById('reg-consent-checkbox');
+    const submitBtn = document.getElementById('reg-submit-btn');
+    const wrapper = document.getElementById('reg-consent-wrapper');
+
+    if (wrapper) wrapper.classList.remove('hidden');
+    if (checkbox) checkbox.checked = false;
+    if (submitBtn) submitBtn.disabled = true; // الزر معطل حتى الموافقة
+};
+
+const originalOpenForgotPasswordModal = window.openForgotPasswordModal;
+window.openForgotPasswordModal = function() {
+    if (typeof originalOpenForgotPasswordModal === 'function') originalOpenForgotPasswordModal();
+
+    const wrapper = document.getElementById('reg-consent-wrapper');
+    const submitBtn = document.getElementById('reg-submit-btn');
+
+    if (wrapper) wrapper.classList.add('hidden'); // إخفاء الشروط في استعادة كلمة المرور
+    if (submitBtn) submitBtn.disabled = false;     // تفعيل الزر لطلب رمز الاستعادة
+};
