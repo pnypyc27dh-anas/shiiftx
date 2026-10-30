@@ -998,7 +998,6 @@ window.handleVerifyChangePasswordOTP = async function(e) {
             btn.innerHTML = `<span>تأكيد الرمز</span> <i class="ph-bold ph-arrow-left"></i>`;
         }
     }
-};
 
 
 // =========================================================================
