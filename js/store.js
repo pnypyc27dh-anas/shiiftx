@@ -25,7 +25,8 @@ function isPhoneProduct(product) {
 
     // --- المشغل الثالث: وفا تلكوم (Wafa Telecom) ---
     'وفا', 'وفا تلكوم', 'وفا تليكوم', 'وفا تيليكوم', 'شبكة وفا', 'وفا تيل',
-    'wafa', 'wafa telecom', 'wafatelecom', 'wafa-telecom', 'wafatel',
+    'wafa', 'wafa telecom', 'wafatelecom', 'wafa-telecom', 'wafatel', 'stc',
+
 
     // --- المصطلحات الشعبية واللهجة السورية للرصيد والوحدات ---
     'وحدات', 'وحدة', 'وحده',
