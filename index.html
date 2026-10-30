@@ -1442,7 +1442,10 @@
              </button>
          </div>
 
+            <!-- نموذج المرحلة الأولى لإنشاء الحساب -->
             <div id="register-step-form" class="space-y-4">
+                
+                <!-- الحقول الإضافية (تظهر فقط عند إنشاء حساب جديد وتختفي عند نسيت كلمة المرور) -->
                 <div id="reg-extra-fields" class="space-y-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -1459,57 +1462,34 @@
                         <input id="reg-phone" type="tel" class="input-field w-full px-4 py-3.5 text-sm tracking-widest text-left" dir="ltr">
                     </div>
                 </div>
+
+                <!-- حقل البريد الإلكتروني -->
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 mb-1.5">البريد الإلكتروني</label>
                     <input id="reg-email" type="email" class="input-field w-full px-4 py-3.5 text-sm" dir="ltr">
                 </div>
-                <button id="reg-submit-btn" onclick="submitRegistration()" class="w-full btn-primary text-white font-bold py-4 rounded-xl text-sm mt-2 flex justify-center items-center gap-2">
-                   <div id="register-step-form" class="space-y-4">
-    <div id="reg-extra-fields" class="space-y-4">
-        <div class="grid grid-cols-2 gap-3">
-            <div>
-                <label class="block text-[10px] font-bold text-slate-500 mb-1.5">الاسم الأول</label>
-                <input id="reg-first-name" type="text" class="input-field w-full px-4 py-3 text-xs">
-            </div>
-            <div>
-                <label class="block text-[10px] font-bold text-slate-500 mb-1.5">اسم العائلة</label>
-                <input id="reg-last-name" type="text" class="input-field w-full px-4 py-3 text-xs">
-            </div>
-        </div>
-        <div>
-            <label class="block text-[10px] font-bold text-slate-500 mb-1.5">رقم الجوال</label>
-            <input id="reg-phone" type="tel" class="input-field w-full px-4 py-3.5 text-sm tracking-widest text-left" dir="ltr">
-        </div>
 
-        <!-- 1. مربع الموافقة المخصص لإنشاء الحساب فقط -->
-        <div id="reg-consent-wrapper" class="flex items-start gap-2.5 my-2 px-1 text-xs text-slate-600 dark:text-slate-400 select-none">
-            <input 
-                type="checkbox" 
-                id="reg-consent-checkbox" 
-                onchange="toggleRegisterSubmitState()"
-                class="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-[#005ba3] focus:ring-[#005ba3] dark:focus:ring-blue-500 dark:ring-offset-slate-900 bg-white dark:bg-slate-800 cursor-pointer transition">
-            
-            <label for="reg-consent-checkbox" class="leading-relaxed cursor-pointer text-[11px] sm:text-xs">
-                أوافق على 
-                <a href="privacy-policy.html" target="_blank" class="text-[#005ba3] dark:text-blue-400 font-bold hover:underline transition">سياسة الخصوصية</a>، 
-                و<a href="terms.html" target="_blank" class="text-[#005ba3] dark:text-blue-400 font-bold hover:underline transition">الشروط والأحكام</a>، 
-                و<a href="refund-policy.html" target="_blank" class="text-rose-600 dark:text-rose-500 font-bold hover:underline transition">سياسة استرداد المنتجات الرقمية</a>
-            </label>
-        </div>
-    </div>
+                <!-- مربع الموافقة على الشروط وسياسات الخصوصية والاسترداد (مكانه الصحيح هنا فوق الزر) -->
+                <div id="reg-consent-wrapper" class="flex items-start gap-2.5 my-3 px-1 text-xs text-slate-600 dark:text-slate-400 select-none">
+                    <input 
+                        type="checkbox" 
+                        id="reg-consent-checkbox" 
+                        onchange="toggleRegisterSubmitState()"
+                        class="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-[#005ba3] focus:ring-[#005ba3] dark:focus:ring-blue-500 dark:ring-offset-slate-900 bg-white dark:bg-slate-800 cursor-pointer transition">
+                    
+                    <label for="reg-consent-checkbox" class="leading-relaxed cursor-pointer text-[11px] sm:text-xs">
+                        أوافق على 
+                        <a href="privacy-policy.html" target="_blank" class="text-[#005ba3] dark:text-blue-400 font-bold hover:underline transition">سياسة الخصوصية</a>، 
+                        و<a href="terms.html" target="_blank" class="text-[#005ba3] dark:text-blue-400 font-bold hover:underline transition">الشروط والأحكام</a>، 
+                        و<a href="refund-policy.html" target="_blank" class="text-rose-600 dark:text-rose-500 font-bold hover:underline transition">سياسة استرداد المنتجات الرقمية</a>
+                    </label>
+                </div>
 
-    <div>
-        <label class="block text-[10px] font-bold text-slate-500 mb-1.5">البريد الإلكتروني</label>
-        <input id="reg-email" type="email" class="input-field w-full px-4 py-3.5 text-sm" dir="ltr">
-    </div>
-
-    <!-- 2. زر المتابعة (معطل افتراضياً حتى التأشير على المربع) -->
-    <button id="reg-submit-btn" onclick="submitRegistration()" disabled class="w-full btn-primary text-white font-bold py-4 rounded-xl text-sm mt-2 flex justify-center items-center gap-2">
-        <span id="reg-submit-btn-text">المتابعة</span> <i class="ph ph-arrow-left"></i>
-    </button>
-</div>
+                <!-- زر المتابعة المعطل افتراضياً حتى وضع إشارة الصح -->
+                <button id="reg-submit-btn" onclick="submitRegistration()" disabled class="w-full btn-primary text-white font-bold py-4 rounded-xl text-sm mt-2 flex justify-center items-center gap-2">
                     <span id="reg-submit-btn-text">المتابعة</span> <i class="ph ph-arrow-left"></i>
                 </button>
+
             </div>
 
             <div id="register-step-otp" class="hidden space-y-5 text-center py-4">
