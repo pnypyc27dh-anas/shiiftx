@@ -12,7 +12,7 @@ function isPhoneProduct(product) {
     // 2. فحص احتياطي ذكي لكلمات وتصنيفات رصيد الجوال واللهجة المحلية
     const cat = (product.category || '').toLowerCase();
     const plat = (product.platform || '').toLowerCase();
-    const syrianKeywords = ['telecom', 'وحدات', 'تعبئة', 'عبيلي', 'سيريتل', 'سيرياتيل', 'mtn', 'ام تي ان', 'mobile'];
+    const syrianKeywords = ['telecom', 'وحدات', 'تعبئة', 'عبيلي', 'سيريتل', 'سيرياتيل', 'mtn', 'ام تي ان',];
     
     return syrianKeywords.some(k => cat.includes(k) || plat.includes(k));
 }
