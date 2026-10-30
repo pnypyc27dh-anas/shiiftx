@@ -119,15 +119,16 @@ window.loadKPIs = async function() {
 };
 
 // =========================================================================
-// 3. تبويب طلبات شحن الـ ID المعلقة (Direct ID Orders)
+// 3. تبويب طلبات شحن الـ ID ورصيد الهاتف المعلقة (مع جلب اسم المنصة)
 // =========================================================================
 window.loadPendingOrders = async function() {
     const tbody = document.getElementById('orders-tbody');
     if (!tbody) return;
 
-    tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400"><i class="ph ph-spinner animate-spin text-lg mb-1 inline-block text-indigo-500"></i><p>جاري تحميل طلبات الـ ID المعلقة...</p></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400"><i class="ph ph-spinner animate-spin text-lg mb-1 inline-block text-indigo-500"></i><p>جاري تحميل طلبات الشحن المعلقة...</p></td></tr>`;
 
     try {
+        // 1. جلب المعاملات المعلقة للشحن المباشر
         const { data: txs, error: txErr } = await supabase
             .from('transactions')
             .select('*')
@@ -144,31 +145,49 @@ window.loadPendingOrders = async function() {
         }
 
         if (!txs || txs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400">لا توجد طلبات ID معلقة حالياً ✓</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400">لا توجد طلبات معلقة حالياً ✓</td></tr>`;
             return;
         }
 
+        // 2. جلب بيانات الطلبات المرتبطة
         const refs = txs.map(t => t.transaction_ref);
         const { data: orders } = await supabase.from('orders').select('*').in('transaction_ref', refs);
         const ordersMap = new Map((orders || []).map(o => [o.transaction_ref, o]));
 
+        // 3. جلب أسماء المنصات التابعة للمنتجات لضمان دقة العرض
+        const prodIds = [...new Set((orders || []).map(o => o.product_id).filter(Boolean))];
+        let prodMap = new Map();
+        if (prodIds.length > 0) {
+            const { data: prods } = await supabase.from('products').select('id, platform').in('id', prodIds);
+            prodMap = new Map((prods || []).map(p => [p.id, p.platform]));
+        }
+
+        // 4. توليد صفوف الجدول متضمنة عمود المنصة
         tbody.innerHTML = txs.map(tx => {
             const ord = ordersMap.get(tx.transaction_ref);
             const playerId = ord?.player_id || ord?.custom_inputs?.player_id || tx.details?.match(/ID:\s*([^\s,]+)/i)?.[1] || '—';
-            const packageName = ord?.package_name || tx.details?.replace(/\[.*?\]/g, '').trim() || 'باقة ألعاب';
+            const packageName = ord?.package_name || tx.details?.replace(/\[.*?\]/g, '').trim() || 'باقة شحن';
+            
+            // استخراج اسم المنصة بمرونة تامة
+            const platformName = ord?.platform || (ord?.product_id ? prodMap.get(ord.product_id) : null) || (tx.details?.match(/\[(.*?)\]/)?.[1]) || 'منصة رقمية';
 
             return `
                 <tr class="border-b border-slate-200 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors text-xs text-slate-700 dark:text-slate-300">
                     <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">${tx.transaction_ref}</td>
+                    <td class="py-3 px-4">
+                        <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-black bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                            ${platformName}
+                        </span>
+                    </td>
                     <td class="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">${packageName}</td>
                     <td class="py-3 px-4 font-mono font-bold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/30 px-2.5 py-1 rounded-md border border-amber-200 dark:border-amber-800/50">${playerId}</td>
                     <td class="py-3 px-4 font-mono font-bold text-emerald-600 dark:text-emerald-400">$${Number(tx.amount).toFixed(2)}</td>
                     <td class="py-3 px-4">
                         <div class="flex items-center gap-1.5 flex-wrap">
-                            <button onclick="processIDOrder('${tx.id}', 'complete')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg text-xs shadow-sm transition-all">
+                            <button onclick="processIDOrder('${tx.id}', 'complete')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg text-xs shadow-sm transition-all cursor-pointer">
                                 تم الشحن ✓
                             </button>
-                            <button onclick="processIDOrder('${tx.id}', 'refund')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950 dark:hover:bg-rose-900 dark:text-rose-300 dark:border-rose-800 rounded-lg text-xs font-semibold transition-all">
+                            <button onclick="processIDOrder('${tx.id}', 'refund')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950 dark:hover:bg-rose-900 dark:text-rose-300 dark:border-rose-800 rounded-lg text-xs font-semibold transition-all cursor-pointer">
                                 رفض وإرجاع
                             </button>
                         </div>
@@ -178,7 +197,7 @@ window.loadPendingOrders = async function() {
         }).join('');
 
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-rose-500 text-xs text-center">تعذر تحميل الطلبات: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-rose-500 text-xs text-center">تعذر تحميل الطلبات: ${err.message}</td></tr>`;
     }
 };
 
