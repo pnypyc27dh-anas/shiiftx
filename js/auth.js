@@ -522,6 +522,7 @@ async function executeFinalAccountCreationOrReset() {
     btn.disabled = true; 
     btn.innerHTML = `<i class="ph ph-spinner animate-spin text-lg"></i> جاري الحفظ...`; 
     
+    // تحديث كلمة المرور في نظام المصادقة
     const { error } = await supabase.auth.updateUser({ password: password }); 
     
     btn.disabled = false; 
@@ -529,21 +530,36 @@ async function executeFinalAccountCreationOrReset() {
 
     if (error) return showCustomAlert("فشل تحديث كلمة المرور: " + error.message); 
     
+    // توثيق الموافقة على الشروط والسياسات في قاعدة البيانات
+    const consentCheckbox = document.getElementById('reg-consent-checkbox');
+    if (consentCheckbox && consentCheckbox.checked) {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                await supabase.from('profiles').update({
+                    terms_accepted_at: new Date().toISOString(),
+                    privacy_policy_version: 'v1.0-2026'
+                }).eq('id', user.id);
+            }
+        } catch (consentErr) {
+            console.warn("تنبيه: تعذر حفظ توثيق الشروط في جدول profiles:", consentErr);
+        }
+    }
+
     isSettingNewPassword = false;
 
-    showCustomAlert("تم إنشاء وتأكيد الحساب بنجاح! سجّل دخولك بكلمتك الجديدة.", false);
+    showCustomAlert("تم إنشاء وتأكيد الحساب بنجاح! سجّل دخولك بكلمتك الجديدة.", false); 
     
     await supabase.auth.signOut();
     currentUser = null;
     toggleView('register-modal', false);
-    document.getElementById('login-email').value = tempRegisterData.email;
+    document.getElementById('login-email').value = tempRegisterData ? tempRegisterData.email : '';
     document.getElementById('login-password').value = "";
     switchTab('home');
     toggleView('dashboard-screen', false);
     toggleView('login-screen', true);
 }
 window.executeFinalAccountCreationOrReset = executeFinalAccountCreationOrReset;
-
 // 13. إعادة إرسال كود OTP
 async function resendOtpCode() {
     const btn = document.getElementById('resend-otp-btn');
