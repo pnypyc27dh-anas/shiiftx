@@ -123,14 +123,14 @@
 
             
 
-            <!-- تبويب 2: طلبات الشحن المعلقة -->
-            <section id="sec-deposits" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+            <!-- تبويب 1: طلبات الـ ID المعلقة -->
+            <section id="sec-orders" class="tab-content bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                 <div class="flex justify-between items-center">
                     <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                        <i class="ph-fill ph-wallet text-emerald-500 text-lg"></i>
-                        <span>طلبات شحن الرصيد بانتظار تأكيد الاستلام المالي</span>
+                        <i class="ph-fill ph-clock-countdown text-amber-500 text-lg"></i>
+                        <span>الطلبات المعلقة التي تتطلب الشحن بالـ ID في اللعبة أو رقم الهاتف</span>
                     </h2>
-                    <button onclick="loadPendingDeposits()" class="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 font-bold">
+                    <button onclick="loadPendingOrders()" class="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 font-bold">
                         <i class="ph-bold ph-arrows-clockwise"></i> تحديث
                     </button>
                 </div>
@@ -138,16 +138,16 @@
                     <table class="w-full text-right text-xs">
                         <thead>
                             <tr class="border-b border-slate-100 dark:border-slate-800 text-slate-400 pb-2">
-                                <th class="pb-2">المرجع</th>
-                                <th class="pb-2">طريقة الدفع / البيان</th>
-                                <th class="pb-2 text-center">رقم إشعار التحويل</th>
-                                <th class="pb-2">المبلغ المطلوب</th>
-                                <th class="pb-2">تاريخ الطلب</th>
-                                <th class="pb-2 text-center">الإجراء</th>
+                                <th class="pb-2">الرقم المرجعي</th>
+                                <th class="pb-2">المنصة</th>
+                                <th class="pb-2">الباقة المطلوبة</th>
+                                <th class="pb-2">Player ID / رقم الشحن</th>
+                                <th class="pb-2">المبلغ</th>
+                                <th class="pb-2 text-center">الإجراء التنفيذي</th>
                             </tr>
                         </thead>
-                        <tbody id="deposits-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
-                            <tr><td colspan="6" class="py-6 text-center text-slate-400">جاري تحميل طلبات الإيداع...</td></tr>
+                        <tbody id="orders-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+                            <tr><td colspan="6" class="py-6 text-center text-slate-400">جاري تحميل الطلبات...</td></tr>
                         </tbody>
                     </table>
                 </div>
