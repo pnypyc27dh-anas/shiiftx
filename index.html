@@ -989,20 +989,28 @@
             </nav>
         </div>
 
-        <div class="border-t border-slate-100 pt-4 mt-6 space-y-3">
-            <div class="flex justify-center items-center gap-3 text-[11px] font-bold text-slate-400">
-                <button onclick="openInfoModal('about')" class="hover:text-blue-600 transition">من نحن</button>
-                <span>•</span>
-                <button onclick="openInfoModal('privacy')" class="hover:text-blue-600 transition">الخصوصية</button>
-                <span>•</span>
-                <button onclick="openInfoModal('terms')" class="hover:text-blue-600 transition">الشروط</button>
-            </div>
-            
-            <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 font-bold text-xs transition active:scale-95">
-                <i class="ph ph-sign-out text-lg"></i>
-                <span>تسجيل الخروج</span>
-            </button>
-        </div>
+        <div class="border-t border-slate-100 dark:border-slate-800 pt-4 mt-6 space-y-3">
+    <!-- الأيقونات التفاعلية -->
+    <div class="flex justify-center items-center gap-3 py-1">
+        <a href="https://www.facebook.com/profile.php?id=61596153959853&locale=ar_AR" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-blue-50 dark:hover:bg-blue-950/60 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-center text-xl transition-all shadow-sm active:scale-95" title="فيسبوك">
+            <i class="ph-fill ph-facebook-logo"></i>
+        </a>
+
+        <a href="https://www.instagram.com/shiiftx11/?hl=ar" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-pink-50 dark:hover:bg-pink-950/60 text-slate-600 dark:text-slate-300 hover:text-pink-600 dark:hover:text-pink-400 flex items-center justify-center text-xl transition-all shadow-sm active:scale-95" title="إنستغرام">
+            <i class="ph-fill ph-instagram-logo"></i>
+        </a>
+
+        <a href="https://wa.me/066567049469" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center justify-center text-xl transition-all shadow-sm active:scale-95" title="واتساب">
+            <i class="ph-fill ph-whatsapp-logo"></i>
+        </a>
+    </div>
+    
+    <!-- زر تسجيل الخروج -->
+    <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/40 dark:text-red-400 font-bold text-xs transition active:scale-95">
+        <i class="ph ph-sign-out text-lg"></i>
+        <span>تسجيل الخروج</span>
+    </button>
+</div>
     </div>
 
     <!-- ==================== النوافذ المنبثقة ==================== -->
