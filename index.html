@@ -77,7 +77,56 @@
 
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
- 
+ <!-- بداية شريط التنويه العرضي -->
+<div class="announcement-bar">
+  <div class="announcement-content">
+    <span>⚠️ تنويه: المتجر لا يزال في مرحلة التعديل البرمجي واستيفاء كافة الشروط القانونية اللازمة لبدء التشغيل</span>
+    <span>⚠️ تنويه: المتجر لا يزال في مرحلة التعديل البرمجي واستيفاء كافة الشروط القانونية اللازمة لبدء التشغيل</span>
+  </div>
+</div>
+
+<style>
+  .announcement-bar {
+    width: 100%;
+    background-color: #d97706; /* لون خلفية تحذيري (كهرماني/برتقالي) */
+    color: #ffffff;            /* لون النص */
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 10px 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    direction: rtl;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .announcement-content {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: scroll-text 25s linear infinite;
+  }
+
+  .announcement-content span {
+    padding-left: 50px; /* مسافة فاصلة بين الجمل المتكررة */
+  }
+
+  /* إيقاف الحركة عند وقوف مؤشر الفأرة على الشريط */
+  .announcement-bar:hover .announcement-content {
+    animation-play-state: paused;
+    cursor: default;
+  }
+
+  /* حركة انسيابية مستمرة من اليمين إلى اليسار */
+  @keyframes scroll-text {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(50%);
+    }
+  }
+</style>
+<!-- نهاية شريط التنويه العرضي -->
     <style>
         :root {
             --primary: #005ba3;
