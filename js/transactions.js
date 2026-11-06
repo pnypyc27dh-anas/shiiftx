@@ -23,6 +23,51 @@ const TX_OP_CONFIG = {
     'صرف الارباح': { label: 'صرف الارباح', color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900/50', icon: 'ph-bold ph-money' }
 };
 
+// =========================================================================
+// 1.5. دوال الأمان والتعقيم الموحدة (XSS Sanitizer & Safe RPC Caller)
+// =========================================================================
+
+// دالة تحييد الوسوم البرمجية الخبيثة
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/`/g, '&#96;');
+}
+
+// وسيط استدعاء الدوال لمنع الأخطاء غير المعالجة (401 / 403 / 42501)
+async function safeRpcCall(rpcName, params = {}) {
+    try {
+        const { data, error } = await supabase.rpc(rpcName, params);
+
+        if (error) {
+            console.warn(`[Supabase RPC Notice] ${rpcName}:`, error.message);
+            if (error.code === '42501' || error.message?.includes('permission denied')) {
+                return { success: false, code: 'UNAUTHORIZED', message: 'غير مصرح لك بتنفيذ هذه العملية.' };
+            }
+            return { success: false, code: error.code || 'DB_ERROR', message: error.message || 'تعذر إتمام العملية.' };
+        }
+
+        if (data && typeof data === 'object' && !Array.isArray(data) && data.status) {
+            return {
+                success: data.status === 'success',
+                code: data.status === 'success' ? 'OK' : 'REJECTED',
+                message: data.message || '',
+                data: data
+            };
+        }
+
+        return { success: true, code: 'OK', data: data };
+    } catch (err) {
+        console.error(`[RPC Exception] ${rpcName}:`, err);
+        return { success: false, code: 'NETWORK_ERROR', message: 'فشل الاتصال بالخادم، يرجى التحقق من الشبكة.' };
+    }
+}
+
 // 2. المزامنة الدورية الهادئة للرصيد، الصلاحيات، وسجل العمليات
 async function silentSyncData() { 
     if (!currentUser) return;
@@ -340,20 +385,25 @@ function createTransactionCardElement(tx) {
             </div>`;
     }
 
-    // حقول المرجع والتاريخ والمعرف
-    const txRef = tx.tx_id || rawTx.transaction_ref || '---';
+    // حقول المرجع والتاريخ والمعرف بعد التعقيم الكامل لمنع XSS
+    const safeTxRef = escapeHTML(tx.tx_id || rawTx.transaction_ref || '---');
+    const safePlayerId = escapeHTML(playerId);
+    const safeDiscount = escapeHTML(discountInfo);
+    const safeDate = escapeHTML(tx.date ? tx.date.split(',')[0] : '');
+
     let chipsHtml = `
         <div class="flex items-center gap-1.5 flex-wrap text-[10px] text-slate-400 pt-0.5 font-sans">
-            <span class="font-mono font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded select-all cursor-pointer hover:bg-slate-200" onclick="event.stopPropagation(); copyToClipboard('${txRef}')" title="انقر لنسخ المرجع">#${txRef}</span>
+            <span class="font-mono font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded select-all cursor-pointer hover:bg-slate-200" onclick="event.stopPropagation(); copyToClipboard('${safeTxRef}')" title="انقر لنسخ المرجع">#${safeTxRef}</span>
             <span>•</span>
-            <span>${tx.date.split(',')[0]}</span>
-            ${playerId ? `<span>•</span> <span class="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-900/40" dir="ltr">${isDeposit ? 'إشعار التحويل: ' : 'معرّف الحساب (ID): '}${playerId}</span>` : ''}
-            ${discountInfo ? `<span>•</span> <span class="font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/40">خصم ${discountInfo}</span>` : ''}
+            <span>${safeDate}</span>
+            ${safePlayerId ? `<span>•</span> <span class="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-900/40" dir="ltr">${isDeposit ? 'إشعار التحويل: ' : 'معرّف الحساب (ID): '}${safePlayerId}</span>` : ''}
+            ${safeDiscount ? `<span>•</span> <span class="font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/40">خصم ${safeDiscount}</span>` : ''}
         </div>
     `;
 
     const serialCode = tx.serial_code ? String(tx.serial_code).trim() : '';
     const hasCode = serialCode && !['null', 'undefined', 'none', '-'].includes(serialCode.toLowerCase());
+    const safeSerialCode = escapeHTML(serialCode);
     let codeRibbonHtml = '';
 
     if (hasCode) {
@@ -363,9 +413,9 @@ function createTransactionCardElement(tx) {
                     <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
                         <i class="ph-bold ph-key"></i>
                     </span>
-                    <span class="font-mono text-xs sm:text-sm font-black tracking-widest text-emerald-400 select-all">${serialCode}</span>
+                    <span class="font-mono text-xs sm:text-sm font-black tracking-widest text-emerald-400 select-all">${safeSerialCode}</span>
                 </div>
-                <button onclick="copyToClipboard('${serialCode}')" class="btn-spring px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer">
+                <button onclick="copyToClipboard('${safeSerialCode}')" class="btn-spring px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer">
                     <i class="ph-bold ph-copy"></i>
                     <span>نسخ</span>
                 </button>
@@ -373,16 +423,17 @@ function createTransactionCardElement(tx) {
         `;
     }
 
-    // تنبيه الرفض أو الإلغاء
+    // تنبيه الرفض أو الإلغاء مع التعقيم الصارم
     let cancelAlertHtml = '';
     if (cancelReason || isRejected || isRefundedOrder) {
-        const displayReason = cancelReason || (isCommission ? 'تم إلغاء العمولة لإلغاء الطلب الأساسي' : 'تم رفض العملية من قبل الإدارة');
+        const rawDisplayReason = cancelReason || (isCommission ? 'تم إلغاء العمولة لإلغاء الطلب الأساسي' : 'تم رفض العملية من قبل الإدارة');
+        const safeDisplayReason = escapeHTML(rawDisplayReason);
         const labelText = isCommission ? 'سبب الإلغاء:' : (isRefundedOrder ? 'سبب الاسترداد:' : 'سبب الرفض:');
 
         cancelAlertHtml = `
             <div class="mt-2 p-2 rounded-xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 flex items-center gap-1.5 text-[10px] text-rose-600 dark:text-rose-400 font-bold">
                 <i class="ph-fill ph-warning-circle text-xs shrink-0"></i>
-                <span>${labelText} ${displayReason}</span>
+                <span>${labelText} ${safeDisplayReason}</span>
             </div>
         `;
     }
@@ -851,35 +902,33 @@ function printOfficialInvoice(ref, platform, pkg, amount, date, playerId, status
 
 let loadedAgentsList = [];
 
-// جلب قائمة الوكلاء المعتمدين النشطين تلقائياً من Supabase
+// جلب قائمة الوكلاء المعتمدين النشطين تلقائياً عبر safeRpcCall
 async function fetchAndRenderAgents() {
     const select = document.getElementById("agent-select");
     if (!select) return;
 
     try {
-        const { data: agents, error } = await supabase.rpc('get_active_agents_list');
+        const res = await safeRpcCall('get_active_agents_list');
         
-        if (error) throw error;
-
-        if (!agents || agents.length === 0) {
+        if (!res.success || !Array.isArray(res.data) || res.data.length === 0) {
             select.innerHTML = `<option value="">لا يوجد وكلاء متاحون حالياً</option>`;
             return;
         }
 
-        loadedAgentsList = agents;
+        loadedAgentsList = res.data;
         select.innerHTML = "";
 
-        agents.forEach(agent => {
+        res.data.forEach(agent => {
             const opt = document.createElement("option");
             opt.value = agent.id;
-            opt.textContent = agent.name;
+            opt.textContent = agent.name; // استخدام textContent آمن تلقائياً
             select.appendChild(opt);
         });
 
         onAgentChanged();
     } catch (err) {
         console.error("Fetch Agents Error:", err);
-        select.innerHTML = `<option value="">فشل تحميل الوكلاء</option>`;
+        select.innerHTML = `<option value="">سجّل الدخول لعرض الوكلاء المتاحين</option>`;
     }
 }
 
@@ -946,10 +995,10 @@ async function submitAgentDepositRequest() {
     const receiptNum = receiptInput ? receiptInput.value.trim() : "";
 
     if (!agentId) {
-        return (typeof showCustomAlert === 'function') ? showCustomAlert("يرجى اختيار الوكيل المعتمد أولاً.") : alert("يرجى اختيار الوكيل المعتمد أولاً.");
+        return (typeof showCustomAlert === 'function') ? showCustomAlert("يرجى اختيار الوكيل المعتمد أولاً.", true) : alert("يرجى اختيار الوكيل المعتمد أولاً.");
     }
-    if (isNaN(amount) || amount <= 0) {
-        return (typeof showCustomAlert === 'function') ? showCustomAlert("يرجى إدخال مبلغ شحن صحيح.") : alert("يرجى إدخال مبلغ شحن صحيح.");
+    if (isNaN(amount) || amount <= 0 || amount > 10000) {
+        return (typeof showCustomAlert === 'function') ? showCustomAlert("يرجى إدخال مبلغ شحن صالح بين 1$ و 10,000$.", true) : alert("يرجى إدخال مبلغ شحن صالح بين 1$ و 10,000$.");
     }
 
     btn.disabled = true;
@@ -957,39 +1006,32 @@ async function submitAgentDepositRequest() {
     btn.innerHTML = `<i class="ph ph-circle-notch animate-spin text-lg"></i> <span>جاري إرسال الطلب للوكيل...</span>`;
 
     try {
-        const { data, error } = await supabase.rpc('customer_submit_agent_deposit', {
+        const res = await safeRpcCall('customer_submit_agent_deposit', {
             p_agent_id: agentId,
             p_amount: amount,
             p_receipt_num: receiptNum || "دفع نقدي كاش"
         });
 
-        if (error) throw error;
-
-        if (data && data.status === 'success') {
+        if (res.success) {
+            const successMsg = res.message || "تم إرسال طلب الشحن بنجاح وهو الآن قيد المراجعة لدى الوكيل المعتمد.";
             if (typeof showCustomAlert === 'function') {
-                showCustomAlert(data.message, false);
+                showCustomAlert(successMsg, false);
             } else {
-                alert(data.message);
+                alert(successMsg);
             }
             if (amountInput) amountInput.value = "";
             if (receiptInput) receiptInput.value = "";
             if (typeof silentSyncData === 'function') silentSyncData();
         } else {
-            alert(data?.message || "فشل إرسال الطلب.");
-        }
-    } catch (err) {
-        console.error("Submit Request Error:", err);
-        let errorMsg = "حدث خطأ أثناء إرسال الطلب.";
-        if (err.code === '23505' || (err.message && err.message.includes('unique_active_receipt_num'))) {
-            errorMsg = "رقم إشعار التحويل هذا مستخدم مسبقاً في طلب آخر، يرجى التأكد من كتابة رقم الإشعار الصحيح.";
-        } else if (err.message) {
-            errorMsg = err.message;
-        }
-
-        if (typeof showCustomAlert === 'function') {
-            showCustomAlert(errorMsg, true);
-        } else {
-            alert(errorMsg);
+            let errorMsg = res.message || "فشل إرسال الطلب.";
+            if (res.code === '23505' || errorMsg.includes('unique_active_receipt_num')) {
+                errorMsg = "رقم إشعار التحويل هذا مستخدم مسبقاً في طلب آخر، يرجى كتابة رقم إشعار صحيح.";
+            }
+            if (typeof showCustomAlert === 'function') {
+                showCustomAlert(errorMsg, true);
+            } else {
+                alert(errorMsg);
+            }
         }
     } finally {
         btn.disabled = false;
