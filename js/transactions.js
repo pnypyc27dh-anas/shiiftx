@@ -73,7 +73,7 @@ async function silentSyncData() {
         }
     }
     
-    // جلب المعاملات المالية الحديثة
+    // جلب المعاملات المالية الحديثة مع ربط بيانات الباقة والمنصة
     const { data: txs } = await supabase
         .from('transactions')
         .select('*')
@@ -81,18 +81,37 @@ async function silentSyncData() {
         .order('created_at', { ascending: false });
 
     if (txs) {
-        globalTransactionsRaw = txs.map(t => ({
-            type: t.transaction_type, 
-            details: t.details, 
-            amount: t.amount + " $",
-            date: new Date(t.created_at).toLocaleString('en-US', { hour12: false }),
-            status: t.status, 
-            tx_id: t.transaction_ref, 
-            serial_code: t.serial_code,
-            delivery_type: t.delivery_type,
-            player_id: t.player_id,
-            raw: t
-        }));
+        // جلب معرفات المنتجات من جدول الطلبات لضمان دقة المنصة
+        const refs = txs.map(t => t.transaction_ref).filter(Boolean);
+        let ordersMap = new Map();
+        if (refs.length > 0) {
+            const { data: ords } = await supabase
+                .from('orders')
+                .select('transaction_ref, product_id, package_name, platform')
+                .in('transaction_ref', refs);
+            if (ords) {
+                ordersMap = new Map(ords.map(o => [o.transaction_ref, o]));
+            }
+        }
+
+        globalTransactionsRaw = txs.map(t => {
+            const ord = ordersMap.get(t.transaction_ref);
+            return {
+                type: t.transaction_type, 
+                details: t.details, 
+                amount: t.amount + " $",
+                date: new Date(t.created_at).toLocaleString('en-US', { hour12: false }),
+                status: t.status, 
+                tx_id: t.transaction_ref, 
+                serial_code: t.serial_code,
+                delivery_type: t.delivery_type,
+                player_id: t.player_id,
+                product_id: ord?.product_id || t.product_id,
+                order_platform: ord?.platform,
+                order_package: ord?.package_name,
+                raw: t
+            };
+        });
         renderRecentDashboardTransactions(globalTransactionsRaw);
     }
 }
@@ -196,11 +215,30 @@ function createTransactionCardElement(tx) {
         platformName = 'شركاء التسويق';
         packageName = 'عمولة عن استخدام كود الخصم';
     } else if (typeof globalProductsRaw !== 'undefined' && globalProductsRaw.length > 0) {
-        const matched = globalProductsRaw.find(p => 
-            p.package_name.trim().toLowerCase() === cleanPackageName.toLowerCase() ||
-            cleanPackageName.toLowerCase().includes(p.package_name.trim().toLowerCase()) ||
-            p.package_name.trim().toLowerCase().includes(cleanPackageName.toLowerCase())
-        );
+        // أ. الأولوية الأولى: مطابقة المنتج بالمعرف الفريد (ID) لمنع تشابه أسماء الباقات
+        const targetProdId = tx.product_id || rawTx.product_id;
+        let matched = targetProdId ? globalProductsRaw.find(p => p.id === targetProdId) : null;
+
+        // ب. استخراج اسم المنصة من نص تفاصيل المعاملة إن وجد
+        const rawBracketMatch = rawDetails.match(/\[(.*?)\]/);
+        const possiblePlatform = tx.order_platform || (rawBracketMatch ? rawBracketMatch[1].replace(/(?:إشعار|مسترجع|مرفوض):.*/, '').trim() : '');
+
+        // ج. الأولوية الثانية: إذا لم يتوفر ID، نطابق اسم المنصة مع اسم الباقة معاً
+        if (!matched && possiblePlatform) {
+            matched = globalProductsRaw.find(p => 
+                p.platform.toLowerCase() === possiblePlatform.toLowerCase() &&
+                (p.package_name.toLowerCase().includes(cleanPackageName.toLowerCase()) || cleanPackageName.toLowerCase().includes(p.package_name.toLowerCase()))
+            );
+        }
+
+        // د. خيار أخير احتياطي: بالاسم فقط إذا تعذر كل ما سبق
+        if (!matched) {
+            matched = globalProductsRaw.find(p => 
+                p.package_name.trim().toLowerCase() === cleanPackageName.toLowerCase()
+            );
+        }
+
+        // هـ. تعيين البيانات الصحيحة
         if (matched) {
             platformName = matched.platform;
             packageName = matched.package_name;
