@@ -3,6 +3,17 @@
 // يدعم الوضعين: النهاري (Light Mode) والليلي (Dark Mode) بأعلى درجات التباين
 // =========================================================================
 
+// تعريف دالة الحماية المركزية في النطاق العام
+window.escapeHTML = function(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+};
+
 let currentAdmin = null;
 let allProductsCache = [];
 
