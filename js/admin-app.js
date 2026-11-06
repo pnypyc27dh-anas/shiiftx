@@ -232,7 +232,7 @@ window.processIDOrder = async function(txId, action) {
 };
 
 // =========================================================================
-// 4. تبويب سجل الإيداعات الرقابي (Deposits Audit)
+// 4. تبويب سجل الإيداعات الرقابي (بتنسيق بصري منظم ومتناسق)
 // =========================================================================
 window.loadDepositsAuditTab = async function() {
     const tbody = document.getElementById('deposits-tbody');
@@ -252,52 +252,121 @@ window.loadDepositsAuditTab = async function() {
         }
 
         if (!records || records.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-xs text-slate-500 dark:text-slate-400">لا توجد طلبات إيداع مسجلة.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="py-10 text-center text-xs text-slate-400 dark:text-slate-500 font-bold">لا توجد طلبات إيداع مسجلة.</td></tr>`;
             return;
         }
 
+        // دالة مساعدة لتنسيق التاريخ والوقت بوضوح وأناقة
+        const formatDateTime = (dateStr) => {
+            if (!dateStr) return '<span class="text-slate-300 dark:text-slate-600 font-mono text-center block text-sm">—</span>';
+            const d = new Date(dateStr);
+            const date = d.toLocaleDateString('en-GB'); // DD/MM/YYYY
+            const time = d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true });
+            return `
+                <div class="font-mono text-[11px] text-slate-700 dark:text-slate-300 whitespace-nowrap leading-tight">
+                    <span>${date}</span>
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">${time}</span>
+                </div>
+            `;
+        };
+
         tbody.innerHTML = records.map(r => {
+            // شارة الحالة (محمية من الانكسار)
             let statusBadge = '';
             if (r.status === 'approved' || r.status === 'completed') {
-                statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-400 dark:border-emerald-800 font-semibold">معتمد ✓</span>';
+                statusBadge = `
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/50 whitespace-nowrap">
+                        <i class="ph-bold ph-check text-xs"></i>
+                        <span>معتمد</span>
+                    </span>`;
             } else if (r.status === 'pending') {
-                statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-950/80 dark:text-amber-400 dark:border-amber-800 font-semibold animate-pulse">معلق</span>';
+                statusBadge = `
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/50 whitespace-nowrap animate-pulse">
+                        <i class="ph-bold ph-hourglass-medium text-xs"></i>
+                        <span>معلق</span>
+                    </span>`;
             } else {
-                statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950/80 dark:text-rose-400 dark:border-rose-800 font-semibold">مرفوض</span>';
+                statusBadge = `
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800/50 whitespace-nowrap">
+                        <i class="ph-bold ph-x text-xs"></i>
+                        <span>مرفوض</span>
+                    </span>`;
             }
 
-            const roleBadge = r.processed_by_role === 'agent' 
-                ? '<span class="px-1.5 py-0.5 rounded text-[9px] bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800 mr-1 font-semibold">وكيل كاش</span>'
-                : (r.processed_by_role === 'admin' ? '<span class="px-1.5 py-0.5 rounded text-[9px] bg-purple-100 text-purple-800 border border-purple-200 dark:bg-purple-950 dark:text-purple-400 dark:border-purple-800 mr-1 font-semibold">إدارة</span>' : '');
+            const isAgent = r.processed_by_role === 'agent';
+            const roleBadge = isAgent 
+                ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800 shrink-0">وكيل كاش</span>'
+                : '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800 shrink-0">إدارة</span>';
+
+            const methodTitle = r.payment_method === 'CASH_AGENT' ? 'دفع عبر وكيل معتمد' : (r.payment_method || 'شحن رصيد');
 
             return `
-                <tr class="border-b border-slate-200 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors text-xs text-slate-700 dark:text-slate-300">
-                    <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">${r.transaction_ref}</td>
-                    <td class="py-3 px-4">
-                        <div class="font-bold text-slate-900 dark:text-white">${r.customer_name}</div>
-                        <div class="text-[10px] text-slate-500 dark:text-slate-400">${r.customer_email} • ${r.customer_phone}</div>
+                <tr class="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/70 dark:hover:bg-slate-800/30 transition-colors text-xs text-slate-700 dark:text-slate-300">
+                    
+                    <!-- 1. الرقم المرجعي (محمي من الانقسام لسطرين) -->
+                    <td class="py-3.5 px-3 whitespace-nowrap align-middle">
+                        <span class="font-mono font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800/90 px-2 py-1 rounded-md border border-slate-200/80 dark:border-slate-700/60 text-[11px] select-all tracking-wider">
+                            ${r.transaction_ref}
+                        </span>
                     </td>
-                    <td class="py-3 px-4 font-mono font-bold text-emerald-600 dark:text-emerald-400">$${Number(r.amount).toFixed(2)}</td>
-                    <td class="py-3 px-4">
-                        <div class="font-semibold text-slate-800 dark:text-slate-200">${r.payment_method}</div>
-                        <div class="text-[10px] font-mono text-slate-500 dark:text-slate-400">إشعار: ${r.receipt_num || '—'}</div>
-                    </td>
-                    <td class="py-3 px-4">${statusBadge}</td>
-                    <td class="py-3 px-4">
-                        <div class="flex items-center">
-                            ${roleBadge}
-                            <span class="font-semibold text-slate-800 dark:text-slate-200">${r.processed_by_name || '—'}</span>
+
+                    <!-- 2. بيانات العميل -->
+                    <td class="py-3.5 px-3 align-middle">
+                        <div class="font-black text-slate-900 dark:text-white text-xs leading-snug">${r.customer_name}</div>
+                        <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-1.5 flex-wrap">
+                            <span>${r.customer_email}</span>
+                            ${r.customer_phone ? `<span>•</span><span class="font-mono text-slate-500 dark:text-slate-400 font-bold" dir="ltr">${r.customer_phone}</span>` : ''}
                         </div>
-                        ${r.rejection_reason ? `<div class="text-[10px] text-rose-600 dark:text-rose-400 mt-0.5 font-medium">سبب الرفض: ${r.rejection_reason}</div>` : ''}
                     </td>
-                    <td class="py-3 px-4 font-mono text-[10px] text-slate-500 dark:text-slate-400">${new Date(r.created_at).toLocaleString('ar-EG')}</td>
-                    <td class="py-3 px-4 font-mono text-[10px] text-slate-500 dark:text-slate-400">${r.processed_at ? new Date(r.processed_at).toLocaleString('ar-EG') : '—'}</td>
+
+                    <!-- 3. المبلغ المالي -->
+                    <td class="py-3.5 px-3 whitespace-nowrap align-middle">
+                        <span class="font-mono font-black text-sm text-emerald-600 dark:text-emerald-400 tabular-nums">
+                            $${Number(r.amount).toFixed(2)}
+                        </span>
+                    </td>
+
+                    <!-- 4. طريقة الدفع ورقم الإشعار -->
+                    <td class="py-3.5 px-3 align-middle">
+                        <div class="font-bold text-slate-800 dark:text-slate-200 text-xs">${methodTitle}</div>
+                        <div class="mt-1">
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 select-all">
+                                <span class="text-slate-400 font-sans">إشعار:</span>
+                                <strong class="font-bold">${r.receipt_num || '—'}</strong>
+                            </span>
+                        </div>
+                    </td>
+
+                    <!-- 5. الحالة -->
+                    <td class="py-3.5 px-3 whitespace-nowrap align-middle">
+                        ${statusBadge}
+                    </td>
+
+                    <!-- 6. المعالج / الوكيل المختار -->
+                    <td class="py-3.5 px-3 align-middle">
+                        <div class="flex items-center gap-1.5">
+                            ${roleBadge}
+                            <span class="font-bold text-slate-800 dark:text-slate-200 text-xs leading-tight">${r.processed_by_name}</span>
+                        </div>
+                        ${r.rejection_reason ? `<div class="text-[10px] text-rose-600 dark:text-rose-400 font-medium mt-1">سبب الرفض: ${r.rejection_reason}</div>` : ''}
+                    </td>
+
+                    <!-- 7. تاريخ الطلب -->
+                    <td class="py-3.5 px-3 whitespace-nowrap align-middle">
+                        ${formatDateTime(r.created_at)}
+                    </td>
+
+                    <!-- 8. تاريخ التنفيذ -->
+                    <td class="py-3.5 px-3 whitespace-nowrap align-middle">
+                        ${formatDateTime(r.processed_at)}
+                    </td>
+
                 </tr>
             `;
         }).join('');
 
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-rose-500 text-xs text-center">تعذر تحميل السجل: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-rose-500 text-xs text-center font-bold">تعذر تحميل السجل: ${err.message}</td></tr>`;
     }
 };
 
