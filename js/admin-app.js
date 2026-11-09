@@ -1242,16 +1242,19 @@ async function loadApiPartnersData() {
                         ${p.is_active ? 'نشط' : 'معطل'}
                     </span>
                 </td>
-                <td class="py-3 px-3 text-center">
-                    <div class="flex items-center justify-center gap-1.5">
-                        <button onclick="openTopupApiPartnerModal('${p.id}', '${p.partner_name}')" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="شحن الرصيد العائم">
-                            <i class="ph-bold ph-wallet text-sm"></i>
-                        </button>
-                        <button onclick="toggleApiPartnerStatus('${p.id}', ${!p.is_active})" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/20 hover:text-amber-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="${p.is_active ? 'تجميد الشريك' : 'تفعيل الشريك'}">
-                            <i class="ph-bold ph-power text-sm"></i>
-                        </button>
-                    </div>
-                </td>
+<td class="py-3 px-3 text-center">
+    <div class="flex items-center justify-center gap-1.5">
+        <button onclick="openPartnerOrdersModal('${p.id}', '${p.partner_name}')" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/20 hover:text-indigo-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="عرض سجل العمليات والأكواد">
+            <i class="ph-bold ph-receipt text-sm"></i>
+        </button>
+        <button onclick="openTopupApiPartnerModal('${p.id}', '${p.partner_name}')" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="شحن الرصيد العائم">
+            <i class="ph-bold ph-wallet text-sm"></i>
+        </button>
+        <button onclick="toggleApiPartnerStatus('${p.id}', ${!p.is_active})" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/20 hover:text-amber-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="${p.is_active ? 'تجميد الشريك' : 'تفعيل الشريك'}">
+            <i class="ph-bold ph-power text-sm"></i>
+        </button>
+    </div>
+</td>
             </tr>
         `).join('');
 
@@ -1372,4 +1375,42 @@ function copyApiText(elementId) {
     input.select();
     navigator.clipboard.writeText(input.value);
     alert("تم نسخ القيمة للحافظة بنجاح!");
+}
+
+// فتح نافذة سجل طلبات الشريك وجلب البيانات
+async function openPartnerOrdersModal(partnerId, partnerName) {
+    document.getElementById('partner-orders-modal-title').innerText = partnerName;
+    const tbody = document.getElementById('partner-orders-tbody');
+    tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">جاري تحميل سجل الطلبات...</td></tr>`;
+    document.getElementById('api-partner-orders-modal').classList.remove('hidden');
+
+    try {
+        const { data, error } = await supabase.rpc('admin_get_api_partner_orders', {
+            p_partner_id: partnerId
+        });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">لم يقم هذا المتجر بسحب أي أكواد حتى الآن.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = data.map(o => `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+                <td class="py-2.5 px-3 font-mono font-bold text-slate-900 dark:text-slate-100">${o.order_ref}</td>
+                <td class="py-2.5 px-3 font-bold">${o.product_name}</td>
+                <td class="py-2.5 px-3 font-mono text-[11px] text-amber-500 font-bold select-all" dir="ltr">${o.delivered_code}</td>
+                <td class="py-2.5 px-3 font-mono font-bold text-rose-500">-$${Number(o.amount).toFixed(2)}</td>
+                <td class="py-2.5 px-3 text-slate-400 text-[11px]">${new Date(o.created_at).toLocaleString('ar-EG')}</td>
+            </tr>
+        `).join('');
+
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-rose-500 font-bold">حدث خطأ أثناء تحميل السجل: ${err.message}</td></tr>`;
+    }
+}
+
+function closePartnerOrdersModal() {
+    document.getElementById('api-partner-orders-modal').classList.add('hidden');
 }
