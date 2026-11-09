@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم والإدارة | SHIIFT X</title>
 
-  <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css">
     <!-- استدعاء وحدة المظهر العام المشتركة -->
     <script src="js/theme.js"></script>
 
@@ -119,9 +119,12 @@
                     <i class="ph-bold ph-hand-coins text-sm"></i>
                     <span>إيداع يدوي</span>
                 </button>
+                <button onclick="switchTab('partners')" id="tab-partners" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
+                    <i class="ph-bold ph-plugs-connected text-sm"></i>
+                    <span>شركاء الـ API (الجملة B2B)</span>
+                    <span id="badge-partners-count" class="px-1.5 py-0.2 bg-indigo-500 text-white rounded-full text-[10px] hidden">0</span>
+                </button>
             </div>
-
-            
 
             <!-- تبويب 1: طلبات الـ ID المعلقة -->
             <section id="sec-orders" class="tab-content bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
@@ -394,8 +397,68 @@
                 </button>
             </section>
 
+            <!-- ==================== تبويب 8: شركاء الـ API والربط البرمجي (B2B Partners) ==================== -->
+            <section id="sec-partners" class="tab-content hidden space-y-4">
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 dark:text-slate-100">
+                                <i class="ph-fill ph-plugs-connected text-indigo-500 text-lg"></i>
+                                <span>إدارة شركاء الربط البرمجي (B2B API Partners)</span>
+                            </h2>
+                            <p class="text-[11px] text-slate-400">إصدار التراخيص والمفاتيح، شحن وتدقيق الأرصدة العائمة، ومراقبة سحب المتاجر الخارجية للأكواد</p>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button onclick="openPartnerModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
+                                <i class="ph-bold ph-plus-circle text-sm"></i>
+                                <span>اعتماد شريك B2B جديد ➕</span>
+                            </button>
+                            <button onclick="loadPartnersData()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800" title="تحديث البيانات">
+                                <i class="ph-bold ph-arrows-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- بطاقات إحصائيات سريعة للشركاء -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                            <span class="text-[11px] text-slate-400 block font-medium mb-1">المتاجر والشركاء المعتمدين</span>
+                            <span id="stat-partners-count" class="font-mono font-black text-lg text-slate-900 dark:text-white">0</span>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                            <span class="text-[11px] text-slate-400 block font-medium mb-1">إجمالي الأرصدة العائمة (Float)</span>
+                            <span id="stat-partners-total-float" class="font-mono font-black text-lg text-emerald-600 dark:text-emerald-400">$0.00</span>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                            <span class="text-[11px] text-slate-400 block font-medium mb-1">إجمالي طلبات السحب المنفذة</span>
+                            <span id="stat-partners-total-orders" class="font-mono font-black text-lg text-indigo-500">0 طلب</span>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-100 dark:border-slate-800 text-slate-400 pb-2">
+                                    <th class="py-2.5 px-3">اسم المتجر / الشريك</th>
+                                    <th class="py-2.5 px-3">معرّف الـ API (Key)</th>
+                                    <th class="py-2.5 px-3">الرصيد العائم (Float)</th>
+                                    <th class="py-2.5 px-3 text-center">العمليات</th>
+                                    <th class="py-2.5 px-3 text-center">الحالة</th>
+                                    <th class="py-2.5 px-3 text-center">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="partners-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+                                <tr><td colspan="6" class="py-6 text-center text-slate-400">جاري تحميل قائمة الشركاء...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
         </main>
     </div>
+
+    <!-- ==================== النوافذ المنبثقة (Modals) ==================== -->
 
     <!-- نافذة تعيين شريك تسويقي جديد -->
     <div id="affiliate-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
@@ -582,8 +645,53 @@
         </div>
     </div>
 
-    <!-- استدعاء الإعدادات المشتركة وتطبيق الإدارة المخصص -->
-    <script src="js/config.js"></script>
-    <script src="js/admin-app.js"></script>
-</body>
-</html>
+    <!-- ==================== نوافذ شركاء الربط البرمجي B2B ==================== -->
+
+    <!-- نافذة إضافة شريك API جديد -->
+    <div id="partner-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="ph-bold ph-plugs-connected text-indigo-500 text-base"></i>
+                    <span>اعتماد متجر شريك ربط جديد (B2B Partner)</span>
+                </h4>
+                <button type="button" onclick="closePartnerModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <!-- نموذج الإدخال -->
+            <form id="partner-create-form" onsubmit="handlePartnerSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اسم المتجر أو التطبيق الشريك:</label>
+                    <input type="text" id="partner-name-input" required placeholder="مثال: متجر النخبة للبطاقات" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">الرصيد الافتتاحي العائم المودع ($):</label>
+                    <input type="number" step="0.01" min="0" id="partner-float-input" required value="100.00" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
+                    <p class="text-[10px] text-slate-400 mt-1">المبلغ الذي قام الشريك بتحويله لتأمين عمليات سحب الأكواد.</p>
+                </div>
+
+                <div class="pt-3 flex gap-2">
+                    <button type="submit" id="btn-save-partner" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5">
+                        <i class="ph-bold ph-key text-sm"></i>
+                        <span>توليد المفاتيح واعتماد الشريك</span>
+                    </button>
+                    <button type="button" onclick="closePartnerModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+
+            <!-- صندوق ظهور المفاتيح لمرة واحدة (One-time Reveal) -->
+            <div id="partner-credentials-reveal" class="hidden space-y-3 text-xs">
+                <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-600 dark:text-amber-300 text-[11px] flex gap-2 items-start">
+                    <i class="ph-bold ph-warning text-base shrink-0 mt-0.5"></i>
+                    <span>⚠️ انسخ المفتاح السري الآن؛ لن تتمكن من رؤيته مرة أخرى للحفاظ على أمان المنظومة.</span>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">معرّف الشريك (API Key):</label>
+                    <div class="flex items-center gap-1.5">
+                        <input id="reveal-partner-key" readonly class="w-full
