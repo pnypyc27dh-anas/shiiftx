@@ -1205,7 +1205,7 @@ function setupAdminEventListeners() {
    وحدة إدارة شركاء الربط الخارجي (B2B API Management Module)
    ========================================================================== */
 
-// 1. جلب قائمة الشركاء المعزولة أمنياً
+// 1. جلب قائمة الشركاء عبر دالة RPC المحمية
 async function loadApiPartnersData() {
     const tbody = document.getElementById('api-partners-tbody');
     if (!tbody) return;
@@ -1213,8 +1213,7 @@ async function loadApiPartnersData() {
     tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">جاري تحميل بيانات الشركاء...</td></tr>`;
 
     try {
-        // استدعاء دالة العزل الآمنة التي تحجب الـ Secret
-        const { data, error } = await supabaseClient.rpc('admin_get_api_partners');
+        const { data, error } = await supabase.rpc('admin_get_api_partners');
 
         if (error) throw error;
 
@@ -1230,11 +1229,11 @@ async function loadApiPartnersData() {
                     <div class="text-[10px] text-slate-400 font-normal">إجمالي الطلبات: ${p.total_orders || 0} | المسحوبات: $${Number(p.total_spent || 0).toFixed(2)}</div>
                 </td>
                 <td class="py-3 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400" dir="ltr">
-                    ${p.api_key.substring(0, 16)}...
+                    ${p.api_key ? p.api_key.substring(0, 16) + '...' : '---'}
                 </td>
                 <td class="py-3 px-3">
                     <span class="font-mono font-black ${Number(p.float_balance) < 50 ? 'text-rose-500' : 'text-emerald-500'}">
-                        $${Number(p.float_balance).toFixed(2)}
+                        $${Number(p.float_balance || 0).toFixed(2)}
                     </span>
                 </td>
                 <td class="py-3 px-3 text-center">
@@ -1257,11 +1256,11 @@ async function loadApiPartnersData() {
         `).join('');
 
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-rose-500">حدث خطأ: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-rose-500 font-bold">حدث خطأ أثناء جلب البيانات: ${err.message}</td></tr>`;
     }
 }
 
-// 2. اعتماد شريك جديد وتوليد المفاتيح (يُعرض السر هنا لمرة واحدة فقط)
+// 2. توليد المفاتيح واعتماد شريك جديد
 async function submitNewApiPartner() {
     const name = document.getElementById('api-partner-name-input').value.trim();
     const floatBal = parseFloat(document.getElementById('api-partner-float-input').value) || 0;
@@ -1273,7 +1272,7 @@ async function submitNewApiPartner() {
     btn.innerText = "جاري الاعتماد الأمني...";
 
     try {
-        const { data, error } = await supabaseClient.rpc('admin_create_api_partner', {
+        const { data, error } = await supabase.rpc('admin_create_api_partner', {
             p_partner_name: name,
             p_initial_balance: floatBal
         });
@@ -1304,7 +1303,7 @@ async function submitApiPartnerTopup() {
     btn.innerText = "جاري تنفيذ الإيداع...";
 
     try {
-        const { error } = await supabaseClient.rpc('admin_adjust_partner_float', {
+        const { error } = await supabase.rpc('admin_adjust_partner_float', {
             p_partner_id: partnerId,
             p_amount: amount
         });
@@ -1327,7 +1326,7 @@ async function toggleApiPartnerStatus(partnerId, newStatus) {
     if (!confirm(newStatus ? 'هل تريد إعادة تفعيل الشريك؟' : 'هل تريد تجميد الشريك ووقف عملياته مؤقتاً؟')) return;
 
     try {
-        const { error } = await supabaseClient
+        const { error } = await supabase
             .from('api_partners')
             .update({ is_active: newStatus })
             .eq('id', partnerId);
