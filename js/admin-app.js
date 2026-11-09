@@ -58,12 +58,10 @@ window.switchTab = function(tabName) {
     tabs.forEach(t => {
         const sec = document.getElementById(`sec-${t}`);
         const tabBtn = document.getElementById(`tab-${t}`);
-
-          // داخل دالة switchTab(tab)
-if (tab === 'api-partners') {
+         // داخل دالة switchTab(tab)
+     if (tab === 'api-partners') {
     loadApiPartnersData();
 }
-
         if (sec) {
             sec.classList.toggle('hidden', t !== tabName);
         }
