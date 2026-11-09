@@ -59,9 +59,7 @@ window.switchTab = function(tabName) {
         const sec = document.getElementById(`sec-${t}`);
         const tabBtn = document.getElementById(`tab-${t}`);
         
-        if (tab === 'api-partners') {
-    loadApiPartnersData();
-}
+        if (tab === 'api-partners') { loadApiPartnersData();}
         if (sec) {
             sec.classList.toggle('hidden', t !== tabName);
         }
