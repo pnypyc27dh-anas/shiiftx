@@ -115,14 +115,14 @@
                     <i class="ph-bold ph-wallet text-sm"></i>
                     <span>الوكلاء الماليين (الكاش)</span>
                 </button>
+                <!-- تبويب شركاء الربط B2B API المضاف -->
+                <button onclick="switchTab('api-partners')" id="tab-api-partners" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
+                    <i class="ph-bold ph-plugs-connected text-sm text-indigo-500"></i>
+                    <span>شركاء الربط (B2B API)</span>
+                </button>
                 <button onclick="switchTab('wallet')" id="tab-wallet" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-hand-coins text-sm"></i>
                     <span>إيداع يدوي</span>
-                </button>
-                <button onclick="switchTab('partners')" id="tab-partners" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
-                    <i class="ph-bold ph-plugs-connected text-sm"></i>
-                    <span>شركاء الـ API (الجملة B2B)</span>
-                    <span id="badge-partners-count" class="px-1.5 py-0.2 bg-indigo-500 text-white rounded-full text-[10px] hidden">0</span>
                 </button>
             </div>
 
@@ -156,7 +156,7 @@
                 </div>
             </section>
 
-            <!-- ==================== تبويب 2: طلبات شحن الرصيد والإيداعات ==================== -->
+            <!-- تبويب 2: طلبات شحن الرصيد والإيداعات -->
             <section id="sec-deposits" class="tab-content hidden space-y-4">
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                     <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -384,7 +384,48 @@
                 </div>
             </section>
 
-            <!-- تبويب 7: الإيداع اليدوي -->
+            <!-- ==================== تبويب 7: شركاء الربط البرمجي (B2B API) المضاف ==================== -->
+            <section id="sec-api-partners" class="tab-content hidden space-y-4">
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                <i class="ph-bold ph-plugs-connected text-indigo-500 text-lg"></i>
+                                <span>إدارة شركاء الربط الخارجي ومتاجر التجزئة (B2B API)</span>
+                            </h3>
+                            <p class="text-[11px] text-slate-400">إصدار مفاتيح الربط، إدارة الرصيد العائم (Float Balance)، وتتبع استهلاك المتاجر المرتبطة</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openCreateApiPartnerModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
+                                <i class="ph-bold ph-plus-circle text-sm"></i>
+                                <span>اعتماد شريك ربط جديد ➕</span>
+                            </button>
+                            <button onclick="loadApiPartnersData()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800" title="تحديث">
+                                <i class="ph-bold ph-arrows-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right text-xs">
+                            <thead>
+                                <tr class="text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
+                                    <th class="py-2.5 px-3">اسم المتجر / التطبيق</th>
+                                    <th class="py-2.5 px-3">معرّف الـ API Key</th>
+                                    <th class="py-2.5 px-3">الرصيد العائم (Float)</th>
+                                    <th class="py-2.5 px-3 text-center">الحالة التشغيلية</th>
+                                    <th class="py-2.5 px-3 text-center">إجراءات التحكم</th>
+                                </tr>
+                            </thead>
+                            <tbody id="api-partners-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+                                <tr><td colspan="5" class="py-6 text-center text-slate-400">جاري تحميل بيانات الشركاء...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- تبويب 8: الإيداع اليدوي -->
             <section id="sec-wallet" class="tab-content hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
                 <h3 class="text-xs font-black">إيداع رصيد يدوي لعميل (دفع كاش أو حوالة مباشرة)</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
@@ -397,68 +438,102 @@
                 </button>
             </section>
 
-            <!-- ==================== تبويب 8: شركاء الـ API والربط البرمجي (B2B Partners) ==================== -->
-            <section id="sec-partners" class="tab-content hidden space-y-4">
-                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-                        <div>
-                            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                                <i class="ph-fill ph-plugs-connected text-indigo-500 text-lg"></i>
-                                <span>إدارة شركاء الربط البرمجي (B2B API Partners)</span>
-                            </h2>
-                            <p class="text-[11px] text-slate-400">إصدار التراخيص والمفاتيح، شحن وتدقيق الأرصدة العائمة، ومراقبة سحب المتاجر الخارجية للأكواد</p>
-                        </div>
-                        <div class="flex items-center gap-2 w-full sm:w-auto">
-                            <button onclick="openPartnerModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
-                                <i class="ph-bold ph-plus-circle text-sm"></i>
-                                <span>اعتماد شريك B2B جديد ➕</span>
-                            </button>
-                            <button onclick="loadPartnersData()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl bg-slate-100 dark:bg-slate-800" title="تحديث البيانات">
-                                <i class="ph-bold ph-arrows-clockwise"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- بطاقات إحصائيات سريعة للشركاء -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div class="bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                            <span class="text-[11px] text-slate-400 block font-medium mb-1">المتاجر والشركاء المعتمدين</span>
-                            <span id="stat-partners-count" class="font-mono font-black text-lg text-slate-900 dark:text-white">0</span>
-                        </div>
-                        <div class="bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                            <span class="text-[11px] text-slate-400 block font-medium mb-1">إجمالي الأرصدة العائمة (Float)</span>
-                            <span id="stat-partners-total-float" class="font-mono font-black text-lg text-emerald-600 dark:text-emerald-400">$0.00</span>
-                        </div>
-                        <div class="bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                            <span class="text-[11px] text-slate-400 block font-medium mb-1">إجمالي طلبات السحب المنفذة</span>
-                            <span id="stat-partners-total-orders" class="font-mono font-black text-lg text-indigo-500">0 طلب</span>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-right text-xs">
-                            <thead>
-                                <tr class="border-b border-slate-100 dark:border-slate-800 text-slate-400 pb-2">
-                                    <th class="py-2.5 px-3">اسم المتجر / الشريك</th>
-                                    <th class="py-2.5 px-3">معرّف الـ API (Key)</th>
-                                    <th class="py-2.5 px-3">الرصيد العائم (Float)</th>
-                                    <th class="py-2.5 px-3 text-center">العمليات</th>
-                                    <th class="py-2.5 px-3 text-center">الحالة</th>
-                                    <th class="py-2.5 px-3 text-center">إجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="partners-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
-                                <tr><td colspan="6" class="py-6 text-center text-slate-400">جاري تحميل قائمة الشركاء...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
         </main>
     </div>
 
-    <!-- ==================== النوافذ المنبثقة (Modals) ==================== -->
+    <!-- ==================== النوافذ المنبثقة المضافة (Modals) ==================== -->
+
+    <!-- نافذة اعتماد شريك API جديد -->
+    <div id="api-partner-create-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="ph-bold ph-plugs-connected text-indigo-500 text-base"></i>
+                    <span>اعتماد شريك ربط API جديد</span>
+                </h4>
+                <button type="button" onclick="closeCreateApiPartnerModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <div id="api-create-form" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اسم المتجر أو الشريك الخارجي:</label>
+                    <input id="api-partner-name-input" type="text" placeholder="مثال: متجر النخبة الرقمي" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">الرصيد الافتتاحي المودع ($):</label>
+                    <input id="api-partner-float-input" type="number" step="0.01" value="100.00" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
+                    <p class="text-[10px] text-slate-400 mt-1">الرصيد المالي المسبق الذي سيتم الخصم منه عند سحب الأكواد.</p>
+                </div>
+                <div class="pt-3 flex gap-2">
+                    <button type="button" onclick="submitNewApiPartner()" id="btn-submit-api-partner" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-sm">
+                        توليد المفاتيح واعتماد الشريك
+                    </button>
+                    <button type="button" onclick="closeCreateApiPartnerModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
+                        إلغاء
+                    </button>
+                </div>
+            </div>
+
+            <!-- صندوق استعراض المفاتيح لمرة واحدة -->
+            <div id="api-credentials-result" class="hidden space-y-3 pt-2 text-xs">
+                <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-500 text-xs flex gap-2">
+                    <i class="ph-bold ph-warning text-base shrink-0"></i>
+                    <span>احفظ المفاتيح الآن في مكان آمن؛ لن يظهر الـ API Secret مرة أخرى حفاظاً على الأمان.</span>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">API Key (المفتاح العام للشريك):</label>
+                    <div class="flex items-center gap-2">
+                        <input id="res-partner-key" readonly class="w-full p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-950 font-mono text-[11px] text-slate-600 dark:text-slate-300" dir="ltr">
+                        <button onclick="copyApiText('res-partner-key')" class="px-3 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 rounded-xl font-bold transition">نسخ</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">API Secret (السر التوقيعي الخاص):</label>
+                    <div class="flex items-center gap-2">
+                        <input id="res-partner-secret" readonly class="w-full p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-950 font-mono text-[11px] text-rose-500 font-bold" dir="ltr">
+                        <button onclick="copyApiText('res-partner-secret')" class="px-3 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 rounded-xl font-bold transition">نسخ</button>
+                    </div>
+                </div>
+                <button type="button" onclick="closeCreateApiPartnerModal(); loadApiPartnersData();" class="w-full py-2.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-xl font-bold transition mt-2">
+                    تم النسخ والحفظ بنجاح
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة شحن الرصيد العائم للشريك -->
+    <div id="api-partner-topup-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="ph-bold ph-wallet text-emerald-500 text-base"></i>
+                    <span>شحن الرصيد العائم للشريك</span>
+                </h4>
+                <button type="button" onclick="closeTopupApiPartnerModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <p id="topup-api-partner-name" class="font-bold text-indigo-500 text-sm"></p>
+                <input type="hidden" id="topup-api-partner-id">
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">المبلغ المراد إيداعه ($):</label>
+                    <input id="api-topup-amount-input" type="number" step="0.01" min="1" placeholder="مثال: 500.00" required class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
+                </div>
+                <div class="pt-3 flex gap-2">
+                    <button type="button" onclick="submitApiPartnerTopup()" id="btn-submit-api-topup" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition shadow-sm">
+                        تأكيد الإيداع في الرصيد
+                    </button>
+                    <button type="button" onclick="closeTopupApiPartnerModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
+                        إلغاء
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- نافذة تعيين شريك تسويقي جديد -->
     <div id="affiliate-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
@@ -645,53 +720,213 @@
         </div>
     </div>
 
-    <!-- ==================== نوافذ شركاء الربط البرمجي B2B ==================== -->
+    <!-- استدعاء الإعدادات المشتركة وتطبيق الإدارة المخصص -->
+    <script src="js/config.js"></script>
+    <script src="js/admin-app.js"></script>
 
-    <!-- نافذة إضافة شريك API جديد -->
-    <div id="partner-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <i class="ph-bold ph-plugs-connected text-indigo-500 text-base"></i>
-                    <span>اعتماد متجر شريك ربط جديد (B2B Partner)</span>
-                </h4>
-                <button type="button" onclick="closePartnerModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
-                    <i class="ph-bold ph-x"></i>
-                </button>
-            </div>
+    <!-- محرك التحكم البرمجي بقسم شركاء الربط (B2B API Controller) -->
+    <script>
+        // الحصول على عميل Supabase المعتمد في المشروع
+        function getAdminClient() {
+            if (typeof supabaseClient !== 'undefined') return supabaseClient;
+            if (typeof supabase !== 'undefined' && supabase.auth) return supabase;
+            // عميل احتياطي في حال عدم وجود متغير عام
+            return window.supabaseClient || window.supabase;
+        }
 
-            <!-- نموذج الإدخال -->
-            <form id="partner-create-form" onsubmit="handlePartnerSubmit(event)" class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">اسم المتجر أو التطبيق الشريك:</label>
-                    <input type="text" id="partner-name-input" required placeholder="مثال: متجر النخبة للبطاقات" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold outline-none">
-                </div>
+        // تحميل قائمة الشركاء عند التبديل للتبويب
+        async function loadApiPartnersData() {
+            const client = getAdminClient();
+            const tbody = document.getElementById('api-partners-tbody');
+            if (!tbody) return;
 
-                <div>
-                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">الرصيد الافتتاحي العائم المودع ($):</label>
-                    <input type="number" step="0.01" min="0" id="partner-float-input" required value="100.00" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none" dir="ltr">
-                    <p class="text-[10px] text-slate-400 mt-1">المبلغ الذي قام الشريك بتحويله لتأمين عمليات سحب الأكواد.</p>
-                </div>
+            tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">جاري تحميل بيانات الشركاء...</td></tr>`;
 
-                <div class="pt-3 flex gap-2">
-                    <button type="submit" id="btn-save-partner" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-1.5">
-                        <i class="ph-bold ph-key text-sm"></i>
-                        <span>توليد المفاتيح واعتماد الشريك</span>
-                    </button>
-                    <button type="button" onclick="closePartnerModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
-                        إلغاء
-                    </button>
-                </div>
-            </form>
+            try {
+                const { data, error } = await client
+                    .from('api_partners')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-            <!-- صندوق ظهور المفاتيح لمرة واحدة (One-time Reveal) -->
-            <div id="partner-credentials-reveal" class="hidden space-y-3 text-xs">
-                <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-600 dark:text-amber-300 text-[11px] flex gap-2 items-start">
-                    <i class="ph-bold ph-warning text-base shrink-0 mt-0.5"></i>
-                    <span>⚠️ انسخ المفتاح السري الآن؛ لن تتمكن من رؤيته مرة أخرى للحفاظ على أمان المنظومة.</span>
-                </div>
+                if (error) throw error;
 
-                <div>
-                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">معرّف الشريك (API Key):</label>
-                    <div class="flex items-center gap-1.5">
-                        <input id="reveal-partner-key" readonly class="w-full
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">لا يوجد شركاء ربط خارجي مسجلين حالياً.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.map(p => `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+                        <td class="py-3 px-3 font-bold text-slate-900 dark:text-slate-100">${p.partner_name}</td>
+                        <td class="py-3 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400" dir="ltr">
+                            ${p.api_key.substring(0, 18)}...
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="font-mono font-black ${Number(p.float_balance) < 50 ? 'text-rose-500' : 'text-emerald-500'}">
+                                $${Number(p.float_balance).toFixed(2)}
+                            </span>
+                        </td>
+                        <td class="py-3 px-3 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${p.is_active ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'}">
+                                <span class="w-1.5 h-1.5 rounded-full ${p.is_active ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
+                                ${p.is_active ? 'نشط' : 'معطل'}
+                            </span>
+                        </td>
+                        <td class="py-3 px-3 text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button onclick="openTopupApiPartnerModal('${p.id}', '${p.partner_name}')" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="شحن الرصيد العائم">
+                                    <i class="ph-bold ph-wallet text-sm"></i>
+                                </button>
+                                <button onclick="toggleApiPartnerStatus('${p.id}', ${!p.is_active})" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/20 hover:text-amber-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="${p.is_active ? 'تجميد الشريك' : 'تفعيل الشريك'}">
+                                    <i class="ph-bold ph-power text-sm"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-rose-500">حدث خطأ: ${err.message}</td></tr>`;
+            }
+        }
+
+        // إنشاء شريك جديد
+        async function submitNewApiPartner() {
+            const client = getAdminClient();
+            const name = document.getElementById('api-partner-name-input').value.trim();
+            const floatBal = parseFloat(document.getElementById('api-partner-float-input').value) || 0;
+            const btn = document.getElementById('btn-submit-api-partner');
+
+            if (!name) return alert('يرجى كتابة اسم المتجر أو الشريك');
+
+            btn.disabled = true;
+            btn.innerText = "جاري الاعتماد...";
+
+            try {
+                const { data, error } = await client.rpc('admin_create_api_partner', {
+                    p_partner_name: name,
+                    p_initial_balance: floatBal
+                });
+
+                if (error) throw error;
+
+                document.getElementById('api-create-form').classList.add('hidden');
+                document.getElementById('res-partner-key').value = data.api_key;
+                document.getElementById('res-partner-secret').value = data.api_secret;
+                document.getElementById('api-credentials-result').classList.remove('hidden');
+            } catch (err) {
+                alert('فشل اعتماد الشريك: ' + err.message);
+                btn.disabled = false;
+                btn.innerText = "توليد المفاتيح واعتماد الشريك";
+            }
+        }
+
+        // شحن رصيد الشريك
+        async function submitApiPartnerTopup() {
+            const client = getAdminClient();
+            const partnerId = document.getElementById('topup-api-partner-id').value;
+            const amount = parseFloat(document.getElementById('api-topup-amount-input').value);
+            const btn = document.getElementById('btn-submit-api-topup');
+
+            if (!amount || amount <= 0) return alert('يرجى إدخال مبلغ صحيح');
+
+            btn.disabled = true;
+            btn.innerText = "جاري تنفيذ الإيداع...";
+
+            try {
+                const { error } = await client.rpc('admin_adjust_partner_float', {
+                    p_partner_id: partnerId,
+                    p_amount: amount
+                });
+
+                if (error) throw error;
+
+                closeTopupApiPartnerModal();
+                loadApiPartnersData();
+            } catch (err) {
+                alert('فشل شحن الرصيد: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "تأكيد الإيداع في الرصيد";
+            }
+        }
+
+        // تجميد أو تنشيط الشريك
+        async function toggleApiPartnerStatus(partnerId, newStatus) {
+            const client = getAdminClient();
+            if (!confirm(newStatus ? 'هل تريد إعادة تفعيل الشريك؟' : 'هل تريد تجميد الشريك ووقف عملياته مؤقتاً؟')) return;
+
+            try {
+                const { error } = await client
+                    .from('api_partners')
+                    .update({ is_active: newStatus })
+                    .eq('id', partnerId);
+
+                if (error) throw error;
+                loadApiPartnersData();
+            } catch (err) {
+                alert('تعذر تغيير الحالة: ' + err.message);
+            }
+        }
+
+        // النوافذ المنبثقة
+        function openCreateApiPartnerModal() {
+            document.getElementById('api-partner-name-input').value = '';
+            document.getElementById('api-partner-float-input').value = '100.00';
+            document.getElementById('api-create-form').classList.remove('hidden');
+            document.getElementById('api-credentials-result').classList.add('hidden');
+            document.getElementById('btn-submit-api-partner').disabled = false;
+            document.getElementById('btn-submit-api-partner').innerText = "توليد المفاتيح واعتماد الشريك";
+            document.getElementById('api-partner-create-modal').classList.remove('hidden');
+        }
+
+        function closeCreateApiPartnerModal() {
+            document.getElementById('api-partner-create-modal').classList.add('hidden');
+        }
+
+        function openTopupApiPartnerModal(id, name) {
+            document.getElementById('topup-api-partner-id').value = id;
+            document.getElementById('topup-api-partner-name').innerText = `المتجر المستفيد: ${name}`;
+            document.getElementById('api-topup-amount-input').value = '';
+            document.getElementById('api-partner-topup-modal').classList.remove('hidden');
+        }
+
+        function closeTopupApiPartnerModal() {
+            document.getElementById('api-partner-topup-modal').classList.add('hidden');
+        }
+
+        function copyApiText(elementId) {
+            const input = document.getElementById(elementId);
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            alert("تم نسخ القيمة للحافظة بنجاح!");
+        }
+
+        // تفعيل التبديل الآلي وتكامل التبويب مع دالة switchTab الأصلية
+        document.addEventListener('DOMContentLoaded', () => {
+            const origSwitchTab = window.switchTab;
+            window.switchTab = function(tabName) {
+                if (typeof origSwitchTab === 'function') {
+                    origSwitchTab(tabName);
+                } else {
+                    document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
+                    document.querySelectorAll('.tab-btn').forEach(b => {
+                        b.classList.remove('bg-slate-900', 'text-white', 'dark:bg-white', 'dark:text-slate-900');
+                        b.classList.add('bg-white', 'dark:bg-slate-900', 'text-slate-600', 'dark:text-slate-300');
+                    });
+                    const sec = document.getElementById(`sec-${tabName}`);
+                    const btn = document.getElementById(`tab-${tabName}`);
+                    if (sec) sec.classList.remove('hidden');
+                    if (btn) {
+                        btn.classList.add('bg-slate-900', 'text-white', 'dark:bg-white', 'dark:text-slate-900');
+                        btn.classList.remove('bg-white', 'dark:bg-slate-900', 'text-slate-600', 'dark:text-slate-300');
+                    }
+                }
+
+                if (tabName === 'api-partners') {
+                    loadApiPartnersData();
+                }
+            };
+        });
+    </script>
+</body>
+</html>
