@@ -70,6 +70,10 @@ window.switchTab = function(tabName) {
                 tabBtn.className = 'tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap hover:bg-slate-50 dark:hover:bg-slate-800/60 transition';
             }
         }
+        // داخل دالة switchTab(tab)
+if (tab === 'api-partners') {
+    loadApiPartnersData();
+}
     });
 
     switch (tabName) {
@@ -1193,4 +1197,176 @@ function setupAdminEventListeners() {
             });
         }
     });
+}
+
+/* ==========================================================================
+   وحدة إدارة شركاء الربط الخارجي (B2B API Management Module)
+   ========================================================================== */
+
+// 1. جلب قائمة الشركاء المعزولة أمنياً
+async function loadApiPartnersData() {
+    const tbody = document.getElementById('api-partners-tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">جاري تحميل بيانات الشركاء...</td></tr>`;
+
+    try {
+        // استدعاء دالة العزل الآمنة التي تحجب الـ Secret
+        const { data, error } = await supabaseClient.rpc('admin_get_api_partners');
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">لا يوجد شركاء ربط خارجي مسجلين حالياً.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = data.map(p => `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+                <td class="py-3 px-3 font-bold text-slate-900 dark:text-slate-100">
+                    <div>${p.partner_name}</div>
+                    <div class="text-[10px] text-slate-400 font-normal">إجمالي الطلبات: ${p.total_orders || 0} | المسحوبات: $${Number(p.total_spent || 0).toFixed(2)}</div>
+                </td>
+                <td class="py-3 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400" dir="ltr">
+                    ${p.api_key.substring(0, 16)}...
+                </td>
+                <td class="py-3 px-3">
+                    <span class="font-mono font-black ${Number(p.float_balance) < 50 ? 'text-rose-500' : 'text-emerald-500'}">
+                        $${Number(p.float_balance).toFixed(2)}
+                    </span>
+                </td>
+                <td class="py-3 px-3 text-center">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${p.is_active ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'}">
+                        <span class="w-1.5 h-1.5 rounded-full ${p.is_active ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
+                        ${p.is_active ? 'نشط' : 'معطل'}
+                    </span>
+                </td>
+                <td class="py-3 px-3 text-center">
+                    <div class="flex items-center justify-center gap-1.5">
+                        <button onclick="openTopupApiPartnerModal('${p.id}', '${p.partner_name}')" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="شحن الرصيد العائم">
+                            <i class="ph-bold ph-wallet text-sm"></i>
+                        </button>
+                        <button onclick="toggleApiPartnerStatus('${p.id}', ${!p.is_active})" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/20 hover:text-amber-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="${p.is_active ? 'تجميد الشريك' : 'تفعيل الشريك'}">
+                            <i class="ph-bold ph-power text-sm"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-rose-500">حدث خطأ: ${err.message}</td></tr>`;
+    }
+}
+
+// 2. اعتماد شريك جديد وتوليد المفاتيح (يُعرض السر هنا لمرة واحدة فقط)
+async function submitNewApiPartner() {
+    const name = document.getElementById('api-partner-name-input').value.trim();
+    const floatBal = parseFloat(document.getElementById('api-partner-float-input').value) || 0;
+    const btn = document.getElementById('btn-submit-api-partner');
+
+    if (!name) return alert('يرجى كتابة اسم المتجر أو الشريك');
+
+    btn.disabled = true;
+    btn.innerText = "جاري الاعتماد الأمني...";
+
+    try {
+        const { data, error } = await supabaseClient.rpc('admin_create_api_partner', {
+            p_partner_name: name,
+            p_initial_balance: floatBal
+        });
+
+        if (error) throw error;
+
+        document.getElementById('api-create-form').classList.add('hidden');
+        document.getElementById('res-partner-key').value = data.api_key;
+        document.getElementById('res-partner-secret').value = data.api_secret;
+        document.getElementById('api-credentials-result').classList.remove('hidden');
+
+    } catch (err) {
+        alert('فشل اعتماد الشريك: ' + err.message);
+        btn.disabled = false;
+        btn.innerText = "توليد المفاتيح واعتماد الشريك";
+    }
+}
+
+// 3. شحن الرصيد العائم للشريك
+async function submitApiPartnerTopup() {
+    const partnerId = document.getElementById('topup-api-partner-id').value;
+    const amount = parseFloat(document.getElementById('api-topup-amount-input').value);
+    const btn = document.getElementById('btn-submit-api-topup');
+
+    if (!amount || amount <= 0) return alert('يرجى إدخال مبلغ صحيح');
+
+    btn.disabled = true;
+    btn.innerText = "جاري تنفيذ الإيداع...";
+
+    try {
+        const { error } = await supabaseClient.rpc('admin_adjust_partner_float', {
+            p_partner_id: partnerId,
+            p_amount: amount
+        });
+
+        if (error) throw error;
+
+        closeTopupApiPartnerModal();
+        loadApiPartnersData();
+
+    } catch (err) {
+        alert('فشل شحن الرصيد: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "تأكيد الإيداع في الرصيد";
+    }
+}
+
+// 4. تجميد أو تنشيط الشريك
+async function toggleApiPartnerStatus(partnerId, newStatus) {
+    if (!confirm(newStatus ? 'هل تريد إعادة تفعيل الشريك؟' : 'هل تريد تجميد الشريك ووقف عملياته مؤقتاً؟')) return;
+
+    try {
+        const { error } = await supabaseClient
+            .from('api_partners')
+            .update({ is_active: newStatus })
+            .eq('id', partnerId);
+
+        if (error) throw error;
+        loadApiPartnersData();
+
+    } catch (err) {
+        alert('تعذر تغيير الحالة: ' + err.message);
+    }
+}
+
+// 5. إدارة النوافذ المنبثقة
+function openCreateApiPartnerModal() {
+    document.getElementById('api-partner-name-input').value = '';
+    document.getElementById('api-partner-float-input').value = '100.00';
+    document.getElementById('api-create-form').classList.remove('hidden');
+    document.getElementById('api-credentials-result').classList.add('hidden');
+    document.getElementById('btn-submit-api-partner').disabled = false;
+    document.getElementById('btn-submit-api-partner').innerText = "توليد المفاتيح واعتماد الشريك";
+    document.getElementById('api-partner-create-modal').classList.remove('hidden');
+}
+
+function closeCreateApiPartnerModal() {
+    document.getElementById('api-partner-create-modal').classList.add('hidden');
+}
+
+function openTopupApiPartnerModal(id, name) {
+    document.getElementById('topup-api-partner-id').value = id;
+    document.getElementById('topup-api-partner-name').innerText = `المتجر المستفيد: ${name}`;
+    document.getElementById('api-topup-amount-input').value = '';
+    document.getElementById('api-partner-topup-modal').classList.remove('hidden');
+}
+
+function closeTopupApiPartnerModal() {
+    document.getElementById('api-partner-topup-modal').classList.add('hidden');
+}
+
+function copyApiText(elementId) {
+    const input = document.getElementById(elementId);
+    input.select();
+    navigator.clipboard.writeText(input.value);
+    alert("تم نسخ القيمة للحافظة بنجاح!");
 }
