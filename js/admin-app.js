@@ -75,7 +75,6 @@ if (tab === 'api-partners') {
                 tabBtn.className = 'tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap hover:bg-slate-50 dark:hover:bg-slate-800/60 transition';
             }
         }
-      
     });
 
     switch (tabName) {
