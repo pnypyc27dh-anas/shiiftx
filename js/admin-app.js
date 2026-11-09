@@ -1321,17 +1321,19 @@ async function submitApiPartnerTopup() {
     }
 }
 
-// 4. تجميد أو تنشيط الشريك
+// 4. تجميد أو تنشيط الشريك عبر RPC
 async function toggleApiPartnerStatus(partnerId, newStatus) {
     if (!confirm(newStatus ? 'هل تريد إعادة تفعيل الشريك؟' : 'هل تريد تجميد الشريك ووقف عملياته مؤقتاً؟')) return;
 
     try {
-        const { error } = await supabase
-            .from('api_partners')
-            .update({ is_active: newStatus })
-            .eq('id', partnerId);
+        const { data, error } = await supabase.rpc('admin_toggle_api_partner_status', {
+            p_partner_id: partnerId,
+            p_is_active: newStatus
+        });
 
         if (error) throw error;
+        if (data && data.status === 'error') throw new Error(data.message);
+
         loadApiPartnersData();
 
     } catch (err) {
