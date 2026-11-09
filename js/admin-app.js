@@ -52,35 +52,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 // =========================================================================
 // 1. نظام التنقل السلس بين التبويبات (Tabs Switching)
 // =========================================================================
+// دالة التبديل بين التبويبات الموحدة لجميع الأقسام
 window.switchTab = function(tabName) {
-    const tabs = ['orders', 'deposits', 'inventory', 'products', 'affiliates', 'agents', 'wallet'];
+    // قائمة بكافة التبويبات الرسمية في اللوحة
+    const tabs = ['orders', 'deposits', 'inventory', 'products', 'affiliates', 'agents', 'api-partners', 'wallet'];
 
     tabs.forEach(t => {
         const sec = document.getElementById(`sec-${t}`);
-        const tabBtn = document.getElementById(`tab-${t}`);
-        
-        if (tab === 'api-partners') { loadApiPartnersData();}
-        if (sec) {
-            sec.classList.toggle('hidden', t !== tabName);
-        }
+        const btn = document.getElementById(`tab-${t}`);
 
-        if (tabBtn) {
-            if (t === tabName) {
-                tabBtn.className = 'tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap shadow-sm';
-            } else {
-                tabBtn.className = 'tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap hover:bg-slate-50 dark:hover:bg-slate-800/60 transition';
+        if (t === tabName) {
+            // إظهار القسم النشط وتفعيل زره
+            if (sec) sec.classList.remove('hidden');
+            if (btn) {
+                btn.classList.add('bg-slate-900', 'text-white', 'dark:bg-white', 'dark:text-slate-900');
+                btn.classList.remove('bg-white', 'dark:bg-slate-900', 'text-slate-600', 'dark:text-slate-300');
+            }
+        } else {
+            // إخفاء الأقسام غير النشطة وإلغاء تفعيل أزرارها
+            if (sec) sec.classList.add('hidden');
+            if (btn) {
+                btn.classList.remove('bg-slate-900', 'text-white', 'dark:bg-white', 'dark:text-slate-900');
+                btn.classList.add('bg-white', 'dark:bg-slate-900', 'text-slate-600', 'dark:text-slate-300');
             }
         }
     });
 
-    switch (tabName) {
-        case 'orders': loadPendingOrders(); break;
-        case 'deposits': loadDepositsAuditTab(); break;
-        case 'inventory': loadInventoryData(); break;
-        case 'products': loadProducts(); break;
-        case 'affiliates': loadAffiliatesData(); break;
-        case 'agents': loadAgentsTab(); break;
-    }
+    // استدعاء دوال تحميل البيانات بحسب التبويب المختار
+    if (tabName === 'orders' && typeof loadPendingOrders === 'function') loadPendingOrders();
+    if (tabName === 'deposits' && typeof loadDepositsAuditTab === 'function') loadDepositsAuditTab();
+    if (tabName === 'inventory' && typeof loadInventoryData === 'function') loadInventoryData();
+    if (tabName === 'products' && typeof loadProducts === 'function') loadProducts();
+    if (tabName === 'affiliates' && typeof loadAffiliatesData === 'function') loadAffiliatesData();
+    if (tabName === 'agents' && typeof loadAgentsData === 'function') loadAgentsData();
+    if (tabName === 'api-partners' && typeof loadApiPartnersData === 'function') loadApiPartnersData();
 };
 
 window.loadAllAdminData = async function() {
