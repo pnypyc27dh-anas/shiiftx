@@ -720,6 +720,47 @@
         </div>
     </div>
 
+    <!-- نافذة استعراض سجل طلبات وسحوبات الشريك API -->
+    <div id="api-partner-orders-modal" class="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-4xl w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div>
+                    <h4 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="ph-bold ph-receipt text-indigo-500 text-base"></i>
+                        <span>سجل عمليات وسحوبات المتجر: <span id="partner-orders-modal-title" class="text-indigo-600 dark:text-indigo-400">---</span></span>
+                    </h4>
+                    <p class="text-[11px] text-slate-400">كافة الأكواد المسحوبة آلياً عبر الـ API والمبالغ المخصومة</p>
+                </div>
+                <button type="button" onclick="closePartnerOrdersModal()" class="text-slate-400 hover:text-rose-500 text-lg transition">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <!-- جدول العمليات -->
+            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                <table class="w-full text-right text-xs">
+                    <thead>
+                        <tr class="text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
+                            <th class="py-2.5 px-3">الرقم المرجعي</th>
+                            <th class="py-2.5 px-3">المنتج / الباقة</th>
+                            <th class="py-2.5 px-3">الكود المسلّم</th>
+                            <th class="py-2.5 px-3">المبلغ المخصوم</th>
+                            <th class="py-2.5 px-3">تاريخ ووقت السحب</th>
+                        </tr>
+                    </thead>
+                    <tbody id="partner-orders-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+                        <tr><td colspan="5" class="py-6 text-center text-slate-400">جاري تحميل السجل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                <button type="button" onclick="closePartnerOrdersModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold transition">
+                    إغلاق
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- استدعاء الإعدادات المشتركة وتطبيق الإدارة المخصص -->
     <script src="js/config.js"></script>
     <script src="js/admin-app.js"></script>
