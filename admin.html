@@ -155,6 +155,35 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- قسم طلبات الـ ID الواردة من شركاء الربط (B2B API) -->
+<div class="pt-5 mt-5 border-t border-slate-100 dark:border-slate-800 space-y-4">
+    <div class="flex justify-between items-center">
+        <h3 class="text-sm font-black flex items-center gap-2 text-slate-800 dark:text-slate-100">
+            <i class="ph-fill ph-plugs-connected text-indigo-500 text-lg"></i>
+            <span>طلبات الشحن بالـ ID الواردة من متاجر الشركاء (B2B API)</span>
+        </h3>
+        <button onclick="loadPendingApiIdOrders()" class="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 font-bold">
+            <i class="ph-bold ph-arrows-clockwise"></i> تحديث
+        </button>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-right text-xs">
+            <thead>
+                <tr class="border-b border-slate-100 dark:border-slate-800 text-slate-400 pb-2">
+                    <th class="pb-2">الرقم المرجعي</th>
+                    <th class="pb-2">المتجر الشريك</th>
+                    <th class="pb-2">المنصة والباقة</th>
+                    <th class="pb-2">Player ID / المعرّف</th>
+                    <th class="pb-2">تكلفة الجملة</th>
+                    <th class="pb-2 text-center">الإجراء التنفيذي</th>
+                </tr>
+            </thead>
+            <tbody id="api-id-orders-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+                <tr><td colspan="6" class="py-6 text-center text-slate-400">جاري تحميل طلبات الشركاء المعلقة...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
             </section>
 
             <!-- تبويب 2: طلبات شحن الرصيد والإيداعات -->
