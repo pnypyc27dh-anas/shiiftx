@@ -7,11 +7,11 @@
 window.escapeHTML = function(str) {
     if (!str) return '';
     return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+        .replace(/&/g, '&')
+        .replace(/</g, '<')
+        .replace(/>/g, '>')
+        .replace(/"/g, '"')
+        .replace(/'/g, ''');
 };
 
 let currentAdmin = null;
@@ -45,14 +45,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 3. ربط أحداث النماذج والنوافذ المنبثقة
     setupAdminEventListeners();
 
-    // 4. تحميل التبويب المبدئي
+    // 4. تحميل التبويب المبدئي (الطلبات المباشرة + طلبات شركاء B2B API)
     await loadPendingOrders();
+    if (typeof loadPendingApiIdOrders === 'function') await loadPendingApiIdOrders();
 });
 
 // =========================================================================
 // 1. نظام التنقل السلس بين التبويبات (Tabs Switching)
 // =========================================================================
-// دالة التبديل بين التبويبات الموحدة لجميع الأقسام
 window.switchTab = function(tabName) {
     // قائمة بكافة التبويبات الرسمية في اللوحة
     const tabs = ['orders', 'deposits', 'inventory', 'products', 'affiliates', 'agents', 'api-partners', 'wallet'];
@@ -79,18 +79,25 @@ window.switchTab = function(tabName) {
     });
 
     // استدعاء دوال تحميل البيانات بحسب التبويب المختار
-    if (tabName === 'orders' && typeof loadPendingOrders === 'function') loadPendingOrders();
+    if (tabName === 'orders') {
+        if (typeof loadPendingOrders === 'function') loadPendingOrders();
+        if (typeof loadPendingApiIdOrders === 'function') loadPendingApiIdOrders();
+    }
     if (tabName === 'deposits' && typeof loadDepositsAuditTab === 'function') loadDepositsAuditTab();
     if (tabName === 'inventory' && typeof loadInventoryData === 'function') loadInventoryData();
     if (tabName === 'products' && typeof loadProducts === 'function') loadProducts();
     if (tabName === 'affiliates' && typeof loadAffiliatesData === 'function') loadAffiliatesData();
-    if (tabName === 'agents' && typeof loadAgentsData === 'function') loadAgentsData();
+    if (tabName === 'agents') {
+        if (typeof loadAgentsTab === 'function') loadAgentsTab();
+        else if (typeof loadAgentsData === 'function') loadAgentsData();
+    }
     if (tabName === 'api-partners' && typeof loadApiPartnersData === 'function') loadApiPartnersData();
 };
 
 window.loadAllAdminData = async function() {
     await loadKPIs();
     await loadPendingOrders();
+    if (typeof loadPendingApiIdOrders === 'function') await loadPendingApiIdOrders();
     if (typeof loadDepositsAuditTab === 'function') loadDepositsAuditTab();
     if (typeof loadInventoryData === 'function') loadInventoryData();
 };
@@ -273,11 +280,10 @@ window.loadDepositsAuditTab = async function() {
             return;
         }
 
-        // دالة مساعدة لتنسيق التاريخ والوقت بوضوح وأناقة
         const formatDateTime = (dateStr) => {
             if (!dateStr) return '<span class="text-slate-300 dark:text-slate-600 font-mono text-center block text-sm">—</span>';
             const d = new Date(dateStr);
-            const date = d.toLocaleDateString('en-GB'); // DD/MM/YYYY
+            const date = d.toLocaleDateString('en-GB');
             const time = d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true });
             return `
                 <div class="font-mono text-[11px] text-slate-700 dark:text-slate-300 whitespace-nowrap leading-tight">
@@ -288,7 +294,6 @@ window.loadDepositsAuditTab = async function() {
         };
 
         tbody.innerHTML = records.map(r => {
-            // شارة الحالة (محمية من الانكسار)
             let statusBadge = '';
             if (r.status === 'approved' || r.status === 'completed') {
                 statusBadge = `
@@ -319,15 +324,11 @@ window.loadDepositsAuditTab = async function() {
 
             return `
                 <tr class="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/70 dark:hover:bg-slate-800/30 transition-colors text-xs text-slate-700 dark:text-slate-300">
-                    
-                    <!-- 1. الرقم المرجعي (محمي من الانقسام لسطرين) -->
                     <td class="py-3.5 px-3 whitespace-nowrap align-middle">
                         <span class="font-mono font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800/90 px-2 py-1 rounded-md border border-slate-200/80 dark:border-slate-700/60 text-[11px] select-all tracking-wider">
                             ${r.transaction_ref}
                         </span>
                     </td>
-
-                    <!-- 2. بيانات العميل -->
                     <td class="py-3.5 px-3 align-middle">
                         <div class="font-black text-slate-900 dark:text-white text-xs leading-snug">${r.customer_name}</div>
                         <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-1.5 flex-wrap">
@@ -335,15 +336,11 @@ window.loadDepositsAuditTab = async function() {
                             ${r.customer_phone ? `<span>•</span><span class="font-mono text-slate-500 dark:text-slate-400 font-bold" dir="ltr">${r.customer_phone}</span>` : ''}
                         </div>
                     </td>
-
-                    <!-- 3. المبلغ المالي -->
                     <td class="py-3.5 px-3 whitespace-nowrap align-middle">
                         <span class="font-mono font-black text-sm text-emerald-600 dark:text-emerald-400 tabular-nums">
                             $${Number(r.amount).toFixed(2)}
                         </span>
                     </td>
-
-                    <!-- 4. طريقة الدفع ورقم الإشعار -->
                     <td class="py-3.5 px-3 align-middle">
                         <div class="font-bold text-slate-800 dark:text-slate-200 text-xs">${methodTitle}</div>
                         <div class="mt-1">
@@ -353,13 +350,9 @@ window.loadDepositsAuditTab = async function() {
                             </span>
                         </div>
                     </td>
-
-                    <!-- 5. الحالة -->
                     <td class="py-3.5 px-3 whitespace-nowrap align-middle">
                         ${statusBadge}
                     </td>
-
-                    <!-- 6. المعالج / الوكيل المختار -->
                     <td class="py-3.5 px-3 align-middle">
                         <div class="flex items-center gap-1.5">
                             ${roleBadge}
@@ -367,17 +360,12 @@ window.loadDepositsAuditTab = async function() {
                         </div>
                         ${r.rejection_reason ? `<div class="text-[10px] text-rose-600 dark:text-rose-400 font-medium mt-1">سبب الرفض: ${r.rejection_reason}</div>` : ''}
                     </td>
-
-                    <!-- 7. تاريخ الطلب -->
                     <td class="py-3.5 px-3 whitespace-nowrap align-middle">
                         ${formatDateTime(r.created_at)}
                     </td>
-
-                    <!-- 8. تاريخ التنفيذ -->
                     <td class="py-3.5 px-3 whitespace-nowrap align-middle">
                         ${formatDateTime(r.processed_at)}
                     </td>
-
                 </tr>
             `;
         }).join('');
@@ -469,7 +457,6 @@ window.quickSelectRestock = function(productId) {
     }
 };
 
-// 1. تحديث العداد الحي للأكواد الملصقة فورياً
 window.updateCodesCountLive = function() {
     const textarea = document.getElementById('restock-codes');
     const badge = document.getElementById('codes-count-badge');
@@ -483,7 +470,6 @@ window.updateCodesCountLive = function() {
     badge.innerText = `${lines.length} كود`;
 };
 
-// 2. تحديث شارة المخزون الحالي للباقة المختارة
 window.updateSelectedStockBadge = function() {
     const select = document.getElementById('restock-product-select');
     const badge = document.getElementById('selected-stock-badge');
@@ -499,7 +485,6 @@ window.updateSelectedStockBadge = function() {
     }
 };
 
-// 3. معالجة إرسال نموذج تعبئة الأكواد
 window.handleRestockSubmit = async function(event) {
     if (event) event.preventDefault();
 
@@ -1225,11 +1210,11 @@ async function loadApiPartnersData() {
         tbody.innerHTML = data.map(p => `
             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
                 <td class="py-3 px-3 font-bold text-slate-900 dark:text-slate-100">
-                    <div>${p.partner_name}</div>
+                    <div>${escapeHTML(p.partner_name)}</div>
                     <div class="text-[10px] text-slate-400 font-normal">إجمالي الطلبات: ${p.total_orders || 0} | المسحوبات: $${Number(p.total_spent || 0).toFixed(2)}</div>
                 </td>
                 <td class="py-3 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400" dir="ltr">
-                    ${p.api_key ? p.api_key.substring(0, 16) + '...' : '---'}
+                    ${p.api_key ? escapeHTML(p.api_key.substring(0, 16)) + '...' : '---'}
                 </td>
                 <td class="py-3 px-3">
                     <span class="font-mono font-black ${Number(p.float_balance) < 50 ? 'text-rose-500' : 'text-emerald-500'}">
@@ -1242,19 +1227,19 @@ async function loadApiPartnersData() {
                         ${p.is_active ? 'نشط' : 'معطل'}
                     </span>
                 </td>
-<td class="py-3 px-3 text-center">
-    <div class="flex items-center justify-center gap-1.5">
-        <button onclick="openPartnerOrdersModal('${p.id}', '${p.partner_name}')" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/20 hover:text-indigo-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="عرض سجل العمليات والأكواد">
-            <i class="ph-bold ph-receipt text-sm"></i>
-        </button>
-        <button onclick="openTopupApiPartnerModal('${p.id}', '${p.partner_name}')" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="شحن الرصيد العائم">
-            <i class="ph-bold ph-wallet text-sm"></i>
-        </button>
-        <button onclick="toggleApiPartnerStatus('${p.id}', ${!p.is_active})" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/20 hover:text-amber-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="${p.is_active ? 'تجميد الشريك' : 'تفعيل الشريك'}">
-            <i class="ph-bold ph-power text-sm"></i>
-        </button>
-    </div>
-</td>
+                <td class="py-3 px-3 text-center">
+                    <div class="flex items-center justify-center gap-1.5">
+                        <button onclick="openPartnerOrdersModal('${p.id}', '${escapeHTML(p.partner_name)}')" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/20 hover:text-indigo-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="عرض سجل العمليات والأكواد">
+                            <i class="ph-bold ph-receipt text-sm"></i>
+                        </button>
+                        <button onclick="openTopupApiPartnerModal('${p.id}', '${escapeHTML(p.partner_name)}')" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="شحن الرصيد العائم">
+                            <i class="ph-bold ph-wallet text-sm"></i>
+                        </button>
+                        <button onclick="toggleApiPartnerStatus('${p.id}', ${!p.is_active})" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/20 hover:text-amber-500 rounded-lg text-slate-600 dark:text-slate-300 transition" title="${p.is_active ? 'تجميد الشريك' : 'تفعيل الشريك'}">
+                            <i class="ph-bold ph-power text-sm"></i>
+                        </button>
+                    </div>
+                </td>
             </tr>
         `).join('');
 
@@ -1398,9 +1383,9 @@ async function openPartnerOrdersModal(partnerId, partnerName) {
 
         tbody.innerHTML = data.map(o => `
             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
-                <td class="py-2.5 px-3 font-mono font-bold text-slate-900 dark:text-slate-100">${o.order_ref}</td>
-                <td class="py-2.5 px-3 font-bold">${o.product_name}</td>
-                <td class="py-2.5 px-3 font-mono text-[11px] text-amber-500 font-bold select-all" dir="ltr">${o.delivered_code}</td>
+                <td class="py-2.5 px-3 font-mono font-bold text-slate-900 dark:text-slate-100">${escapeHTML(o.order_ref)}</td>
+                <td class="py-2.5 px-3 font-bold">${escapeHTML(o.product_name)}</td>
+                <td class="py-2.5 px-3 font-mono text-[11px] text-amber-500 font-bold select-all" dir="ltr">${o.delivered_code ? escapeHTML(o.delivered_code) : 'شحن مباشر (ID)'}</td>
                 <td class="py-2.5 px-3 font-mono font-bold text-rose-500">-$${Number(o.amount).toFixed(2)}</td>
                 <td class="py-2.5 px-3 text-slate-400 text-[11px]">${new Date(o.created_at).toLocaleString('ar-EG')}</td>
             </tr>
@@ -1413,4 +1398,113 @@ async function openPartnerOrdersModal(partnerId, partnerName) {
 
 function closePartnerOrdersModal() {
     document.getElementById('api-partner-orders-modal').classList.add('hidden');
+}
+
+/* ==========================================================================
+   وحدة معالجة طلبات الشحن بالمعرّف (ID) الواردة من شركاء B2B API
+   ========================================================================== */
+
+// 1. دالة جلب وعرض طلبات الـ ID المعلقة للشركاء
+async function loadPendingApiIdOrders() {
+    const tbody = document.getElementById('api-id-orders-tbody');
+    const badge = document.getElementById('badge-api-orders-count');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">جاري تحميل طلبات الشركاء المعلقة...</td></tr>`;
+
+    try {
+        const { data, error } = await supabase.rpc('admin_get_pending_api_id_orders');
+        if (error) throw error;
+
+        if (badge) {
+            if (data && data.length > 0) {
+                badge.innerText = data.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">لا توجد طلبات شحن ID معلقة من الشركاء حالياً.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = data.map(o => `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+                <td class="py-3 font-mono font-bold text-slate-900 dark:text-slate-100">${escapeHTML(o.order_ref)}</td>
+                <td class="py-3">
+                    <span class="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-[11px]">
+                        ${escapeHTML(o.partner_name)}
+                    </span>
+                </td>
+                <td class="py-3">
+                    <div class="font-bold text-slate-800 dark:text-slate-200">${escapeHTML(o.package_name)}</div>
+                    <div class="text-[10px] text-slate-400">${escapeHTML(o.platform)}</div>
+                </td>
+                <td class="py-3">
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-mono font-black text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded select-all" dir="ltr">${escapeHTML(o.player_id)}</span>
+                        <button onclick="copyPlayerId(this)" data-pid="${escapeHTML(o.player_id)}" class="p-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded text-slate-500" title="نسخ المعرّف">
+                            <i class="ph-bold ph-copy text-xs"></i>
+                        </button>
+                    </div>
+                </td>
+                <td class="py-3 font-mono font-black text-emerald-600 dark:text-emerald-400">$${Number(o.amount).toFixed(2)}</td>
+                <td class="py-3 text-center">
+                    <div class="flex items-center justify-center gap-1.5">
+                        <button onclick="resolveApiIdOrder('${o.order_id}', 'complete')" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold transition flex items-center gap-1">
+                            <i class="ph-bold ph-check"></i> تم الشحن
+                        </button>
+                        <button onclick="resolveApiIdOrder('${o.order_id}', 'reject')" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold transition flex items-center gap-1">
+                            <i class="ph-bold ph-x"></i> رفض
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-rose-500 font-bold">خطأ: ${err.message}</td></tr>`;
+    }
+}
+
+// دالة مساعدة لنسخ معرّف اللاعب بأمان
+function copyPlayerId(btn) {
+    const pid = btn.getAttribute('data-pid');
+    if (!pid) return;
+    navigator.clipboard.writeText(pid);
+    alert(`تم نسخ المعرّف: ${pid}`);
+}
+
+// 2. دالة تنفيذ الشحن أو الرفض واسترجاع الرصيد العائم
+async function resolveApiIdOrder(orderId, action) {
+    let rejectionReason = null;
+
+    if (action === 'complete') {
+        if (!confirm('هل تم شحن الباقة لحساب اللاعب بنجاح؟')) return;
+    } else if (action === 'reject') {
+        rejectionReason = prompt('أدخل سبب الرفض ليظهر لمتجر الشريك (سيتم إرجاع تكلفة الجملة لرصيده العائم تلقائياً):', 'معرّف اللاعب (Player ID) غير صحيح');
+        if (rejectionReason === null) return;
+    }
+
+    try {
+        const { data, error } = await supabase.rpc('admin_resolve_api_id_order', {
+            p_order_id: orderId,
+            p_action: action,
+            p_rejection_reason: rejectionReason
+        });
+
+        if (error) throw error;
+        if (data && data.status === 'error') throw new Error(data.message);
+
+        if (action === 'reject') {
+            alert(`تم رفض الطلب وإعادة $${Number(data.refunded_amount).toFixed(2)} إلى الرصيد العائم للشريك.`);
+        }
+
+        loadPendingApiIdOrders();
+
+    } catch (err) {
+        alert('تعذر تنفيذ الإجراء: ' + err.message);
+    }
 }
