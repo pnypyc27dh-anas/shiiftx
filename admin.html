@@ -90,10 +90,11 @@
             <!-- أشرطة التبويب العلوية -->
             <div class="flex gap-2 overflow-x-auto pb-1 text-xs font-black">
                 <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center gap-2 whitespace-nowrap">
-                    <i class="ph-bold ph-device-mobile-speaker text-sm"></i>
-                    <span>طلبات الـ ID المعلقة</span>
-                    <span id="badge-orders-count" class="px-1.5 py-0.2 bg-rose-500 text-white rounded-full text-[10px] hidden">0</span>
-                </button>
+    <i class="ph-bold ph-device-mobile-speaker text-sm"></i>
+    <span>طلبات الـ ID المعلقة</span>
+    <span id="badge-orders-count" class="px-1.5 py-0.2 bg-rose-500 text-white rounded-full text-[10px] hidden">0</span>
+    <span id="badge-api-orders-count" class="px-1.5 py-0.2 bg-indigo-500 text-white rounded-full text-[10px] hidden" title="طلبات شركاء API">0</span>
+</button>
                 <button onclick="switchTab('deposits')" id="tab-deposits" class="tab-btn px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 flex items-center gap-2 whitespace-nowrap">
                     <i class="ph-bold ph-wallet text-sm"></i>
                     <span>طلبات شحن الرصيد</span>
