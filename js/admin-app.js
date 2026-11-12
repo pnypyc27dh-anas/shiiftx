@@ -10,7 +10,6 @@ function escapeHTML(str) {
     div.textContent = String(str);
     return div.innerHTML;
 }
-};
 
 let currentAdmin = null;
 let allProductsCache = [];
